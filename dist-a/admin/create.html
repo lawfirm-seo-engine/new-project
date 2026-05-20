@@ -10,14 +10,21 @@
     body {
       font-family: sans-serif;
       padding: 40px;
-      max-width: 800px;
+      max-width: 960px;
       margin: 0 auto;
+      color: #172033;
+      background: #f6f8fb;
     }
 
-    form {
+    form,
+    .panel {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      padding: 24px;
+      background: #fff;
+      border: 1px solid #dde3ee;
+      border-radius: 8px;
     }
 
     input,
@@ -28,11 +35,59 @@
     }
 
     textarea {
-      min-height: 120px;
+      min-height: 160px;
+      font-family: Consolas, monospace;
     }
 
     button {
       cursor: pointer;
+      border: 0;
+      border-radius: 6px;
+      background: #1f4fd8;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    button.secondary {
+      background: #263244;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .panel {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .panel.is-visible {
+      display: flex;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 6px;
+      background: #edf7ed;
+      color: #145b22;
+      white-space: pre-wrap;
+    }
+
+    .status.warning {
+      background: #fff7e0;
+      color: #714900;
+    }
+
+    .status.blocked {
+      background: #ffe8e8;
+      color: #8a1f1f;
     }
   </style>
 </head>
@@ -41,72 +96,157 @@
   <h1>사건 생성</h1>
 
   <form id="createForm">
+    <input id="caseName" type="text" placeholder="사건명" required />
 
-    <input
-      id="caseName"
-      type="text"
-      placeholder="사건명"
-      required
-    />
+    <div class="actions">
+      <button id="generateDraftButton" class="secondary" type="button">
+        AI 원고 생성
+      </button>
 
-    <input
-      id="slug"
-      type="text"
-      placeholder="slug"
-      required
-    />
+      <button id="submitButton" type="submit" disabled>
+        사건 생성
+      </button>
+    </div>
 
-    <input
-      id="category"
-      type="text"
-      placeholder="카테고리"
-      required
-    />
-
-    <textarea
-      id="summary"
-      placeholder="사건 요약"
-      required
-    ></textarea>
-
-    <button type="submit">
-      사건 생성
-    </button>
-
+    <input id="slug" type="text" placeholder="slug" readonly required />
+    <input id="category" type="text" placeholder="카테고리" readonly required />
+    <textarea id="summary" placeholder="요약" readonly required></textarea>
   </form>
+
+  <section id="reviewPanel" class="panel" aria-live="polite">
+    <strong>AI 데이터 검수 결과</strong>
+    <div id="reviewStatus" class="status"></div>
+    <textarea id="generatedData" readonly></textarea>
+  </section>
 
   <p id="message"></p>
 
   <script>
-    document
-      .getElementById("createForm")
-      .addEventListener("submit", async (e) => {
+    const caseNameEl = document.getElementById("caseName");
+    const slugEl = document.getElementById("slug");
+    const categoryEl = document.getElementById("category");
+    const summaryEl = document.getElementById("summary");
+    const messageEl = document.getElementById("message");
+    const reviewPanelEl = document.getElementById("reviewPanel");
+    const reviewStatusEl = document.getElementById("reviewStatus");
+    const generatedDataEl = document.getElementById("generatedData");
+    const generateDraftButtonEl = document.getElementById("generateDraftButton");
+    const submitButtonEl = document.getElementById("submitButton");
 
-        e.preventDefault();
+    let generatedCase = null;
 
-        const payload = {
-          caseName: document.getElementById("caseName").value.trim(),
-          slug: document.getElementById("slug").value.trim(),
-          category: document.getElementById("category").value.trim(),
-          summary: document.getElementById("summary").value.trim(),
-        };
+    function resetGeneratedData() {
+      generatedCase = null;
+      submitButtonEl.disabled = true;
+      reviewPanelEl.classList.remove("is-visible");
+      reviewStatusEl.textContent = "";
+      generatedDataEl.value = "";
+      slugEl.value = "";
+      categoryEl.value = "";
+      summaryEl.value = "";
+    }
 
-        const res = await fetch("/api/create-case", {
+    function renderGeneratedData(data) {
+      generatedCase = data.case;
+      slugEl.value = generatedCase.slug;
+      categoryEl.value = generatedCase.category;
+      summaryEl.value = generatedCase.summary;
+
+      const status = data.review.status;
+      reviewPanelEl.classList.add("is-visible");
+      reviewStatusEl.className = `status ${status}`;
+      reviewStatusEl.textContent = [
+        status === "blocked"
+          ? "저장 차단: 동일 또는 매우 유사한 사건이 있습니다."
+          : status === "warning"
+            ? "주의: 유사 사건이 있습니다. 기존 사건과 별도인지 확인하세요."
+            : "통과: 중복 위험이 낮습니다.",
+        data.review.categoryReason,
+        ...(data.review.notes || []),
+        ...(data.review.duplicateCheck.matches || []).map((item) => `유사 후보: ${item.caseName || item.slug} / ${item.slug} / ${Math.round(item.score * 100)}%`),
+      ].join("\n");
+
+      generatedDataEl.value = JSON.stringify({
+        savedFields: [
+          "title",
+          "description",
+          "canonical",
+          "ogTitle",
+          "ogDescription",
+          "ogImage",
+          "h1",
+          "body",
+          "victimCases",
+          "suspiciousCompanies",
+          "faq",
+          "schema",
+        ],
+        case: generatedCase,
+      }, null, 2);
+
+      submitButtonEl.disabled = status === "blocked";
+    }
+
+    caseNameEl.addEventListener("input", resetGeneratedData);
+
+    generateDraftButtonEl.addEventListener("click", async () => {
+      const caseName = caseNameEl.value.trim().replace(/\s+/g, " ");
+
+      if (!caseName) {
+        messageEl.textContent = "사건명을 먼저 입력해주세요.";
+        return;
+      }
+
+      messageEl.textContent = "AI 데이터 생성 및 중복 검수 중...";
+      generateDraftButtonEl.disabled = true;
+
+      try {
+        const res = await fetch("/api/generate-draft", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ caseName }),
         });
-
         const data = await res.json();
 
-        if (data.ok) {
-          document.getElementById("message").textContent = "사건 생성 완료";
-        } else {
-          document.getElementById("message").textContent = JSON.stringify(data, null, 2);
+        if (!data.ok) {
+          messageEl.textContent = data.message || "AI 데이터 생성에 실패했습니다.";
+          return;
         }
+
+        renderGeneratedData(data);
+        messageEl.textContent = "AI 데이터 생성 완료. 검수 결과 확인 후 사건 생성을 진행하세요.";
+      } catch (error) {
+        messageEl.textContent = `AI 데이터 생성 오류: ${error.message}`;
+      } finally {
+        generateDraftButtonEl.disabled = false;
+      }
+    });
+
+    document.getElementById("createForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!generatedCase) {
+        messageEl.textContent = "먼저 AI 원고 생성을 실행해주세요.";
+        return;
+      }
+
+      messageEl.textContent = "사건 저장 중...";
+      submitButtonEl.disabled = true;
+
+      const res = await fetch("/api/create-case", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(generatedCase),
       });
+      const data = await res.json();
+
+      if (data.ok) {
+        messageEl.textContent = "사건 저장 완료. 정적 HTML은 배포 생성 단계에서 출력됩니다.";
+      } else {
+        messageEl.textContent = JSON.stringify(data, null, 2);
+        submitButtonEl.disabled = false;
+      }
+    });
   </script>
 
 </body>

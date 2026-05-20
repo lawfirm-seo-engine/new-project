@@ -32,7 +32,8 @@ export async function onRequest(context) {
 
   if (
     url.pathname.startsWith("/admin") ||
-    url.pathname.startsWith("/api/create-case")
+    url.pathname.startsWith("/api/create-case") ||
+    url.pathname.startsWith("/api/generate-draft")
   ) {
 
     const ok = await verifySession(request, env);

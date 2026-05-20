@@ -1,16 +1,46 @@
+const ALLOWED_CATEGORIES = [
+  "공동고소 형사대응",
+  "민사소송 회수",
+  "회수 성공사례",
+  "AI브리핑",
+  "방송 환전 사기",
+  "로맨스스캠 환전 사기",
+  "환전 피싱",
+  "투자 사기",
+  "형사대응",
+];
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
     const body = await request.json();
-
-    const caseName = String(body.caseName || "").trim();
-    const slug = String(body.slug || "").trim();
-    const category = String(body.category || "").trim();
-    const summary = String(body.summary || "").trim();
+    const caseName = normalizeSpace(body.caseName);
+    const slug = normalizeSpace(body.slug);
+    const category = normalizeSpace(body.category);
+    const summary = normalizeSpace(body.summary);
+    const landings = body.landings && typeof body.landings === "object" ? body.landings : null;
+    const tags = Array.isArray(body.tags) ? body.tags.map(normalizeSpace).filter(Boolean) : [];
+    const landingViews = Number.isInteger(body.landingViews) ? body.landingViews : randomInt(140, 8000, slug);
+    const reports = Number.isInteger(body.reports) ? body.reports : randomInt(4, 34, `${slug}-reports`);
 
     if (!caseName || !slug || !category || !summary) {
       return json({ ok: false, message: "필수 입력값이 누락되었습니다." }, 400);
+    }
+
+    if (!ALLOWED_CATEGORIES.includes(category)) {
+      return json({
+        ok: false,
+        message: "허용되지 않은 카테고리입니다. AI 원고 생성으로 카테고리를 다시 검수해주세요.",
+        category,
+      }, 400);
+    }
+
+    if (!hasRequiredLandingData(landings)) {
+      return json({
+        ok: false,
+        message: "AI 원고 데이터가 누락되었습니다. AI 원고 생성을 먼저 실행해주세요.",
+      }, 400);
     }
 
     const repoOwner = env.GITHUB_REPO_OWNER;
@@ -20,26 +50,25 @@ export async function onRequestPost(context) {
 
     const filePath = "data/cases.json";
     const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
-
     const currentRes = await fetch(apiUrl, {
-      headers: githubHeaders(token)
+      headers: githubHeaders(token),
     });
 
     if (!currentRes.ok) {
-        const errorText = await currentRes.text();
+      const errorText = await currentRes.text();
 
-        return json({
-          ok: false,
-          message: "기존 cases.json을 불러오지 못했습니다.",
-          status: currentRes.status,
-          statusText: currentRes.statusText,
-          repoOwner,
-          repoName,
-          branch,
-          filePath,
-          apiUrl,
-          githubError: errorText
-        }, 500);
+      return json({
+        ok: false,
+        message: "기존 cases.json을 불러오지 못했습니다.",
+        status: currentRes.status,
+        statusText: currentRes.statusText,
+        repoOwner,
+        repoName,
+        branch,
+        filePath,
+        apiUrl,
+        githubError: errorText,
+      }, 500);
     }
 
     const currentFile = await currentRes.json();
@@ -50,21 +79,33 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "이미 존재하는 slug입니다." }, 409);
     }
 
-    const now = new Date().toISOString().slice(0, 10);
+    const similarCase = findTooSimilarCase({ caseName, slug, cases });
 
-    cases.push({
+    if (similarCase) {
+      return json({
+        ok: false,
+        message: "유사하거나 중복된 사건이 감지되었습니다. 기존 사건과 별도 사건인지 확인해주세요.",
+        similarCase,
+      }, 409);
+    }
+
+    const now = today();
+    const newCase = {
       slug,
       caseName,
       category,
-      landingViews: 0,
-      reports: 0,
-      updatedAt: now,
+      landingViews,
+      reports,
+      createdAt: normalizeSpace(body.createdAt) || now,
+      updatedAt: normalizeSpace(body.updatedAt) || now,
       summary,
-      tags: []
-    });
+      tags,
+      landings,
+    };
+
+    cases.push(newCase);
 
     const newContent = JSON.stringify(cases, null, 2);
-
     const updateRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
       method: "PUT",
       headers: githubHeaders(token),
@@ -72,41 +113,140 @@ export async function onRequestPost(context) {
         message: `Add case ${caseName}`,
         content: encodeBase64(newContent),
         sha: currentFile.sha,
-        branch
-      })
+        branch,
+      }),
     });
 
     if (!updateRes.ok) {
-      const err = await updateRes.text();
-      return json({ ok: false, message: "GitHub 저장 실패", detail: err }, 500);
+      const detail = await updateRes.text();
+      return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
     return json({
       ok: true,
-      message: "사건이 GitHub에 저장되었습니다. Pages가 자동 재배포됩니다.",
-      case: {
-        slug,
-        caseName,
-        category,
-        summary
-      }
+      message: "사건이 GitHub에 저장되었습니다. Pages가 자동 배포됩니다.",
+      case: newCase,
     });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
 }
 
+function hasRequiredLandingData(landings) {
+  if (!landings) return false;
+
+  return ["a", "b", "c", "d", "e"].every((key) => {
+    const item = landings[key];
+    return item &&
+      item.title &&
+      item.description &&
+      item.canonical &&
+      item.ogTitle &&
+      item.ogDescription &&
+      item.ogImage &&
+      item.h1 &&
+      Array.isArray(item.body) &&
+      Array.isArray(item.victimCases) &&
+      Array.isArray(item.suspiciousCompanies) &&
+      Array.isArray(item.faq) &&
+      item.schema;
+  });
+}
+
+function findTooSimilarCase({ caseName, slug, cases }) {
+  const normalizedName = normalizeForCompare(caseName);
+  const normalizedSlug = normalizeForCompare(slug);
+
+  for (const item of cases) {
+    const existingName = String(item.caseName || item.name || "");
+    const existingSlug = String(item.slug || "");
+    const score = Math.max(
+      similarity(normalizedName, normalizeForCompare(existingName)),
+      similarity(normalizedSlug, normalizeForCompare(existingSlug))
+    );
+
+    if (score >= 0.9) {
+      return {
+        slug: existingSlug,
+        caseName: existingName,
+        score: Number(score.toFixed(2)),
+      };
+    }
+  }
+
+  return null;
+}
+
+function similarity(a, b) {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+
+  const aSet = tokenSet(a);
+  const bSet = tokenSet(b);
+  const intersection = [...aSet].filter((item) => bSet.has(item)).length;
+  const union = new Set([...aSet, ...bSet]).size || 1;
+
+  return intersection / union;
+}
+
+function tokenSet(value) {
+  const compact = normalizeForCompare(value);
+  const chunks = compact.split(/[\s-]+/).filter(Boolean);
+  const grams = [];
+
+  for (const chunk of chunks) {
+    if (chunk.length <= 2) {
+      grams.push(chunk);
+      continue;
+    }
+
+    for (let index = 0; index < chunk.length - 1; index += 1) {
+      grams.push(chunk.slice(index, index + 2));
+    }
+  }
+
+  return new Set(grams);
+}
+
+function normalizeForCompare(value) {
+  return normalizeSpace(value)
+    .toLowerCase()
+    .replace(/https?:\/\//g, "")
+    .replace(/www\./g, "")
+    .replace(/\.(com|net|org|co|kr|vip|shop|site|store|io)/g, "")
+    .replace(/사기|사칭|피해|투자|리딩방|거래소|증권|주식|코인/g, "")
+    .replace(/[^a-z0-9가-힣\s-]/g, "")
+    .trim();
+}
+
+function randomInt(min, max, seed) {
+  let hash = 0;
+  for (const char of seed) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  }
+
+  return min + (hash % (max - min + 1));
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function normalizeSpace(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
 function githubHeaders(token) {
   return {
-    "Authorization": `Bearer ${token}`,
-    "Accept": "application/vnd.github+json",
-    "User-Agent": "static-landing-generator-admin"
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "User-Agent": "static-landing-generator-admin",
   };
 }
 
 function decodeBase64(value) {
   const clean = value.replace(/\n/g, "");
-  return new TextDecoder().decode(Uint8Array.from(atob(clean), (c) => c.charCodeAt(0)));
+  return new TextDecoder().decode(Uint8Array.from(atob(clean), (char) => char.charCodeAt(0)));
 }
 
 function encodeBase64(value) {
@@ -124,7 +264,7 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json; charset=utf-8"
-    }
+      "Content-Type": "application/json; charset=utf-8",
+    },
   });
 }
