@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+
+  <title>{{title}}</title>
+
+  <meta name="description" content="{{description}}" />
+
+  <link rel="canonical" href="{{canonical}}" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="{{ogTitle}}" />
+  <meta property="og:description" content="{{ogDescription}}" />
+  <meta property="og:image" content="{{ogImage}}" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script type="application/ld+json">
+  {{schema}}
+  </script>
+
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+
+  <header class="hero">
+    <h1>{{h1}}</h1>
+
+    <p class="summary">
+      {{summary}}
+    </p>
+  </header>
+
+  <main class="content">
+
+    {{content}}
+
+  </main>
+
+  <section class="cta">
+    <h2>사기 피해 대응 상담</h2>
+
+    <p>
+      사건 구조 분석 및 법적 대응 방향을 확인해보시기 바랍니다.
+    </p>
+
+    <a href="/consulting/">
+      상담 문의
+    </a>
+  </section>
+
+</body>
+</html>

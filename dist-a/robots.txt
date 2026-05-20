@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://cb175ef8.new-project-9o2.pages.dev/sitemap.xml

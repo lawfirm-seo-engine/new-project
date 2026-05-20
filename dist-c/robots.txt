@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://afd962d5.new-project-c.pages.dev/sitemap.xml
