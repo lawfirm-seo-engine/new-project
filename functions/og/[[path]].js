@@ -1,9 +1,9 @@
 const GROUPS = [
-  { host: "new-project-9o2.pages.dev", label: "형사고소", bg: "#12355b", accent: "#f4c95d" },
-  { host: "new-project-b.pages.dev", label: "민사소송", bg: "#213f36", accent: "#9fd8cb" },
-  { host: "new-project-c.pages.dev", label: "성공사례", bg: "#4a274f", accent: "#f0a6ca" },
-  { host: "new-project-d.pages.dev", label: "AI브리핑", bg: "#1e2f55", accent: "#8ecae6" },
-  { host: "new-project-e.pages.dev", label: "전체허브", bg: "#2e3440", accent: "#a3be8c" },
+  { host: "new-project-9o2.pages.dev", label: "형사고소", tone: "법적 대응", accent: "#d9b46f" },
+  { host: "new-project-b.pages.dev", label: "민사소송", tone: "회수 절차", accent: "#9fd8cb" },
+  { host: "new-project-c.pages.dev", label: "성공사례", tone: "피해 회수", accent: "#f0c987" },
+  { host: "new-project-d.pages.dev", label: "AI브리핑", tone: "사건 정보", accent: "#8ecae6" },
+  { host: "new-project-e.pages.dev", label: "전체허브", tone: "통합 안내", accent: "#c7d3a2" },
 ];
 
 export function onRequestGet(context) {
@@ -11,7 +11,8 @@ export function onRequestGet(context) {
   const slug = decodeURIComponent(url.pathname.split("/").pop() || "hub.webp").replace(/\.webp$/i, "");
   const group = GROUPS.find((item) => item.host === url.host) || GROUPS[0];
   const title = slug === "hub" ? "피해사건 통합 허브" : slugToTitle(slug);
-  const svg = createOgSvg({ title, group });
+  const templateUrl = `${url.origin}/assets/og-template.png`;
+  const svg = createOgSvg({ title, group, templateUrl });
 
   return new Response(svg, {
     headers: {
@@ -32,32 +33,39 @@ function slugToTitle(slug) {
     .replace(/\b[a-z]/g, (char) => char.toUpperCase());
 }
 
-function createOgSvg({ title, group }) {
-  const safeTitle = escapeXml(title);
-  const wrapped = wrapText(safeTitle, 23).slice(0, 3);
-  const lines = wrapped
-    .map((line, index) => `<text x="80" y="${286 + index * 72}" class="title">${line}</text>`)
+function createOgSvg({ title, group, templateUrl }) {
+  const wrapped = wrapText(title, 18).slice(0, 3);
+  const titleLines = wrapped
+    .map((line, index) => `<text x="72" y="${252 + index * 70}" class="title">${escapeXml(line)}</text>`)
     .join("");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="shade" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#000000" stop-opacity=".78"/>
+      <stop offset=".48" stop-color="#000000" stop-opacity=".48"/>
+      <stop offset="1" stop-color="#000000" stop-opacity=".08"/>
+    </linearGradient>
+  </defs>
   <style>
-    .label { fill: ${group.accent}; font: 700 34px Arial, sans-serif; letter-spacing: 0; }
-    .title { fill: #ffffff; font: 800 60px Arial, sans-serif; letter-spacing: 0; }
-    .sub { fill: rgba(255,255,255,.78); font: 400 30px Arial, sans-serif; letter-spacing: 0; }
+    .label { fill: ${group.accent}; font: 700 30px Arial, 'Noto Sans KR', sans-serif; letter-spacing: 0; }
+    .title { fill: #ffffff; font: 800 58px Arial, 'Noto Sans KR', sans-serif; letter-spacing: 0; }
+    .sub { fill: rgba(255,255,255,.86); font: 400 28px Arial, 'Noto Sans KR', sans-serif; letter-spacing: 0; }
+    .brand { fill: rgba(255,255,255,.72); font: 700 24px Arial, 'Noto Sans KR', sans-serif; letter-spacing: 0; }
   </style>
-  <rect width="1200" height="630" fill="${group.bg}"/>
-  <rect x="44" y="44" width="1112" height="542" rx="28" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
-  <circle cx="1015" cy="120" r="150" fill="${group.accent}" opacity=".2"/>
-  <circle cx="1084" cy="502" r="210" fill="#ffffff" opacity=".08"/>
-  <text x="80" y="128" class="label">${escapeXml(group.label)} 피해 대응</text>
-  ${lines}
-  <text x="80" y="536" class="sub">사건 개요 · 증거 보존 · 회수 대응 정보</text>
+  <image href="${escapeXml(templateUrl)}" x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="1200" height="630" fill="url(#shade)"/>
+  <rect x="48" y="64" width="510" height="502" rx="22" fill="rgba(0,0,0,.28)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+  <text x="72" y="128" class="label">${escapeXml(group.label)} · ${escapeXml(group.tone)}</text>
+  ${titleLines}
+  <text x="72" y="500" class="sub">사건 개요 · 증거 보존 · 회수 대응</text>
+  <text x="72" y="544" class="brand">피해사건 대응 센터</text>
 </svg>`;
 }
 
 function wrapText(text, limit) {
-  const words = text.split(" ");
+  const words = String(text || "").split(" ").filter(Boolean);
   const lines = [];
   let line = "";
 
