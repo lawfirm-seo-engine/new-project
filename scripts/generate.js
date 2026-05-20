@@ -209,6 +209,13 @@ for (const group of groups) {
     await fs.copy(publicDir, path.join(group.outDir, 'assets'));
   }
 
+  if (group.key === 'a') {
+  await fs.copy(
+    path.join(root, 'admin'),
+    path.join(root, 'dist-a', 'admin')
+  );
+}
+
   const hubItems = cases
     .map((item) => {
       const caseName = item.caseName || item.name;

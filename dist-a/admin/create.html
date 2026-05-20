@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>사건 생성</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    input,
+    textarea,
+    button {
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    textarea {
+      min-height: 120px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>사건 생성</h1>
+
+  <form id="createForm">
+
+    <input
+      id="caseName"
+      type="text"
+      placeholder="사건명"
+      required
+    />
+
+    <input
+      id="slug"
+      type="text"
+      placeholder="slug"
+      required
+    />
+
+    <input
+      id="category"
+      type="text"
+      placeholder="카테고리"
+      required
+    />
+
+    <textarea
+      id="summary"
+      placeholder="사건 요약"
+      required
+    ></textarea>
+
+    <button type="submit">
+      사건 생성
+    </button>
+
+  </form>
+
+  <p id="message"></p>
+
+  <script>
+    document
+      .getElementById("createForm")
+      .addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const payload = {
+          caseName: document.getElementById("caseName").value.trim(),
+          slug: document.getElementById("slug").value.trim(),
+          category: document.getElementById("category").value.trim(),
+          summary: document.getElementById("summary").value.trim(),
+        };
+
+        const res = await fetch("/api/create-case", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (data.ok) {
+          document.getElementById("message").textContent =
+            "사건 생성 완료";
+        } else {
+          document.getElementById("message").textContent =
+            data.message || "생성 실패";
+        }
+      });
+  </script>
+
+</body>
+</html>
