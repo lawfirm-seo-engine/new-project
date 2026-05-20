@@ -68,5 +68,15 @@
     "updatedAt": "2026-05-20",
     "summary": "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다.",
     "tags": []
+  },
+  {
+    "slug": "test-case",
+    "caseName": "테스트사건",
+    "category": "형사대응",
+    "landingViews": 0,
+    "reports": 0,
+    "updatedAt": "2026-05-20",
+    "summary": "테스트 사건입니다.",
+    "tags": []
   }
 ]
