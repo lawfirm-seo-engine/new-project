@@ -1,55 +1,46 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{title}}</title>
-
-  <meta name="description" content="{{description}}" />
-
-  <link rel="canonical" href="{{canonical}}" />
-
-  <meta property="og:type" content="article" />
-  <meta property="og:title" content="{{ogTitle}}" />
-  <meta property="og:description" content="{{ogDescription}}" />
-  <meta property="og:image" content="{{ogImage}}" />
+  <meta name="description" content="{{description}}">
+  <link rel="canonical" href="{{canonical}}">
+  <meta property="og:type" content="{{ogType}}">
+  <meta property="og:title" content="{{ogTitle}}">
+  <meta property="og:description" content="{{ogDescription}}">
+  <meta property="og:image" content="{{ogImage}}">
+  <meta property="og:url" content="{{canonical}}">
+  <meta property="og:site_name" content="{{siteName}}">
+  <meta property="og:locale" content="ko_KR">
   {{headExtra}}
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <script type="application/ld+json">
-  {{schema}}
-  </script>
-
-  <link rel="stylesheet" href="/assets/style.css" />
+  <script type="application/ld+json">{{schema}}</script>
+  <link rel="stylesheet" href="/assets/style.css">
 </head>
-<body>
-
-  <header class="hero">
-    <h1>{{h1}}</h1>
-
-    <p class="summary">
-      {{summary}}
-    </p>
+<body class="{{bodyClass}} {{pageKind}}">
+  <header class="site-header">
+    <a class="brand" href="/"><span>{{shortName}}</span>{{siteName}}</a>
+    <nav class="site-nav" aria-label="검색 의도별 바로가기">{{navLinks}}</nav>
+    <a class="header-call" href="#consult">요약 확인</a>
   </header>
 
-  <main class="content">
+  <main>
+    <section class="hero">
+      <p class="eyebrow">{{tone}}</p>
+      <h1>{{h1}}</h1>
+      <p class="summary">{{summary}}</p>
+    </section>
 
-    {{content}}
+    <div class="page-shell">
+      {{content}}
+    </div>
 
+    <section id="consult" class="cta">
+      <p class="eyebrow">{{intent}}</p>
+      <h2>{{ctaTitle}}</h2>
+      <p>{{ctaText}}</p>
+      <a href="tel:01000000000">{{ctaLabel}}</a>
+    </section>
   </main>
-
-  <section class="cta">
-    <h2>사기 피해 대응 정보</h2>
-
-    <p>
-      사건 구조와 대응 방법을 확인하고 추가 피해를 예방하시기 바랍니다.
-    </p>
-
-    <a href="/consulting/">
-      상담 문의
-    </a>
-  </section>
-
 </body>
 </html>

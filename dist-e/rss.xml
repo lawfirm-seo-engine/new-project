@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>피해사건 센터 - 전체 허브형</title>
+    <title>사기피해 통합 허브 - 전체 허브형</title>
     <link>https://new-project-e.pages.dev/</link>
-    <description>전체 사건 허브, 관련 사건, 유형별 대응 정보를 연결합니다.</description>
+    <description>전체 사건 허브에서 형사, 민사, 성공사례, AI브리핑 정보를 사건별로 연결합니다.</description>
     
     <item>
       <title>BG웰스셰어링 탈출 전체 허브형 대응 안내</title>

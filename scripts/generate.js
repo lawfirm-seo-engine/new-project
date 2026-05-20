@@ -6,6 +6,14 @@ const dataPath = path.join(root, "data", "cases.json");
 const publicDir = path.join(root, "public");
 const templatesDir = path.join(root, "templates");
 
+const crossLinks = [
+  { key: "a", label: "형사고소", url: "https://new-project-9o2.pages.dev", prefix: "prosecute" },
+  { key: "b", label: "민사소송", url: "https://new-project-b.pages.dev", prefix: "civil" },
+  { key: "c", label: "성공사례", url: "https://new-project-c.pages.dev", prefix: "success" },
+  { key: "d", label: "AI브리핑", url: "https://new-project-d.pages.dev", prefix: "briefing" },
+  { key: "e", label: "전체허브", url: "https://new-project-e.pages.dev", prefix: "case" },
+];
+
 const groups = [
   {
     key: "a",
@@ -13,10 +21,22 @@ const groups = [
     template: "group-a.html",
     siteUrl: "https://new-project-9o2.pages.dev",
     pathPrefix: "prosecute",
+    bodyClass: "domain-a",
+    siteName: "피해금 추적 법률센터",
+    shortName: "형사고소 센터",
     label: "법률형",
+    intent: "형사고소 · 법적제재 · 형사합의 · 회수",
+    ogType: "article",
     titleSuffix: "형사고소 및 법적 대응",
-    descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 검토합니다.",
+    descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
     ogSuffix: "형사고소 대응",
+    hubTitle: "투자사기 형사고소 접수 사건 목록",
+    hubLead: "사기 의심 업체명과 접수 현황을 빠르게 확인하고, 동일 피해자가 모일 수 있도록 사건별 법적 대응 정보를 정리합니다.",
+    tone: "긴급 대응",
+    ctaTitle: "형사고소 가능성 확인",
+    ctaText: "입금 내역, 대화 내용, 사이트 주소를 기준으로 고소장 작성과 계좌 추적 방향을 검토합니다.",
+    ctaLabel: "피해 사실 접수",
+    tableTitle: "형사고소 진행 현황",
   },
   {
     key: "b",
@@ -24,10 +44,22 @@ const groups = [
     template: "group-b.html",
     siteUrl: "https://new-project-b.pages.dev",
     pathPrefix: "civil",
+    bodyClass: "domain-b",
+    siteName: "민사 회수 전략실",
+    shortName: "민사 회수",
     label: "민사형",
+    intent: "민사소송 · 가압류 · 손해배상 · 부당이득반환",
+    ogType: "article",
     titleSuffix: "민사소송 및 회수 절차",
-    descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수를 안내합니다.",
-    ogSuffix: "민사소송 회수",
+    descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
+    ogSuffix: "민사 회수 절차",
+    hubTitle: "민사 회수 검토 사건 목록",
+    hubLead: "채권 보전과 손해배상 청구 관점에서 사건별 회수 가능성, 가압류 필요성, 합의 전략을 정리합니다.",
+    tone: "회수 전략",
+    ctaTitle: "민사 회수 경로 검토",
+    ctaText: "상대방 특정 가능성, 입금 계좌, 계약·약정 자료를 기준으로 보전처분과 본안소송을 함께 봅니다.",
+    ctaLabel: "회수 절차 문의",
+    tableTitle: "민사 검토 현황",
   },
   {
     key: "c",
@@ -35,10 +67,22 @@ const groups = [
     template: "group-c.html",
     siteUrl: "https://new-project-c.pages.dev",
     pathPrefix: "success",
+    bodyClass: "domain-c",
+    siteName: "피해 회수 성공사례",
+    shortName: "성공사례",
     label: "성공사례형",
-    titleSuffix: "회수 성공사례",
-    descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 사례를 중심으로 안내합니다.",
+    intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수",
+    ogType: "article",
+    titleSuffix: "회수 성공사례 분석",
+    descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
     ogSuffix: "회수 성공사례",
+    hubTitle: "피해금 회수 성공사례 목록",
+    hubLead: "유사 사건의 대응 흐름과 회수율을 비교할 수 있도록 성공사례 중심으로 재구성한 사건 목록입니다.",
+    tone: "결과 중심",
+    ctaTitle: "유사 성공사례 비교",
+    ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
+    ctaLabel: "사례 비교 문의",
+    tableTitle: "회수 사례 현황",
   },
   {
     key: "d",
@@ -46,10 +90,22 @@ const groups = [
     template: "group-d.html",
     siteUrl: "https://new-project-d.pages.dev",
     pathPrefix: "briefing",
+    bodyClass: "domain-d",
+    siteName: "AI 피해 브리핑",
+    shortName: "AI 브리핑",
     label: "AI브리핑형",
-    titleSuffix: "AI브리핑 정보",
-    descriptionSuffix: "네이버 AI브리핑 노출을 고려해 사건 개요, 피해 구조, 대응 방법을 정보성으로 정리합니다.",
+    intent: "네이버 AI브리핑 · 사건 개요 · 대응 방법",
+    ogType: "article",
+    titleSuffix: "AI브리핑 대응 정보",
+    descriptionSuffix: "네이버 AI브리핑 노출을 고려해 사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
     ogSuffix: "AI브리핑",
+    hubTitle: "AI브리핑용 사기 사건 정보 목록",
+    hubLead: "검색자가 사건 구조를 빠르게 이해할 수 있도록 질문과 답변, 핵심 요약, 대응 순서를 정보성으로 제공합니다.",
+    tone: "정보 요약",
+    ctaTitle: "사건 구조 확인",
+    ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
+    ctaLabel: "브리핑 확인",
+    tableTitle: "브리핑 등록 현황",
   },
   {
     key: "e",
@@ -57,10 +113,22 @@ const groups = [
     template: "group-e.html",
     siteUrl: "https://new-project-e.pages.dev",
     pathPrefix: "case",
+    bodyClass: "domain-e",
+    siteName: "사기피해 통합 허브",
+    shortName: "전체 허브",
     label: "전체 허브형",
+    intent: "전체 사건 허브 · 유형별 연결 · 관련 사건",
+    ogType: "website",
     titleSuffix: "전체 허브",
-    descriptionSuffix: "전체 사건 허브, 관련 사건, 유형별 대응 정보를 연결합니다.",
+    descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, AI브리핑 정보를 사건별로 연결합니다.",
     ogSuffix: "전체 허브",
+    hubTitle: "사기피해 전체 사건 허브",
+    hubLead: "같은 사건을 형사고소, 민사소송, 성공사례, 정보 브리핑 관점으로 연결해 검색 의도별 진입 경로를 제공합니다.",
+    tone: "통합 탐색",
+    ctaTitle: "유형별 대응 보기",
+    ctaText: "하나의 사건을 법적 대응, 회수 절차, 사례, 정보 요약 관점으로 나누어 확인할 수 있습니다.",
+    ctaLabel: "관련 정보 확인",
+    tableTitle: "전체 사건 연결 현황",
   },
 ];
 
@@ -76,19 +144,10 @@ function escapeHtml(value = "") {
 }
 
 function replaceAllPlaceholders(template, data) {
-  return template
-    .replaceAll("{{title}}", data.title)
-    .replaceAll("{{description}}", data.description)
-    .replaceAll("{{canonical}}", data.canonical)
-    .replaceAll("{{ogTitle}}", data.ogTitle)
-    .replaceAll("{{ogDescription}}", data.ogDescription)
-    .replaceAll("{{ogImage}}", data.ogImage)
-    .replaceAll("{{headExtra}}", data.headExtra || "")
-    .replaceAll("{{schema}}", data.schema)
-    .replaceAll("{{h1}}", data.h1)
-    .replaceAll("{{summary}}", data.summary)
-    .replaceAll("{{content}}", data.content)
-    .replaceAll("{{relatedLinks}}", data.relatedLinks || "");
+  return Object.entries(data).reduce(
+    (html, [key, value]) => html.replaceAll(`{{${key}}}`, value ?? ""),
+    template,
+  );
 }
 
 function getLanding(caseItem, group) {
@@ -127,11 +186,11 @@ function createFallbackLanding(caseItem, group) {
     victimCases: [
       "출금 또는 수익 실현을 조건으로 추가 입금을 요구받은 사례",
       "상담원 또는 담당자 사칭 계정으로 입금을 유도받은 사례",
-      "플랫폼 잔액은 보이나 실제 출금이 제한된 사례",
+      "화면상 잔액은 보이지만 실제 출금이 제한된 사례",
     ],
     suspiciousCompanies: [
       `${caseName} 관련 사이트 또는 앱`,
-      `${caseName} 담당자 사칭 계정`,
+      `${caseName} 상담원·담당자 사칭 계정`,
       `${caseName} 입금 계좌 또는 연계 법인 명칭`,
     ],
     faq,
@@ -173,12 +232,13 @@ function createSchemaData({ title, description, canonical, faq }) {
   };
 }
 
-function createLandingContent(landing) {
+function createLandingContent(landing, group, caseItem) {
   return [
-    `<section><h2>본문 원고</h2>${paragraphs(landing.body)}</section>`,
-    `<section><h2>피해사례</h2>${list(landing.victimCases)}</section>`,
-    `<section><h2>사기 의심 업체 리스트</h2>${list(landing.suspiciousCompanies)}</section>`,
-    `<section><h2>FAQ</h2>${faqHtml(landing.faq)}</section>`,
+    `<section class="article-block"><p class="section-kicker">${escapeHtml(group.intent)}</p><h2>${escapeHtml(caseItem.caseName)} 핵심 대응</h2>${paragraphs(landing.body)}</section>`,
+    `<section class="article-block ${group.key === "d" ? "brief-card" : ""}"><h2>피해 사례</h2>${list(landing.victimCases)}</section>`,
+    `<section class="article-block"><h2>사기 의심 업체 리스트</h2>${list(landing.suspiciousCompanies)}</section>`,
+    `<section class="article-block faq"><h2>FAQ</h2>${faqHtml(landing.faq)}</section>`,
+    `<section class="related"><h2>검색 의도별 관련 페이지</h2>${createRelatedLinks(caseItem)}</section>`,
   ].join("\n");
 }
 
@@ -196,45 +256,141 @@ function faqHtml(items = []) {
     .join("\n");
 }
 
-function createRelatedLinks(caseItem) {
+function createRelatedLinks(caseItem, currentKey = "") {
   const caseName = escapeHtml(caseItem.caseName || caseItem.name);
   const slug = encodeURIComponent(caseItem.slug);
 
   return `
-    <ul>
-      <li><a href="https://new-project-e.pages.dev/case/${slug}/">${caseName} 전체 허브</a></li>
-      <li><a href="https://new-project-9o2.pages.dev/prosecute/${slug}/">${caseName} 형사고소 대응</a></li>
-      <li><a href="https://new-project-b.pages.dev/civil/${slug}/">${caseName} 민사소송 회수</a></li>
-      <li><a href="https://new-project-c.pages.dev/success/${slug}/">${caseName} 회수 성공사례</a></li>
-      <li><a href="https://new-project-d.pages.dev/briefing/${slug}/">${caseName} AI브리핑</a></li>
-    </ul>
+    <div class="related-grid">
+      ${crossLinks
+        .map((link) => {
+          const active = link.key === currentKey ? " is-active" : "";
+          return `<a class="related-card${active}" href="${link.url}/${link.prefix}/${slug}/"><span>${link.label}</span><strong>${caseName}</strong></a>`;
+        })
+        .join("\n")}
+    </div>
   `;
 }
 
-function createHeadExtra({ landing, group, caseItem }) {
+function createHeadExtra({ landing, group, caseItem, isHub = false }) {
   const slug = caseItem?.slug ? encodeURIComponent(caseItem.slug) : "";
   const links = [
-    `<link rel="preload" as="image" href="/assets/og-template.png" />`,
-    `<link rel="prefetch" href="${group.siteUrl}/sitemap.xml" />`,
+    `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
+    `<meta name="NaverBot" content="All">`,
+    `<meta name="Yeti" content="All">`,
+    `<meta name="theme-color" content="${themeColor(group.key)}">`,
+    `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(group.siteName)} RSS" href="/rss.xml">`,
+    `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
+    `<link rel="preload" as="image" href="/assets/og-template.png">`,
   ];
 
   if (slug) {
-    links.push(`<link rel="prefetch" href="https://new-project-e.pages.dev/case/${slug}/" />`);
-    links.push(`<link rel="prefetch" href="${landing.ogImage}" as="image" />`);
+    links.push(`<link rel="prefetch" href="https://new-project-e.pages.dev/case/${slug}/">`);
+    links.push(`<link rel="prefetch" href="${landing.ogImage}" as="image">`);
+  }
+
+  if (isHub) {
+    links.push(`<meta name="classification" content="${escapeHtml(group.intent)}">`);
   }
 
   return links.join("\n  ");
 }
 
+function themeColor(key) {
+  return {
+    a: "#111827",
+    b: "#173b57",
+    c: "#174333",
+    d: "#25314d",
+    e: "#3b2f52",
+  }[key];
+}
+
 function createHubContent(group) {
-  const items = cases
-    .map((item) => {
+  const totalViews = cases.reduce((sum, item) => sum + Number(item.landingViews || 0), 0);
+  const totalReports = cases.reduce((sum, item) => sum + Number(item.reports || 0), 0);
+  const rows = cases
+    .map((item, index) => {
       const caseName = escapeHtml(item.caseName || item.name);
-      return `<li><a href="/${group.pathPrefix}/${encodeURIComponent(item.slug)}/">${caseName} ${escapeHtml(group.ogSuffix)}</a></li>`;
+      const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`;
+      return `
+        <a href="${url}" class="case-row" data-title="${caseName}">
+          <span class="case-no">${12000 - index}</span>
+          <span class="case-title-wrap">
+            <strong class="case-title">${caseName}</strong>
+            ${index < 6 ? '<em class="today-badge">TODAY</em>' : ""}
+          </span>
+          <span class="case-status">${statusLabel(group.key)}</span>
+          <span class="case-date">${escapeHtml(item.updatedAt)}</span>
+          <span class="case-views">${Number(item.landingViews || 0).toLocaleString("ko-KR")}</span>
+        </a>`;
     })
     .join("\n");
 
-  return `<section><h2>현재 등록된 사건</h2><ul>${items}</ul></section>`;
+  return `
+    <section class="hub-panel">
+      <div class="hub-stats">
+        <div><strong>${cases.length.toLocaleString("ko-KR")}</strong><span>등록 사건</span></div>
+        <div><strong>${totalReports.toLocaleString("ko-KR")}</strong><span>누적 접수</span></div>
+        <div><strong>${totalViews.toLocaleString("ko-KR")}</strong><span>조회수</span></div>
+      </div>
+      <div class="case-search-wrap">
+        <input id="case-search" type="search" class="case-search" placeholder="사기 업체명 또는 사건명 검색" autocomplete="off">
+        <button class="search-btn" type="button">검색</button>
+      </div>
+    </section>
+    <section class="case-table-wrap" aria-label="${escapeHtml(group.tableTitle)}">
+      <div class="case-table-title"><h2>${escapeHtml(group.tableTitle)}</h2><span>${escapeHtml(group.intent)}</span></div>
+      <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
+      ${rows}
+    </section>
+    <script>
+      const searchInput = document.getElementById("case-search");
+      const rows = Array.from(document.querySelectorAll(".case-row"));
+      if (searchInput) {
+        searchInput.addEventListener("input", () => {
+          const query = searchInput.value.trim().toLowerCase();
+          rows.forEach((row) => {
+            row.style.display = row.dataset.title.toLowerCase().includes(query) ? "grid" : "none";
+          });
+        });
+      }
+    </script>`;
+}
+
+function statusLabel(key) {
+  return {
+    a: "형사 검토중",
+    b: "민사 검토중",
+    c: "사례 분석",
+    d: "브리핑 공개",
+    e: "허브 연결",
+  }[key];
+}
+
+function buildPage(template, group, data) {
+  return replaceAllPlaceholders(template, {
+    bodyClass: group.bodyClass,
+    siteName: escapeHtml(group.siteName),
+    shortName: escapeHtml(group.shortName),
+    intent: escapeHtml(group.intent),
+    tone: escapeHtml(group.tone),
+    navLinks: createNavLinks(group),
+    ctaTitle: escapeHtml(group.ctaTitle),
+    ctaText: escapeHtml(group.ctaText),
+    ctaLabel: escapeHtml(group.ctaLabel),
+    ogType: group.ogType,
+    ...data,
+  });
+}
+
+function createNavLinks(group) {
+  return crossLinks
+    .map((link) => {
+      const active = link.key === group.key ? " is-active" : "";
+      return `<a class="${active}" href="${link.url}/">${link.label}</a>`;
+    })
+    .join("\n");
 }
 
 for (const group of groups) {
@@ -250,38 +406,35 @@ for (const group of groups) {
     await fs.copy(path.join(root, "admin"), path.join(root, "dist-a", "admin"));
   }
 
-  const hubTitle = `피해사건 ${group.label} 목록`;
-  const hubDescription = group.descriptionSuffix;
-  const hubHtml = replaceAllPlaceholders(template, {
+  const hubTitle = group.hubTitle;
+  const hubDescription = group.hubLead;
+  const hubHtml = buildPage(template, group, {
     title: escapeHtml(hubTitle),
     description: escapeHtml(hubDescription),
     canonical: `${group.siteUrl}/`,
     ogTitle: escapeHtml(hubTitle),
     ogDescription: escapeHtml(hubDescription),
     ogImage: `${group.siteUrl}/og/hub.webp`,
-    headExtra: [
-      `<link rel="preload" as="image" href="/assets/og-template.png" />`,
-      `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(hubTitle)} RSS" href="/rss.xml" />`,
-      `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />`,
-    ].join("\n  "),
+    headExtra: createHeadExtra({ group, isHub: true }),
     schema: JSON.stringify({
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       name: hubTitle,
       url: `${group.siteUrl}/`,
       inLanguage: "ko-KR",
+      description: hubDescription,
     }),
     h1: escapeHtml(hubTitle),
     summary: escapeHtml(hubDescription),
     content: createHubContent(group),
-    relatedLinks: "",
+    pageKind: "hub-page",
   });
 
   await fs.outputFile(path.join(group.outDir, "index.html"), hubHtml);
 
   for (const caseItem of cases) {
     const landing = getLanding(caseItem, group);
-    const html = replaceAllPlaceholders(template, {
+    const html = buildPage(template, group, {
       title: escapeHtml(landing.title),
       description: escapeHtml(landing.description),
       canonical: landing.canonical,
@@ -292,8 +445,8 @@ for (const group of groups) {
       schema: JSON.stringify(landing.schema, null, 2),
       h1: escapeHtml(landing.h1),
       summary: escapeHtml(landing.description),
-      content: createLandingContent(landing),
-      relatedLinks: createRelatedLinks(caseItem),
+      content: createLandingContent(landing, group, caseItem),
+      pageKind: "landing-page",
     });
 
     await fs.outputFile(path.join(group.outDir, group.pathPrefix, caseItem.slug, "index.html"), html);
@@ -321,7 +474,7 @@ ${urls.map((url, index) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>피해사건 센터 - ${group.label}</title>
+    <title>${escapeHtml(group.siteName)} - ${escapeHtml(group.label)}</title>
     <link>${group.siteUrl}/</link>
     <description>${escapeHtml(group.descriptionSuffix)}</description>
     ${cases.map((item) => {
