@@ -10,7 +10,7 @@
     body {
       font-family: sans-serif;
       padding: 40px;
-      max-width: 960px;
+      max-width: 1120px;
       margin: 0 auto;
       color: #172033;
       background: #f6f8fb;
@@ -35,7 +35,7 @@
     }
 
     textarea {
-      min-height: 160px;
+      min-height: 120px;
       font-family: Consolas, monospace;
     }
 
@@ -89,6 +89,79 @@
       background: #ffe8e8;
       color: #8a1f1f;
     }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-bottom: 1px solid #dde3ee;
+      padding-bottom: 12px;
+    }
+
+    .tab-button {
+      background: #edf1f7;
+      color: #263244;
+      padding: 10px 14px;
+      border: 1px solid #d7deea;
+    }
+
+    .tab-button.is-active {
+      background: #1f4fd8;
+      color: #fff;
+      border-color: #1f4fd8;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      padding: 14px;
+      border: 1px solid #e1e6ef;
+      border-radius: 6px;
+      background: #fafbfd;
+    }
+
+    .field.wide {
+      grid-column: 1 / -1;
+    }
+
+    .field strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #4b5a70;
+      font-size: 13px;
+    }
+
+    .field p,
+    .field ul,
+    .field pre {
+      margin: 0;
+    }
+
+    .field ul {
+      padding-left: 20px;
+    }
+
+    .field pre {
+      overflow: auto;
+      max-height: 260px;
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 20px;
+      }
+
+      .actions,
+      .preview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -116,12 +189,24 @@
   <section id="reviewPanel" class="panel" aria-live="polite">
     <strong>AI 데이터 검수 결과</strong>
     <div id="reviewStatus" class="status"></div>
+
+    <div id="previewTabs" class="tabs" role="tablist" aria-label="도메인별 원고 미리보기"></div>
+    <div id="landingPreview" class="preview-grid"></div>
+
     <textarea id="generatedData" readonly></textarea>
   </section>
 
   <p id="message"></p>
 
   <script>
+    const GROUPS = [
+      { key: "a", label: "A 법률형" },
+      { key: "b", label: "B 민사형" },
+      { key: "c", label: "C 성공사례형" },
+      { key: "d", label: "D AI브리핑형" },
+      { key: "e", label: "E 전체 허브형" },
+    ];
+
     const caseNameEl = document.getElementById("caseName");
     const slugEl = document.getElementById("slug");
     const categoryEl = document.getElementById("category");
@@ -130,10 +215,13 @@
     const reviewPanelEl = document.getElementById("reviewPanel");
     const reviewStatusEl = document.getElementById("reviewStatus");
     const generatedDataEl = document.getElementById("generatedData");
+    const previewTabsEl = document.getElementById("previewTabs");
+    const landingPreviewEl = document.getElementById("landingPreview");
     const generateDraftButtonEl = document.getElementById("generateDraftButton");
     const submitButtonEl = document.getElementById("submitButton");
 
     let generatedCase = null;
+    let activePreviewKey = "a";
 
     function resetGeneratedData() {
       generatedCase = null;
@@ -141,6 +229,8 @@
       reviewPanelEl.classList.remove("is-visible");
       reviewStatusEl.textContent = "";
       generatedDataEl.value = "";
+      previewTabsEl.innerHTML = "";
+      landingPreviewEl.innerHTML = "";
       slugEl.value = "";
       categoryEl.value = "";
       summaryEl.value = "";
@@ -166,6 +256,10 @@
         ...(data.review.duplicateCheck.matches || []).map((item) => `유사 후보: ${item.caseName || item.slug} / ${item.slug} / ${Math.round(item.score * 100)}%`),
       ].join("\n");
 
+      activePreviewKey = "a";
+      renderPreviewTabs();
+      renderLandingPreview(activePreviewKey);
+
       generatedDataEl.value = JSON.stringify({
         savedFields: [
           "title",
@@ -185,6 +279,103 @@
       }, null, 2);
 
       submitButtonEl.disabled = status === "blocked";
+    }
+
+    function renderPreviewTabs() {
+      previewTabsEl.innerHTML = "";
+
+      for (const group of GROUPS) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `tab-button${group.key === activePreviewKey ? " is-active" : ""}`;
+        button.textContent = group.label;
+        button.setAttribute("role", "tab");
+        button.setAttribute("aria-selected", String(group.key === activePreviewKey));
+        button.addEventListener("click", () => {
+          activePreviewKey = group.key;
+          renderPreviewTabs();
+          renderLandingPreview(group.key);
+        });
+        previewTabsEl.appendChild(button);
+      }
+    }
+
+    function renderLandingPreview(key) {
+      const landing = generatedCase?.landings?.[key];
+
+      if (!landing) {
+        landingPreviewEl.innerHTML = "";
+        return;
+      }
+
+      landingPreviewEl.innerHTML = "";
+      landingPreviewEl.append(
+        createTextField("title", landing.title),
+        createTextField("description", landing.description),
+        createTextField("canonical", landing.canonical),
+        createTextField("OG title", landing.ogTitle),
+        createTextField("OG description", landing.ogDescription),
+        createTextField("OG image", landing.ogImage),
+        createTextField("H1", landing.h1),
+        createListField("본문 원고", landing.body, true),
+        createListField("피해사례", landing.victimCases, true),
+        createListField("사기 의심 업체 리스트", landing.suspiciousCompanies, true),
+        createFaqField("FAQ", landing.faq),
+        createCodeField("schema JSON-LD", landing.schema)
+      );
+    }
+
+    function createTextField(label, value) {
+      const field = createField(label);
+      const paragraph = document.createElement("p");
+      paragraph.textContent = value || "";
+      field.appendChild(paragraph);
+      return field;
+    }
+
+    function createListField(label, values, wide) {
+      const field = createField(label, wide);
+      const list = document.createElement("ul");
+
+      for (const value of values || []) {
+        const item = document.createElement("li");
+        item.textContent = value;
+        list.appendChild(item);
+      }
+
+      field.appendChild(list);
+      return field;
+    }
+
+    function createFaqField(label, values) {
+      const field = createField(label, true);
+      const list = document.createElement("ul");
+
+      for (const value of values || []) {
+        const item = document.createElement("li");
+        item.textContent = `${value.question} ${value.answer}`;
+        list.appendChild(item);
+      }
+
+      field.appendChild(list);
+      return field;
+    }
+
+    function createCodeField(label, value) {
+      const field = createField(label, true);
+      const pre = document.createElement("pre");
+      pre.textContent = JSON.stringify(value || {}, null, 2);
+      field.appendChild(pre);
+      return field;
+    }
+
+    function createField(label, wide = false) {
+      const field = document.createElement("div");
+      field.className = `field${wide ? " wide" : ""}`;
+      const title = document.createElement("strong");
+      title.textContent = label;
+      field.appendChild(title);
+      return field;
     }
 
     caseNameEl.addEventListener("input", resetGeneratedData);
@@ -214,7 +405,7 @@
         }
 
         renderGeneratedData(data);
-        messageEl.textContent = "AI 데이터 생성 완료. 검수 결과 확인 후 사건 생성을 진행하세요.";
+        messageEl.textContent = "AI 데이터 생성 완료. 도메인별 원고를 확인한 뒤 사건 생성을 진행하세요.";
       } catch (error) {
         messageEl.textContent = `AI 데이터 생성 오류: ${error.message}`;
       } finally {
