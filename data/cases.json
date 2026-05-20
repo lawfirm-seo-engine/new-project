@@ -78,5 +78,15 @@
     "updatedAt": "2026-05-20",
     "summary": "테스트 사건입니다.",
     "tags": []
+  },
+  {
+    "slug": "test-1",
+    "caseName": "테스트1",
+    "category": "형사 대응",
+    "landingViews": 0,
+    "reports": 0,
+    "updatedAt": "2026-05-20",
+    "summary": "테스트 생성",
+    "tags": []
   }
 ]
