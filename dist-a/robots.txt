@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+Sitemap: https://new-project-9o2.pages.dev/sitemap-index.xml
 Sitemap: https://new-project-9o2.pages.dev/sitemap.xml

@@ -83,6 +83,7 @@ function replaceAllPlaceholders(template, data) {
     .replaceAll("{{ogTitle}}", data.ogTitle)
     .replaceAll("{{ogDescription}}", data.ogDescription)
     .replaceAll("{{ogImage}}", data.ogImage)
+    .replaceAll("{{headExtra}}", data.headExtra || "")
     .replaceAll("{{schema}}", data.schema)
     .replaceAll("{{h1}}", data.h1)
     .replaceAll("{{summary}}", data.summary)
@@ -210,6 +211,21 @@ function createRelatedLinks(caseItem) {
   `;
 }
 
+function createHeadExtra({ landing, group, caseItem }) {
+  const slug = caseItem?.slug ? encodeURIComponent(caseItem.slug) : "";
+  const links = [
+    `<link rel="preload" as="image" href="/assets/og-template.png" />`,
+    `<link rel="prefetch" href="${group.siteUrl}/sitemap.xml" />`,
+  ];
+
+  if (slug) {
+    links.push(`<link rel="prefetch" href="https://new-project-e.pages.dev/case/${slug}/" />`);
+    links.push(`<link rel="prefetch" href="${landing.ogImage}" as="image" />`);
+  }
+
+  return links.join("\n  ");
+}
+
 function createHubContent(group) {
   const items = cases
     .map((item) => {
@@ -243,6 +259,11 @@ for (const group of groups) {
     ogTitle: escapeHtml(hubTitle),
     ogDescription: escapeHtml(hubDescription),
     ogImage: `${group.siteUrl}/og/hub.webp`,
+    headExtra: [
+      `<link rel="preload" as="image" href="/assets/og-template.png" />`,
+      `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(hubTitle)} RSS" href="/rss.xml" />`,
+      `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />`,
+    ].join("\n  "),
     schema: JSON.stringify({
       "@context": "https://schema.org",
       "@type": "CollectionPage",
@@ -267,6 +288,7 @@ for (const group of groups) {
       ogTitle: escapeHtml(landing.ogTitle),
       ogDescription: escapeHtml(landing.ogDescription),
       ogImage: landing.ogImage,
+      headExtra: createHeadExtra({ landing, group, caseItem }),
       schema: JSON.stringify(landing.schema, null, 2),
       h1: escapeHtml(landing.h1),
       summary: escapeHtml(landing.description),
@@ -284,10 +306,17 @@ for (const group of groups) {
   const lastmod = new Date().toISOString().slice(0, 10);
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((url) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod></url>`).join("\n")}
+${urls.map((url, index) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod><changefreq>${index === 0 ? "hourly" : "daily"}</changefreq><priority>${index === 0 ? "1.0" : "0.8"}</priority></url>`).join("\n")}
 </urlset>`;
 
   await fs.outputFile(path.join(group.outDir, "sitemap.xml"), sitemap);
+
+  const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>${group.siteUrl}/sitemap.xml</loc><lastmod>${lastmod}</lastmod></sitemap>
+</sitemapindex>`;
+
+  await fs.outputFile(path.join(group.outDir, "sitemap-index.xml"), sitemapIndex);
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
@@ -312,6 +341,7 @@ ${urls.map((url) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod></url>
 
   await fs.outputFile(path.join(group.outDir, "robots.txt"), `User-agent: *
 Allow: /
+Sitemap: ${group.siteUrl}/sitemap-index.xml
 Sitemap: ${group.siteUrl}/sitemap.xml
 `);
 
