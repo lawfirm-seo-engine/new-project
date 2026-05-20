@@ -29,16 +29,16 @@ export async function onRequestPost(context) {
         const errorText = await currentRes.text();
 
         return json({
-            ok: false,
-            message: "기존 cases.json을 불러오지 못했습니다.",
-            status: currentRes.status,
-            statusText: currentRes.statusText,
-            repoOwner,
-            repoName,
-            branch,
-            filePath,
-            apiUrl,
-            githubError: errorText
+          ok: false,
+          message: "기존 cases.json을 불러오지 못했습니다.",
+          status: currentRes.status,
+          statusText: currentRes.statusText,
+          repoOwner,
+          repoName,
+          branch,
+          filePath,
+          apiUrl,
+          githubError: errorText
         }, 500);
     }
 
