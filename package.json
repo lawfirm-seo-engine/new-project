@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "generate": "node scripts/generate.js",
+    "migrate:cases": "node scripts/migrate-cases.js",
     "warmup": "node scripts/warmup.js",
     "preview": "npx http-server dist -p 4173 -c-1"
   },

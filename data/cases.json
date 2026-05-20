@@ -12,7 +12,475 @@
       "형사고소",
       "검찰송치",
       "피해금 회수"
-    ]
+    ],
+    "createdAt": "2026-05-18",
+    "landings": {
+      "a": {
+        "title": "BG웰스셰어링 탈출 법률형 대응 안내",
+        "description": "BG웰스셰어링 탈출 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-9o2.pages.dev/prosecute/bg-wealth-sharing-talchul/",
+        "ogTitle": "BG웰스셰어링 탈출 법률형",
+        "ogDescription": "BG웰스셰어링 탈출 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-9o2.pages.dev/og/bg-wealth-sharing-talchul.webp",
+        "h1": "BG웰스셰어링 탈출 법률형 대응",
+        "body": [
+          "BG웰스셰어링 탈출 사건은 공동고소 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "법률형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "BG웰스셰어링 탈출 관련 사이트 또는 앱",
+          "BG웰스셰어링 탈출 상담원·담당자 사칭 계정",
+          "BG웰스셰어링 탈출 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-9o2.pages.dev/prosecute/bg-wealth-sharing-talchul/#webpage",
+              "name": "BG웰스셰어링 탈출 법률형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "BG웰스셰어링 탈출 법률형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "about": "BG웰스셰어링 탈출",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "b": {
+        "title": "BG웰스셰어링 탈출 민사형 대응 안내",
+        "description": "BG웰스셰어링 탈출 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-b.pages.dev/civil/bg-wealth-sharing-talchul/",
+        "ogTitle": "BG웰스셰어링 탈출 민사형",
+        "ogDescription": "BG웰스셰어링 탈출 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-b.pages.dev/og/bg-wealth-sharing-talchul.webp",
+        "h1": "BG웰스셰어링 탈출 민사형 대응",
+        "body": [
+          "BG웰스셰어링 탈출 사건은 공동고소 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "민사형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "BG웰스셰어링 탈출 관련 사이트 또는 앱",
+          "BG웰스셰어링 탈출 상담원·담당자 사칭 계정",
+          "BG웰스셰어링 탈출 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-b.pages.dev/civil/bg-wealth-sharing-talchul/#webpage",
+              "name": "BG웰스셰어링 탈출 민사형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "BG웰스셰어링 탈출 민사형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "about": "BG웰스셰어링 탈출",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "c": {
+        "title": "BG웰스셰어링 탈출 성공사례형 대응 안내",
+        "description": "BG웰스셰어링 탈출 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-c.pages.dev/success/bg-wealth-sharing-talchul/",
+        "ogTitle": "BG웰스셰어링 탈출 성공사례형",
+        "ogDescription": "BG웰스셰어링 탈출 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-c.pages.dev/og/bg-wealth-sharing-talchul.webp",
+        "h1": "BG웰스셰어링 탈출 성공사례형 대응",
+        "body": [
+          "BG웰스셰어링 탈출 사건은 공동고소 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "성공사례형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "BG웰스셰어링 탈출 관련 사이트 또는 앱",
+          "BG웰스셰어링 탈출 상담원·담당자 사칭 계정",
+          "BG웰스셰어링 탈출 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-c.pages.dev/success/bg-wealth-sharing-talchul/#webpage",
+              "name": "BG웰스셰어링 탈출 성공사례형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "BG웰스셰어링 탈출 성공사례형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "about": "BG웰스셰어링 탈출",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "d": {
+        "title": "BG웰스셰어링 탈출 AI브리핑형 대응 안내",
+        "description": "BG웰스셰어링 탈출 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-d.pages.dev/briefing/bg-wealth-sharing-talchul/",
+        "ogTitle": "BG웰스셰어링 탈출 AI브리핑형",
+        "ogDescription": "BG웰스셰어링 탈출 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-d.pages.dev/og/bg-wealth-sharing-talchul.webp",
+        "h1": "BG웰스셰어링 탈출 AI브리핑형 대응",
+        "body": [
+          "BG웰스셰어링 탈출 사건은 공동고소 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "AI브리핑형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "BG웰스셰어링 탈출 관련 사이트 또는 앱",
+          "BG웰스셰어링 탈출 상담원·담당자 사칭 계정",
+          "BG웰스셰어링 탈출 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-d.pages.dev/briefing/bg-wealth-sharing-talchul/#webpage",
+              "name": "BG웰스셰어링 탈출 AI브리핑형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "BG웰스셰어링 탈출 AI브리핑형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "about": "BG웰스셰어링 탈출",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "e": {
+        "title": "BG웰스셰어링 탈출 전체 허브형 대응 안내",
+        "description": "BG웰스셰어링 탈출 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-e.pages.dev/case/bg-wealth-sharing-talchul/",
+        "ogTitle": "BG웰스셰어링 탈출 전체 허브형",
+        "ogDescription": "BG웰스셰어링 탈출 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-e.pages.dev/og/bg-wealth-sharing-talchul.webp",
+        "h1": "BG웰스셰어링 탈출 전체 허브형 대응",
+        "body": [
+          "BG웰스셰어링 탈출 사건은 공동고소 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "전체 허브형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "BG웰스셰어링 탈출 관련 사이트 또는 앱",
+          "BG웰스셰어링 탈출 상담원·담당자 사칭 계정",
+          "BG웰스셰어링 탈출 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-e.pages.dev/case/bg-wealth-sharing-talchul/#webpage",
+              "name": "BG웰스셰어링 탈출 전체 허브형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "BG웰스셰어링 탈출 전체 허브형 대응 안내",
+              "description": "BG웰스셰어링 탈출 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/bg-wealth-sharing-talchul/",
+              "inLanguage": "ko-KR",
+              "about": "BG웰스셰어링 탈출",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "BG웰스셰어링 탈출 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
   },
   {
     "slug": "tingus-live-exchange",
@@ -27,7 +495,475 @@
       "포인트환전",
       "팀미션",
       "추가입금"
-    ]
+    ],
+    "createdAt": "2026-05-18",
+    "landings": {
+      "a": {
+        "title": "틴그스라이브 법률형 대응 안내",
+        "description": "틴그스라이브 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-9o2.pages.dev/prosecute/tingus-live-exchange/",
+        "ogTitle": "틴그스라이브 법률형",
+        "ogDescription": "틴그스라이브 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-9o2.pages.dev/og/tingus-live-exchange.webp",
+        "h1": "틴그스라이브 법률형 대응",
+        "body": [
+          "틴그스라이브 사건은 방송 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "법률형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "라이브 방송 미션과 포인트 환전을 빙자해 환전 수수료와 등급 비용을 요구한 방송 환전 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "틴그스라이브 관련 사이트 또는 앱",
+          "틴그스라이브 상담원·담당자 사칭 계정",
+          "틴그스라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "틴그스라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-9o2.pages.dev/prosecute/tingus-live-exchange/#webpage",
+              "name": "틴그스라이브 법률형 대응 안내",
+              "description": "틴그스라이브 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "틴그스라이브 법률형 대응 안내",
+              "description": "틴그스라이브 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "틴그스라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "틴그스라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "b": {
+        "title": "틴그스라이브 민사형 대응 안내",
+        "description": "틴그스라이브 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-b.pages.dev/civil/tingus-live-exchange/",
+        "ogTitle": "틴그스라이브 민사형",
+        "ogDescription": "틴그스라이브 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-b.pages.dev/og/tingus-live-exchange.webp",
+        "h1": "틴그스라이브 민사형 대응",
+        "body": [
+          "틴그스라이브 사건은 방송 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "민사형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "라이브 방송 미션과 포인트 환전을 빙자해 환전 수수료와 등급 비용을 요구한 방송 환전 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "틴그스라이브 관련 사이트 또는 앱",
+          "틴그스라이브 상담원·담당자 사칭 계정",
+          "틴그스라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "틴그스라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-b.pages.dev/civil/tingus-live-exchange/#webpage",
+              "name": "틴그스라이브 민사형 대응 안내",
+              "description": "틴그스라이브 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "틴그스라이브 민사형 대응 안내",
+              "description": "틴그스라이브 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "틴그스라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "틴그스라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "c": {
+        "title": "틴그스라이브 성공사례형 대응 안내",
+        "description": "틴그스라이브 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-c.pages.dev/success/tingus-live-exchange/",
+        "ogTitle": "틴그스라이브 성공사례형",
+        "ogDescription": "틴그스라이브 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-c.pages.dev/og/tingus-live-exchange.webp",
+        "h1": "틴그스라이브 성공사례형 대응",
+        "body": [
+          "틴그스라이브 사건은 방송 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "성공사례형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "라이브 방송 미션과 포인트 환전을 빙자해 환전 수수료와 등급 비용을 요구한 방송 환전 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "틴그스라이브 관련 사이트 또는 앱",
+          "틴그스라이브 상담원·담당자 사칭 계정",
+          "틴그스라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "틴그스라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-c.pages.dev/success/tingus-live-exchange/#webpage",
+              "name": "틴그스라이브 성공사례형 대응 안내",
+              "description": "틴그스라이브 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "틴그스라이브 성공사례형 대응 안내",
+              "description": "틴그스라이브 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "틴그스라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "틴그스라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "d": {
+        "title": "틴그스라이브 AI브리핑형 대응 안내",
+        "description": "틴그스라이브 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-d.pages.dev/briefing/tingus-live-exchange/",
+        "ogTitle": "틴그스라이브 AI브리핑형",
+        "ogDescription": "틴그스라이브 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-d.pages.dev/og/tingus-live-exchange.webp",
+        "h1": "틴그스라이브 AI브리핑형 대응",
+        "body": [
+          "틴그스라이브 사건은 방송 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "AI브리핑형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "라이브 방송 미션과 포인트 환전을 빙자해 환전 수수료와 등급 비용을 요구한 방송 환전 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "틴그스라이브 관련 사이트 또는 앱",
+          "틴그스라이브 상담원·담당자 사칭 계정",
+          "틴그스라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "틴그스라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-d.pages.dev/briefing/tingus-live-exchange/#webpage",
+              "name": "틴그스라이브 AI브리핑형 대응 안내",
+              "description": "틴그스라이브 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "틴그스라이브 AI브리핑형 대응 안내",
+              "description": "틴그스라이브 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "틴그스라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "틴그스라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "e": {
+        "title": "틴그스라이브 전체 허브형 대응 안내",
+        "description": "틴그스라이브 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-e.pages.dev/case/tingus-live-exchange/",
+        "ogTitle": "틴그스라이브 전체 허브형",
+        "ogDescription": "틴그스라이브 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-e.pages.dev/og/tingus-live-exchange.webp",
+        "h1": "틴그스라이브 전체 허브형 대응",
+        "body": [
+          "틴그스라이브 사건은 방송 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "전체 허브형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "라이브 방송 미션과 포인트 환전을 빙자해 환전 수수료와 등급 비용을 요구한 방송 환전 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "틴그스라이브 관련 사이트 또는 앱",
+          "틴그스라이브 상담원·담당자 사칭 계정",
+          "틴그스라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "틴그스라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-e.pages.dev/case/tingus-live-exchange/#webpage",
+              "name": "틴그스라이브 전체 허브형 대응 안내",
+              "description": "틴그스라이브 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "틴그스라이브 전체 허브형 대응 안내",
+              "description": "틴그스라이브 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/tingus-live-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "틴그스라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "틴그스라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
   },
   {
     "slug": "valuna-live-romance",
@@ -42,7 +978,475 @@
       "환전사기",
       "SNS접근",
       "계정잠금"
-    ]
+    ],
+    "createdAt": "2026-05-18",
+    "landings": {
+      "a": {
+        "title": "벨루나라이브 법률형 대응 안내",
+        "description": "벨루나라이브 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-9o2.pages.dev/prosecute/valuna-live-romance/",
+        "ogTitle": "벨루나라이브 법률형",
+        "ogDescription": "벨루나라이브 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-9o2.pages.dev/og/valuna-live-romance.webp",
+        "h1": "벨루나라이브 법률형 대응",
+        "body": [
+          "벨루나라이브 사건은 로맨스스캠 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "법률형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "SNS 친분 형성 후 특정 플랫폼 가입과 환전을 유도하며 보증금과 세금을 요구한 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "벨루나라이브 관련 사이트 또는 앱",
+          "벨루나라이브 상담원·담당자 사칭 계정",
+          "벨루나라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "벨루나라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-9o2.pages.dev/prosecute/valuna-live-romance/#webpage",
+              "name": "벨루나라이브 법률형 대응 안내",
+              "description": "벨루나라이브 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "벨루나라이브 법률형 대응 안내",
+              "description": "벨루나라이브 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "about": "벨루나라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "벨루나라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "b": {
+        "title": "벨루나라이브 민사형 대응 안내",
+        "description": "벨루나라이브 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-b.pages.dev/civil/valuna-live-romance/",
+        "ogTitle": "벨루나라이브 민사형",
+        "ogDescription": "벨루나라이브 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-b.pages.dev/og/valuna-live-romance.webp",
+        "h1": "벨루나라이브 민사형 대응",
+        "body": [
+          "벨루나라이브 사건은 로맨스스캠 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "민사형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "SNS 친분 형성 후 특정 플랫폼 가입과 환전을 유도하며 보증금과 세금을 요구한 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "벨루나라이브 관련 사이트 또는 앱",
+          "벨루나라이브 상담원·담당자 사칭 계정",
+          "벨루나라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "벨루나라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-b.pages.dev/civil/valuna-live-romance/#webpage",
+              "name": "벨루나라이브 민사형 대응 안내",
+              "description": "벨루나라이브 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "벨루나라이브 민사형 대응 안내",
+              "description": "벨루나라이브 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "about": "벨루나라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "벨루나라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "c": {
+        "title": "벨루나라이브 성공사례형 대응 안내",
+        "description": "벨루나라이브 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-c.pages.dev/success/valuna-live-romance/",
+        "ogTitle": "벨루나라이브 성공사례형",
+        "ogDescription": "벨루나라이브 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-c.pages.dev/og/valuna-live-romance.webp",
+        "h1": "벨루나라이브 성공사례형 대응",
+        "body": [
+          "벨루나라이브 사건은 로맨스스캠 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "성공사례형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "SNS 친분 형성 후 특정 플랫폼 가입과 환전을 유도하며 보증금과 세금을 요구한 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "벨루나라이브 관련 사이트 또는 앱",
+          "벨루나라이브 상담원·담당자 사칭 계정",
+          "벨루나라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "벨루나라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-c.pages.dev/success/valuna-live-romance/#webpage",
+              "name": "벨루나라이브 성공사례형 대응 안내",
+              "description": "벨루나라이브 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "벨루나라이브 성공사례형 대응 안내",
+              "description": "벨루나라이브 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "about": "벨루나라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "벨루나라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "d": {
+        "title": "벨루나라이브 AI브리핑형 대응 안내",
+        "description": "벨루나라이브 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-d.pages.dev/briefing/valuna-live-romance/",
+        "ogTitle": "벨루나라이브 AI브리핑형",
+        "ogDescription": "벨루나라이브 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-d.pages.dev/og/valuna-live-romance.webp",
+        "h1": "벨루나라이브 AI브리핑형 대응",
+        "body": [
+          "벨루나라이브 사건은 로맨스스캠 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "AI브리핑형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "SNS 친분 형성 후 특정 플랫폼 가입과 환전을 유도하며 보증금과 세금을 요구한 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "벨루나라이브 관련 사이트 또는 앱",
+          "벨루나라이브 상담원·담당자 사칭 계정",
+          "벨루나라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "벨루나라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-d.pages.dev/briefing/valuna-live-romance/#webpage",
+              "name": "벨루나라이브 AI브리핑형 대응 안내",
+              "description": "벨루나라이브 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "벨루나라이브 AI브리핑형 대응 안내",
+              "description": "벨루나라이브 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "about": "벨루나라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "벨루나라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "e": {
+        "title": "벨루나라이브 전체 허브형 대응 안내",
+        "description": "벨루나라이브 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-e.pages.dev/case/valuna-live-romance/",
+        "ogTitle": "벨루나라이브 전체 허브형",
+        "ogDescription": "벨루나라이브 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-e.pages.dev/og/valuna-live-romance.webp",
+        "h1": "벨루나라이브 전체 허브형 대응",
+        "body": [
+          "벨루나라이브 사건은 로맨스스캠 환전 사기 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "전체 허브형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "SNS 친분 형성 후 특정 플랫폼 가입과 환전을 유도하며 보증금과 세금을 요구한 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "벨루나라이브 관련 사이트 또는 앱",
+          "벨루나라이브 상담원·담당자 사칭 계정",
+          "벨루나라이브 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "벨루나라이브 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-e.pages.dev/case/valuna-live-romance/#webpage",
+              "name": "벨루나라이브 전체 허브형 대응 안내",
+              "description": "벨루나라이브 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "벨루나라이브 전체 허브형 대응 안내",
+              "description": "벨루나라이브 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/valuna-live-romance/",
+              "inLanguage": "ko-KR",
+              "about": "벨루나라이브",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "벨루나라이브 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
   },
   {
     "slug": "core-casino-exchange",
@@ -57,36 +1461,1925 @@
       "출금제한",
       "보증금",
       "피해상담"
-    ]
+    ],
+    "createdAt": "2026-05-18",
+    "landings": {
+      "a": {
+        "title": "코어카지노 법률형 대응 안내",
+        "description": "코어카지노 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-9o2.pages.dev/prosecute/core-casino-exchange/",
+        "ogTitle": "코어카지노 법률형",
+        "ogDescription": "코어카지노 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-9o2.pages.dev/og/core-casino-exchange.webp",
+        "h1": "코어카지노 법률형 대응",
+        "body": [
+          "코어카지노 사건은 환전 피싱 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "법률형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "게임 포인트와 환전 가능 금액을 보여준 뒤 출금 조건으로 추가 입금을 요구한 환전 피싱 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "코어카지노 관련 사이트 또는 앱",
+          "코어카지노 상담원·담당자 사칭 계정",
+          "코어카지노 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "코어카지노 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-9o2.pages.dev/prosecute/core-casino-exchange/#webpage",
+              "name": "코어카지노 법률형 대응 안내",
+              "description": "코어카지노 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "코어카지노 법률형 대응 안내",
+              "description": "코어카지노 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "코어카지노",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "코어카지노 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "b": {
+        "title": "코어카지노 민사형 대응 안내",
+        "description": "코어카지노 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-b.pages.dev/civil/core-casino-exchange/",
+        "ogTitle": "코어카지노 민사형",
+        "ogDescription": "코어카지노 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-b.pages.dev/og/core-casino-exchange.webp",
+        "h1": "코어카지노 민사형 대응",
+        "body": [
+          "코어카지노 사건은 환전 피싱 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "민사형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "게임 포인트와 환전 가능 금액을 보여준 뒤 출금 조건으로 추가 입금을 요구한 환전 피싱 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "코어카지노 관련 사이트 또는 앱",
+          "코어카지노 상담원·담당자 사칭 계정",
+          "코어카지노 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "코어카지노 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-b.pages.dev/civil/core-casino-exchange/#webpage",
+              "name": "코어카지노 민사형 대응 안내",
+              "description": "코어카지노 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "코어카지노 민사형 대응 안내",
+              "description": "코어카지노 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "코어카지노",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "코어카지노 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "c": {
+        "title": "코어카지노 성공사례형 대응 안내",
+        "description": "코어카지노 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-c.pages.dev/success/core-casino-exchange/",
+        "ogTitle": "코어카지노 성공사례형",
+        "ogDescription": "코어카지노 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-c.pages.dev/og/core-casino-exchange.webp",
+        "h1": "코어카지노 성공사례형 대응",
+        "body": [
+          "코어카지노 사건은 환전 피싱 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "성공사례형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "게임 포인트와 환전 가능 금액을 보여준 뒤 출금 조건으로 추가 입금을 요구한 환전 피싱 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "코어카지노 관련 사이트 또는 앱",
+          "코어카지노 상담원·담당자 사칭 계정",
+          "코어카지노 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "코어카지노 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-c.pages.dev/success/core-casino-exchange/#webpage",
+              "name": "코어카지노 성공사례형 대응 안내",
+              "description": "코어카지노 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "코어카지노 성공사례형 대응 안내",
+              "description": "코어카지노 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "코어카지노",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "코어카지노 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "d": {
+        "title": "코어카지노 AI브리핑형 대응 안내",
+        "description": "코어카지노 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-d.pages.dev/briefing/core-casino-exchange/",
+        "ogTitle": "코어카지노 AI브리핑형",
+        "ogDescription": "코어카지노 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-d.pages.dev/og/core-casino-exchange.webp",
+        "h1": "코어카지노 AI브리핑형 대응",
+        "body": [
+          "코어카지노 사건은 환전 피싱 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "AI브리핑형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "게임 포인트와 환전 가능 금액을 보여준 뒤 출금 조건으로 추가 입금을 요구한 환전 피싱 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "코어카지노 관련 사이트 또는 앱",
+          "코어카지노 상담원·담당자 사칭 계정",
+          "코어카지노 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "코어카지노 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-d.pages.dev/briefing/core-casino-exchange/#webpage",
+              "name": "코어카지노 AI브리핑형 대응 안내",
+              "description": "코어카지노 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "코어카지노 AI브리핑형 대응 안내",
+              "description": "코어카지노 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "코어카지노",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "코어카지노 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "e": {
+        "title": "코어카지노 전체 허브형 대응 안내",
+        "description": "코어카지노 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-e.pages.dev/case/core-casino-exchange/",
+        "ogTitle": "코어카지노 전체 허브형",
+        "ogDescription": "코어카지노 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-e.pages.dev/og/core-casino-exchange.webp",
+        "h1": "코어카지노 전체 허브형 대응",
+        "body": [
+          "코어카지노 사건은 환전 피싱 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "전체 허브형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "게임 포인트와 환전 가능 금액을 보여준 뒤 출금 조건으로 추가 입금을 요구한 환전 피싱 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "코어카지노 관련 사이트 또는 앱",
+          "코어카지노 상담원·담당자 사칭 계정",
+          "코어카지노 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "코어카지노 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-e.pages.dev/case/core-casino-exchange/#webpage",
+              "name": "코어카지노 전체 허브형 대응 안내",
+              "description": "코어카지노 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "Article",
+              "headline": "코어카지노 전체 허브형 대응 안내",
+              "description": "코어카지노 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/core-casino-exchange/",
+              "inLanguage": "ko-KR",
+              "about": "코어카지노",
+              "datePublished": "2026-05-18",
+              "dateModified": "2026-05-18"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "코어카지노 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
   },
   {
     "slug": "nanocore30-scam",
     "caseName": "나노코어30 사칭 사기",
     "category": "형사대응",
-    "landingViews": 0,
-    "reports": 0,
+    "landingViews": 5140,
+    "reports": 18,
     "updatedAt": "2026-05-20",
     "summary": "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다.",
-    "tags": []
+    "tags": [
+      "나노코어30",
+      "사칭",
+      "사기",
+      "형사대응",
+      "피해회복",
+      "증거보존"
+    ],
+    "createdAt": "2026-05-20",
+    "landings": {
+      "a": {
+        "title": "나노코어30 사칭 사기 법률형 대응 안내",
+        "description": "나노코어30 사칭 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-9o2.pages.dev/prosecute/nanocore30-scam/",
+        "ogTitle": "나노코어30 사칭 사기 법률형",
+        "ogDescription": "나노코어30 사칭 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-9o2.pages.dev/og/nanocore30-scam.webp",
+        "h1": "나노코어30 사칭 사기 법률형 대응",
+        "body": [
+          "나노코어30 사칭 사기 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "법률형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "나노코어30 사칭 사기 관련 사이트 또는 앱",
+          "나노코어30 사칭 사기 상담원·담당자 사칭 계정",
+          "나노코어30 사칭 사기 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-9o2.pages.dev/prosecute/nanocore30-scam/#webpage",
+              "name": "나노코어30 사칭 사기 법률형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "나노코어30 사칭 사기 법률형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "about": "나노코어30 사칭 사기",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "b": {
+        "title": "나노코어30 사칭 사기 민사형 대응 안내",
+        "description": "나노코어30 사칭 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-b.pages.dev/civil/nanocore30-scam/",
+        "ogTitle": "나노코어30 사칭 사기 민사형",
+        "ogDescription": "나노코어30 사칭 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-b.pages.dev/og/nanocore30-scam.webp",
+        "h1": "나노코어30 사칭 사기 민사형 대응",
+        "body": [
+          "나노코어30 사칭 사기 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "민사형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "나노코어30 사칭 사기 관련 사이트 또는 앱",
+          "나노코어30 사칭 사기 상담원·담당자 사칭 계정",
+          "나노코어30 사칭 사기 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-b.pages.dev/civil/nanocore30-scam/#webpage",
+              "name": "나노코어30 사칭 사기 민사형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "나노코어30 사칭 사기 민사형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "about": "나노코어30 사칭 사기",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "c": {
+        "title": "나노코어30 사칭 사기 성공사례형 대응 안내",
+        "description": "나노코어30 사칭 사기 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-c.pages.dev/success/nanocore30-scam/",
+        "ogTitle": "나노코어30 사칭 사기 성공사례형",
+        "ogDescription": "나노코어30 사칭 사기 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-c.pages.dev/og/nanocore30-scam.webp",
+        "h1": "나노코어30 사칭 사기 성공사례형 대응",
+        "body": [
+          "나노코어30 사칭 사기 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "성공사례형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "나노코어30 사칭 사기 관련 사이트 또는 앱",
+          "나노코어30 사칭 사기 상담원·담당자 사칭 계정",
+          "나노코어30 사칭 사기 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-c.pages.dev/success/nanocore30-scam/#webpage",
+              "name": "나노코어30 사칭 사기 성공사례형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "나노코어30 사칭 사기 성공사례형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "about": "나노코어30 사칭 사기",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "d": {
+        "title": "나노코어30 사칭 사기 AI브리핑형 대응 안내",
+        "description": "나노코어30 사칭 사기 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-d.pages.dev/briefing/nanocore30-scam/",
+        "ogTitle": "나노코어30 사칭 사기 AI브리핑형",
+        "ogDescription": "나노코어30 사칭 사기 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-d.pages.dev/og/nanocore30-scam.webp",
+        "h1": "나노코어30 사칭 사기 AI브리핑형 대응",
+        "body": [
+          "나노코어30 사칭 사기 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "AI브리핑형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "나노코어30 사칭 사기 관련 사이트 또는 앱",
+          "나노코어30 사칭 사기 상담원·담당자 사칭 계정",
+          "나노코어30 사칭 사기 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-d.pages.dev/briefing/nanocore30-scam/#webpage",
+              "name": "나노코어30 사칭 사기 AI브리핑형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "나노코어30 사칭 사기 AI브리핑형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "about": "나노코어30 사칭 사기",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "e": {
+        "title": "나노코어30 사칭 사기 전체 허브형 대응 안내",
+        "description": "나노코어30 사칭 사기 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-e.pages.dev/case/nanocore30-scam/",
+        "ogTitle": "나노코어30 사칭 사기 전체 허브형",
+        "ogDescription": "나노코어30 사칭 사기 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-e.pages.dev/og/nanocore30-scam.webp",
+        "h1": "나노코어30 사칭 사기 전체 허브형 대응",
+        "body": [
+          "나노코어30 사칭 사기 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "전체 허브형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "실존 기업과 유사한 명칭을 이용해 투자금 입금과 추가 수수료를 반복 유도한 사칭 사기 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "나노코어30 사칭 사기 관련 사이트 또는 앱",
+          "나노코어30 사칭 사기 상담원·담당자 사칭 계정",
+          "나노코어30 사칭 사기 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-e.pages.dev/case/nanocore30-scam/#webpage",
+              "name": "나노코어30 사칭 사기 전체 허브형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "나노코어30 사칭 사기 전체 허브형 대응 안내",
+              "description": "나노코어30 사칭 사기 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/nanocore30-scam/",
+              "inLanguage": "ko-KR",
+              "about": "나노코어30 사칭 사기",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "나노코어30 사칭 사기 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
   },
   {
     "slug": "test-case",
     "caseName": "테스트사건",
     "category": "형사대응",
-    "landingViews": 0,
-    "reports": 0,
+    "landingViews": 2838,
+    "reports": 13,
     "updatedAt": "2026-05-20",
     "summary": "테스트 사건입니다.",
-    "tags": []
+    "tags": [
+      "테스트사건",
+      "형사대응",
+      "피해회복",
+      "증거보존"
+    ],
+    "createdAt": "2026-05-20",
+    "landings": {
+      "a": {
+        "title": "테스트사건 법률형 대응 안내",
+        "description": "테스트사건 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-9o2.pages.dev/prosecute/test-case/",
+        "ogTitle": "테스트사건 법률형",
+        "ogDescription": "테스트사건 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-9o2.pages.dev/og/test-case.webp",
+        "h1": "테스트사건 법률형 대응",
+        "body": [
+          "테스트사건 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "법률형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트사건 관련 사이트 또는 앱",
+          "테스트사건 상담원·담당자 사칭 계정",
+          "테스트사건 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트사건 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-9o2.pages.dev/prosecute/test-case/#webpage",
+              "name": "테스트사건 법률형 대응 안내",
+              "description": "테스트사건 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/test-case/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트사건 법률형 대응 안내",
+              "description": "테스트사건 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/test-case/",
+              "inLanguage": "ko-KR",
+              "about": "테스트사건",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트사건 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "b": {
+        "title": "테스트사건 민사형 대응 안내",
+        "description": "테스트사건 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-b.pages.dev/civil/test-case/",
+        "ogTitle": "테스트사건 민사형",
+        "ogDescription": "테스트사건 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-b.pages.dev/og/test-case.webp",
+        "h1": "테스트사건 민사형 대응",
+        "body": [
+          "테스트사건 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "민사형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트사건 관련 사이트 또는 앱",
+          "테스트사건 상담원·담당자 사칭 계정",
+          "테스트사건 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트사건 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-b.pages.dev/civil/test-case/#webpage",
+              "name": "테스트사건 민사형 대응 안내",
+              "description": "테스트사건 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/test-case/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트사건 민사형 대응 안내",
+              "description": "테스트사건 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/test-case/",
+              "inLanguage": "ko-KR",
+              "about": "테스트사건",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트사건 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "c": {
+        "title": "테스트사건 성공사례형 대응 안내",
+        "description": "테스트사건 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-c.pages.dev/success/test-case/",
+        "ogTitle": "테스트사건 성공사례형",
+        "ogDescription": "테스트사건 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-c.pages.dev/og/test-case.webp",
+        "h1": "테스트사건 성공사례형 대응",
+        "body": [
+          "테스트사건 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "성공사례형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트사건 관련 사이트 또는 앱",
+          "테스트사건 상담원·담당자 사칭 계정",
+          "테스트사건 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트사건 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-c.pages.dev/success/test-case/#webpage",
+              "name": "테스트사건 성공사례형 대응 안내",
+              "description": "테스트사건 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/test-case/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트사건 성공사례형 대응 안내",
+              "description": "테스트사건 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/test-case/",
+              "inLanguage": "ko-KR",
+              "about": "테스트사건",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트사건 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "d": {
+        "title": "테스트사건 AI브리핑형 대응 안내",
+        "description": "테스트사건 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-d.pages.dev/briefing/test-case/",
+        "ogTitle": "테스트사건 AI브리핑형",
+        "ogDescription": "테스트사건 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-d.pages.dev/og/test-case.webp",
+        "h1": "테스트사건 AI브리핑형 대응",
+        "body": [
+          "테스트사건 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "AI브리핑형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트사건 관련 사이트 또는 앱",
+          "테스트사건 상담원·담당자 사칭 계정",
+          "테스트사건 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트사건 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-d.pages.dev/briefing/test-case/#webpage",
+              "name": "테스트사건 AI브리핑형 대응 안내",
+              "description": "테스트사건 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/test-case/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트사건 AI브리핑형 대응 안내",
+              "description": "테스트사건 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/test-case/",
+              "inLanguage": "ko-KR",
+              "about": "테스트사건",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트사건 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "e": {
+        "title": "테스트사건 전체 허브형 대응 안내",
+        "description": "테스트사건 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-e.pages.dev/case/test-case/",
+        "ogTitle": "테스트사건 전체 허브형",
+        "ogDescription": "테스트사건 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-e.pages.dev/og/test-case.webp",
+        "h1": "테스트사건 전체 허브형 대응",
+        "body": [
+          "테스트사건 사건은 형사대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "전체 허브형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 사건입니다."
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트사건 관련 사이트 또는 앱",
+          "테스트사건 상담원·담당자 사칭 계정",
+          "테스트사건 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트사건 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-e.pages.dev/case/test-case/#webpage",
+              "name": "테스트사건 전체 허브형 대응 안내",
+              "description": "테스트사건 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/test-case/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트사건 전체 허브형 대응 안내",
+              "description": "테스트사건 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/test-case/",
+              "inLanguage": "ko-KR",
+              "about": "테스트사건",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트사건 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
   },
   {
     "slug": "test-1",
     "caseName": "테스트1",
     "category": "형사 대응",
-    "landingViews": 0,
-    "reports": 0,
+    "landingViews": 6304,
+    "reports": 31,
     "updatedAt": "2026-05-20",
     "summary": "테스트 생성",
-    "tags": []
+    "tags": [
+      "테스트1",
+      "형사 대응",
+      "피해회복",
+      "증거보존"
+    ],
+    "createdAt": "2026-05-20",
+    "landings": {
+      "a": {
+        "title": "테스트1 법률형 대응 안내",
+        "description": "테스트1 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-9o2.pages.dev/prosecute/test-1/",
+        "ogTitle": "테스트1 법률형",
+        "ogDescription": "테스트1 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-9o2.pages.dev/og/test-1.webp",
+        "h1": "테스트1 법률형 대응",
+        "body": [
+          "테스트1 사건은 형사 대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "법률형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 생성"
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트1 관련 사이트 또는 앱",
+          "테스트1 상담원·담당자 사칭 계정",
+          "테스트1 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트1 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-9o2.pages.dev/prosecute/test-1/#webpage",
+              "name": "테스트1 법률형 대응 안내",
+              "description": "테스트1 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/test-1/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트1 법률형 대응 안내",
+              "description": "테스트1 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-9o2.pages.dev/prosecute/test-1/",
+              "inLanguage": "ko-KR",
+              "about": "테스트1",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트1 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "b": {
+        "title": "테스트1 민사형 대응 안내",
+        "description": "테스트1 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-b.pages.dev/civil/test-1/",
+        "ogTitle": "테스트1 민사형",
+        "ogDescription": "테스트1 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-b.pages.dev/og/test-1.webp",
+        "h1": "테스트1 민사형 대응",
+        "body": [
+          "테스트1 사건은 형사 대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "민사형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 생성"
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트1 관련 사이트 또는 앱",
+          "테스트1 상담원·담당자 사칭 계정",
+          "테스트1 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트1 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-b.pages.dev/civil/test-1/#webpage",
+              "name": "테스트1 민사형 대응 안내",
+              "description": "테스트1 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/test-1/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트1 민사형 대응 안내",
+              "description": "테스트1 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-b.pages.dev/civil/test-1/",
+              "inLanguage": "ko-KR",
+              "about": "테스트1",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트1 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "c": {
+        "title": "테스트1 성공사례형 대응 안내",
+        "description": "테스트1 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-c.pages.dev/success/test-1/",
+        "ogTitle": "테스트1 성공사례형",
+        "ogDescription": "테스트1 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-c.pages.dev/og/test-1.webp",
+        "h1": "테스트1 성공사례형 대응",
+        "body": [
+          "테스트1 사건은 형사 대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "성공사례형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 생성"
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트1 관련 사이트 또는 앱",
+          "테스트1 상담원·담당자 사칭 계정",
+          "테스트1 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트1 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-c.pages.dev/success/test-1/#webpage",
+              "name": "테스트1 성공사례형 대응 안내",
+              "description": "테스트1 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/test-1/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트1 성공사례형 대응 안내",
+              "description": "테스트1 관련 성공사례, 지역, 회수율, 전액 또는 일부 회수 사례 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-c.pages.dev/success/test-1/",
+              "inLanguage": "ko-KR",
+              "about": "테스트1",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트1 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "d": {
+        "title": "테스트1 AI브리핑형 대응 안내",
+        "description": "테스트1 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-d.pages.dev/briefing/test-1/",
+        "ogTitle": "테스트1 AI브리핑형",
+        "ogDescription": "테스트1 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-d.pages.dev/og/test-1.webp",
+        "h1": "테스트1 AI브리핑형 대응",
+        "body": [
+          "테스트1 사건은 형사 대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "AI브리핑형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 생성"
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트1 관련 사이트 또는 앱",
+          "테스트1 상담원·담당자 사칭 계정",
+          "테스트1 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트1 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-d.pages.dev/briefing/test-1/#webpage",
+              "name": "테스트1 AI브리핑형 대응 안내",
+              "description": "테스트1 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/test-1/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트1 AI브리핑형 대응 안내",
+              "description": "테스트1 관련 네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-d.pages.dev/briefing/test-1/",
+              "inLanguage": "ko-KR",
+              "about": "테스트1",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트1 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "e": {
+        "title": "테스트1 전체 허브형 대응 안내",
+        "description": "테스트1 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "canonical": "https://new-project-e.pages.dev/case/test-1/",
+        "ogTitle": "테스트1 전체 허브형",
+        "ogDescription": "테스트1 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+        "ogImage": "https://new-project-e.pages.dev/og/test-1.webp",
+        "h1": "테스트1 전체 허브형 대응",
+        "body": [
+          "테스트1 사건은 형사 대응 범주에서 검토할 수 있는 피해 상담형 사건입니다.",
+          "전체 허브형 검색 의도에 맞춰 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.",
+          "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
+          "테스트 생성"
+        ],
+        "victimCases": [
+          "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
+          "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
+          "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례"
+        ],
+        "suspiciousCompanies": [
+          "테스트1 관련 사이트 또는 앱",
+          "테스트1 상담원·담당자 사칭 계정",
+          "테스트1 입금 계좌 또는 연계 법인 명칭"
+        ],
+        "faq": [
+          {
+            "question": "테스트1 피해금을 회수할 수 있나요?",
+            "answer": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+          },
+          {
+            "question": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+            "answer": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+          },
+          {
+            "question": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+            "answer": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+          }
+        ],
+        "schema": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": "https://new-project-e.pages.dev/case/test-1/#webpage",
+              "name": "테스트1 전체 허브형 대응 안내",
+              "description": "테스트1 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/test-1/",
+              "inLanguage": "ko-KR",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "Article",
+              "headline": "테스트1 전체 허브형 대응 안내",
+              "description": "테스트1 관련 전체 허브, 사건명 리스트, 관련 대응 경로 안내 검색 의도에 맞춘 피해 대응 정보입니다.",
+              "url": "https://new-project-e.pages.dev/case/test-1/",
+              "inLanguage": "ko-KR",
+              "about": "테스트1",
+              "datePublished": "2026-05-20",
+              "dateModified": "2026-05-20"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "테스트1 피해금을 회수할 수 있나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "추가 입금을 요구받으면 어떻게 해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "기존 사건과 유사하면 새 사건으로 분리해야 하나요?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
   }
 ]
