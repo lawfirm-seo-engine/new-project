@@ -14,6 +14,18 @@ export async function onRequest(context) {
     return handleLogin(request, env);
   }
 
+  if (
+    url.pathname === "/admin/login.html" ||
+    url.pathname === "/admin/login" ||
+    url.pathname.startsWith("/assets/")
+  ) {
+    if (url.pathname === "/admin/login" && request.method === "POST") {
+      return handleLogin(request, env);
+    }
+
+    return next();
+  }
+  
   if (url.pathname === "/admin/logout") {
     return handleLogout(url);
   }
@@ -22,9 +34,6 @@ export async function onRequest(context) {
     url.pathname.startsWith("/admin") ||
     url.pathname.startsWith("/api/create-case")
   ) {
-    if (url.pathname === "/admin/login.html") {
-      return next();
-    }
 
     const ok = await verifySession(request, env);
 
