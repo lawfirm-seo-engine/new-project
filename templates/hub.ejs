@@ -1,0 +1,129 @@
+<header class="site-header">
+  <a href="/" class="brand">법무법인 선린 사기피해 형사 센터</a>
+  <a href="tel:02-6952-3695" class="header-call">24시간 상담</a>
+</header>
+
+<main class="hub">
+
+  <section class="hero compact">
+    <p class="eyebrow">LIVE CASE HUB</p>
+
+    <h1>실시간 피해 접수 사건 목록</h1>
+
+    <p class="lead">
+      랜딩페이지 조회수와 사건 접수 건수를 기준으로
+      현재 대응 중인 사건을 확인할 수 있습니다.
+    </p>
+
+    <div class="hub-stats">
+      <div>
+        <strong><%= totalCases.toLocaleString('ko-KR') %></strong>
+        <span>등록 사건</span>
+      </div>
+
+      <div>
+        <strong><%= totalViews.toLocaleString('ko-KR') %></strong>
+        <span>랜딩페이지 조회</span>
+      </div>
+
+      <div>
+        <strong><%= totalReports.toLocaleString('ko-KR') %></strong>
+        <span>피해 접수</span>
+      </div>
+    </div>
+
+    <div class="case-search-wrap">
+      <input
+        id="case-search"
+        type="search"
+        class="case-search"
+        placeholder="🔍 사기 업체명을 검색하세요"
+        autocomplete="off"
+      >
+
+      <button class="search-btn">
+        검색
+      </button>
+    </div>
+  </section>
+
+  <section class="case-table-wrap">
+
+    <div class="case-table-header">
+      <div>No.</div>
+      <div>업체명</div>
+      <div>상태</div>
+      <div>등록일</div>
+      <div>조회수</div>
+    </div>
+
+    <% cases.forEach((item, index) => { %>
+
+      <a
+        href="/prosecute/<%= item.slug %>/"
+        class="case-row"
+        data-title="<%= item.caseName %>"
+      >
+
+        <div class="case-no">
+          <%= 12073 - index %>
+        </div>
+
+        <div class="case-title-wrap">
+
+          <strong class="case-title">
+            <%= item.caseName %> 사칭 사기 형사고소
+          </strong>
+
+          <% if(index < 6) { %>
+            <span class="today-badge">TODAY NEW</span>
+          <% } %>
+
+        </div>
+
+        <div>
+          <span class="case-status">
+            사건접수중
+          </span>
+        </div>
+
+        <div class="case-date">
+          <%= item.updatedAt %>
+        </div>
+
+        <div class="case-views">
+          <%= item.landingViews.toLocaleString('ko-KR') %>
+        </div>
+
+      </a>
+
+    <% }) %>
+
+  </section>
+
+</main>
+
+<script>
+  const searchInput = document.getElementById('case-search');
+  const rows = Array.from(document.querySelectorAll('.case-row'));
+
+  searchInput.addEventListener('input', () => {
+
+    const query = searchInput.value
+      .trim()
+      .toLowerCase();
+
+    rows.forEach((row) => {
+
+      const title = row.dataset.title
+        .toLowerCase();
+
+      row.style.display =
+        title.includes(query)
+          ? 'grid'
+          : 'none';
+
+    });
+
+  });
+</script>

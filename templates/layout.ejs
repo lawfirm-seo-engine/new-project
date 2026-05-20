@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+  <meta name="NaverBot" content="All">
+  <meta name="Yeti" content="All">
+  <meta name="theme-color" content="#101018">
+  <title><%= title %></title>
+  <meta name="description" content="<%= description %>">
+  <link rel="canonical" href="<%= canonical %>">
+  <link rel="alternate" type="application/rss+xml" title="피해사건 공동대응 센터" href="/rss.xml">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="<%= title %>">
+  <meta property="og:description" content="<%= description %>">
+  <meta property="og:url" content="<%= canonical %>">
+  <meta property="og:site_name" content="피해사건 공동대응 센터">
+  <meta property="og:locale" content="ko_KR">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="application/ld+json"><%- JSON.stringify(schema) %></script>
+</head>
+<body>
+  <%- body %>
+</body>
+</html>
