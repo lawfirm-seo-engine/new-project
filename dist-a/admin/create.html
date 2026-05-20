@@ -102,11 +102,9 @@
         const data = await res.json();
 
         if (data.ok) {
-          document.getElementById("message").textContent =
-            "사건 생성 완료";
+          document.getElementById("message").textContent = "사건 생성 완료";
         } else {
-          document.getElementById("message").textContent =
-            data.message || "생성 실패";
+          document.getElementById("message").textContent = JSON.stringify(data, null, 2);
         }
       });
   </script>
