@@ -41,5 +41,11 @@
       <description>테스트 사건입니다.</description>
       <pubDate>Wed, 20 May 2026 00:00:00 +0900</pubDate>
     </item>
+    <item>
+      <title>테스트1 사기 민사소송 및 회수 대응</title>
+      <link>https://new-project-b.pages.dev/civil/test-1/</link>
+      <description>테스트 생성</description>
+      <pubDate>Wed, 20 May 2026 00:00:00 +0900</pubDate>
+    </item>
   </channel>
 </rss>
