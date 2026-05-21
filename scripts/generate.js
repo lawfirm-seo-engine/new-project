@@ -49,6 +49,7 @@ const groups = [
     ctaText: "입금 내역, 대화 내용, 사이트 주소를 기준으로 고소장 작성과 계좌 추적 방향을 검토합니다.",
     ctaLabel: "피해 사실 접수",
     tableTitle: "형사고소 진행 현황",
+    naverVerification: "",
   },
   {
     key: "b",
@@ -72,6 +73,7 @@ const groups = [
     ctaText: "상대방 특정 가능성, 입금 계좌, 계약·약정 자료를 기준으로 보전처분과 본안소송을 함께 봅니다.",
     ctaLabel: "회수 절차 문의",
     tableTitle: "민사 소송 진행 현황",
+    naverVerification: "",
   },
   {
     key: "c",
@@ -95,6 +97,7 @@ const groups = [
     ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
     ctaLabel: "사례 비교 문의",
     tableTitle: "성공사례 진행 현황",
+    naverVerification: "",
   },
   {
     key: "d",
@@ -118,6 +121,7 @@ const groups = [
     ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
     ctaLabel: "정보 확인",
     tableTitle: "사건 접수 현황",
+    naverVerification: "",
   },
   {
     key: "e",
@@ -141,6 +145,7 @@ const groups = [
     ctaText: "하나의 사건을 법적 대응, 회수 절차, 사례, 정보 요약 관점으로 나누어 확인할 수 있습니다.",
     ctaLabel: "관련 정보 확인",
     tableTitle: "전체 사건 진행 현황",
+    naverVerification: "",
   },
 ];
 
@@ -460,6 +465,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
     `<meta name="NaverBot" content="All">`,
     `<meta name="Yeti" content="All">`,
+    ...(group.naverVerification ? [`<meta name="naver-site-verification" content="${group.naverVerification}">`] : []),
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
