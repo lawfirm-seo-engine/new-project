@@ -1,39 +1,9 @@
 const GROUPS = [
-  {
-    key: "a",
-    label: "법률형",
-    siteUrl: "https://new-project-9o2.pages.dev",
-    pathPrefix: "prosecute",
-    intent: "형사고소, 법적제재, 형사합의, 피해금 회수",
-  },
-  {
-    key: "b",
-    label: "민사형",
-    siteUrl: "https://new-project-b.pages.dev",
-    pathPrefix: "civil",
-    intent: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수",
-  },
-  {
-    key: "c",
-    label: "성공사례형",
-    siteUrl: "https://new-project-c.pages.dev",
-    pathPrefix: "success",
-    intent: "성공사례, 지역, 회수율, 전액 또는 일부 회수 사례",
-  },
-  {
-    key: "d",
-    label: "정보형",
-    siteUrl: "https://new-project-d.pages.dev",
-    pathPrefix: "briefing",
-    intent: "사건 개요 · 대응 방법 · 정보 요약",
-  },
-  {
-    key: "e",
-    label: "전체 허브형",
-    siteUrl: "https://new-project-e.pages.dev",
-    pathPrefix: "case",
-    intent: "전체 허브, 사건명 리스트, 관련 대응 경로 안내",
-  },
+  { key: "a", label: "형사고소형", siteUrl: "https://new-project-9o2.pages.dev", pathPrefix: "prosecute", suffix: "사칭 사기 형사 고소" },
+  { key: "b", label: "민사소송형", siteUrl: "https://new-project-b.pages.dev", pathPrefix: "civil", suffix: "사칭 사기 민사 소송" },
+  { key: "c", label: "성공사례형", siteUrl: "https://new-project-c.pages.dev", pathPrefix: "success", suffix: "사칭 사기 피해금 회수" },
+  { key: "d", label: "정보형", siteUrl: "https://new-project-d.pages.dev", pathPrefix: "briefing", suffix: "사칭 사기 피해 접수" },
+  { key: "e", label: "전체허브형", siteUrl: "https://new-project-e.pages.dev", pathPrefix: "case", suffix: "사칭 사기 피해 진행현황" },
 ];
 
 export async function onRequestPost(context) {
@@ -51,13 +21,7 @@ export async function onRequestPost(context) {
     const slug = createSlug(caseName);
     const category = detectCategory(caseName);
     const duplicateCheck = findDuplicateRisks(caseName, slug, cases);
-    const generated = await createGeneratedData({
-      caseName,
-      slug,
-      category,
-      duplicateCheck,
-      env,
-    });
+    const generated = await createGeneratedData({ caseName, slug, category, duplicateCheck, env });
 
     return json({
       ok: true,
@@ -78,6 +42,7 @@ export async function onRequestPost(context) {
         duplicateCheck,
         categoryReason: explainCategory(caseName, category),
         notes: generated.reviewNotes,
+        source: generated.source,
       },
     });
   } catch (error) {
@@ -85,58 +50,115 @@ export async function onRequestPost(context) {
   }
 }
 
+// ─── Data loading ────────────────────────────────────────────────────────────
+
 async function loadCases(env) {
-  const repoOwner = env.GITHUB_REPO_OWNER;
-  const repoName = env.GITHUB_REPO_NAME;
-  const branch = env.GITHUB_BRANCH || "main";
-  const token = env.GITHUB_TOKEN;
+  const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
+  if (!owner || !repo || !token) return [];
 
-  if (!repoOwner || !repoName || !token) return [];
-
-  const filePath = "data/cases.json";
-  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
-  const response = await fetch(apiUrl, { headers: githubHeaders(token) });
-
-  if (!response.ok) return [];
-
-  const currentFile = await response.json();
-  return JSON.parse(decodeBase64(currentFile.content));
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`,
+    { headers: githubHeaders(token) }
+  );
+  if (!res.ok) return [];
+  return JSON.parse(decodeBase64((await res.json()).content));
 }
+
+// ─── AI generation ───────────────────────────────────────────────────────────
 
 async function createGeneratedData({ caseName, slug, category, duplicateCheck, env }) {
   const fallback = createRuleBasedData({ caseName, slug, category, duplicateCheck });
-
-  if (!env.AI) return fallback;
+  if (!env.OPENAI_API_KEY) return fallback;
 
   try {
-    const prompt = [
-      "너는 한국어 SEO 원고 데이터 생성기다.",
-      "AI 생성은 데이터 작성 단계다. HTML 태그를 만들지 말고 JSON 데이터만 만든다.",
-      "랜딩 출력은 별도 Static HTML 생성기가 담당한다.",
-      "과장, 확정적 회수 보장, 허위 성공률, 단정적 범죄 판정 표현을 피한다.",
-      `사건명: ${caseName}`,
-      `slug: ${slug}`,
-      `카테고리: ${category}`,
-      `유사/중복 후보: ${JSON.stringify(duplicateCheck.matches)}`,
-      `도메인 그룹: ${JSON.stringify(GROUPS)}`,
-      "반드시 compact valid JSON만 반환한다.",
-      "형식: {\"summary\":\"...\",\"tags\":[\"...\"],\"reviewNotes\":[\"...\"],\"landings\":{\"a\":{\"title\":\"...\",\"description\":\"...\",\"canonical\":\"...\",\"ogTitle\":\"...\",\"ogDescription\":\"...\",\"ogImage\":\"...\",\"h1\":\"...\",\"body\":[\"...\"],\"victimCases\":[\"...\"],\"suspiciousCompanies\":[\"...\"],\"faq\":[{\"question\":\"...\",\"answer\":\"...\"}],\"schema\":{\"@context\":\"https://schema.org\",\"@graph\":[]}},\"b\":{},\"c\":{},\"d\":{},\"e\":{}}}",
-    ].join("\n");
-
-    const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
-      messages: [
-        { role: "system", content: "Return valid JSON only. No markdown." },
-        { role: "user", content: prompt },
-      ],
-    });
-
-    const text = String(result.response || result.text || "").trim();
-    const parsed = JSON.parse(text.replace(/^```json|```$/g, "").trim());
-    return normalizeGeneratedData(parsed, fallback);
-  } catch {
+    const aiResult = await callOpenAI({ caseName, category, env });
+    return mergeWithFallback(aiResult, fallback);
+  } catch (err) {
+    console.error("[generate-draft] OpenAI error:", err.message);
     return fallback;
   }
 }
+
+async function callOpenAI({ caseName, category, env }) {
+  const base = baseCaseName(caseName);
+
+  const systemPrompt = `너는 한국 투자사기 피해자 법률 대응 SEO 원고 전문 작성기다.
+사건명을 받아 5개 도메인 그룹별 랜딩 원고를 JSON으로만 반환한다. HTML·마크다운·설명문 금지.
+
+[그룹별 작성 방향]
+a 형사고소: 경찰 고소 접수 절차, 사기죄 요건, 계좌 지급정지·동결 신청, 고소장 작성 증거 목록, 수사 진행 흐름. 톤: 긴급하고 실질적.
+b 민사소송: 손해배상 청구(민법 750·741조), 가압류·가처분, 집행권원 확보, 상대방 재산 파악. 톤: 전략적·절차 중심.
+c 성공사례: 피해 접수→증거 보전→고소·가압류→회수까지 단계별 흐름, 지역·플랫폼별 실제 결과. 톤: 결과 중심, 과장 없이.
+d 사건정보: 사기 수법과 피해 구조 단계별 설명, 즉각 대응 방법, 핵심 증거 보존 순서. 톤: 중립적·정보성.
+e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단계별 행동 지침. 톤: 포괄적·안내형.
+
+[작성 제약]
+- 확정적 회수 보장·수익 보장 금지 (가능성, 검토, 정황 등으로 표현)
+- 재판 전 범죄 단정 금지 ("사기 의심", "관련 정황" 사용)
+- body: 완결된 단락 4개, 각 2~4문장, 사건명 자연스럽게 2~3회 포함
+- victimCases: 구체적인 실제 피해 패턴 4개 (막연한 표현 금지)
+- suspiciousCompanies: 업체·계정·플랫폼 유형 3개
+- faq: 피해자가 실제 묻는 질문과 행동 지향적 답변 3개
+- description: 검색 키워드 포함 80~120자
+
+반환 JSON 형식:
+{"summary":"","tags":[],"reviewNotes":[],"landings":{"a":{"description":"","ogDescription":"","body":["","","",""],"victimCases":["","","",""],"suspiciousCompanies":["","",""],"faq":[{"question":"","answer":""}]},"b":{},"c":{},"d":{},"e":{}}}`;
+
+  const userPrompt = `사건명: ${caseName}\n업체명(기본): ${base}\n감지 카테고리: ${category}\n위 사건의 5개 그룹 랜딩 원고를 작성하라.`;
+
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.75,
+      max_tokens: 4500,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`OpenAI ${res.status}: ${errText.slice(0, 300)}`);
+  }
+
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error("OpenAI 응답 없음");
+  return JSON.parse(text);
+}
+
+function mergeWithFallback(ai, fallback) {
+  const result = {
+    source: "openai",
+    summary: normalizeSpace(ai.summary) || fallback.summary,
+    tags: normalizeStringArray(ai.tags, fallback.tags),
+    reviewNotes: normalizeStringArray(ai.reviewNotes, fallback.reviewNotes),
+    landings: {},
+  };
+  for (const g of GROUPS) {
+    result.landings[g.key] = mergeGroupLanding(ai.landings?.[g.key], fallback.landings[g.key]);
+  }
+  return result;
+}
+
+function mergeGroupLanding(ai, fallback) {
+  return {
+    ...fallback,
+    description: normalizeSpace(ai?.description) || fallback.description,
+    ogDescription: normalizeSpace(ai?.ogDescription) || fallback.ogDescription,
+    body: normalizeStringArray(ai?.body, fallback.body),
+    victimCases: normalizeStringArray(ai?.victimCases, fallback.victimCases),
+    suspiciousCompanies: normalizeStringArray(ai?.suspiciousCompanies, fallback.suspiciousCompanies),
+    faq: normalizeFaq(ai?.faq, fallback.faq),
+  };
+}
+
+// ─── Rule-based fallback ──────────────────────────────────────────────────────
 
 function createRuleBasedData({ caseName, slug, category, duplicateCheck }) {
   const summary = createSummary(caseName, category);
@@ -147,114 +169,150 @@ function createRuleBasedData({ caseName, slug, category, duplicateCheck }) {
       : duplicateCheck.warn
         ? "유사 사건이 있어 기존 사건과 별도 사건인지 확인해야 합니다."
         : "중복 위험이 낮습니다.",
-    `${category} 검색 의도 기준으로 원고 데이터를 생성했습니다.`,
+    `${category} 검색 의도 기준으로 기본 원고를 생성했습니다. OpenAI API 키가 설정되면 고품질 원고가 자동으로 생성됩니다.`,
   ];
 
   const landings = Object.fromEntries(
-    GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, category, summary, group })])
+    GROUPS.map((g) => [g.key, createLandingData({ caseName, slug, group: g })])
   );
 
   return { source: "rule-based", summary, tags, reviewNotes, landings };
 }
 
-function normalizeGeneratedData(parsed, fallback) {
-  const result = {
-    source: "workers-ai",
-    summary: normalizeSpace(parsed.summary) || fallback.summary,
-    tags: Array.isArray(parsed.tags) ? parsed.tags.map(normalizeSpace).filter(Boolean) : fallback.tags,
-    reviewNotes: Array.isArray(parsed.reviewNotes)
-      ? parsed.reviewNotes.map(normalizeSpace).filter(Boolean)
-      : fallback.reviewNotes,
-    landings: {},
-  };
-
-  for (const group of GROUPS) {
-    result.landings[group.key] = normalizeLanding(parsed.landings?.[group.key], fallback.landings[group.key]);
-  }
-
-  return result;
-}
-
-function normalizeLanding(value, fallback) {
-  return {
-    title: normalizeSpace(value?.title) || fallback.title,
-    description: normalizeSpace(value?.description) || fallback.description,
-    canonical: normalizeSpace(value?.canonical) || fallback.canonical,
-    ogTitle: normalizeSpace(value?.ogTitle) || fallback.ogTitle,
-    ogDescription: normalizeSpace(value?.ogDescription) || fallback.ogDescription,
-    ogImage: normalizeSpace(value?.ogImage) || fallback.ogImage,
-    h1: normalizeSpace(value?.h1) || fallback.h1,
-    body: normalizeStringArray(value?.body, fallback.body),
-    victimCases: normalizeStringArray(value?.victimCases, fallback.victimCases),
-    suspiciousCompanies: normalizeStringArray(value?.suspiciousCompanies, fallback.suspiciousCompanies),
-    faq: normalizeFaq(value?.faq, fallback.faq),
-    schema: value?.schema && typeof value.schema === "object" ? value.schema : fallback.schema,
-  };
-}
-
-function createLandingData({ caseName, slug, category, summary, group }) {
+function createLandingData({ caseName, slug, group }) {
+  const base = baseCaseName(caseName);
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
-  const ogImage = `${group.siteUrl}/og/${slug}.webp`;
-  const tone = {
-    a: "형사고소와 법적 조치 가능성을 중심으로",
-    b: "민사소송과 보전처분을 중심으로",
-    c: "회수 진행 사례와 실무 포인트를 중심으로",
-    d: "사건 개요와 대응 방법을 정보성으로",
-    e: "전체 대응 경로와 관련 사건 탐색을 중심으로",
-  }[group.key];
-
-  const title = `${caseName} ${group.label} 대응 안내`;
-  const description = `${caseName} 관련 ${group.intent} 검색 의도에 맞춘 피해 대응 정보입니다.`;
-  const h1 = `${caseName} ${group.label} 대응`;
-
-  const body = [
-    `${caseName} 사건은 ${category} 범주에서 검토할 수 있는 피해 상담형 사건입니다.`,
-    `${tone} 사건 개요, 입금 경위, 대화 내역, 계좌 정보, 플랫폼 주소를 정리해야 합니다.`,
-    "추가 입금 요구가 이어지는 경우 즉시 중단하고, 기존 자료를 삭제하지 않은 상태로 상담 자료를 확보하는 것이 중요합니다.",
-  ];
-
-  const victimCases = [
-    "수익 실현 또는 출금을 앞세워 수수료, 세금, 보증금 명목의 추가 입금을 요구받은 사례",
-    "카카오톡, 텔레그램, 문자, SNS 등으로 담당자나 상담원을 사칭해 입금을 유도받은 사례",
-    "플랫폼 화면상 잔액은 표시되지만 실제 출금이 제한되거나 계정 제한 안내를 받은 사례",
-  ];
-
-  const suspiciousCompanies = [
-    `${caseName} 관련 사이트 또는 앱`,
-    `${caseName} 상담원·담당자 사칭 계정`,
-    `${caseName} 입금 계좌 또는 연계 법인 명칭`,
-  ];
-
-  const faq = [
-    {
-      question: `${caseName} 피해금을 회수할 수 있나요?`,
-      answer: "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다.",
-    },
-    {
-      question: "추가 입금을 요구받으면 어떻게 해야 하나요?",
-      answer: "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다.",
-    },
-    {
-      question: "기존 사건과 유사하면 새로 등록해도 되나요?",
-      answer: "동일 업체나 동일 URL이면 중복 등록을 피하고, 별도 사건이라면 지역, 플랫폼, 계좌 등 구분 정보를 사건명에 포함하는 것이 좋습니다.",
-    },
-  ];
+  const pageTitle = `${base} ${group.suffix}`;
+  const description = makeDescription(caseName, base, group.key);
+  const body = makeBody(caseName, base, group.key);
+  const victimCases = makeVictimCases(base, group.key);
+  const suspiciousCompanies = makeSuspiciousCompanies(base);
+  const faq = makeFaq(caseName, base, group.key);
 
   return {
-    title,
+    title: pageTitle,
     description,
     canonical,
-    ogTitle: `${caseName} ${group.label}`,
+    ogTitle: pageTitle,
     ogDescription: description,
-    ogImage,
-    h1,
+    ogImage: `${group.siteUrl}/og/${slug}.webp`,
+    h1: pageTitle,
     body,
     victimCases,
     suspiciousCompanies,
     faq,
-    schema: createSchemaData({ title, description, canonical, caseName, faq }),
+    schema: createSchemaData({ title: pageTitle, description, canonical, caseName, faq }),
   };
 }
+
+function makeDescription(caseName, base, key) {
+  return {
+    a: `${caseName} 피해자를 위한 형사 고소 절차 안내입니다. 계좌 지급정지, 고소장 작성, 증거 보존 방법을 확인하세요.`,
+    b: `${caseName} 피해금 회수를 위한 민사 소송 절차입니다. 가압류 신청, 손해배상 청구, 부당이득반환 전략을 안내합니다.`,
+    c: `${caseName} 피해금 회수 사례를 정리했습니다. 접수부터 회수 완료까지 실제 대응 흐름과 결과를 확인하세요.`,
+    d: `${caseName} 사건 수법과 피해 구조를 단계별로 정리합니다. 즉각 대응 방법과 핵심 증거 보존 순서를 안내합니다.`,
+    e: `${caseName} 관련 형사고소·민사소송·성공사례·사건정보를 한곳에서 확인하세요. 피해 단계별 대응 경로를 연결합니다.`,
+  }[key] || `${caseName} 피해 대응 정보입니다.`;
+}
+
+function makeBody(caseName, base, key) {
+  const bodies = {
+    a: [
+      `${caseName} 관련 피해 신고가 지속적으로 접수되고 있습니다. 주요 피해 경로는 카카오톡·텔레그램·인스타그램 등 메신저를 통한 고수익 투자 플랫폼 유도이며, 초기 소액 출금 허용 후 대규모 입금 유도, 이후 출금 제한과 세금·수수료·보증금 명목의 추가 입금 요구가 반복되는 구조입니다.`,
+      `형사 고소는 사기죄(형법 제347조)·특정경제범죄 가중처벌 등에 관한 법률 위반 혐의로 관할 경찰서 또는 사이버수사대에 고소장을 제출하는 방식으로 시작됩니다. ${base} 관련 피해 계좌에 대한 지급정지 신청을 병행하면 추가 피해 확산을 억제하는 데 도움이 될 수 있습니다.`,
+      `고소장 작성에 필요한 핵심 증거는 입금 확인증·거래 내역·담당자와의 대화 기록·사이트·앱 화면 캡처·계좌번호와 예금주 명의입니다. ${caseName} 관련 자료는 삭제하지 말고 원본 상태로 보관해야 하며, 이미 앱이 삭제된 경우 기기를 초기화하지 않으면 디지털 포렌식을 통한 복원이 가능할 수 있습니다.`,
+      `공동 피해자가 있다면 연명 고소 방식으로 피해 규모를 명확히 하면 수사기관의 집중도를 높일 수 있습니다. 피해금 규모·피해자 수·조직적 사기 여부에 따라 적용 법조항과 형량 기준이 달라질 수 있으므로, 관련 자료를 최대한 확보한 뒤 고소 절차를 진행하는 것이 중요합니다.`,
+    ],
+    b: [
+      `${caseName} 피해금 회수를 위한 민사 절차는 불법행위로 인한 손해배상 청구(민법 제750조)와 부당이득반환 청구(민법 제741조)를 중심으로 진행됩니다. 상대방의 신원과 보유 재산을 먼저 파악하는 것이 소송 전략의 핵심입니다.`,
+      `가압류·가처분은 판결 전에 상대방 재산을 동결해 이후 강제집행이 가능한 상태를 확보하는 보전처분입니다. ${base} 관련 입금 계좌나 연계 법인의 재산이 파악되면 빠르게 가압류를 신청하는 것이 중요합니다. 재산이 분산되거나 은닉되기 전에 조치를 취해야 집행력을 확보할 수 있습니다.`,
+      `민사 소송의 핵심 증거는 계좌 입금 내역·상대방과의 계약·약정 자료·담당자 정보·서비스 이용 화면입니다. 상대방 특정이 어려운 경우 형사 고소를 먼저 진행해 수사기관의 계좌 추적 결과를 활용하는 방법도 있습니다.`,
+      `소액 사건은 지급명령 신청(독촉 절차)으로 간이하게 집행권원을 확보할 수 있습니다. 피해금이 5천만 원 이상이면 ${caseName} 관련 민사 소송과 형사 고소를 병행하는 방식이 실질적 회수 가능성을 높이는 경우가 많습니다.`,
+    ],
+    c: [
+      `${caseName}와 유사한 사건에서 피해 대응은 입금 계좌 지급정지 신청과 형사 고소를 병행하는 방식으로 시작된 경우가 많습니다. 초기 대응 속도가 빠를수록 계좌 내 잔여 피해금 동결 가능성이 높아집니다.`,
+      `피해금 일부 회수는 가압류가 성공적으로 이루어진 경우에 집중됩니다. ${base} 관련 상대방 명의 계좌 또는 연계 법인 재산이 확인된 경우, 강제집행으로 피해금 일부를 돌려받은 사례가 있습니다. 단, 모든 사건에서 동일한 결과가 보장되지는 않습니다.`,
+      `성공적인 대응에 공통적으로 필요한 조건은 입금 계좌 보존·담당자 연락처·사이트·앱 화면 캡처·대화 기록입니다. ${caseName} 피해자도 동일한 증거를 보존했을 경우 절차 진행이 원활하게 이루어질 가능성이 높습니다.`,
+      `수사기관의 압수수색 이후 서버 자료가 확보되거나 관련자가 구속된 경우, 형사 합의 과정에서 피해금 일부를 반환받는 경로가 생기기도 합니다. 형사·민사 절차를 동시에 진행하면 협상 가능성과 실질적인 회수 경로가 넓어질 수 있습니다.`,
+    ],
+    d: [
+      `${caseName}는 온라인 플랫폼 또는 메신저를 통해 고수익 투자·수익 창출 기회를 제안하며 피해자를 유인하는 방식의 사기 의심 사건입니다. 피해 구조는 초기 소액 출금 허용 → 대규모 입금 유도 → 출금 제한 → 추가 비용 요구 순으로 진행되는 경우가 전형적입니다.`,
+      `${base} 관련 피해자들이 공통적으로 경험한 핵심 패턴은 담당자·상담원을 사칭한 계정을 통한 지속적인 연락과, 원금 보장·고수익을 강조한 투자 제안입니다. 플랫폼 화면상 잔액은 표시되지만 실제 출금은 차단되거나 추가 비용 요구로 이어집니다.`,
+      `즉각적인 대응으로 가장 중요한 것은 증거 보존입니다. 대화 기록·입금 영수증·플랫폼 화면·계좌번호·담당자 이름과 연락처를 삭제하지 말고 스크린샷으로 저장하세요. 앱이 이미 삭제된 경우에도 기기 캐시·이메일 확인서·은행 거래 내역은 남아 있을 수 있습니다.`,
+      `${caseName} 사건의 법적 대응 경로는 형사 고소(사기죄)와 민사 손해배상 청구 두 가지입니다. 수사기관에 고소장을 접수하면 계좌 추적과 금융정보 제공 명령이 이루어질 수 있으며, 민사 소송을 병행해 피해금 회수를 위한 보전처분도 신청할 수 있습니다.`,
+    ],
+    e: [
+      `${caseName} 피해를 확인하셨다면 대응 경로는 크게 네 가지입니다. 형사 고소·민사 소송·성공사례 확인·사건정보 파악 중 현재 상황과 목적에 맞는 진입 경로를 선택하세요. 증거 확보 상황과 피해 규모에 따라 우선순위가 달라질 수 있습니다.`,
+      `형사 고소 경로는 수사기관에 고소장을 제출하고 계좌 동결·압수수색·관련자 형사처벌을 목표로 합니다. 민사 소송 경로는 ${base} 피해금 직접 회수를 위해 손해배상 청구와 가압류 보전처분을 병행하는 방식입니다. 두 절차는 동시에 진행할 수 있습니다.`,
+      `성공사례를 먼저 확인하면 ${caseName}와 유사한 피해 유형에서 어떤 절차가 효과적이었는지 파악할 수 있습니다. 비슷한 구조의 사건에서 실제 대응 흐름과 회수 경로를 비교해 전략을 수립하는 데 도움이 됩니다.`,
+      `사건정보 페이지에서는 ${base} 수법·피해 구조·핵심 증거 목록·즉각 대응 순서를 정리한 정보를 확인할 수 있습니다. 어느 경로로 대응할지 결정하기 전에 사건 구조를 먼저 파악하면 절차 선택이 수월해집니다.`,
+    ],
+  };
+  return bodies[key] || [makeDescription(caseName, base, key)];
+}
+
+function makeVictimCases(base, key) {
+  const common = [
+    `${base} 플랫폼·앱에서 수익이 발생했다는 화면을 확인한 뒤 출금을 신청했으나 세금·수수료·보증금 명목으로 추가 입금을 요구받은 사례`,
+    `카카오톡·텔레그램·인스타그램 등 SNS에서 ${base} 담당자·상담원을 사칭하는 계정으로부터 투자 권유를 받고 입금을 유도받은 사례`,
+    `${base} 사이트·앱 내 잔액은 정상적으로 표시되었으나 실제 출금 요청 시 계정 제한·점검 중·심사 중 안내만 반복된 사례`,
+    `처음 소액 입금 후 출금이 한 번 가능해 신뢰가 형성된 뒤 대규모 입금을 유도받았고, 이후 연락이 두절되거나 플랫폼이 접속 불가 상태로 전환된 사례`,
+  ];
+  const extra = {
+    a: `고소장 제출을 준비하던 중 상대방 측에서 소액 합의를 조건으로 고소 취하를 요청하며 추가 입금을 유도한 사례`,
+    b: `피해 계좌 지급정지 신청 후 상대방이 다른 계좌로 자금을 이동시켜 가압류 집행이 어려워진 사례`,
+    c: `형사 고소 접수 후 수사기관의 계좌 추적 과정에서 피해금 일부가 동결되어 피해자에게 반환된 사례`,
+    d: `${base} 관련 플랫폼이 갑자기 폐쇄되고 앱 다운로드 링크도 삭제되어 증거 확보가 어려워진 사례`,
+    e: `피해 후 혼자 대응을 시도했으나 형사·민사 절차 중 어느 것부터 시작해야 할지 판단하기 어려웠던 사례`,
+  };
+  return extra[key] ? [...common.slice(0, 3), extra[key]] : common.slice(0, 4);
+}
+
+function makeSuspiciousCompanies(base) {
+  return [
+    `${base} 명칭을 사용한 투자 플랫폼, 거래소, 앱 또는 웹사이트`,
+    `${base} 담당자·상담원·팀장 등을 사칭하는 SNS 계정 또는 채팅 계정`,
+    `${base} 관련 입금 계좌 명의 법인 또는 개인 명칭`,
+  ];
+}
+
+function makeFaq(caseName, base, key) {
+  const common = [
+    {
+      question: `${base} 피해금을 돌려받을 수 있나요?`,
+      answer: `확정적인 회수를 보장하기는 어렵지만, 입금 계좌·대화 기록·플랫폼 화면·담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 통해 회수 가능성을 구체적으로 검토할 수 있습니다. 증거의 양과 상대방 특정 가능 여부가 결과에 큰 영향을 미칩니다.`,
+    },
+    {
+      question: "추가 입금 요구를 받았습니다. 어떻게 해야 하나요?",
+      answer: `추가 입금은 즉시 중단하세요. 세금·수수료·보증금 명목의 추가 요구는 사기 수법의 핵심 패턴입니다. 추가 입금을 해도 출금이 허용되지 않는 경우가 대부분입니다. 기존 대화 기록과 입금 내역을 보존한 상태로 법률 상담을 먼저 진행하세요.`,
+    },
+  ];
+  const specific = {
+    a: {
+      question: `${base} 고소장은 어디에 제출하나요?`,
+      answer: `관할 경찰서 민원실 또는 사이버수사대에 제출할 수 있습니다. 피해금이 크거나 조직적 사기가 의심되면 검찰청에 직접 고발장을 제출하는 방법도 있습니다. 입금 내역·대화 기록·계좌번호를 준비한 뒤 고소장을 작성하는 것이 좋습니다.`,
+    },
+    b: {
+      question: "가압류 신청은 어떻게 진행하나요?",
+      answer: `법원에 채권자(피해자) 명의로 신청하며 상대방 계좌·부동산·차량 등을 대상으로 합니다. 피보전 권리와 보전의 필요성을 소명해야 하며 공탁금이 필요한 경우도 있습니다. 상대방 특정이 어려운 경우 형사 수사 결과를 활용할 수 있습니다.`,
+    },
+    c: {
+      question: "피해금 회수까지 얼마나 걸리나요?",
+      answer: `사건마다 다르지만 형사 수사 결과와 민사 소송 진행 속도에 따라 수개월에서 수년이 걸릴 수 있습니다. 상대방 재산이 조기에 파악되고 가압류가 성공한 경우 상대적으로 빠르게 진행될 수 있습니다. 초기 증거 확보 속도가 전체 기간에 영향을 미칩니다.`,
+    },
+    d: {
+      question: `${base} 관련 증거가 이미 삭제된 경우 어떻게 하나요?`,
+      answer: `앱·플랫폼이 사라진 경우에도 은행 거래 내역·문자 메시지·이메일·캐시 파일이 남아 있을 수 있습니다. 디지털 포렌식을 통한 복원도 가능한 경우가 있으니 기기를 초기화하지 않는 것이 중요합니다. 이미 지운 경우에도 클라우드 백업을 확인해 보세요.`,
+    },
+    e: {
+      question: "형사 고소와 민사 소송 중 어느 것을 먼저 해야 하나요?",
+      answer: `동시에 진행하는 것이 가능하며, 일반적으로 형사 고소와 민사 가압류 신청을 먼저 병행합니다. 형사 수사 결과(계좌 추적·상대방 특정)가 민사 소송에 도움이 되는 경우가 많습니다. 피해 규모와 상대방 특정 가능 여부에 따라 우선순위가 달라질 수 있습니다.`,
+    },
+  };
+  return specific[key] ? [...common, specific[key]] : common;
+}
+
+// ─── Schema ───────────────────────────────────────────────────────────────────
 
 function createSchemaData({ title, description, canonical, caseName, faq }) {
   return {
@@ -285,15 +343,53 @@ function createSchemaData({ title, description, canonical, caseName, faq }) {
         mainEntity: faq.map((item) => ({
           "@type": "Question",
           name: item.question,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: item.answer,
-          },
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
         })),
       },
     ],
   };
 }
+
+// ─── Category detection ───────────────────────────────────────────────────────
+
+function detectCategory(caseName) {
+  const text = normalizeSpace(caseName).toLowerCase();
+  if (/공동고소|단체|집단|탈출|형사|고소|합의/.test(text)) return "공동고소 형사대응";
+  if (/민사|가압류|손해배상|부당이득|판결|반환/.test(text)) return "민사소송 회수";
+  if (/성공|회수율|전액|지역|사례/.test(text)) return "회수 성공사례";
+  if (/브리핑|개요|대응방법|정보|주의/.test(text)) return "사건정보";
+  if (/방송|라이브|미션|포인트|환전/.test(text)) return "방송 환전 사기";
+  if (/로맨스|sns|채팅|연애|외국인/.test(text)) return "로맨스스캠 사기";
+  if (/카지노|게임|출금|보증금|피싱/.test(text)) return "환전 피싱";
+  if (/코인|거래소|선물|투자|리딩|주식|증권|공모주/.test(text)) return "투자 사기";
+  return "형사대응";
+}
+
+function explainCategory(caseName, category) {
+  return `${caseName} 사건명에서 감지된 키워드를 기준으로 "${category}" 카테고리를 제안했습니다.`;
+}
+
+function createSummary(caseName, category) {
+  const map = {
+    "공동고소 형사대응": `${caseName} 관련 피해자들이 입금 유도와 추가 비용 요구를 겪은 사건으로 공동고소와 형사대응 검토가 필요합니다.`,
+    "민사소송 회수": `${caseName} 피해금 회수를 위해 가압류, 손해배상, 부당이득반환 등 민사 절차 검토가 필요한 사건입니다.`,
+    "회수 성공사례": `${caseName} 피해 회수 진행 과정과 대응 포인트를 정리한 성공사례형 사건입니다.`,
+    "사건정보": `${caseName} 사건 개요, 피해 구조, 증거 보존, 대응 방법을 정보성으로 정리한 사건입니다.`,
+    "방송 환전 사기": `${caseName}에서 라이브 방송·미션·포인트 환전을 빙자해 추가 입금을 요구한 사기 의심 사건입니다.`,
+    "로맨스스캠 사기": `${caseName} 관련 SNS 접근과 친분 형성 후 플랫폼 가입·환전·보증금 명목의 입금을 유도한 사건입니다.`,
+    "환전 피싱": `${caseName}에서 출금을 조건으로 보증금·세금·인증비 등 추가 입금을 요구한 사기 의심 사건입니다.`,
+    "투자 사기": `${caseName} 명칭을 이용해 투자금 입금·수익 실현·출금 수수료 등을 반복적으로 유도한 사기 의심 사건입니다.`,
+    "형사대응": `${caseName} 관련 피해 정황을 바탕으로 입금 경위·대화 내용·계좌 정보를 정리해 형사대응이 필요한 사건입니다.`,
+  };
+  return map[category] || map["형사대응"];
+}
+
+function createTags(caseName, category) {
+  const tokens = normalizeSpace(caseName).split(/[\s-]+/).filter((t) => t.length >= 2).slice(0, 4);
+  return [...new Set([...tokens, category, "피해회복", "증거보존"])];
+}
+
+// ─── Duplicate detection ──────────────────────────────────────────────────────
 
 function findDuplicateRisks(caseName, slug, cases) {
   const normalizedName = normalizeForCompare(caseName);
@@ -305,13 +401,7 @@ function findDuplicateRisks(caseName, slug, cases) {
         similarity(normalizedName, normalizeForCompare(existingName)),
         similarity(normalizeForCompare(slug), normalizeForCompare(existingSlug))
       );
-
-      return {
-        slug: existingSlug,
-        caseName: existingName,
-        score: Number(score.toFixed(2)),
-        exactSlug: existingSlug === slug,
-      };
+      return { slug: existingSlug, caseName: existingName, score: Number(score.toFixed(2)), exactSlug: existingSlug === slug };
     })
     .filter((item) => item.exactSlug || item.score >= 0.58)
     .sort((a, b) => Number(b.exactSlug) - Number(a.exactSlug) || b.score - a.score)
@@ -324,64 +414,18 @@ function findDuplicateRisks(caseName, slug, cases) {
   };
 }
 
-function detectCategory(caseName) {
-  const text = normalizeSpace(caseName).toLowerCase();
-
-  if (/공동고소|단체|집단|탈출|형사|고소|합의/.test(text)) return "공동고소 형사대응";
-  if (/민사|가압류|손해배상|부당이득|판결|반환/.test(text)) return "민사소송 회수";
-  if (/성공|회수율|전액|지역|사례/.test(text)) return "회수 성공사례";
-  if (/브리핑|개요|대응방법|정보|주의/.test(text)) return "사건정보";
-  if (/방송|라이브|미션|포인트|환전/.test(text)) return "방송 환전 사기";
-  if (/로맨스|sns|채팅|연애|외국인/.test(text)) return "로맨스스캠 환전 사기";
-  if (/카지노|게임|출금|보증금|피싱/.test(text)) return "환전 피싱";
-  if (/코인|거래소|선물|투자|리딩|주식|증권|공모주/.test(text)) return "투자 사기";
-
-  return "형사대응";
-}
-
-function explainCategory(caseName, category) {
-  return `${caseName} 사건명에서 감지된 키워드를 기준으로 "${category}" 카테고리를 제안했습니다.`;
-}
-
-function createSummary(caseName, category) {
-  const summaries = {
-    "공동고소 형사대응": `${caseName} 관련 피해자들이 입금 유도와 추가 비용 요구를 겪은 사건으로, 공동고소와 형사대응 검토가 필요한 사안입니다.`,
-    "민사소송 회수": `${caseName} 피해금 회수를 위해 가압류, 손해배상, 부당이득반환 등 민사 절차 검토가 필요한 사건입니다.`,
-    "회수 성공사례": `${caseName} 피해 회수 진행 과정과 대응 포인트를 정리한 성공사례형 사건입니다.`,
-    "사건정보": `${caseName} 사건 개요, 피해 구조, 증거 보존, 대응 방법을 정보성 형식으로 정리한 사건입니다.`,
-    "방송 환전 사기": `${caseName}에서 라이브 방송, 미션, 포인트 환전을 빙자해 추가 입금을 요구한 사건입니다.`,
-    "로맨스스캠 환전 사기": `${caseName} 관련 SNS 접근과 친분 형성 후 플랫폼 가입, 환전, 보증금 명목의 입금을 유도한 사건입니다.`,
-    "환전 피싱": `${caseName}에서 출금을 조건으로 보증금, 세금, 인증비 등 추가 입금을 요구한 사건입니다.`,
-    "투자 사기": `${caseName} 명칭을 이용해 투자금 입금, 수익 실현, 출금 수수료 등을 반복적으로 유도한 투자 사기 의심 사건입니다.`,
-    "형사대응": `${caseName} 관련 피해 정황을 바탕으로 입금 경위, 대화 내용, 계좌 정보를 정리해 형사대응이 필요한 사건입니다.`,
-  };
-
-  return summaries[category] || summaries["형사대응"];
-}
-
-function createTags(caseName, category) {
-  const tokens = normalizeSpace(caseName)
-    .split(/[\s-]+/)
-    .filter((token) => token.length >= 2)
-    .slice(0, 4);
-
-  return [...new Set([...tokens, category, "피해회복", "증거보존"])];
-}
+// ─── Utilities ────────────────────────────────────────────────────────────────
 
 function normalizeStringArray(value, fallback) {
-  return Array.isArray(value) ? value.map(normalizeSpace).filter(Boolean) : fallback;
+  return Array.isArray(value) && value.length ? value.map(normalizeSpace).filter(Boolean) : fallback;
 }
 
 function normalizeFaq(value, fallback) {
   if (!Array.isArray(value)) return fallback;
-
-  const faq = value
-    .map((item) => ({
-      question: normalizeSpace(item?.question),
-      answer: normalizeSpace(item?.answer),
-    }))
-    .filter((item) => item.question && item.answer);
-
+  const faq = value.map((item) => ({
+    question: normalizeSpace(item?.question),
+    answer: normalizeSpace(item?.answer),
+  })).filter((item) => item.question && item.answer);
   return faq.length ? faq : fallback;
 }
 
@@ -398,31 +442,20 @@ function createSlug(value) {
 function similarity(a, b) {
   if (!a || !b) return 0;
   if (a === b) return 1;
-
   const aSet = tokenSet(a);
   const bSet = tokenSet(b);
   const intersection = [...aSet].filter((item) => bSet.has(item)).length;
   const union = new Set([...aSet, ...bSet]).size || 1;
-
   return intersection / union;
 }
 
 function tokenSet(value) {
-  const compact = normalizeForCompare(value);
-  const chunks = compact.split(/[\s-]+/).filter(Boolean);
+  const chunks = normalizeForCompare(value).split(/[\s-]+/).filter(Boolean);
   const grams = [];
-
   for (const chunk of chunks) {
-    if (chunk.length <= 2) {
-      grams.push(chunk);
-      continue;
-    }
-
-    for (let index = 0; index < chunk.length - 1; index += 1) {
-      grams.push(chunk.slice(index, index + 2));
-    }
+    if (chunk.length <= 2) { grams.push(chunk); continue; }
+    for (let i = 0; i < chunk.length - 1; i++) grams.push(chunk.slice(i, i + 2));
   }
-
   return new Set(grams);
 }
 
@@ -439,10 +472,7 @@ function normalizeForCompare(value) {
 
 function randomInt(min, max, seed) {
   let hash = 0;
-  for (const char of seed) {
-    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-  }
-
+  for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
   return min + (hash % (max - min + 1));
 }
 
@@ -455,6 +485,13 @@ function normalizeCaseName(name) {
   n = n.replace(/\s*(사기|탈출|스캠|scam)$/i, "").trim();
   if (!/사칭\s*사기/.test(n)) n = n + " 사칭 사기";
   return n;
+}
+
+function baseCaseName(name) {
+  return String(name || "")
+    .trim()
+    .replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "")
+    .trim();
 }
 
 function normalizeSpace(value) {
@@ -471,14 +508,12 @@ function githubHeaders(token) {
 
 function decodeBase64(value) {
   const clean = value.replace(/\n/g, "");
-  return new TextDecoder().decode(Uint8Array.from(atob(clean), (char) => char.charCodeAt(0)));
+  return new TextDecoder().decode(Uint8Array.from(atob(clean), (c) => c.charCodeAt(0)));
 }
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-    },
+    headers: { "Content-Type": "application/json; charset=utf-8" },
   });
 }
