@@ -24,6 +24,8 @@ const crossLinks = [
   { key: "e", label: "전체허브", url: "https://new-project-e.pages.dev", prefix: "case" },
 ];
 
+const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
+
 const groups = [
   {
     key: "a",
@@ -751,6 +753,8 @@ Allow: /
 Sitemap: ${group.siteUrl}/sitemap-index.xml
 Sitemap: ${group.siteUrl}/sitemap.xml
 `);
+
+  await fs.outputFile(path.join(group.outDir, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
 
   console.log(`[OK] generated ${cases.length} pages in dist-${group.key}/`);
 }

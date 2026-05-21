@@ -122,6 +122,9 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
+    const indexNowKey = env.INDEXNOW_KEY || "6f71f78a3dc940b9a3e1025bf8460d3c";
+    pingIndexNow(slug, indexNowKey).catch(() => {});
+
     return json({
       ok: true,
       message: "사건이 GitHub에 저장되었습니다. Pages가 자동 배포됩니다.",
@@ -130,6 +133,30 @@ export async function onRequestPost(context) {
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+async function pingIndexNow(slug, key) {
+  const groups = [
+    { host: "new-project-9o2.pages.dev", prefix: "prosecute" },
+    { host: "new-project-b.pages.dev", prefix: "civil" },
+    { host: "new-project-c.pages.dev", prefix: "success" },
+    { host: "new-project-d.pages.dev", prefix: "briefing" },
+    { host: "new-project-e.pages.dev", prefix: "case" },
+  ];
+  await Promise.allSettled(
+    groups.map(({ host, prefix }) =>
+      fetch("https://searchadvisor.naver.com/indexnow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({
+          host,
+          key,
+          keyLocation: `https://${host}/${key}.txt`,
+          urlList: [`https://${host}/${prefix}/${encodeURIComponent(slug)}/`],
+        }),
+      })
+    )
+  );
 }
 
 function hasRequiredLandingData(landings) {
