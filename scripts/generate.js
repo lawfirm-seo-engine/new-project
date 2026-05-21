@@ -6,6 +6,16 @@ const dataPath = path.join(root, "data", "cases.json");
 const publicDir = path.join(root, "public");
 const templatesDir = path.join(root, "templates");
 
+const today = new Date().toISOString().slice(0, 10);
+
+const ORGANIZATION = {
+  "@type": "Organization",
+  "@id": "https://new-project-9o2.pages.dev/#organization",
+  name: "대온 법률사무소",
+  url: "https://new-project-9o2.pages.dev",
+  logo: { "@type": "ImageObject", url: "https://new-project-9o2.pages.dev/assets/logo.png" },
+};
+
 const crossLinks = [
   { key: "a", label: "형사고소", url: "https://new-project-9o2.pages.dev", prefix: "prosecute" },
   { key: "b", label: "민사소송", url: "https://new-project-b.pages.dev", prefix: "civil" },
@@ -194,11 +204,35 @@ function createFallbackLanding(caseItem, group) {
       `${caseName} 입금 계좌 또는 연계 법인 명칭`,
     ],
     faq,
-    schema: createSchemaData({ title: `${caseName} ${group.titleSuffix}`, description, canonical, faq }),
+    schema: createSchemaData({ title: `${caseName} ${group.titleSuffix}`, description, canonical, faq, groupKey: group.key, caseName }),
   };
 }
 
-function createSchemaData({ title, description, canonical, faq }) {
+function createSchemaData({ title, description, canonical, faq, groupKey = "a", caseName = "" }) {
+  const siteUrl = canonical.split("/").slice(0, 3).join("/");
+  const articleType = groupKey === "d" ? "NewsArticle" : "Article";
+
+  const article = {
+    "@type": articleType,
+    "@id": `${canonical}#article`,
+    headline: title,
+    description,
+    url: canonical,
+    inLanguage: "ko-KR",
+    datePublished: today,
+    dateModified: today,
+    author: ORGANIZATION,
+    publisher: ORGANIZATION,
+    isPartOf: { "@id": `${canonical}#webpage` },
+  };
+
+  if (groupKey === "d") {
+    article.speakable = {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["h1", "h2", ".article-block > p"],
+    };
+  }
+
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -209,23 +243,26 @@ function createSchemaData({ title, description, canonical, faq }) {
         description,
         url: canonical,
         inLanguage: "ko-KR",
+        datePublished: today,
+        dateModified: today,
+        breadcrumb: { "@id": `${canonical}#breadcrumb` },
+        author: ORGANIZATION,
       },
+      article,
       {
-        "@type": "Article",
-        headline: title,
-        description,
-        url: canonical,
-        inLanguage: "ko-KR",
+        "@type": "BreadcrumbList",
+        "@id": `${canonical}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "홈", item: siteUrl + "/" },
+          { "@type": "ListItem", position: 2, name: caseName || title, item: canonical },
+        ],
       },
       {
         "@type": "FAQPage",
         mainEntity: faq.map((item) => ({
           "@type": "Question",
           name: item.question,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: item.answer,
-          },
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
         })),
       },
     ],
@@ -233,9 +270,21 @@ function createSchemaData({ title, description, canonical, faq }) {
 }
 
 function createLandingContent(landing, group, caseItem) {
+  const name = escapeHtml(caseItem.caseName);
+
+  if (group.key === "d") {
+    return [
+      `<section class="article-block brief-card"><h2>${name} 사건 개요</h2>${paragraphs(landing.body)}</section>`,
+      `<section class="article-block"><h2>${name} 피해 유형</h2>${list(landing.victimCases)}</section>`,
+      `<section class="article-block"><h2>${name} 주의 업체 및 플랫폼</h2>${list(landing.suspiciousCompanies)}</section>`,
+      `<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(landing.faq)}</section>`,
+      `<section class="related"><h2>관련 법적 대응 정보</h2>${createRelatedLinks(caseItem)}</section>`,
+    ].join("\n");
+  }
+
   return [
-    `<section class="article-block"><p class="section-kicker">${escapeHtml(group.intent)}</p><h2>${escapeHtml(caseItem.caseName)} 핵심 대응</h2>${paragraphs(landing.body)}</section>`,
-    `<section class="article-block ${group.key === "d" ? "brief-card" : ""}"><h2>피해 사례</h2>${list(landing.victimCases)}</section>`,
+    `<section class="article-block"><p class="section-kicker">${escapeHtml(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(landing.body)}</section>`,
+    `<section class="article-block"><h2>피해 사례</h2>${list(landing.victimCases)}</section>`,
     `<section class="article-block"><h2>사기 의심 업체 리스트</h2>${list(landing.suspiciousCompanies)}</section>`,
     `<section class="article-block faq"><h2>FAQ</h2>${faqHtml(landing.faq)}</section>`,
     `<section class="related"><h2>검색 의도별 관련 페이지</h2>${createRelatedLinks(caseItem)}</section>`,
@@ -291,6 +340,14 @@ function createHeadExtra({ landing, group, caseItem, isHub = false }) {
 
   if (isHub) {
     links.push(`<meta name="classification" content="${escapeHtml(group.intent)}">`);
+    links.push(`<meta property="og:updated_time" content="${today}">`);
+  } else {
+    const isoNow = new Date().toISOString();
+    links.push(`<meta property="article:published_time" content="${isoNow}">`);
+    links.push(`<meta property="article:modified_time" content="${isoNow}">`);
+    links.push(`<meta property="article:author" content="대온 법률사무소">`);
+    links.push(`<meta property="article:section" content="${escapeHtml(group.intent)}">`);
+    links.push(`<meta name="author" content="대온 법률사무소">`);
   }
 
   return links.join("\n  ");
@@ -428,11 +485,18 @@ for (const group of groups) {
     headExtra: createHeadExtra({ group, isHub: true }),
     schema: JSON.stringify({
       "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      name: hubTitle,
-      url: `${group.siteUrl}/`,
-      inLanguage: "ko-KR",
-      description: hubDescription,
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          name: hubTitle,
+          url: `${group.siteUrl}/`,
+          inLanguage: "ko-KR",
+          description: hubDescription,
+          dateModified: today,
+          publisher: ORGANIZATION,
+        },
+        ORGANIZATION,
+      ],
     }),
     h1: escapeHtml(hubTitle),
     summary: "",
@@ -444,6 +508,14 @@ for (const group of groups) {
 
   for (const caseItem of cases) {
     const landing = getLanding(caseItem, group);
+    const schema = createSchemaData({
+      title: landing.title,
+      description: landing.description,
+      canonical: landing.canonical,
+      faq: landing.faq || [],
+      groupKey: group.key,
+      caseName: caseItem.caseName,
+    });
     const html = buildPage(template, group, {
       title: escapeHtml(landing.title),
       description: escapeHtml(landing.description),
@@ -452,7 +524,7 @@ for (const group of groups) {
       ogDescription: escapeHtml(landing.ogDescription),
       ogImage: landing.ogImage,
       headExtra: createHeadExtra({ landing, group, caseItem }),
-      schema: JSON.stringify(landing.schema, null, 2),
+      schema: JSON.stringify(schema, null, 2),
       h1: escapeHtml(landing.h1),
       summary: escapeHtml(landing.description),
       content: createLandingContent(landing, group, caseItem),
@@ -466,7 +538,7 @@ for (const group of groups) {
     `${group.siteUrl}/`,
     ...cases.map((item) => `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`),
   ];
-  const lastmod = new Date().toISOString().slice(0, 10);
+  const lastmod = today;
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((url, index) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod><changefreq>${index === 0 ? "hourly" : "daily"}</changefreq><priority>${index === 0 ? "1.0" : "0.8"}</priority></url>`).join("\n")}

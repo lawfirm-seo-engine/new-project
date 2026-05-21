@@ -38,6 +38,21 @@ for (const result of results) {
   }
 }
 
+const naverPingBase = "https://searchadvisor.naver.com/xml/rss";
+const pingUrls = groups.flatMap((group) => [
+  `${naverPingBase}?sitemap=${encodeURIComponent(`${group.siteUrl}/sitemap-index.xml`)}`,
+  `${naverPingBase}?sitemap=${encodeURIComponent(`${group.siteUrl}/sitemap.xml`)}`,
+]);
+
+const pingResults = await Promise.allSettled(pingUrls.map((url) => warm(url)));
+for (const result of pingResults) {
+  if (result.status === "fulfilled") {
+    console.log(`[naver-ping] ${result.value.status} ${result.value.url}`);
+  } else {
+    console.log(`[naver-ping] failed ${result.reason.message}`);
+  }
+}
+
 async function warm(url) {
   let lastStatus = "request failed";
 
