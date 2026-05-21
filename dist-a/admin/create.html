@@ -200,11 +200,11 @@
 
   <script>
     const GROUPS = [
-      { key: "a", label: "A 법률형" },
-      { key: "b", label: "B 민사형" },
+      { key: "a", label: "A 형사고소형" },
+      { key: "b", label: "B 민사소송형" },
       { key: "c", label: "C 성공사례형" },
-      { key: "d", label: "D AI브리핑형" },
-      { key: "e", label: "E 전체 허브형" },
+      { key: "d", label: "D 정보형" },
+      { key: "e", label: "E 전체허브형" },
     ];
 
     const caseNameEl = document.getElementById("caseName");
@@ -245,7 +245,9 @@
       const status = data.review.status;
       reviewPanelEl.classList.add("is-visible");
       reviewStatusEl.className = `status ${status}`;
+      const sourceLabel = data.review.source === "openai" ? "✅ OpenAI GPT-4o-mini 원고 생성 완료" : "⚠️ 기본 규칙 기반 원고 (OpenAI API 키 미설정)";
       reviewStatusEl.textContent = [
+        sourceLabel,
         status === "blocked"
           ? "저장 차단: 동일 또는 매우 유사한 사건이 있습니다."
           : status === "warning"

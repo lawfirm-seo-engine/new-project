@@ -7,7 +7,14 @@
     "generate": "node scripts/generate.js",
     "migrate:cases": "node scripts/migrate-cases.js",
     "warmup": "node scripts/warmup.js",
-    "preview": "npx http-server dist -p 4173 -c-1"
+    "preview": "npx http-server dist -p 4173 -c-1",
+    "deploy:a": "npx wrangler pages deploy dist-a --project-name new-project",
+    "deploy:b": "npx wrangler pages deploy dist-b --project-name new-project-b",
+    "deploy:c": "npx wrangler pages deploy dist-c --project-name new-project-c",
+    "deploy:d": "npx wrangler pages deploy dist-d --project-name new-project-d",
+    "deploy:e": "npx wrangler pages deploy dist-e --project-name new-project-e",
+    "deploy": "npm run deploy:a && npm run deploy:b && npm run deploy:c && npm run deploy:d && npm run deploy:e",
+    "build:deploy": "npm run generate && npm run deploy"
   },
   "dependencies": {
     "ejs": "^3.1.10",
