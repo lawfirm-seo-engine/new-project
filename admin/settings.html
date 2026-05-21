@@ -94,7 +94,7 @@
         msg.textContent = '저장 완료'; msg.className = 'msg ok';
         setTimeout(() => msg.textContent = '', 3000);
       } else {
-        msg.textContent = '저장 실패: ' + (data.message || ''); msg.className = 'msg err';
+        msg.textContent = '저장 실패: ' + (data.message || '알 수 없는 오류'); msg.className = 'msg err';
       }
     } catch (e) {
       msg.textContent = '오류: ' + e.message; msg.className = 'msg err';

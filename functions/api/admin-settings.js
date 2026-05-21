@@ -23,52 +23,64 @@ export async function onRequestPost(context) {
   const { repoOwner, repoName, branch, token } = githubEnv(env);
 
   try {
-    const { telegramChatId, openaiApiKey } = await request.json();
+    const body = await request.json();
+    const { telegramChatId, openaiApiKey } = body;
 
-    const getRes = await fetch(
-      `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${FILE_PATH}?ref=${branch}`,
-      { headers: githubHeaders(token) }
-    );
-
-    let existingSettings = {};
-    let sha;
-    if (getRes.ok) {
-      const file = await getRes.json();
-      sha = file.sha;
-      try { existingSettings = JSON.parse(decodeBase64(file.content)); } catch { /* ignore */ }
-    }
-
-    const settings = {
-      ...existingSettings,
-      telegramChatId: String(telegramChatId ?? existingSettings.telegramChatId ?? "").trim(),
-      ...(openaiApiKey !== undefined ? { openaiApiKey: String(openaiApiKey || "").trim() } : {}),
-    };
-
-    const putBody = {
-      message: "Admin: update telegram settings",
-      content: encodeBase64(JSON.stringify(settings, null, 2) + "\n"),
-      branch,
-    };
-    if (sha) putBody.sha = sha;
-
-    const putRes = await fetch(
-      `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${FILE_PATH}`,
-      {
-        method: "PUT",
-        headers: githubHeaders(token),
-        body: JSON.stringify(putBody),
-      }
-    );
-
-    if (!putRes.ok) {
-      const detail = await putRes.text();
-      return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
+    // SHA 충돌 방지: 항상 최신 파일 정보를 가져와 저장
+    const result = await saveSettings({ repoOwner, repoName, branch, token, telegramChatId, openaiApiKey });
+    if (!result.ok) {
+      return json({ ok: false, message: result.message }, 500);
     }
 
     return json({ ok: true });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+async function saveSettings({ repoOwner, repoName, branch, token, telegramChatId, openaiApiKey }) {
+  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${FILE_PATH}`;
+
+  // 최신 파일 조회 (SHA + 현재 내용)
+  const getRes = await fetch(`${apiUrl}?ref=${branch}`, { headers: githubHeaders(token) });
+
+  let existingSettings = {};
+  let sha;
+  if (getRes.ok) {
+    const file = await getRes.json();
+    sha = file.sha;
+    try { existingSettings = JSON.parse(decodeBase64(file.content)); } catch { /* ignore */ }
+  }
+
+  const settings = { ...existingSettings };
+  if (telegramChatId !== undefined) settings.telegramChatId = String(telegramChatId || "").trim();
+  if (openaiApiKey !== undefined) settings.openaiApiKey = String(openaiApiKey || "").trim();
+
+  const putBody = {
+    message: "Admin: update settings",
+    content: encodeBase64(JSON.stringify(settings, null, 2) + "\n"),
+    branch,
+  };
+  if (sha) putBody.sha = sha;
+
+  const putRes = await fetch(apiUrl, {
+    method: "PUT",
+    headers: githubHeaders(token),
+    body: JSON.stringify(putBody),
+  });
+
+  if (!putRes.ok) {
+    const detail = await putRes.text();
+    // SHA 충돌(409/422)이면 한 번 재시도
+    if (putRes.status === 409 || putRes.status === 422) {
+      return saveSettings({ repoOwner, repoName, branch, token, telegramChatId, openaiApiKey });
+    }
+    let parsed = {};
+    try { parsed = JSON.parse(detail); } catch { /* ignore */ }
+    return { ok: false, message: `GitHub 저장 실패 (${putRes.status}): ${parsed.message || detail.slice(0, 200)}` };
+  }
+
+  return { ok: true };
 }
 
 function githubEnv(env) {
