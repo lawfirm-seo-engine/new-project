@@ -106,9 +106,9 @@ const groups = [
     label: "정보형",
     intent: "사건 개요 · 대응 방법 · 정보 요약",
     ogType: "article",
-    titleSuffix: "AI브리핑 대응 정보",
-    descriptionSuffix: "네이버 AI브리핑 노출을 고려해 사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
-    ogSuffix: "AI브리핑",
+    titleSuffix: "사건 정보",
+    descriptionSuffix: "네이버 검색 노출을 고려해 사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
+    ogSuffix: "사건 정보",
     hubTitle: "피해 사건 정보 리스트",
     hubLead: "사건 구조를 빠르게 이해할 수 있도록 질문과 답변, 핵심 요약, 대응 순서를 정보성으로 제공합니다.",
     tone: "정보 요약",
@@ -130,7 +130,7 @@ const groups = [
     intent: "전체 사건 허브 · 유형별 연결 · 관련 사건",
     ogType: "website",
     titleSuffix: "전체 허브",
-    descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, AI브리핑 정보를 사건별로 연결합니다.",
+    descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
     ogSuffix: "전체 허브",
     hubTitle: "사기피해 전체 사건 리스트",
     hubLead: "같은 사건을 형사고소, 민사소송, 성공사례, 정보 브리핑 관점으로 연결해 검색 의도별 진입 경로를 제공합니다.",
@@ -166,12 +166,14 @@ function getLanding(caseItem, group) {
 
 function createFallbackLanding(caseItem, group) {
   const caseName = caseItem.caseName || caseItem.name;
+  const pageTitle = groupPageTitle(caseName, group.key);
+  const dispName = normalizeCaseName(caseName);
   const slug = caseItem.slug;
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
-  const description = `${caseName} 관련 ${group.descriptionSuffix}`;
+  const description = `${dispName} 관련 ${group.descriptionSuffix}`;
   const faq = [
     {
-      question: `${caseName} 피해금을 회수할 수 있나요?`,
+      question: `${dispName} 피해금을 회수할 수 있나요?`,
       answer: "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다.",
     },
     {
@@ -181,15 +183,15 @@ function createFallbackLanding(caseItem, group) {
   ];
 
   return {
-    title: `${caseName} ${group.titleSuffix}`,
+    title: pageTitle,
     description,
     canonical,
-    ogTitle: `${caseName} ${group.ogSuffix}`,
+    ogTitle: pageTitle,
     ogDescription: description,
     ogImage: `${group.siteUrl}/og/${slug}.webp`,
-    h1: `${caseName} ${group.titleSuffix}`,
+    h1: pageTitle,
     body: [
-      caseItem.summary || `${caseName} 피해 구조와 대응 방법을 정리한 안내입니다.`,
+      caseItem.summary || `${dispName} 피해 구조와 대응 방법을 정리한 안내입니다.`,
       group.descriptionSuffix,
       "입금 내역, 대화 내용, 사이트 주소, 계정 정보는 삭제하지 않고 보존하는 것이 중요합니다.",
     ],
@@ -199,18 +201,32 @@ function createFallbackLanding(caseItem, group) {
       "화면상 잔액은 보이지만 실제 출금이 제한된 사례",
     ],
     suspiciousCompanies: [
-      `${caseName} 관련 사이트 또는 앱`,
-      `${caseName} 상담원·담당자 사칭 계정`,
-      `${caseName} 입금 계좌 또는 연계 법인 명칭`,
+      `${dispName} 관련 사이트 또는 앱`,
+      `${dispName} 상담원·담당자 사칭 계정`,
+      `${dispName} 입금 계좌 또는 연계 법인 명칭`,
     ],
     faq,
-    schema: createSchemaData({ title: `${caseName} ${group.titleSuffix}`, description, canonical, faq, groupKey: group.key, caseName }),
+    schema: createSchemaData({ title: pageTitle, description, canonical, faq, groupKey: group.key, caseName, keywords: searchKeyword(caseName) }),
   };
 }
 
-function createSchemaData({ title, description, canonical, faq, groupKey = "a", caseName = "" }) {
+function createSchemaData({ title, description, canonical, faq, groupKey = "a", caseName = "", keywords = "" }) {
   const siteUrl = canonical.split("/").slice(0, 3).join("/");
   const articleType = groupKey === "d" ? "NewsArticle" : "Article";
+
+  const webPage = {
+    "@type": "WebPage",
+    "@id": `${canonical}#webpage`,
+    name: title,
+    description,
+    url: canonical,
+    inLanguage: "ko-KR",
+    datePublished: today,
+    dateModified: today,
+    breadcrumb: { "@id": `${canonical}#breadcrumb` },
+    author: ORGANIZATION,
+    ...(keywords ? { keywords } : {}),
+  };
 
   const article = {
     "@type": articleType,
@@ -224,6 +240,7 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
     author: ORGANIZATION,
     publisher: ORGANIZATION,
     isPartOf: { "@id": `${canonical}#webpage` },
+    ...(keywords ? { keywords } : {}),
   };
 
   if (groupKey === "d") {
@@ -236,18 +253,7 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
   return {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "WebPage",
-        "@id": `${canonical}#webpage`,
-        name: title,
-        description,
-        url: canonical,
-        inLanguage: "ko-KR",
-        datePublished: today,
-        dateModified: today,
-        breadcrumb: { "@id": `${canonical}#breadcrumb` },
-        author: ORGANIZATION,
-      },
+      webPage,
       article,
       {
         "@type": "BreadcrumbList",
@@ -359,7 +365,7 @@ function createRelatedLinks(caseItem, currentKey = "") {
   `;
 }
 
-function createHeadExtra({ landing, group, caseItem, isHub = false }) {
+function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = "" }) {
   const slug = caseItem?.slug ? encodeURIComponent(caseItem.slug) : "";
   const links = [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
@@ -386,6 +392,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false }) {
     links.push(`<meta property="article:author" content="대온 법률사무소">`);
     links.push(`<meta property="article:section" content="${escapeHtml(group.intent)}">`);
     links.push(`<meta name="author" content="대온 법률사무소">`);
+    if (keyword) links.push(`<meta name="keywords" content="${escapeHtml(keyword)}">`);
   }
 
   return links.join("\n  ");
@@ -469,6 +476,30 @@ function normalizeCaseName(name) {
   return clean.replace(/\s*(사기|탈출|스캠|scam)$/i, "").trim() + " 사칭 사기";
 }
 
+function baseCaseName(name) {
+  return String(name || "")
+    .trim()
+    .replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "")
+    .trim();
+}
+
+function groupPageTitle(name, groupKey) {
+  const base = baseCaseName(name);
+  const suffixes = {
+    a: "사칭 사기 형사 고소",
+    b: "사칭 사기 민사 소송",
+    c: "사칭 사기 피해금 회수",
+    d: "사칭 사기 피해 접수",
+    e: "사칭 사기 피해 진행현황",
+  };
+  return `${base} ${suffixes[groupKey] || "사칭 사기"}`;
+}
+
+function searchKeyword(name) {
+  const base = baseCaseName(name);
+  return `${base} 사기, ${base} 사칭 사기`;
+}
+
 function statusLabel(key) {
   if (key === "c") {
     return Math.random() < 0.25 ? "전액 회수" : `${randomInt(3, 80)}% 회수`;
@@ -550,24 +581,27 @@ for (const group of groups) {
 
   for (const caseItem of cases) {
     const landing = getLanding(caseItem, group);
+    const pageTitle = groupPageTitle(caseItem.caseName, group.key);
+    const keyword = searchKeyword(caseItem.caseName);
     const schema = createSchemaData({
-      title: landing.title,
+      title: pageTitle,
       description: landing.description,
       canonical: landing.canonical,
       faq: landing.faq || [],
       groupKey: group.key,
       caseName: caseItem.caseName,
+      keywords: keyword,
     });
     const html = buildPage(template, group, {
-      title: escapeHtml(landing.title),
+      title: escapeHtml(pageTitle),
       description: escapeHtml(landing.description),
       canonical: landing.canonical,
-      ogTitle: escapeHtml(landing.ogTitle),
+      ogTitle: escapeHtml(pageTitle),
       ogDescription: escapeHtml(landing.ogDescription),
       ogImage: landing.ogImage,
-      headExtra: createHeadExtra({ landing, group, caseItem }),
+      headExtra: createHeadExtra({ landing, group, caseItem, keyword }),
       schema: JSON.stringify(schema, null, 2),
-      h1: escapeHtml(normalizeCaseName(caseItem.caseName)),
+      h1: escapeHtml(pageTitle),
       summary: escapeHtml(landing.description),
       content: createLandingContent(landing, group, caseItem),
       headerCall: `<a class="header-call" href="#consult">상담 접수</a>`,
@@ -604,9 +638,10 @@ ${urls.map((url, index) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod
     <description>${escapeHtml(group.descriptionSuffix)}</description>
     ${cases.map((item) => {
       const landing = getLanding(item, group);
+      const rssTitle = groupPageTitle(item.caseName, group.key);
       return `
     <item>
-      <title>${escapeHtml(landing.title)}</title>
+      <title>${escapeHtml(rssTitle)}</title>
       <link>${landing.canonical}</link>
       <description>${escapeHtml(landing.description)}</description>
       <pubDate>${new Date(`${item.updatedAt || lastmod}T00:00:00+09:00`).toUTCString()}</pubDate>
