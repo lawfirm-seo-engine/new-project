@@ -30,7 +30,7 @@ const groups = [
     titleSuffix: "형사고소 및 법적 대응",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
     ogSuffix: "형사고소 대응",
-    hubTitle: "투자사기 형사고소 접수 사건 목록",
+    hubTitle: "사기피해 형사 사건 접수 리스트",
     hubLead: "사기 의심 업체명과 접수 현황을 빠르게 확인하고, 동일 피해자가 모일 수 있도록 사건별 법적 대응 정보를 정리합니다.",
     tone: "긴급 대응",
     ctaTitle: "형사고소 가능성 확인",
@@ -53,13 +53,13 @@ const groups = [
     titleSuffix: "민사소송 및 회수 절차",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
     ogSuffix: "민사 회수 절차",
-    hubTitle: "민사 회수 검토 사건 목록",
+    hubTitle: "민사 소송 진행 사건 리스트",
     hubLead: "채권 보전과 손해배상 청구 관점에서 사건별 회수 가능성, 가압류 필요성, 합의 전략을 정리합니다.",
     tone: "회수 전략",
     ctaTitle: "민사 회수 경로 검토",
     ctaText: "상대방 특정 가능성, 입금 계좌, 계약·약정 자료를 기준으로 보전처분과 본안소송을 함께 봅니다.",
     ctaLabel: "회수 절차 문의",
-    tableTitle: "민사 검토 현황",
+    tableTitle: "민사 소송 진행 현황",
   },
   {
     key: "c",
@@ -76,13 +76,13 @@ const groups = [
     titleSuffix: "회수 성공사례 분석",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
     ogSuffix: "회수 성공사례",
-    hubTitle: "피해금 회수 성공사례 목록",
+    hubTitle: "피해 회수 성공 사건 리스트",
     hubLead: "유사 사건의 대응 흐름과 회수율을 비교할 수 있도록 성공사례 중심으로 재구성한 사건 목록입니다.",
     tone: "결과 중심",
     ctaTitle: "유사 성공사례 비교",
     ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
     ctaLabel: "사례 비교 문의",
-    tableTitle: "회수 사례 현황",
+    tableTitle: "성공사례 진행 현황",
   },
   {
     key: "d",
@@ -99,13 +99,13 @@ const groups = [
     titleSuffix: "AI브리핑 대응 정보",
     descriptionSuffix: "네이버 AI브리핑 노출을 고려해 사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
     ogSuffix: "AI브리핑",
-    hubTitle: "AI브리핑용 사기 사건 정보 목록",
+    hubTitle: "AI브리핑 사건 정보 리스트",
     hubLead: "검색자가 사건 구조를 빠르게 이해할 수 있도록 질문과 답변, 핵심 요약, 대응 순서를 정보성으로 제공합니다.",
     tone: "정보 요약",
     ctaTitle: "사건 구조 확인",
     ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
     ctaLabel: "브리핑 확인",
-    tableTitle: "브리핑 등록 현황",
+    tableTitle: "AI브리핑 진행 현황",
   },
   {
     key: "e",
@@ -122,13 +122,13 @@ const groups = [
     titleSuffix: "전체 허브",
     descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, AI브리핑 정보를 사건별로 연결합니다.",
     ogSuffix: "전체 허브",
-    hubTitle: "사기피해 전체 사건 허브",
+    hubTitle: "사기피해 전체 사건 리스트",
     hubLead: "같은 사건을 형사고소, 민사소송, 성공사례, 정보 브리핑 관점으로 연결해 검색 의도별 진입 경로를 제공합니다.",
     tone: "통합 탐색",
     ctaTitle: "유형별 대응 보기",
     ctaText: "하나의 사건을 법적 대응, 회수 절차, 사례, 정보 요약 관점으로 나누어 확인할 수 있습니다.",
     ctaLabel: "관련 정보 확인",
-    tableTitle: "전체 사건 연결 현황",
+    tableTitle: "전체 사건 진행 현황",
   },
 ];
 
@@ -306,41 +306,51 @@ function themeColor(key) {
   }[key];
 }
 
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function createHubContent(group) {
-  const totalViews = cases.reduce((sum, item) => sum + Number(item.landingViews || 0), 0);
-  const totalReports = cases.reduce((sum, item) => sum + Number(item.reports || 0), 0);
+  const caseViews = cases.map(() => randomInt(140, 8140));
+  const caseReports = cases.map(() => randomInt(4, 34));
+  const totalViews = caseViews.reduce((sum, v) => sum + v, 0);
+  const totalReports = caseReports.reduce((sum, r) => sum + r, 0);
+
   const rows = cases
     .map((item, index) => {
       const caseName = escapeHtml(item.caseName || item.name);
       const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`;
       return `
         <a href="${url}" class="case-row" data-title="${caseName}">
-          <span class="case-no">${12000 - index}</span>
+          <span class="case-no">${cases.length - index}</span>
           <span class="case-title-wrap">
             <strong class="case-title">${caseName}</strong>
             ${index < 6 ? '<em class="today-badge">TODAY</em>' : ""}
           </span>
           <span class="case-status">${statusLabel(group.key)}</span>
           <span class="case-date">${escapeHtml(item.updatedAt)}</span>
-          <span class="case-views">${Number(item.landingViews || 0).toLocaleString("ko-KR")}</span>
+          <span class="case-views">${caseViews[index].toLocaleString("ko-KR")}</span>
         </a>`;
     })
     .join("\n");
 
   return `
-    <section class="hub-panel">
+    <section class="hub-stats-section">
       <div class="hub-stats">
         <div><strong>${cases.length.toLocaleString("ko-KR")}</strong><span>등록 사건</span></div>
         <div><strong>${totalReports.toLocaleString("ko-KR")}</strong><span>누적 접수</span></div>
         <div><strong>${totalViews.toLocaleString("ko-KR")}</strong><span>조회수</span></div>
       </div>
-      <div class="case-search-wrap">
-        <input id="case-search" type="search" class="case-search" placeholder="사기 업체명 또는 사건명 검색" autocomplete="off">
-        <button class="search-btn" type="button">검색</button>
-      </div>
     </section>
+    <div class="case-search-wrap">
+      <input id="case-search" type="search" class="case-search" placeholder="사기 업체명 또는 사건명 검색" autocomplete="off">
+      <button class="search-btn" type="button">검색</button>
+    </div>
     <section class="case-table-wrap" aria-label="${escapeHtml(group.tableTitle)}">
-      <div class="case-table-title"><h2>${escapeHtml(group.tableTitle)}</h2><span>${escapeHtml(group.intent)}</span></div>
+      <div class="case-table-title">
+        <h2>${escapeHtml(group.tableTitle)}</h2>
+        <p class="case-table-lead">${escapeHtml(group.hubLead)}</p>
+      </div>
       <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
       ${rows}
     </section>
@@ -425,7 +435,7 @@ for (const group of groups) {
       description: hubDescription,
     }),
     h1: escapeHtml(hubTitle),
-    summary: escapeHtml(hubDescription),
+    summary: "",
     content: createHubContent(group),
     pageKind: "hub-page",
   });
