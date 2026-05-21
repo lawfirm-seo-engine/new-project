@@ -22,8 +22,8 @@
   <link rel="preload" as="image" href="/assets/og-template.png">
   <link rel="prefetch" href="https://new-project-e.pages.dev/case/bg-wealth-sharing-talchul/">
   <link rel="prefetch" href="https://new-project-9o2.pages.dev/og/bg-wealth-sharing-talchul.webp" as="image">
-  <meta property="article:published_time" content="2026-05-21T07:41:21.085Z">
-  <meta property="article:modified_time" content="2026-05-21T07:41:21.085Z">
+  <meta property="article:published_time" content="2026-05-21T08:13:55.670Z">
+  <meta property="article:modified_time" content="2026-05-21T08:13:55.670Z">
   <meta property="article:author" content="대온 법률사무소">
   <meta property="article:section" content="형사고소 · 법적제재 · 형사합의 · 회수">
   <meta name="author" content="대온 법률사무소">
@@ -152,7 +152,7 @@
     <section class="hero">
       <p class="eyebrow">긴급 대응</p>
       <h1>BG웰스셰어링 사칭 사기 형사 고소</h1>
-      <div class="og-thumbnail" aria-hidden="true"><img src="/assets/og-template.png" alt="" loading="lazy"><span class="og-thumbnail-title">BG웰스셰어링 사칭 사기 형사 고소</span></div>
+      
       <p class="summary">BG웰스셰어링 탈출 관련 형사고소, 법적제재, 형사합의, 피해금 회수 검색 의도에 맞춘 피해 대응 정보입니다.</p>
     </section>
 
@@ -192,8 +192,8 @@
         });
         var data = await res.json();
         if (data.ok) { msg.textContent = '상담 접수가 완료되었습니다. 담당자가 연락드립니다.'; msg.className = 'consult-msg ok'; this.reset(); }
-        else { msg.textContent = '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
-      } catch { msg.textContent = '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+        else { msg.textContent = data.message || '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+      } catch(err) { msg.textContent = err.message || '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
     });
   </script>
 </section>

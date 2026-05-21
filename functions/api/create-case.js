@@ -2,9 +2,9 @@ const ALLOWED_CATEGORIES = [
   "공동고소 형사대응",
   "민사소송 회수",
   "회수 성공사례",
-  "AI브리핑",
+  "사건정보",
   "방송 환전 사기",
-  "로맨스스캠 환전 사기",
+  "로맨스스캠 사기",
   "환전 피싱",
   "투자 사기",
   "형사대응",
@@ -147,7 +147,6 @@ function hasRequiredLandingData(landings) {
       item.h1 &&
       Array.isArray(item.body) &&
       Array.isArray(item.victimCases) &&
-      Array.isArray(item.suspiciousCompanies) &&
       Array.isArray(item.faq) &&
       item.schema;
   });

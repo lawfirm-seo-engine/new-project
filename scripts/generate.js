@@ -296,8 +296,8 @@ function createConsultForm(caseItem, group) {
         });
         var data = await res.json();
         if (data.ok) { msg.textContent = '상담 접수가 완료되었습니다. 담당자가 연락드립니다.'; msg.className = 'consult-msg ok'; this.reset(); }
-        else { msg.textContent = '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
-      } catch { msg.textContent = '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+        else { msg.textContent = data.message || '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+      } catch(err) { msg.textContent = err.message || '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
     });
   </script>
 </section>`;
@@ -592,7 +592,7 @@ for (const group of groups) {
       headExtra: createHeadExtra({ landing, group, caseItem, keyword }),
       schema: JSON.stringify(schema, null, 2),
       h1: escapeHtml(pageTitle),
-      ogThumbnail: `<div class="og-thumbnail" aria-hidden="true"><img src="/assets/og-template.png" alt="" loading="lazy"><span class="og-thumbnail-title">${escapeHtml(pageTitle)}</span></div>`,
+      ogThumbnail: "",
       summary: escapeHtml(landing.description),
       content: createLandingContent(landing, group, caseItem),
       headerCall: `<a class="header-call" href="#consult">상담 접수</a>`,
