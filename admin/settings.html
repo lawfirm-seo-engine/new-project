@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>텔레그램 설정</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#172033}
+    .wrap{max-width:640px;margin:0 auto;padding:28px 20px}
+    h1{margin:0 0 4px;font-size:22px}
+    .meta{color:#8a96a8;font-size:13px;margin:0 0 20px}
+    .nav{display:flex;gap:10px;margin-bottom:24px}
+    .btn{display:inline-flex;align-items:center;height:38px;padding:0 16px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none}
+    .btn.sec{background:#263244}
+    .card{background:#fff;border-radius:10px;padding:24px;margin-bottom:18px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+    .card h2{margin:0 0 6px;font-size:16px;color:#263244}
+    .card p{margin:0 0 18px;font-size:13px;color:#8a96a8;line-height:1.6}
+    label{display:block;margin-bottom:4px;font-size:13px;font-weight:700;color:#4b5a70}
+    input[type=text]{width:100%;padding:10px 12px;border:1px solid #dde3ee;border-radius:6px;font-size:14px;font-family:inherit}
+    .field{margin-bottom:16px}
+    .hint{font-size:12px;color:#8a96a8;margin:4px 0 0}
+    .save-row{display:flex;align-items:center;gap:12px;margin-top:6px}
+    .msg{font-size:13px;font-weight:700}
+    .msg.ok{color:#16865f}.msg.err{color:#c0392b}
+    .loading{color:#8a96a8;font-size:14px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <a class="btn sec" href="/admin/dashboard.html">← 대시보드</a>
+  </div>
+  <h1>텔레그램 알림 설정</h1>
+  <p class="meta">상담 접수 폼 알림을 받을 텔레그램 채팅 ID를 설정합니다.</p>
+
+  <div class="card">
+    <h2>텔레그램 Chat ID</h2>
+    <p>봇에게 메시지를 보낸 뒤 <code>@userinfobot</code>에서 본인 ID를 확인하거나, 그룹 채팅을 사용하는 경우 그룹 ID를 입력하세요. 그룹 ID는 음수(-)로 시작합니다.</p>
+    <div class="field" id="formArea">
+      <div class="loading">설정 로딩 중...</div>
+    </div>
+    <div class="save-row">
+      <button class="btn" onclick="save()">저장</button>
+      <span class="msg" id="saveMsg"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let loaded = false;
+
+  fetch('/api/admin-settings')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.ok) throw new Error(data.message || '로드 실패');
+      document.getElementById('formArea').innerHTML = `
+        <label>Telegram Chat ID</label>
+        <input type="text" id="chatId" value="${esc(data.settings?.telegramChatId || '')}" placeholder="예: 123456789 또는 -1001234567890">
+        <p class="hint">값이 없으면 서버 환경변수(TELEGRAM_CHAT_ID)로 대체됩니다.</p>
+      `;
+      loaded = true;
+    })
+    .catch(err => {
+      document.getElementById('formArea').innerHTML = `<p style="color:#c0392b;font-size:13px">로드 오류: ${esc(err.message)}</p>`;
+    });
+
+  async function save() {
+    const msg = document.getElementById('saveMsg');
+    if (!loaded) { msg.textContent = '아직 로딩 중입니다.'; msg.className = 'msg err'; return; }
+    const chatId = (document.getElementById('chatId')?.value || '').trim();
+    msg.textContent = '저장 중...'; msg.className = 'msg';
+    try {
+      const res = await fetch('/api/admin-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramChatId: chatId }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        msg.textContent = '저장 완료'; msg.className = 'msg ok';
+        setTimeout(() => msg.textContent = '', 3000);
+      } else {
+        msg.textContent = '저장 실패: ' + (data.message || ''); msg.className = 'msg err';
+      }
+    } catch (e) {
+      msg.textContent = '오류: ' + e.message; msg.className = 'msg err';
+    }
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+</script>
+</body>
+</html>

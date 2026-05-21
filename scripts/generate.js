@@ -20,7 +20,7 @@ const crossLinks = [
   { key: "a", label: "형사고소", url: "https://new-project-9o2.pages.dev", prefix: "prosecute" },
   { key: "b", label: "민사소송", url: "https://new-project-b.pages.dev", prefix: "civil" },
   { key: "c", label: "성공사례", url: "https://new-project-c.pages.dev", prefix: "success" },
-  { key: "d", label: "AI브리핑", url: "https://new-project-d.pages.dev", prefix: "briefing" },
+  { key: "d", label: "사건정보", url: "https://new-project-d.pages.dev", prefix: "briefing" },
   { key: "e", label: "전체허브", url: "https://new-project-e.pages.dev", prefix: "case" },
 ];
 
@@ -101,21 +101,21 @@ const groups = [
     siteUrl: "https://new-project-d.pages.dev",
     pathPrefix: "briefing",
     bodyClass: "domain-d",
-    siteName: "AI 피해 브리핑",
-    shortName: "AI 브리핑",
-    label: "AI브리핑형",
-    intent: "네이버 AI브리핑 · 사건 개요 · 대응 방법",
+    siteName: "피해 사건 정보",
+    shortName: "사건 정보",
+    label: "정보형",
+    intent: "사건 개요 · 대응 방법 · 정보 요약",
     ogType: "article",
     titleSuffix: "AI브리핑 대응 정보",
     descriptionSuffix: "네이버 AI브리핑 노출을 고려해 사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
     ogSuffix: "AI브리핑",
-    hubTitle: "AI브리핑 사건 정보 리스트",
-    hubLead: "검색자가 사건 구조를 빠르게 이해할 수 있도록 질문과 답변, 핵심 요약, 대응 순서를 정보성으로 제공합니다.",
+    hubTitle: "피해 사건 정보 리스트",
+    hubLead: "사건 구조를 빠르게 이해할 수 있도록 질문과 답변, 핵심 요약, 대응 순서를 정보성으로 제공합니다.",
     tone: "정보 요약",
     ctaTitle: "사건 구조 확인",
     ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
-    ctaLabel: "브리핑 확인",
-    tableTitle: "AI브리핑 진행 현황",
+    ctaLabel: "정보 확인",
+    tableTitle: "사건 접수 현황",
   },
   {
     key: "e",
@@ -269,8 +269,44 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
   };
 }
 
+function createConsultForm(caseItem, group) {
+  const cn = escapeHtml(normalizeCaseName(caseItem.caseName));
+  const siteName = escapeHtml(group.siteName);
+  return `<section class="article-block consult-form-section" id="consult">
+  <h2>상담 접수</h2>
+  <p>이름, 연락처, 피해금액을 입력하시면 담당자가 빠르게 연락드립니다.</p>
+  <form class="consult-form" id="consultForm">
+    <input type="text" name="cname" placeholder="이름" required autocomplete="name">
+    <input type="tel" name="phone" placeholder="연락처 (010-xxxx-xxxx)" required autocomplete="tel">
+    <input type="text" name="amount" placeholder="피해금액 (예: 500만원)" required>
+    <button type="submit">상담 접수</button>
+  </form>
+  <p class="consult-msg" id="consultMsg"></p>
+  <script>
+    document.getElementById('consultForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var btn = this.querySelector('button');
+      var msg = document.getElementById('consultMsg');
+      btn.disabled = true; btn.textContent = '접수 중...';
+      msg.textContent = ''; msg.className = 'consult-msg';
+      try {
+        var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: this.cname.value, phone: this.phone.value, amount: this.amount.value, caseName: '${cn}', domain: '${siteName}' })
+        });
+        var data = await res.json();
+        if (data.ok) { msg.textContent = '상담 접수가 완료되었습니다. 담당자가 연락드립니다.'; msg.className = 'consult-msg ok'; this.reset(); }
+        else { msg.textContent = '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+      } catch { msg.textContent = '접수 중 오류가 발생했습니다. 다시 시도해주세요.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+    });
+  </script>
+</section>`;
+}
+
 function createLandingContent(landing, group, caseItem) {
-  const name = escapeHtml(caseItem.caseName);
+  const name = escapeHtml(normalizeCaseName(caseItem.caseName));
+  const form = createConsultForm(caseItem, group);
 
   if (group.key === "d") {
     return [
@@ -278,6 +314,7 @@ function createLandingContent(landing, group, caseItem) {
       `<section class="article-block"><h2>${name} 피해 유형</h2>${list(landing.victimCases)}</section>`,
       `<section class="article-block"><h2>${name} 주의 업체 및 플랫폼</h2>${list(landing.suspiciousCompanies)}</section>`,
       `<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(landing.faq)}</section>`,
+      form,
       `<section class="related"><h2>관련 법적 대응 정보</h2>${createRelatedLinks(caseItem)}</section>`,
     ].join("\n");
   }
@@ -287,6 +324,7 @@ function createLandingContent(landing, group, caseItem) {
     `<section class="article-block"><h2>피해 사례</h2>${list(landing.victimCases)}</section>`,
     `<section class="article-block"><h2>사기 의심 업체 리스트</h2>${list(landing.suspiciousCompanies)}</section>`,
     `<section class="article-block faq"><h2>FAQ</h2>${faqHtml(landing.faq)}</section>`,
+    form,
     `<section class="related"><h2>검색 의도별 관련 페이지</h2>${createRelatedLinks(caseItem)}</section>`,
   ].join("\n");
 }
@@ -375,14 +413,14 @@ function createHubContent(group) {
 
   const rows = cases
     .map((item, index) => {
-      const caseName = escapeHtml(item.caseName || item.name);
+      const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
       const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`;
       return `
         <a href="${url}" class="case-row" data-title="${caseName}">
           <span class="case-no">${cases.length - index}</span>
           <span class="case-title-wrap">
             <strong class="case-title">${caseName}</strong>
-            ${index < 6 ? '<em class="today-badge">TODAY</em>' : ""}
+            ${item.updatedAt === today ? '<em class="today-badge">TODAY</em>' : ""}
           </span>
           <span class="case-status">${statusLabel(group.key)}</span>
           <span class="case-date">${escapeHtml(item.updatedAt)}</span>
@@ -425,14 +463,17 @@ function createHubContent(group) {
     </script>`;
 }
 
+function normalizeCaseName(name) {
+  const clean = String(name || "").trim();
+  if (/사칭\s*사기/.test(clean)) return clean;
+  return clean.replace(/\s*(사기|탈출|스캠|scam)$/i, "").trim() + " 사칭 사기";
+}
+
 function statusLabel(key) {
-  return {
-    a: "형사 검토중",
-    b: "민사 검토중",
-    c: "사례 분석",
-    d: "브리핑 공개",
-    e: "허브 연결",
-  }[key];
+  if (key === "c") {
+    return Math.random() < 0.25 ? "전액 회수" : `${randomInt(3, 80)}% 회수`;
+  }
+  return { a: "형사 진행중", b: "민사 진행중", d: "사건 접수중", e: "사건 진행중" }[key] || "진행중";
 }
 
 function buildPage(template, group, data) {
@@ -501,6 +542,7 @@ for (const group of groups) {
     h1: escapeHtml(hubTitle),
     summary: "",
     content: createHubContent(group),
+    headerCall: "",
     pageKind: "hub-page",
   });
 
@@ -525,9 +567,10 @@ for (const group of groups) {
       ogImage: landing.ogImage,
       headExtra: createHeadExtra({ landing, group, caseItem }),
       schema: JSON.stringify(schema, null, 2),
-      h1: escapeHtml(landing.h1),
+      h1: escapeHtml(normalizeCaseName(caseItem.caseName)),
       summary: escapeHtml(landing.description),
       content: createLandingContent(landing, group, caseItem),
+      headerCall: `<a class="header-call" href="#consult">상담 접수</a>`,
       pageKind: "landing-page",
     });
 

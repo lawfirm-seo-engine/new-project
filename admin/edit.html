@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사건 편집</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#172033}
+    .wrap{max-width:1000px;margin:0 auto;padding:28px 20px}
+    h1{margin:0 0 4px;font-size:22px}
+    .meta{color:#8a96a8;font-size:13px;margin:0 0 20px}
+    .nav{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;height:38px;padding:0 16px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none}
+    .btn.sec{background:#263244}.btn.sm{height:32px;padding:0 12px;font-size:12px}
+    .btn.danger{background:#c0392b}
+    .card{background:#fff;border-radius:10px;padding:22px;margin-bottom:18px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+    .card h2{margin:0 0 14px;font-size:16px;color:#263244}
+    .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+    .tab{padding:7px 14px;border:1px solid #d7deea;border-radius:6px;background:#f0f4fa;color:#263244;font-size:13px;font-weight:700;cursor:pointer}
+    .tab.active{background:#1f4fd8;color:#fff;border-color:#1f4fd8}
+    label{display:block;margin-bottom:4px;font-size:13px;font-weight:700;color:#4b5a70}
+    textarea,input[type=text]{width:100%;padding:10px 12px;border:1px solid #dde3ee;border-radius:6px;font-size:14px;font-family:inherit;resize:vertical}
+    textarea{min-height:100px}
+    .field{margin-bottom:14px}
+    .hint{font-size:12px;color:#8a96a8;margin:3px 0 0}
+    .save-row{display:flex;align-items:center;gap:12px;margin-top:6px}
+    .msg{font-size:13px;font-weight:700}
+    .msg.ok{color:#16865f}.msg.err{color:#c0392b}
+    .comment-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+    .comment-item{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid #e8edf4;border-radius:6px;background:#fafbfd}
+    .comment-text{font-size:14px;flex:1}
+    .comment-date{font-size:11px;color:#8a96a8;white-space:nowrap}
+    .loading{color:#8a96a8;font-size:14px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <a class="btn sec" href="/admin/dashboard.html">← 대시보드</a>
+  </div>
+  <h1 id="pageTitle">사건 편집</h1>
+  <p class="meta" id="slugLabel">로딩 중...</p>
+
+  <!-- 랜딩 본문 편집 -->
+  <div class="card">
+    <h2>랜딩 본문 편집</h2>
+    <div class="tabs" id="groupTabs"></div>
+    <div id="landingEditor" class="loading">로딩 중...</div>
+    <div class="save-row">
+      <button class="btn" onclick="saveLanding()">저장</button>
+      <span class="msg" id="landingMsg"></span>
+    </div>
+  </div>
+
+  <!-- 운영자 메모 -->
+  <div class="card">
+    <h2>운영자 메모</h2>
+    <div class="field">
+      <textarea id="memoField" rows="4" placeholder="내부 메모 (공개되지 않음)"></textarea>
+    </div>
+    <div class="save-row">
+      <button class="btn" onclick="saveMemo()">메모 저장</button>
+      <span class="msg" id="memoMsg"></span>
+    </div>
+  </div>
+
+  <!-- 댓글 -->
+  <div class="card">
+    <h2>댓글 관리</h2>
+    <div id="commentList" class="comment-list loading">로딩 중...</div>
+    <div class="field">
+      <label>새 댓글 추가</label>
+      <textarea id="newComment" rows="3" placeholder="댓글 내용을 입력하세요"></textarea>
+    </div>
+    <div class="save-row">
+      <button class="btn" onclick="addComment()">댓글 추가</button>
+      <span class="msg" id="commentMsg"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const GROUPS = [
+    { key: 'a', label: 'A 형사고소' },
+    { key: 'b', label: 'B 민사소송' },
+    { key: 'c', label: 'C 성공사례' },
+    { key: 'd', label: 'D 사건정보' },
+    { key: 'e', label: 'E 전체허브' },
+  ];
+  const FIELDS = [
+    { key: 'h1', label: 'H1 제목', multi: false },
+    { key: 'body', label: '본문 (줄바꿈으로 문단 구분)', multi: true },
+    { key: 'victimCases', label: '피해 사례 (줄바꿈으로 항목 구분)', multi: true },
+    { key: 'suspiciousCompanies', label: '사기 의심 업체 (줄바꿈으로 항목 구분)', multi: true },
+  ];
+
+  const params = new URLSearchParams(location.search);
+  const slug = params.get('slug');
+  if (!slug) { document.body.innerHTML = '<p style="padding:40px;color:red">slug 파라미터가 없습니다.</p>'; }
+
+  let caseData = null;
+  let activeGroup = 'a';
+
+  fetch('/api/get-cases')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.ok) throw new Error('로드 실패');
+      caseData = data.cases.find(c => c.slug === slug);
+      if (!caseData) throw new Error('사건을 찾을 수 없습니다.');
+      document.getElementById('pageTitle').textContent = caseData.caseName + ' 편집';
+      document.getElementById('slugLabel').textContent = 'slug: ' + slug;
+      document.getElementById('memoField').value = caseData.memo || '';
+      renderTabs();
+      renderLandingEditor();
+      renderComments();
+    })
+    .catch(err => {
+      document.getElementById('landingEditor').textContent = '오류: ' + err.message;
+    });
+
+  function renderTabs() {
+    document.getElementById('groupTabs').innerHTML = GROUPS.map(g =>
+      `<button class="tab${g.key === activeGroup ? ' active' : ''}" onclick="switchGroup('${g.key}')">${g.label}</button>`
+    ).join('');
+  }
+
+  function switchGroup(key) {
+    activeGroup = key;
+    renderTabs();
+    renderLandingEditor();
+  }
+
+  function renderLandingEditor() {
+    const landing = caseData?.landings?.[activeGroup] || {};
+    document.getElementById('landingEditor').innerHTML = FIELDS.map(f => {
+      const val = landing[f.key];
+      const text = f.multi ? (Array.isArray(val) ? val.join('\n') : (val || '')) : (val || '');
+      return `<div class="field">
+        <label>${esc(f.label)}</label>
+        <textarea id="field_${f.key}" rows="${f.multi ? 5 : 2}">${esc(text)}</textarea>
+        ${f.multi ? '<p class="hint">줄바꿈(Enter)으로 항목을 구분합니다.</p>' : ''}
+      </div>`;
+    }).join('');
+    document.getElementById('landingEditor').className = '';
+  }
+
+  async function saveLanding() {
+    const msg = document.getElementById('landingMsg');
+    msg.textContent = '저장 중...'; msg.className = 'msg';
+    for (const f of FIELDS) {
+      const el = document.getElementById('field_' + f.key);
+      if (!el) continue;
+      const value = f.multi
+        ? el.value.split('\n').map(s => s.trim()).filter(Boolean)
+        : el.value.trim();
+      const res = await api('/api/update-case', { slug, action: 'update-landing', groupKey: activeGroup, field: f.key, value });
+      if (!res.ok) { msg.textContent = '저장 실패: ' + (res.message || ''); msg.className = 'msg err'; return; }
+    }
+    msg.textContent = '저장 완료'; msg.className = 'msg ok';
+    setTimeout(() => msg.textContent = '', 3000);
+  }
+
+  async function saveMemo() {
+    const msg = document.getElementById('memoMsg');
+    msg.textContent = '저장 중...'; msg.className = 'msg';
+    const res = await api('/api/update-case', { slug, action: 'update-memo', value: document.getElementById('memoField').value });
+    if (res.ok) { msg.textContent = '메모 저장 완료'; msg.className = 'msg ok'; setTimeout(() => msg.textContent = '', 3000); }
+    else { msg.textContent = '저장 실패: ' + (res.message || ''); msg.className = 'msg err'; }
+  }
+
+  function renderComments() {
+    const comments = caseData?.comments || [];
+    const el = document.getElementById('commentList');
+    el.className = 'comment-list';
+    if (!comments.length) { el.innerHTML = '<p style="color:#8a96a8;font-size:14px">등록된 댓글이 없습니다.</p>'; return; }
+    el.innerHTML = comments.map(c => `
+      <div class="comment-item">
+        <div>
+          <div class="comment-text">${esc(c.text)}</div>
+          <div class="comment-date">${esc(c.createdAt)}</div>
+        </div>
+        <button class="btn danger sm" onclick="deleteComment(${c.id})">삭제</button>
+      </div>`).join('');
+  }
+
+  async function addComment() {
+    const msg = document.getElementById('commentMsg');
+    const text = document.getElementById('newComment').value.trim();
+    if (!text) { msg.textContent = '댓글을 입력하세요.'; msg.className = 'msg err'; return; }
+    msg.textContent = '추가 중...'; msg.className = 'msg';
+    const res = await api('/api/update-case', { slug, action: 'add-comment', comment: text });
+    if (res.ok) {
+      caseData = res.updatedCase;
+      renderComments();
+      document.getElementById('newComment').value = '';
+      msg.textContent = '댓글 추가 완료'; msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    } else { msg.textContent = '추가 실패: ' + (res.message || ''); msg.className = 'msg err'; }
+  }
+
+  async function deleteComment(id) {
+    if (!confirm('댓글을 삭제할까요?')) return;
+    const msg = document.getElementById('commentMsg');
+    const res = await api('/api/update-case', { slug, action: 'delete-comment', commentId: id });
+    if (res.ok) {
+      caseData = res.updatedCase;
+      renderComments();
+      msg.textContent = '삭제 완료'; msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    } else { msg.textContent = '삭제 실패'; msg.className = 'msg err'; }
+  }
+
+  async function api(url, body) {
+    try {
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      return await res.json();
+    } catch (e) { return { ok: false, message: e.message }; }
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+</script>
+</body>
+</html>

@@ -22,10 +22,10 @@ const GROUPS = [
   },
   {
     key: "d",
-    label: "AI브리핑형",
+    label: "정보형",
     siteUrl: "https://new-project-d.pages.dev",
     pathPrefix: "briefing",
-    intent: "네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서",
+    intent: "사건 개요 · 대응 방법 · 정보 요약",
   },
   {
     key: "e",
@@ -41,7 +41,7 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const caseName = normalizeSpace(body.caseName);
+    const caseName = normalizeCaseName(normalizeSpace(body.caseName));
 
     if (!caseName) {
       return json({ ok: false, message: "사건명을 입력해주세요." }, 400);
@@ -330,7 +330,7 @@ function detectCategory(caseName) {
   if (/공동고소|단체|집단|탈출|형사|고소|합의/.test(text)) return "공동고소 형사대응";
   if (/민사|가압류|손해배상|부당이득|판결|반환/.test(text)) return "민사소송 회수";
   if (/성공|회수율|전액|지역|사례/.test(text)) return "회수 성공사례";
-  if (/브리핑|개요|대응방법|정보|주의/.test(text)) return "AI브리핑";
+  if (/브리핑|개요|대응방법|정보|주의/.test(text)) return "사건정보";
   if (/방송|라이브|미션|포인트|환전/.test(text)) return "방송 환전 사기";
   if (/로맨스|sns|채팅|연애|외국인/.test(text)) return "로맨스스캠 환전 사기";
   if (/카지노|게임|출금|보증금|피싱/.test(text)) return "환전 피싱";
@@ -348,7 +348,7 @@ function createSummary(caseName, category) {
     "공동고소 형사대응": `${caseName} 관련 피해자들이 입금 유도와 추가 비용 요구를 겪은 사건으로, 공동고소와 형사대응 검토가 필요한 사안입니다.`,
     "민사소송 회수": `${caseName} 피해금 회수를 위해 가압류, 손해배상, 부당이득반환 등 민사 절차 검토가 필요한 사건입니다.`,
     "회수 성공사례": `${caseName} 피해 회수 진행 과정과 대응 포인트를 정리한 성공사례형 사건입니다.`,
-    "AI브리핑": `${caseName} 사건 개요, 피해 구조, 증거 보존, 대응 방법을 정보성 브리핑 형식으로 정리한 사건입니다.`,
+    "사건정보": `${caseName} 사건 개요, 피해 구조, 증거 보존, 대응 방법을 정보성 형식으로 정리한 사건입니다.`,
     "방송 환전 사기": `${caseName}에서 라이브 방송, 미션, 포인트 환전을 빙자해 추가 입금을 요구한 사건입니다.`,
     "로맨스스캠 환전 사기": `${caseName} 관련 SNS 접근과 친분 형성 후 플랫폼 가입, 환전, 보증금 명목의 입금을 유도한 사건입니다.`,
     "환전 피싱": `${caseName}에서 출금을 조건으로 보증금, 세금, 인증비 등 추가 입금을 요구한 사건입니다.`,
@@ -448,6 +448,13 @@ function randomInt(min, max, seed) {
 
 function today() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function normalizeCaseName(name) {
+  let n = String(name || "").trim();
+  n = n.replace(/\s*(사기|탈출|스캠|scam)$/i, "").trim();
+  if (!/사칭\s*사기/.test(n)) n = n + " 사칭 사기";
+  return n;
 }
 
 function normalizeSpace(value) {

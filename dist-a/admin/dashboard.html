@@ -1,21 +1,75 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="robots" content="noindex, nofollow" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>관리자 대시보드</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#172033}
+    .wrap{max-width:1100px;margin:0 auto;padding:32px 20px}
+    h1{margin:0 0 6px;font-size:24px}
+    .top-nav{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;height:40px;padding:0 18px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none}
+    .btn.sec{background:#263244}
+    .btn.danger{background:#c0392b}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+    th,td{padding:13px 16px;text-align:left;font-size:14px;border-bottom:1px solid #e8edf4}
+    th{background:#f0f4fa;font-weight:800;color:#4b5a70}
+    tr:last-child td{border-bottom:0}
+    tr:hover td{background:#f8faff}
+    .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:800;background:#e8f0fe;color:#1f4fd8}
+    .act a{margin-right:8px;color:#1f4fd8;font-weight:700;text-decoration:none;font-size:13px}
+    .loading{text-align:center;padding:40px;color:#8a96a8}
+    .meta{color:#8a96a8;font-size:13px;margin:0 0 20px}
+  </style>
 </head>
 <body>
+<div class="wrap">
   <h1>관리자 대시보드</h1>
+  <p class="meta" id="caseCount">사건 로딩 중...</p>
+  <div class="top-nav">
+    <a class="btn" href="/admin/create.html">+ 새 사건 생성</a>
+    <a class="btn sec" href="/admin/settings.html">텔레그램 설정</a>
+    <a class="btn sec" href="/admin/logout">로그아웃</a>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>No.</th><th>사건명</th><th>카테고리</th><th>등록일</th><th>수정일</th><th>관리</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"><tr><td colspan="6" class="loading">로딩 중...</td></tr></tbody>
+  </table>
+</div>
+<script>
+  fetch('/api/get-cases')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.ok) { document.getElementById('tbody').innerHTML = '<tr><td colspan="6">불러오기 실패</td></tr>'; return; }
+      const cases = data.cases;
+      document.getElementById('caseCount').textContent = `총 ${cases.length}건`;
+      document.getElementById('tbody').innerHTML = cases.map((c, i) => `
+        <tr>
+          <td>${cases.length - i}</td>
+          <td><strong>${esc(c.caseName)}</strong>${c.memo ? ' <span style="color:#8a96a8;font-size:12px">📝</span>' : ''}</td>
+          <td><span class="badge">${esc(c.category)}</span></td>
+          <td>${esc(c.createdAt||'-')}</td>
+          <td>${esc(c.updatedAt||'-')}</td>
+          <td class="act">
+            <a href="/admin/edit.html?slug=${encodeURIComponent(c.slug)}">편집</a>
+            <a href="https://new-project-9o2.pages.dev/prosecute/${encodeURIComponent(c.slug)}/" target="_blank">A</a>
+            <a href="https://new-project-b.pages.dev/civil/${encodeURIComponent(c.slug)}/" target="_blank">B</a>
+            <a href="https://new-project-d.pages.dev/briefing/${encodeURIComponent(c.slug)}/" target="_blank">D</a>
+          </td>
+        </tr>`).join('');
+    })
+    .catch(() => { document.getElementById('tbody').innerHTML = '<tr><td colspan="6">로딩 오류</td></tr>'; });
 
-  <nav>
-    <a href="/admin/create.html">사건명 입력</a>
-  </nav>
-
-  <section>
-    <h2>랜딩 생성 관리</h2>
-    <p>A군, B군, C군, D군, E군 랜딩페이지를 생성·관리하는 관리자 화면입니다.</p>
-  </section>
+  function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
 </body>
 </html>
