@@ -68,13 +68,19 @@ async function loadCases(env) {
 
 async function createGeneratedData({ caseName, slug, category, duplicateCheck, env }) {
   const fallback = createRuleBasedData({ caseName, slug, category, duplicateCheck });
-  if (!env.OPENAI_API_KEY) return fallback;
+
+  if (!env.OPENAI_API_KEY) {
+    fallback.source = "no-key";
+    return fallback;
+  }
 
   try {
     const aiResult = await callOpenAI({ caseName, category, env });
     return mergeWithFallback(aiResult, fallback);
   } catch (err) {
     console.error("[generate-draft] OpenAI error:", err.message);
+    fallback.source = "openai-error";
+    fallback.reviewNotes.unshift(`OpenAI 오류: ${err.message}`);
     return fallback;
   }
 }

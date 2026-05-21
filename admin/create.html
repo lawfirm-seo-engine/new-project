@@ -245,7 +245,13 @@
       const status = data.review.status;
       reviewPanelEl.classList.add("is-visible");
       reviewStatusEl.className = `status ${status}`;
-      const sourceLabel = data.review.source === "openai" ? "✅ OpenAI GPT-4o-mini 원고 생성 완료" : "⚠️ 기본 규칙 기반 원고 (OpenAI API 키 미설정)";
+      const sourceLabels = {
+        "openai": "✅ OpenAI GPT-4o-mini 원고 생성 완료",
+        "no-key": "⚠️ 기본 규칙 기반 원고 — OPENAI_API_KEY 환경변수가 Functions에 전달되지 않음",
+        "openai-error": "❌ OpenAI 호출 오류 — 검수 노트에서 에러 메시지 확인",
+        "rule-based": "⚠️ 기본 규칙 기반 원고",
+      };
+      const sourceLabel = sourceLabels[data.review.source] || "⚠️ 기본 규칙 기반 원고";
       reviewStatusEl.textContent = [
         sourceLabel,
         status === "blocked"
