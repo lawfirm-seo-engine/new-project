@@ -70,7 +70,7 @@ async function loadCases(env) {
 async function createGeneratedData({ caseName, slug, category, duplicateCheck, env }) {
   const fallback = createRuleBasedData({ caseName, slug, category, duplicateCheck });
 
-  const apiKey = env.OPENAI_API_KEY || await resolveOpenAiKey(env);
+  const apiKey = await resolveOpenAiKey(env) || env.OPENAI_API_KEY;
   if (!apiKey) {
     fallback.source = "no-key";
     return fallback;
@@ -526,10 +526,9 @@ function today() {
 }
 
 function normalizeCaseName(name) {
-  let n = String(name || "").trim();
-  n = n.replace(/\s*(사기|탈출|스캠|scam)$/i, "").trim();
-  if (!/사칭\s*사기/.test(n)) n = n + " 사칭 사기";
-  return n;
+  let clean = String(name || "").trim();
+  clean = clean.replace(/\s*(?:사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
+  return /사기/.test(clean) ? `${clean} 사칭` : `${clean} 사칭 사기`;
 }
 
 function baseCaseName(name) {

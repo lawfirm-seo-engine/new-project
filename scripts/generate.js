@@ -561,9 +561,11 @@ function createHubContent(group) {
 }
 
 function normalizeCaseName(name) {
-  const clean = String(name || "").trim();
-  if (/사칭\s*사기/.test(clean)) return clean;
-  return clean.replace(/\s*(사기|탈출|스캠|scam)$/i, "").trim() + " 사칭 사기";
+  let clean = String(name || "").trim();
+  // Strip any trailing canonical suffix to get the base
+  clean = clean.replace(/\s*(?:사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
+  // If "사기" already appears in the base, just add "사칭" (avoid "X 사기 Y 사칭 사기")
+  return /사기/.test(clean) ? `${clean} 사칭` : `${clean} 사칭 사기`;
 }
 
 function baseCaseName(name) {

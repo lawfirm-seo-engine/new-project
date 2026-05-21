@@ -36,7 +36,7 @@ function slugToTitle(slug) {
 function createOgSvg({ title, group, bgUrl }) {
   const wrapped = wrapText(title, 20).slice(0, 3);
   const titleLines = wrapped
-    .map((line, index) => `<text x="600" y="${170 + index * 72}" class="title" text-anchor="middle">${escapeXml(line)}</text>`)
+    .map((line, index) => `<text x="600" y="${180 + index * 50}" class="title" text-anchor="middle">${escapeXml(line)}</text>`)
     .join("");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -49,7 +49,7 @@ function createOgSvg({ title, group, bgUrl }) {
   </defs>
   <style>
     .label { fill: ${group.accent}; font: 700 28px Arial, 'Noto Sans KR', sans-serif; letter-spacing: .04em; }
-    .title { fill: #ffffff; font: 800 54px Arial, 'Noto Sans KR', sans-serif; letter-spacing: -.01em; }
+    .title { fill: #ffffff; font: 800 36px Arial, 'Noto Sans KR', sans-serif; letter-spacing: -.01em; }
     .sub { fill: rgba(255,255,255,.78); font: 400 26px Arial, 'Noto Sans KR', sans-serif; }
     .brand { fill: rgba(255,255,255,.55); font: 700 22px Arial, 'Noto Sans KR', sans-serif; }
   </style>
