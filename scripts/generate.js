@@ -164,6 +164,55 @@ function getLanding(caseItem, group) {
   return caseItem.landings?.[group.key] || createFallbackLanding(caseItem, group);
 }
 
+function makeFallbackFaq(groupKey) {
+  const Q1_ANSWER = "상담을 통해 입금 계좌·대화 기록·플랫폼 화면·담당자 정보 등 증거를 분석하여 형사·민사 절차의 전략을 수립, 회수 가능성을 구체적으로 검토합니다. 증거의 양과 상대방 특정 가능 여부가 결과에 큰 영향을 미칩니다.";
+  const Q3_ANSWER = "변호사 선임에서 후불은 불법이기에 후불이 가능하다는 곳은 변호사를 사칭하는 곳이며, 변호사가 아닌 사람의 법률 서비스 제공 또한 불법이기에 각종 전문가를 자칭하는 곳도 2차 사기 위험이 있으니 주의하시기 바랍니다.";
+
+  const faqs = {
+    a: [
+      { question: "[피해금 회수] 피해금을 돌려받을 수 있나요?", answer: Q1_ANSWER },
+      { question: "[형사 고소] 경찰 신고만으로 해결되나요?", answer: "형사 고소는 중요한 첫 단계이지만, 수사 결과만으로 피해금이 자동 환급되지는 않습니다. 민사 손해배상 청구와 가압류 보전처분을 형사 절차와 병행해야 실질적인 회수 가능성이 높아집니다." },
+      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
+      { question: "추가 입금 요구를 받았습니다. 어떻게 해야 하나요?", answer: "추가 입금은 즉시 중단하세요. 세금·수수료·보증금 명목의 추가 요구는 사기 수법의 핵심 패턴입니다. 추가 입금을 해도 출금이 허용되지 않는 경우가 대부분입니다. 기존 대화 기록과 입금 내역을 보존한 상태로 법률 상담을 먼저 진행하세요." },
+      { question: "공동고소와 단독 고소의 차이점은?", answer: "공동 대응을 위해 기다리는 시간 동안 사기범은 도주할 수 있습니다. 피해 규모와 증거 상태에 따라 단독 고소가 더 신속한 경우가 많습니다." },
+      { question: "단체소송(연대 소송)으로 진행하는게 좋은가요?", answer: "대표자 선정과 같은 사건의 피해자를 모집하는 기간이 길어져 의뢰인에게 실익이 없습니다." },
+    ],
+    b: [
+      { question: "[민사 회수] 민사 소송으로 피해금을 돌려받을 수 있나요?", answer: Q1_ANSWER },
+      { question: "[가압류 신청] 가압류는 언제 신청해야 하나요?", answer: "가압류는 판결 전에 상대방 재산을 동결하는 보전처분입니다. 입금 계좌나 상대방 재산이 파악되는 즉시 신청하는 것이 유리하며, 재산이 은닉되기 전에 빠르게 조치해야 집행력을 확보할 수 있습니다." },
+      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
+      { question: "민사와 형사를 동시에 진행할 수 있나요?", answer: "형사 고소와 민사 손해배상 청구는 독립된 절차로 동시에 진행이 가능합니다. 형사 수사에서 확보된 계좌 추적 결과를 민사 소송의 증거로 활용하는 방법도 있습니다." },
+      { question: "상대방 신원을 모르는데 소송이 가능한가요?", answer: "형사 고소를 먼저 진행해 수사기관의 계좌 추적으로 상대방 신원을 파악한 뒤 민사 소송을 진행하는 방법이 있습니다. 입금 계좌와 대화 내역만 있어도 절차를 시작할 수 있습니다." },
+      { question: "소액 피해도 민사 소송이 가능한가요?", answer: "소액 사건은 지급명령 신청(독촉 절차)으로 간이하게 집행권원을 확보할 수 있습니다. 피해 규모와 상관없이 증거가 있다면 절차를 진행할 수 있으며, 소액사건심판 제도도 활용 가능합니다." },
+    ],
+    c: [
+      { question: "[피해금 회수] 실제로 피해금을 돌려받은 사례가 있나요?", answer: Q1_ANSWER },
+      { question: "[회수 기간] 피해금 회수까지 얼마나 걸리나요?", answer: "사건마다 다르지만, 계좌 지급정지와 가압류가 빠르게 이루어진 경우 수개월 내 일부 회수가 가능한 경우도 있습니다. 수사 진행 기간과 상대방 재산 현황에 따라 달라집니다." },
+      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
+      { question: "어떤 증거가 있어야 회수 성공률이 높아지나요?", answer: "입금 계좌·거래 내역·담당자와의 대화 기록·사이트·앱 화면 캡처가 모두 보존된 경우 성공률이 가장 높습니다. 상대방 특정이 가능한 정보(이름, 연락처, 사업자 정보)가 있으면 절차 진행이 원활합니다." },
+      { question: "전액 회수가 가능한가요?", answer: "전액 회수는 상대방 보유 재산과 계좌 잔액에 따라 달라집니다. 일부 회수 사례가 더 일반적이며, 형사·민사 절차를 병행하면 회수 경로가 넓어집니다." },
+      { question: "해외 사기범에게도 법적 대응이 가능한가요?", answer: "국내 계좌를 이용한 경우 계좌 지급정지와 가압류가 가능합니다. 해외 서버를 이용하더라도 국내에 관련자가 있다면 형사 처벌과 민사 청구가 가능한 경우가 있습니다." },
+    ],
+    d: [
+      { question: "[피해 구조] 이런 사기는 어떻게 진행되나요?", answer: Q1_ANSWER },
+      { question: "[증거 보존] 어떤 증거를 보존해야 하나요?", answer: "대화 기록(카카오톡·텔레그램 등), 입금 영수증, 플랫폼 화면 캡처, 계좌번호와 예금주 명의, 담당자 이름과 연락처를 삭제하지 않고 원본 보존해야 합니다. 앱이 삭제된 경우에도 기기를 초기화하지 않으면 복원이 가능할 수 있습니다." },
+      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
+      { question: "앱이 삭제된 경우 어떻게 해야 하나요?", answer: "앱을 삭제했더라도 기기 자체를 초기화하지 않았다면 디지털 포렌식을 통한 복원이 가능할 수 있습니다. 이메일 확인서, 은행 거래 내역, 카카오톡 채팅 백업도 대체 증거로 활용할 수 있습니다." },
+      { question: "2차 피해를 막으려면 어떻게 해야 하나요?", answer: "사기범 측 연락을 즉시 차단하고 추가 입금을 절대 하지 않아야 합니다. 개인정보(신분증, 계좌정보)가 유출된 경우 금융기관에 연락해 계좌 보호 조치를 취하세요." },
+      { question: "피해를 당한 뒤 얼마나 빨리 신고해야 하나요?", answer: "피해 인식 즉시 신고하는 것이 가장 좋습니다. 입금 계좌의 지급정지는 신속할수록 효과적이며, 시간이 지날수록 상대방이 자금을 이동하거나 증거를 삭제할 가능성이 높아집니다." },
+    ],
+    e: [
+      { question: "[대응 경로] 어떤 법적 대응이 가능한가요?", answer: Q1_ANSWER },
+      { question: "[형사·민사 병행] 형사와 민사 절차를 동시에 진행할 수 있나요?", answer: "형사 고소와 민사 손해배상 청구는 독립된 절차로 동시에 진행이 가능합니다. 형사 수사에서 확보된 계좌 추적 결과를 민사 소송의 증거로 활용하는 방법도 있습니다." },
+      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
+      { question: "어떤 경로로 대응하는 게 가장 효과적인가요?", answer: "증거 상태와 피해 규모에 따라 다르지만, 형사 고소로 계좌 추적을 먼저 진행하고 민사 가압류를 병행하는 방식이 일반적으로 효과적입니다." },
+      { question: "해외 서버를 이용한 사기도 대응이 가능한가요?", answer: "국내 계좌를 사용했거나 국내에 관련자가 있다면 형사 처벌과 민사 청구가 가능한 경우가 있습니다. 해외 주소지 사기범도 국내 입금 계좌가 있다면 지급정지와 가압류 조치가 가능합니다." },
+      { question: "신고 시 개인정보 보호가 되나요?", answer: "수사기관에 고소장을 제출할 때 피해자 정보는 법적으로 보호되며, 가명 처리 제도도 활용 가능합니다. 법률 상담은 대화 내역이 외부에 공개되지 않습니다." },
+    ],
+  };
+  return faqs[groupKey] || faqs.a;
+}
+
 function createFallbackLanding(caseItem, group) {
   const caseName = caseItem.caseName || caseItem.name;
   const pageTitle = groupPageTitle(caseName, group.key);
@@ -171,14 +220,7 @@ function createFallbackLanding(caseItem, group) {
   const slug = caseItem.slug;
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
   const description = `${dispName} 관련 ${group.descriptionSuffix}`;
-  const faq = [
-    { question: "피해금을 돌려받을 수 있나요?", answer: "피해금 전액 회수를 보장하기는 어렵지만, 입금 계좌·대화 기록·플랫폼 화면·담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 통해 회수 가능성을 구체적으로 검토할 수 있습니다. 증거의 양과 상대방 특정 가능 여부가 결과에 큰 영향을 미칩니다." },
-    { question: "경찰 신고만으로 해결되나요?", answer: "형사 고소는 중요한 첫 단계이지만, 수사 결과만으로 피해금이 자동 환급되지는 않습니다. 민사 손해배상 청구와 가압류 보전처분을 형사 절차와 병행해야 실질적인 회수 가능성이 높아집니다." },
-    { question: "후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: "변호사 선임에서 후불은 불법이기에 후불이 가능하다는 곳은 변호사를 사칭하는 곳이며, 변호사가 아닌 사람의 법률 서비스 제공 또한 불법이기에 각종 전문가를 자칭하는 곳도 2차 사기 위험이 있으니 주의하시기 바랍니다." },
-    { question: "추가 입금 요구를 받았습니다. 어떻게 해야 하나요?", answer: "추가 입금은 즉시 중단하세요. 세금·수수료·보증금 명목의 추가 요구는 사기 수법의 핵심 패턴입니다. 추가 입금을 해도 출금이 허용되지 않는 경우가 대부분입니다. 기존 대화 기록과 입금 내역을 보존한 상태로 법률 상담을 먼저 진행하세요." },
-    { question: "공동고소과 단독 고소의 차이점은?", answer: "공동 대응을 위해 기다리는 시간 동안 사기범은 도주할 수 있습니다." },
-    { question: "단체소송(연대 소송)으로 진행하는게 좋은가요?", answer: "대표자 선정과 같은 사건의 피해자를 모집하는 기간이 길어져 의뢰인에게 실익이 없습니다." },
-  ];
+  const faq = makeFallbackFaq(group.key);
 
   return {
     title: pageTitle,
@@ -306,23 +348,73 @@ function createConsultForm(caseItem, group) {
 function createLandingContent(landing, group, caseItem) {
   const name = escapeHtml(normalizeCaseName(caseItem.caseName));
   const form = createConsultForm(caseItem, group);
+  const widgets = createFloatingWidgets(caseItem, group);
+  const slug = escapeHtml(caseItem.slug);
+  const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
+  const memoSection = caseItem.memo
+    ? `<section class="article-block memo-section"><h2>운영자 안내</h2><p>${escapeHtml(caseItem.memo)}</p></section>`
+    : "";
 
   if (group.key === "d") {
     return [
       `<section class="article-block brief-card"><h2>${name} 사건 개요</h2>${paragraphs(landing.body)}</section>`,
       `<section class="article-block"><h2>${name} 피해 유형</h2>${list(landing.victimCases)}</section>`,
       `<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(landing.faq)}</section>`,
+      memoSection,
       form,
-    ].join("\n");
+      widgets,
+      trackScript,
+    ].filter(Boolean).join("\n");
   }
 
   return [
     `<section class="article-block"><p class="section-kicker">${escapeHtml(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(landing.body)}</section>`,
     `<section class="article-block"><h2>피해 사례</h2>${list(landing.victimCases)}</section>`,
     `<section class="article-block faq"><h2>FAQ</h2>${faqHtml(landing.faq)}</section>`,
+    memoSection,
     form,
-  ].join("\n");
+    widgets,
+    trackScript,
+  ].filter(Boolean).join("\n");
 }
+
+function createFloatingWidgets(caseItem, group) {
+  const cn = escapeHtml(normalizeCaseName(caseItem.caseName));
+  const siteName = escapeHtml(group.siteName);
+  return `<div class="floating-contact">
+  <a href="tel:02-6952-3695" class="float-btn phone">전화문의</a>
+  <a href="http://pf.kakao.com/_xcypmn/chat" class="float-btn kakao" target="_blank" rel="noopener noreferrer">카톡상담</a>
+</div>
+<div class="sticky-bar" id="stickyBar">
+  <span class="sticky-title">긴급상담 ｜ 02-6952-3695</span>
+  <form class="sticky-form" id="stickyConsultForm">
+    <input type="text" name="sname" placeholder="이름" required autocomplete="name">
+    <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
+    <input type="text" name="samount" placeholder="피해금액" required>
+    <button type="submit">상담 접수</button>
+  </form>
+  <span id="stickyMsg" class="sticky-msg"></span>
+</div>
+<script>
+  document.getElementById('stickyConsultForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var btn = this.querySelector('button');
+    var msg = document.getElementById('stickyMsg');
+    btn.disabled = true; btn.textContent = '접수 중...';
+    msg.textContent = ''; msg.className = 'sticky-msg';
+    try {
+      var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: '${cn}', domain: '${siteName}' })
+      });
+      var data = await res.json();
+      if (data.ok) { msg.textContent = '접수 완료!'; msg.className = 'sticky-msg ok'; this.reset(); btn.disabled = false; btn.textContent = '상담 접수'; }
+      else { msg.textContent = data.message || '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+    } catch(err) { msg.textContent = '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+  });
+</script>`
+;}
 
 function paragraphs(items = []) {
   return items.map((item) => `<p>${escapeHtml(item)}</p>`).join("\n");
@@ -401,26 +493,29 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function createHubContent(group) {
-  const caseViews = cases.map(() => randomInt(140, 8140));
-  const caseReports = cases.map(() => randomInt(4, 34));
-  const totalViews = caseViews.reduce((sum, v) => sum + v, 0);
-  const totalReports = caseReports.reduce((sum, r) => sum + r, 0);
+const HUB_SUFFIX = { a: "형사고소", b: "민사소송", c: "성공사례", d: "사건정보", e: "진행현황" };
 
-  const rows = cases
+function createHubContent(group) {
+  const sortedCases = [...cases].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  const totalViews = cases.reduce((sum, c) => sum + (c.landingViews || 0), 0);
+  const totalReports = cases.reduce((sum, c) => sum + (c.reports || 0), 0);
+  const suffix = HUB_SUFFIX[group.key] || "";
+
+  const rows = sortedCases
     .map((item, index) => {
       const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
+      const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
       const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`;
       return `
         <a href="${url}" class="case-row" data-title="${caseName}">
-          <span class="case-no">${cases.length - index}</span>
+          <span class="case-no">${sortedCases.length - index}</span>
           <span class="case-title-wrap">
-            <strong class="case-title">${caseName}</strong>
-            ${item.updatedAt === today ? '<em class="today-badge">TODAY</em>' : ""}
+            <strong class="case-title">${displayTitle}</strong>
+            ${item.createdAt === today ? '<em class="today-badge">TODAY</em>' : ""}
           </span>
           <span class="case-status">${statusLabel(group.key)}</span>
-          <span class="case-date">${escapeHtml(item.updatedAt)}</span>
-          <span class="case-views">${caseViews[index].toLocaleString("ko-KR")}</span>
+          <span class="case-date">${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
+          <span class="case-views">${(item.landingViews || 0).toLocaleString("ko-KR")}</span>
         </a>`;
     })
     .join("\n");

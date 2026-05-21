@@ -23,15 +23,26 @@ export async function onRequestPost(context) {
   const { repoOwner, repoName, branch, token } = githubEnv(env);
 
   try {
-    const { telegramChatId } = await request.json();
+    const { telegramChatId, openaiApiKey } = await request.json();
 
     const getRes = await fetch(
       `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${FILE_PATH}?ref=${branch}`,
       { headers: githubHeaders(token) }
     );
 
-    const sha = getRes.ok ? (await getRes.json()).sha : undefined;
-    const settings = { telegramChatId: String(telegramChatId || "").trim() };
+    let existingSettings = {};
+    let sha;
+    if (getRes.ok) {
+      const file = await getRes.json();
+      sha = file.sha;
+      try { existingSettings = JSON.parse(decodeBase64(file.content)); } catch { /* ignore */ }
+    }
+
+    const settings = {
+      ...existingSettings,
+      telegramChatId: String(telegramChatId ?? existingSettings.telegramChatId ?? "").trim(),
+      ...(openaiApiKey !== undefined ? { openaiApiKey: String(openaiApiKey || "").trim() } : {}),
+    };
 
     const putBody = {
       message: "Admin: update telegram settings",

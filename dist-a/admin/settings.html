@@ -32,19 +32,32 @@
   <div class="nav">
     <a class="btn sec" href="/admin/dashboard.html">← 대시보드</a>
   </div>
-  <h1>텔레그램 알림 설정</h1>
-  <p class="meta">상담 접수 폼 알림을 받을 텔레그램 채팅 ID를 설정합니다.</p>
+  <h1>알림 / AI 설정</h1>
+  <p class="meta">텔레그램 알림과 OpenAI API 키를 설정합니다.</p>
 
   <div class="card">
     <h2>텔레그램 Chat ID</h2>
     <p>봇에게 메시지를 보낸 뒤 <code>@userinfobot</code>에서 본인 ID를 확인하거나, 그룹 채팅을 사용하는 경우 그룹 ID를 입력하세요. 그룹 ID는 음수(-)로 시작합니다.</p>
-    <div class="field" id="formArea">
-      <div class="loading">설정 로딩 중...</div>
+    <div class="field">
+      <label>Telegram Chat ID</label>
+      <input type="text" id="chatId" placeholder="예: 123456789 또는 -1001234567890">
+      <p class="hint">값이 없으면 서버 환경변수(TELEGRAM_CHAT_ID)로 대체됩니다. 미설정 시에도 상담 접수는 GitHub에 저장됩니다.</p>
     </div>
-    <div class="save-row">
-      <button class="btn" onclick="save()">저장</button>
-      <span class="msg" id="saveMsg"></span>
+  </div>
+
+  <div class="card">
+    <h2>OpenAI API 키</h2>
+    <p>사건 초안 자동 생성(AI 드래프트)에 사용됩니다. 설정하지 않으면 규칙 기반 초안으로 대체됩니다.</p>
+    <div class="field">
+      <label>OpenAI API Key</label>
+      <input type="password" id="openaiKey" placeholder="sk-...">
+      <p class="hint">모델: gpt-4.1-mini. 키가 없으면 기본 템플릿으로 생성됩니다.</p>
     </div>
+  </div>
+
+  <div class="save-row" style="padding:0 0 20px">
+    <button class="btn" onclick="save()">전체 저장</button>
+    <span class="msg" id="saveMsg"></span>
   </div>
 </div>
 
@@ -55,27 +68,26 @@
     .then(r => r.json())
     .then(data => {
       if (!data.ok) throw new Error(data.message || '로드 실패');
-      document.getElementById('formArea').innerHTML = `
-        <label>Telegram Chat ID</label>
-        <input type="text" id="chatId" value="${esc(data.settings?.telegramChatId || '')}" placeholder="예: 123456789 또는 -1001234567890">
-        <p class="hint">값이 없으면 서버 환경변수(TELEGRAM_CHAT_ID)로 대체됩니다.</p>
-      `;
+      document.getElementById('chatId').value = esc(data.settings?.telegramChatId || '');
+      document.getElementById('openaiKey').value = esc(data.settings?.openaiApiKey || '');
       loaded = true;
     })
     .catch(err => {
-      document.getElementById('formArea').innerHTML = `<p style="color:#c0392b;font-size:13px">로드 오류: ${esc(err.message)}</p>`;
+      document.getElementById('saveMsg').textContent = '로드 오류: ' + esc(err.message);
+      document.getElementById('saveMsg').className = 'msg err';
     });
 
   async function save() {
     const msg = document.getElementById('saveMsg');
     if (!loaded) { msg.textContent = '아직 로딩 중입니다.'; msg.className = 'msg err'; return; }
     const chatId = (document.getElementById('chatId')?.value || '').trim();
+    const openaiKey = (document.getElementById('openaiKey')?.value || '').trim();
     msg.textContent = '저장 중...'; msg.className = 'msg';
     try {
       const res = await fetch('/api/admin-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramChatId: chatId }),
+        body: JSON.stringify({ telegramChatId: chatId, openaiApiKey: openaiKey }),
       });
       const data = await res.json();
       if (data.ok) {
