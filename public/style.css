@@ -704,46 +704,39 @@ button{
   font-size:15px;
   font-weight:900;
   white-space:nowrap;
-  flex:0 0 auto;
+  flex:0 0 33.33%;
   line-height:1.3;
-  margin-left:auto;
-  padding-left:16px;
+  display:flex;
+  align-items:center;
 }
 
 .sticky-form{
   display:flex;
-  gap:10px;
+  flex:1;
+  gap:0;
+}
+
+.sticky-form input,
+.sticky-form button{
   flex:1;
   min-width:0;
-  flex-wrap:wrap;
-}
-
-.sticky-form input{
-  flex:1;
-  min-width:70px;
-  max-width:120px;
   height:40px;
-  padding:0 10px;
-  border:1px solid rgba(255,255,255,.25);
-  border-radius:7px;
-  background:rgba(255,255,255,.1);
+  padding:0 8px;
+  border:none;
+  border-left:1px solid rgba(255,255,255,.15);
+  border-radius:0;
+  background:rgba(255,255,255,.08);
   color:#fff;
   font-size:13px;
 }
 
-.sticky-form input::placeholder{color:rgba(255,255,255,.55)}
+.sticky-form input::placeholder{color:rgba(255,255,255,.5)}
 
 .sticky-form button{
-  height:40px;
-  padding:0 16px;
-  width:auto;
-  border-radius:7px;
   background:#b9892b;
-  color:#fff;
-  font-size:13px;
   font-weight:900;
-  white-space:nowrap;
-  flex:0 0 auto;
+  cursor:pointer;
+  border-left:1px solid rgba(255,255,255,.2);
 }
 
 .sticky-msg{
@@ -763,10 +756,10 @@ button{
 .landing-page .site-footer{padding-bottom:100px}
 
 @media(max-width:640px){
-  .sticky-bar{padding:10px 12px;gap:6px;min-height:60px}
-  .sticky-title{font-size:12px;padding-left:8px}
-  .sticky-form input{height:36px;font-size:12px;min-width:60px;max-width:100px}
-  .sticky-form button{height:36px;font-size:12px}
+  .sticky-bar{padding:10px 12px;gap:0;min-height:60px;flex-wrap:wrap}
+  .sticky-title{flex:0 0 100%;font-size:13px;margin-bottom:4px}
+  .sticky-form{flex:0 0 100%}
+  .sticky-form input,.sticky-form button{height:36px;font-size:12px}
   .floating-contact{bottom:90px;right:12px}
 }
 

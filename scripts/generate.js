@@ -388,6 +388,7 @@ function createFloatingWidgets(caseItem, group) {
   <a href="http://pf.kakao.com/_xcypmn/chat" class="float-btn kakao" target="_blank" rel="noopener noreferrer">카톡상담</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
+  <span class="sticky-title">긴급상담 ｜ 02-6952-3695</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
@@ -395,7 +396,6 @@ function createFloatingWidgets(caseItem, group) {
     <button type="submit">상담 접수</button>
   </form>
   <span id="stickyMsg" class="sticky-msg"></span>
-  <span class="sticky-title">긴급상담 ｜ 02-6952-3695</span>
 </div>
 <script>
   document.getElementById('stickyConsultForm').addEventListener('submit', async function(e) {
