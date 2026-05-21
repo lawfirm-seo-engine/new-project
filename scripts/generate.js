@@ -375,7 +375,7 @@ function buildPage(template, group, data) {
     shortName: escapeHtml(group.shortName),
     intent: escapeHtml(group.intent),
     tone: escapeHtml(group.tone),
-    navLinks: createNavLinks(group),
+    footerLinks: createFooterLinks(group),
     ctaTitle: escapeHtml(group.ctaTitle),
     ctaText: escapeHtml(group.ctaText),
     ctaLabel: escapeHtml(group.ctaLabel),
@@ -384,11 +384,11 @@ function buildPage(template, group, data) {
   });
 }
 
-function createNavLinks(group) {
+function createFooterLinks(group) {
   return crossLinks
     .map((link) => {
-      const active = link.key === group.key ? " is-active" : "";
-      return `<a class="${active}" href="${link.url}/">${link.label}</a>`;
+      const active = link.key === group.key ? "is-active" : "";
+      return `<a class="${active}" href="${link.url}/">${escapeHtml(link.label)}</a>`;
     })
     .join("\n");
 }
