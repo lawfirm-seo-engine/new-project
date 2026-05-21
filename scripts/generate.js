@@ -172,14 +172,12 @@ function createFallbackLanding(caseItem, group) {
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
   const description = `${dispName} 관련 ${group.descriptionSuffix}`;
   const faq = [
-    {
-      question: `${dispName} 피해금을 회수할 수 있나요?`,
-      answer: "입금 계좌, 대화 내역, 플랫폼 주소, 담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 함께 검토할 수 있습니다.",
-    },
-    {
-      question: "추가 입금을 요구받으면 어떻게 해야 하나요?",
-      answer: "추가 입금은 중단하고 입금 내역, 대화방, URL, 계정 정보, 송금 영수증을 먼저 보존해야 합니다.",
-    },
+    { question: "피해금을 돌려받을 수 있나요?", answer: "피해금 전액 회수를 보장하기는 어렵지만, 입금 계좌·대화 기록·플랫폼 화면·담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 통해 회수 가능성을 구체적으로 검토할 수 있습니다. 증거의 양과 상대방 특정 가능 여부가 결과에 큰 영향을 미칩니다." },
+    { question: "경찰 신고만으로 해결되나요?", answer: "형사 고소는 중요한 첫 단계이지만, 수사 결과만으로 피해금이 자동 환급되지는 않습니다. 민사 손해배상 청구와 가압류 보전처분을 형사 절차와 병행해야 실질적인 회수 가능성이 높아집니다." },
+    { question: "후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: "변호사 선임에서 후불은 불법이기에 후불이 가능하다는 곳은 변호사를 사칭하는 곳이며, 변호사가 아닌 사람의 법률 서비스 제공 또한 불법이기에 각종 전문가를 자칭하는 곳도 2차 사기 위험이 있으니 주의하시기 바랍니다." },
+    { question: "추가 입금 요구를 받았습니다. 어떻게 해야 하나요?", answer: "추가 입금은 즉시 중단하세요. 세금·수수료·보증금 명목의 추가 요구는 사기 수법의 핵심 패턴입니다. 추가 입금을 해도 출금이 허용되지 않는 경우가 대부분입니다. 기존 대화 기록과 입금 내역을 보존한 상태로 법률 상담을 먼저 진행하세요." },
+    { question: "공동고소과 단독 고소의 차이점은?", answer: "공동 대응을 위해 기다리는 시간 동안 사기범은 도주할 수 있습니다." },
+    { question: "단체소송(연대 소송)으로 진행하는게 좋은가요?", answer: "대표자 선정과 같은 사건의 피해자를 모집하는 기간이 길어져 의뢰인에게 실익이 없습니다." },
   ];
 
   return {
@@ -199,11 +197,6 @@ function createFallbackLanding(caseItem, group) {
       "출금 또는 수익 실현을 조건으로 추가 입금을 요구받은 사례",
       "상담원 또는 담당자 사칭 계정으로 입금을 유도받은 사례",
       "화면상 잔액은 보이지만 실제 출금이 제한된 사례",
-    ],
-    suspiciousCompanies: [
-      `${dispName} 관련 사이트 또는 앱`,
-      `${dispName} 상담원·담당자 사칭 계정`,
-      `${dispName} 입금 계좌 또는 연계 법인 명칭`,
     ],
     faq,
     schema: createSchemaData({ title: pageTitle, description, canonical, faq, groupKey: group.key, caseName, keywords: searchKeyword(caseName) }),
@@ -318,20 +311,16 @@ function createLandingContent(landing, group, caseItem) {
     return [
       `<section class="article-block brief-card"><h2>${name} 사건 개요</h2>${paragraphs(landing.body)}</section>`,
       `<section class="article-block"><h2>${name} 피해 유형</h2>${list(landing.victimCases)}</section>`,
-      `<section class="article-block"><h2>${name} 주의 업체 및 플랫폼</h2>${list(landing.suspiciousCompanies)}</section>`,
       `<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(landing.faq)}</section>`,
       form,
-      `<section class="related"><h2>관련 법적 대응 정보</h2>${createRelatedLinks(caseItem)}</section>`,
     ].join("\n");
   }
 
   return [
     `<section class="article-block"><p class="section-kicker">${escapeHtml(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(landing.body)}</section>`,
     `<section class="article-block"><h2>피해 사례</h2>${list(landing.victimCases)}</section>`,
-    `<section class="article-block"><h2>사기 의심 업체 리스트</h2>${list(landing.suspiciousCompanies)}</section>`,
     `<section class="article-block faq"><h2>FAQ</h2>${faqHtml(landing.faq)}</section>`,
     form,
-    `<section class="related"><h2>검색 의도별 관련 페이지</h2>${createRelatedLinks(caseItem)}</section>`,
   ].join("\n");
 }
 
@@ -571,6 +560,7 @@ for (const group of groups) {
       ],
     }),
     h1: escapeHtml(hubTitle),
+    ogThumbnail: "",
     summary: "",
     content: createHubContent(group),
     headerCall: "",
@@ -602,6 +592,7 @@ for (const group of groups) {
       headExtra: createHeadExtra({ landing, group, caseItem, keyword }),
       schema: JSON.stringify(schema, null, 2),
       h1: escapeHtml(pageTitle),
+      ogThumbnail: `<div class="og-thumbnail" aria-hidden="true"><img src="/assets/og-template.png" alt="" loading="lazy"><span class="og-thumbnail-title">${escapeHtml(pageTitle)}</span></div>`,
       summary: escapeHtml(landing.description),
       content: createLandingContent(landing, group, caseItem),
       headerCall: `<a class="header-call" href="#consult">상담 접수</a>`,

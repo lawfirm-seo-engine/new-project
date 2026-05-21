@@ -11,14 +11,15 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const caseName = normalizeCaseName(normalizeSpace(body.caseName));
+    const rawName = normalizeSpace(body.caseName);
+    const caseName = normalizeCaseName(rawName);
 
     if (!caseName) {
       return json({ ok: false, message: "사건명을 입력해주세요." }, 400);
     }
 
     const cases = await loadCases(env);
-    const slug = createSlug(caseName);
+    const slug = createSlug(baseCaseName(rawName));
     const category = detectCategory(caseName);
     const duplicateCheck = findDuplicateRisks(caseName, slug, cases);
     const generated = await createGeneratedData({ caseName, slug, category, duplicateCheck, env });
@@ -103,12 +104,10 @@ e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단�
 - 재판 전 범죄 단정 금지 ("사기 의심", "관련 정황" 사용)
 - body: 완결된 단락 4개, 각 2~4문장, 사건명 자연스럽게 2~3회 포함
 - victimCases: 구체적인 실제 피해 패턴 4개 (막연한 표현 금지)
-- suspiciousCompanies: 업체·계정·플랫폼 유형 3개
-- faq: 피해자가 실제 묻는 질문과 행동 지향적 답변 3개
 - description: 검색 키워드 포함 80~120자
 
 반환 JSON 형식:
-{"summary":"","tags":[],"reviewNotes":[],"landings":{"a":{"description":"","ogDescription":"","body":["","","",""],"victimCases":["","","",""],"suspiciousCompanies":["","",""],"faq":[{"question":"","answer":""}]},"b":{},"c":{},"d":{},"e":{}}}`;
+{"summary":"","tags":[],"reviewNotes":[],"landings":{"a":{"description":"","ogDescription":"","body":["","","",""],"victimCases":["","","",""]},"b":{},"c":{},"d":{},"e":{}}}`;
 
   const userPrompt = `사건명: ${caseName}\n업체명(기본): ${base}\n감지 카테고리: ${category}\n위 사건의 5개 그룹 랜딩 원고를 작성하라.`;
 
@@ -116,7 +115,7 @@ e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단�
     method: "POST",
     headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model: "gpt-4.1-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -159,7 +158,6 @@ function mergeGroupLanding(ai, fallback) {
     ogDescription: normalizeSpace(ai?.ogDescription) || fallback.ogDescription,
     body: normalizeStringArray(ai?.body, fallback.body),
     victimCases: normalizeStringArray(ai?.victimCases, fallback.victimCases),
-    suspiciousCompanies: normalizeStringArray(ai?.suspiciousCompanies, fallback.suspiciousCompanies),
     faq: normalizeFaq(ai?.faq, fallback.faq),
   };
 }
@@ -192,8 +190,7 @@ function createLandingData({ caseName, slug, group }) {
   const description = makeDescription(caseName, base, group.key);
   const body = makeBody(caseName, base, group.key);
   const victimCases = makeVictimCases(base, group.key);
-  const suspiciousCompanies = makeSuspiciousCompanies(base);
-  const faq = makeFaq(caseName, base, group.key);
+  const faq = makeFaq();
 
   return {
     title: pageTitle,
@@ -205,7 +202,6 @@ function createLandingData({ caseName, slug, group }) {
     h1: pageTitle,
     body,
     victimCases,
-    suspiciousCompanies,
     faq,
     schema: createSchemaData({ title: pageTitle, description, canonical, caseName, faq }),
   };
@@ -274,48 +270,33 @@ function makeVictimCases(base, key) {
   return extra[key] ? [...common.slice(0, 3), extra[key]] : common.slice(0, 4);
 }
 
-function makeSuspiciousCompanies(base) {
+function makeFaq() {
   return [
-    `${base} 명칭을 사용한 투자 플랫폼, 거래소, 앱 또는 웹사이트`,
-    `${base} 담당자·상담원·팀장 등을 사칭하는 SNS 계정 또는 채팅 계정`,
-    `${base} 관련 입금 계좌 명의 법인 또는 개인 명칭`,
-  ];
-}
-
-function makeFaq(caseName, base, key) {
-  const common = [
     {
-      question: `${base} 피해금을 돌려받을 수 있나요?`,
-      answer: `확정적인 회수를 보장하기는 어렵지만, 입금 계좌·대화 기록·플랫폼 화면·담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 통해 회수 가능성을 구체적으로 검토할 수 있습니다. 증거의 양과 상대방 특정 가능 여부가 결과에 큰 영향을 미칩니다.`,
+      question: "피해금을 돌려받을 수 있나요?",
+      answer: "피해금 전액 회수를 보장하기는 어렵지만, 입금 계좌·대화 기록·플랫폼 화면·담당자 정보 등 증거가 남아 있다면 형사·민사 절차를 통해 회수 가능성을 구체적으로 검토할 수 있습니다. 증거의 양과 상대방 특정 가능 여부가 결과에 큰 영향을 미칩니다.",
+    },
+    {
+      question: "경찰 신고만으로 해결되나요?",
+      answer: "형사 고소는 중요한 첫 단계이지만, 수사 결과만으로 피해금이 자동 환급되지는 않습니다. 민사 손해배상 청구와 가압류 보전처분을 형사 절차와 병행해야 실질적인 회수 가능성이 높아집니다.",
+    },
+    {
+      question: "후불제로 사건 진행을 하고 싶은데 가능한가요?",
+      answer: "변호사 선임에서 후불은 불법이기에 후불이 가능하다는 곳은 변호사를 사칭하는 곳이며, 변호사가 아닌 사람의 법률 서비스 제공 또한 불법이기에 각종 전문가를 자칭하는 곳도 2차 사기 위험이 있으니 주의하시기 바랍니다.",
     },
     {
       question: "추가 입금 요구를 받았습니다. 어떻게 해야 하나요?",
-      answer: `추가 입금은 즉시 중단하세요. 세금·수수료·보증금 명목의 추가 요구는 사기 수법의 핵심 패턴입니다. 추가 입금을 해도 출금이 허용되지 않는 경우가 대부분입니다. 기존 대화 기록과 입금 내역을 보존한 상태로 법률 상담을 먼저 진행하세요.`,
+      answer: "추가 입금은 즉시 중단하세요. 세금·수수료·보증금 명목의 추가 요구는 사기 수법의 핵심 패턴입니다. 추가 입금을 해도 출금이 허용되지 않는 경우가 대부분입니다. 기존 대화 기록과 입금 내역을 보존한 상태로 법률 상담을 먼저 진행하세요.",
+    },
+    {
+      question: "공동고소과 단독 고소의 차이점은?",
+      answer: "공동 대응을 위해 기다리는 시간 동안 사기범은 도주할 수 있습니다.",
+    },
+    {
+      question: "단체소송(연대 소송)으로 진행하는게 좋은가요?",
+      answer: "대표자 선정과 같은 사건의 피해자를 모집하는 기간이 길어져 의뢰인에게 실익이 없습니다.",
     },
   ];
-  const specific = {
-    a: {
-      question: `${base} 고소장은 어디에 제출하나요?`,
-      answer: `관할 경찰서 민원실 또는 사이버수사대에 제출할 수 있습니다. 피해금이 크거나 조직적 사기가 의심되면 검찰청에 직접 고발장을 제출하는 방법도 있습니다. 입금 내역·대화 기록·계좌번호를 준비한 뒤 고소장을 작성하는 것이 좋습니다.`,
-    },
-    b: {
-      question: "가압류 신청은 어떻게 진행하나요?",
-      answer: `법원에 채권자(피해자) 명의로 신청하며 상대방 계좌·부동산·차량 등을 대상으로 합니다. 피보전 권리와 보전의 필요성을 소명해야 하며 공탁금이 필요한 경우도 있습니다. 상대방 특정이 어려운 경우 형사 수사 결과를 활용할 수 있습니다.`,
-    },
-    c: {
-      question: "피해금 회수까지 얼마나 걸리나요?",
-      answer: `사건마다 다르지만 형사 수사 결과와 민사 소송 진행 속도에 따라 수개월에서 수년이 걸릴 수 있습니다. 상대방 재산이 조기에 파악되고 가압류가 성공한 경우 상대적으로 빠르게 진행될 수 있습니다. 초기 증거 확보 속도가 전체 기간에 영향을 미칩니다.`,
-    },
-    d: {
-      question: `${base} 관련 증거가 이미 삭제된 경우 어떻게 하나요?`,
-      answer: `앱·플랫폼이 사라진 경우에도 은행 거래 내역·문자 메시지·이메일·캐시 파일이 남아 있을 수 있습니다. 디지털 포렌식을 통한 복원도 가능한 경우가 있으니 기기를 초기화하지 않는 것이 중요합니다. 이미 지운 경우에도 클라우드 백업을 확인해 보세요.`,
-    },
-    e: {
-      question: "형사 고소와 민사 소송 중 어느 것을 먼저 해야 하나요?",
-      answer: `동시에 진행하는 것이 가능하며, 일반적으로 형사 고소와 민사 가압류 신청을 먼저 병행합니다. 형사 수사 결과(계좌 추적·상대방 특정)가 민사 소송에 도움이 되는 경우가 많습니다. 피해 규모와 상대방 특정 가능 여부에 따라 우선순위가 달라질 수 있습니다.`,
-    },
-  };
-  return specific[key] ? [...common, specific[key]] : common;
 }
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -440,7 +421,7 @@ function createSlug(value) {
     .toLowerCase()
     .replace(/https?:\/\//g, "")
     .replace(/www\./g, "")
-    .replace(/[^a-z0-9가-힣]+/g, "-")
+    .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-");
 }

@@ -34,9 +34,15 @@
       font-size: 16px;
     }
 
+    input[readonly] {
+      background: #f4f6fb;
+      color: #6b7a90;
+    }
+
     textarea {
-      min-height: 120px;
+      min-height: 90px;
       font-family: Consolas, monospace;
+      resize: vertical;
     }
 
     button {
@@ -50,6 +56,12 @@
 
     button.secondary {
       background: #263244;
+    }
+
+    button.danger {
+      background: #8a1f1f;
+      padding: 6px 10px;
+      font-size: 13px;
     }
 
     button:disabled {
@@ -111,45 +123,84 @@
       border-color: #1f4fd8;
     }
 
-    .preview-grid {
+    .edit-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
     }
 
-    .field {
-      padding: 14px;
+    .edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .edit-field.wide {
+      grid-column: 1 / -1;
+    }
+
+    .edit-field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4b5a70;
+    }
+
+    .edit-field input,
+    .edit-field textarea {
+      border: 1px solid #d0d7e3;
+      border-radius: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .edit-field textarea.lines {
+      min-height: 110px;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .faq-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      align-items: start;
+      padding: 12px;
       border: 1px solid #e1e6ef;
       border-radius: 6px;
       background: #fafbfd;
     }
 
-    .field.wide {
-      grid-column: 1 / -1;
+    .faq-item-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
-    .field strong {
-      display: block;
-      margin-bottom: 8px;
-      color: #4b5a70;
-      font-size: 13px;
+    .faq-item input,
+    .faq-item textarea {
+      border: 1px solid #d0d7e3;
+      border-radius: 6px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 14px;
+      padding: 8px 10px;
     }
 
-    .field p,
-    .field ul,
-    .field pre {
-      margin: 0;
+    .faq-item textarea {
+      min-height: 60px;
+      font-family: sans-serif;
     }
 
-    .field ul {
-      padding-left: 20px;
-    }
-
-    .field pre {
-      overflow: auto;
-      max-height: 260px;
-      white-space: pre-wrap;
-      font-size: 13px;
+    .add-faq-btn {
+      margin-top: 6px;
+      background: #3d5a80;
+      padding: 8px 14px;
+      font-size: 14px;
+      align-self: flex-start;
     }
 
     @media (max-width: 760px) {
@@ -158,7 +209,7 @@
       }
 
       .actions,
-      .preview-grid {
+      .edit-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -190,10 +241,8 @@
     <strong>AI 데이터 검수 결과</strong>
     <div id="reviewStatus" class="status"></div>
 
-    <div id="previewTabs" class="tabs" role="tablist" aria-label="도메인별 원고 미리보기"></div>
-    <div id="landingPreview" class="preview-grid"></div>
-
-    <textarea id="generatedData" readonly></textarea>
+    <div id="previewTabs" class="tabs" role="tablist" aria-label="도메인별 원고 편집"></div>
+    <div id="landingEditor" class="edit-grid"></div>
   </section>
 
   <p id="message"></p>
@@ -214,23 +263,67 @@
     const messageEl = document.getElementById("message");
     const reviewPanelEl = document.getElementById("reviewPanel");
     const reviewStatusEl = document.getElementById("reviewStatus");
-    const generatedDataEl = document.getElementById("generatedData");
     const previewTabsEl = document.getElementById("previewTabs");
-    const landingPreviewEl = document.getElementById("landingPreview");
+    const landingEditorEl = document.getElementById("landingEditor");
     const generateDraftButtonEl = document.getElementById("generateDraftButton");
     const submitButtonEl = document.getElementById("submitButton");
 
     let generatedCase = null;
+    let editedLandings = {};
     let activePreviewKey = "a";
+
+    function val(id) {
+      return (document.getElementById(id)?.value || "").trim();
+    }
+
+    function lines(id) {
+      return (document.getElementById(id)?.value || "")
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+
+    function collectFaq() {
+      return Array.from(document.querySelectorAll(".faq-item")).map((item) => ({
+        question: (item.querySelector(".faq-q")?.value || "").trim(),
+        answer: (item.querySelector(".faq-a")?.value || "").trim(),
+      })).filter((f) => f.question || f.answer);
+    }
+
+    function saveCurrentTabEdits() {
+      if (!generatedCase || !activePreviewKey) return;
+      const k = activePreviewKey;
+      const base = generatedCase.landings[k] || {};
+      editedLandings[k] = {
+        ...base,
+        title: val("pv-title"),
+        description: val("pv-description"),
+        ogTitle: val("pv-ogTitle"),
+        ogDescription: val("pv-ogDescription"),
+        h1: val("pv-h1"),
+        body: lines("pv-body"),
+        victimCases: lines("pv-victimCases"),
+        faq: collectFaq(),
+      };
+    }
+
+    function buildSubmitCase() {
+      saveCurrentTabEdits();
+      const result = JSON.parse(JSON.stringify(generatedCase));
+      for (const g of GROUPS) {
+        if (editedLandings[g.key]) result.landings[g.key] = editedLandings[g.key];
+      }
+      return result;
+    }
 
     function resetGeneratedData() {
       generatedCase = null;
+      editedLandings = {};
       submitButtonEl.disabled = true;
       reviewPanelEl.classList.remove("is-visible");
       reviewStatusEl.textContent = "";
-      generatedDataEl.value = "";
       previewTabsEl.innerHTML = "";
-      landingPreviewEl.innerHTML = "";
+      landingEditorEl.innerHTML = "";
       slugEl.value = "";
       categoryEl.value = "";
       summaryEl.value = "";
@@ -238,6 +331,7 @@
 
     function renderGeneratedData(data) {
       generatedCase = data.case;
+      editedLandings = {};
       slugEl.value = generatedCase.slug;
       categoryEl.value = generatedCase.category;
       summaryEl.value = generatedCase.summary;
@@ -246,7 +340,7 @@
       reviewPanelEl.classList.add("is-visible");
       reviewStatusEl.className = `status ${status}`;
       const sourceLabels = {
-        "openai": "✅ OpenAI GPT-4o-mini 원고 생성 완료",
+        "openai": "✅ OpenAI GPT-4.1-mini 원고 생성 완료",
         "no-key": "⚠️ 기본 규칙 기반 원고 — OPENAI_API_KEY 환경변수가 Functions에 전달되지 않음",
         "openai-error": "❌ OpenAI 호출 오류 — 검수 노트에서 에러 메시지 확인",
         "rule-based": "⚠️ 기본 규칙 기반 원고",
@@ -266,32 +360,13 @@
 
       activePreviewKey = "a";
       renderPreviewTabs();
-      renderLandingPreview(activePreviewKey);
-
-      generatedDataEl.value = JSON.stringify({
-        savedFields: [
-          "title",
-          "description",
-          "canonical",
-          "ogTitle",
-          "ogDescription",
-          "ogImage",
-          "h1",
-          "body",
-          "victimCases",
-          "suspiciousCompanies",
-          "faq",
-          "schema",
-        ],
-        case: generatedCase,
-      }, null, 2);
+      renderLandingEditor(activePreviewKey);
 
       submitButtonEl.disabled = status === "blocked";
     }
 
     function renderPreviewTabs() {
       previewTabsEl.innerHTML = "";
-
       for (const group of GROUPS) {
         const button = document.createElement("button");
         button.type = "button";
@@ -300,90 +375,136 @@
         button.setAttribute("role", "tab");
         button.setAttribute("aria-selected", String(group.key === activePreviewKey));
         button.addEventListener("click", () => {
+          saveCurrentTabEdits();
           activePreviewKey = group.key;
           renderPreviewTabs();
-          renderLandingPreview(group.key);
+          renderLandingEditor(group.key);
         });
         previewTabsEl.appendChild(button);
       }
     }
 
-    function renderLandingPreview(key) {
-      const landing = generatedCase?.landings?.[key];
+    function renderLandingEditor(key) {
+      const src = editedLandings[key] || generatedCase?.landings?.[key];
+      landingEditorEl.innerHTML = "";
 
-      if (!landing) {
-        landingPreviewEl.innerHTML = "";
-        return;
-      }
+      if (!src) return;
 
-      landingPreviewEl.innerHTML = "";
-      landingPreviewEl.append(
-        createTextField("title", landing.title),
-        createTextField("description", landing.description),
-        createTextField("canonical", landing.canonical),
-        createTextField("OG title", landing.ogTitle),
-        createTextField("OG description", landing.ogDescription),
-        createTextField("OG image", landing.ogImage),
-        createTextField("H1", landing.h1),
-        createListField("본문 원고", landing.body, true),
-        createListField("피해사례", landing.victimCases, true),
-        createListField("사기 의심 업체 리스트", landing.suspiciousCompanies, true),
-        createFaqField("FAQ", landing.faq),
-        createCodeField("schema JSON-LD", landing.schema)
+      landingEditorEl.append(
+        makeInput("title", "타이틀 (title)", src.title),
+        makeInput("ogTitle", "OG 제목 (ogTitle)", src.ogTitle),
+        makeTextarea("description", "메타 설명 (description)", src.description),
+        makeTextarea("ogDescription", "OG 설명 (ogDescription)", src.ogDescription),
+        makeInput("h1", "H1 제목", src.h1),
+        makeReadonly("canonical", "Canonical URL", src.canonical),
+        makeReadonly("ogImage", "OG Image URL", src.ogImage),
+        makeLines("body", "본문 원고 (한 줄 = 한 단락)", src.body),
+        makeLines("victimCases", "피해 사례 (한 줄 = 한 항목)", src.victimCases),
+        makeFaqEditor("faq", "FAQ", src.faq),
       );
     }
 
-    function createTextField(label, value) {
-      const field = createField(label);
-      const paragraph = document.createElement("p");
-      paragraph.textContent = value || "";
-      field.appendChild(paragraph);
-      return field;
+    function makeInput(id, label, value = "") {
+      const wrap = document.createElement("div");
+      wrap.className = "edit-field";
+      const lbl = document.createElement("label");
+      lbl.htmlFor = `pv-${id}`;
+      lbl.textContent = label;
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.id = `pv-${id}`;
+      inp.value = value;
+      wrap.append(lbl, inp);
+      return wrap;
     }
 
-    function createListField(label, values, wide) {
-      const field = createField(label, wide);
-      const list = document.createElement("ul");
+    function makeReadonly(id, label, value = "") {
+      const wrap = makeInput(id, label, value);
+      wrap.querySelector("input").readOnly = true;
+      return wrap;
+    }
 
-      for (const value of values || []) {
-        const item = document.createElement("li");
-        item.textContent = value;
-        list.appendChild(item);
+    function makeTextarea(id, label, value = "") {
+      const wrap = document.createElement("div");
+      wrap.className = "edit-field wide";
+      const lbl = document.createElement("label");
+      lbl.htmlFor = `pv-${id}`;
+      lbl.textContent = label;
+      const ta = document.createElement("textarea");
+      ta.id = `pv-${id}`;
+      ta.value = value;
+      wrap.append(lbl, ta);
+      return wrap;
+    }
+
+    function makeLines(id, label, values = []) {
+      const wrap = document.createElement("div");
+      wrap.className = "edit-field wide";
+      const lbl = document.createElement("label");
+      lbl.htmlFor = `pv-${id}`;
+      lbl.textContent = label;
+      const ta = document.createElement("textarea");
+      ta.className = "lines";
+      ta.id = `pv-${id}`;
+      ta.value = (values || []).join("\n");
+      wrap.append(lbl, ta);
+      return wrap;
+    }
+
+    function makeFaqEditor(id, label, faqItems = []) {
+      const wrap = document.createElement("div");
+      wrap.className = "edit-field wide";
+      const lbl = document.createElement("label");
+      lbl.textContent = label;
+
+      const list = document.createElement("div");
+      list.className = "faq-list";
+      list.id = `pv-${id}-list`;
+
+      for (const item of (faqItems || [])) {
+        list.appendChild(createFaqItem(item.question, item.answer));
       }
 
-      field.appendChild(list);
-      return field;
+      const addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "add-faq-btn";
+      addBtn.textContent = "+ FAQ 추가";
+      addBtn.addEventListener("click", () => {
+        list.appendChild(createFaqItem("", ""));
+      });
+
+      wrap.append(lbl, list, addBtn);
+      return wrap;
     }
 
-    function createFaqField(label, values) {
-      const field = createField(label, true);
-      const list = document.createElement("ul");
+    function createFaqItem(question = "", answer = "") {
+      const item = document.createElement("div");
+      item.className = "faq-item";
 
-      for (const value of values || []) {
-        const item = document.createElement("li");
-        item.textContent = `${value.question} ${value.answer}`;
-        list.appendChild(item);
-      }
+      const fields = document.createElement("div");
+      fields.className = "faq-item-fields";
 
-      field.appendChild(list);
-      return field;
-    }
+      const qInput = document.createElement("input");
+      qInput.type = "text";
+      qInput.className = "faq-q";
+      qInput.placeholder = "질문";
+      qInput.value = question;
 
-    function createCodeField(label, value) {
-      const field = createField(label, true);
-      const pre = document.createElement("pre");
-      pre.textContent = JSON.stringify(value || {}, null, 2);
-      field.appendChild(pre);
-      return field;
-    }
+      const aArea = document.createElement("textarea");
+      aArea.className = "faq-a";
+      aArea.placeholder = "답변";
+      aArea.value = answer;
 
-    function createField(label, wide = false) {
-      const field = document.createElement("div");
-      field.className = `field${wide ? " wide" : ""}`;
-      const title = document.createElement("strong");
-      title.textContent = label;
-      field.appendChild(title);
-      return field;
+      fields.append(qInput, aArea);
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "danger";
+      delBtn.textContent = "삭제";
+      delBtn.addEventListener("click", () => item.remove());
+
+      item.append(fields, delBtn);
+      return item;
     }
 
     caseNameEl.addEventListener("input", resetGeneratedData);
@@ -413,7 +534,7 @@
         }
 
         renderGeneratedData(data);
-        messageEl.textContent = "AI 데이터 생성 완료. 도메인별 원고를 확인한 뒤 사건 생성을 진행하세요.";
+        messageEl.textContent = "AI 데이터 생성 완료. 도메인별 원고를 수정한 뒤 사건 생성을 진행하세요.";
       } catch (error) {
         messageEl.textContent = `AI 데이터 생성 오류: ${error.message}`;
       } finally {
@@ -432,10 +553,12 @@
       messageEl.textContent = "사건 저장 중...";
       submitButtonEl.disabled = true;
 
+      const caseToSave = buildSubmitCase();
+
       const res = await fetch("/api/create-case", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(generatedCase),
+        body: JSON.stringify(caseToSave),
       });
       const data = await res.json();
 
