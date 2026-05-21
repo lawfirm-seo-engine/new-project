@@ -37,7 +37,8 @@ export async function onRequest(context) {
     url.pathname.startsWith("/api/get-cases") ||
     url.pathname.startsWith("/api/update-case") ||
     url.pathname.startsWith("/api/admin-settings") ||
-    url.pathname.startsWith("/api/delete-case")
+    url.pathname.startsWith("/api/delete-case") ||
+    url.pathname.startsWith("/api/telegram-test")
   ) {
 
     const ok = await verifySession(request, env);
