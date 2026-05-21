@@ -355,11 +355,13 @@ function createLandingContent(landing, group, caseItem) {
     ? `<section class="article-block memo-section"><h2>운영자 안내</h2><p>${escapeHtml(caseItem.memo)}</p></section>`
     : "";
 
+  const rawCaseName = caseItem.caseName || caseItem.name || "";
+
   if (group.key === "d") {
     return [
       `<section class="article-block brief-card"><h2>${name} 사건 개요</h2>${paragraphs(landing.body)}</section>`,
       `<section class="article-block"><h2>${name} 피해 유형</h2>${list(landing.victimCases)}</section>`,
-      `<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(landing.faq)}</section>`,
+      `<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(landing.faq, rawCaseName)}</section>`,
       memoSection,
       form,
       widgets,
@@ -370,7 +372,7 @@ function createLandingContent(landing, group, caseItem) {
   return [
     `<section class="article-block"><p class="section-kicker">${escapeHtml(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(landing.body)}</section>`,
     `<section class="article-block"><h2>피해 사례</h2>${list(landing.victimCases)}</section>`,
-    `<section class="article-block faq"><h2>FAQ</h2>${faqHtml(landing.faq)}</section>`,
+    `<section class="article-block faq"><h2>FAQ</h2>${faqHtml(landing.faq, rawCaseName)}</section>`,
     memoSection,
     form,
     widgets,
@@ -424,10 +426,14 @@ function list(items = []) {
   return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("\n")}</ul>`;
 }
 
-function faqHtml(items = []) {
-  return items
-    .map((item) => `<details><summary>${escapeHtml(item.question)}</summary><p>${escapeHtml(item.answer)}</p></details>`)
-    .join("\n");
+function faqHtml(items = [], caseName = "") {
+  return items.map((item, i) => {
+    let q = item.question || "";
+    if (i < 3 && caseName) {
+      q = `[${caseName}] ` + q.replace(/^\[[^\]]*\]\s*/, "");
+    }
+    return `<details><summary>${escapeHtml(q)}</summary><p>${escapeHtml(item.answer)}</p></details>`;
+  }).join("\n");
 }
 
 function createRelatedLinks(caseItem, currentKey = "") {
@@ -683,7 +689,7 @@ for (const group of groups) {
       canonical: landing.canonical,
       ogTitle: escapeHtml(pageTitle),
       ogDescription: escapeHtml(landing.ogDescription),
-      ogImage: landing.ogImage,
+      ogImage: caseItem.thumbnailUrl || landing.ogImage,
       headExtra: createHeadExtra({ landing, group, caseItem, keyword }),
       schema: JSON.stringify(schema, null, 2),
       h1: escapeHtml(pageTitle),

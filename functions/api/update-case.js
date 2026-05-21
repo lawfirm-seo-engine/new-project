@@ -35,6 +35,9 @@ export async function onRequestPost(context) {
     } else if (action === "update-memo") {
       cases[idx].memo = String(value || "").trim();
 
+    } else if (action === "update-thumbnail") {
+      cases[idx].thumbnailUrl = String(value || "").trim();
+
     } else if (action === "add-comment") {
       if (!comment || !comment.trim()) return json({ ok: false, message: "댓글 내용 필수" }, 400);
       if (!Array.isArray(cases[idx].comments)) cases[idx].comments = [];

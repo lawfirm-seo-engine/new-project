@@ -700,7 +700,7 @@ button{
 }
 
 .sticky-title{
-  font-size:14px;
+  font-size:28px;
   font-weight:900;
   white-space:nowrap;
   flex:0 0 auto;
@@ -759,7 +759,7 @@ button{
 
 @media(max-width:640px){
   .sticky-bar{padding:8px 12px;gap:6px}
-  .sticky-title{font-size:12px}
+  .sticky-title{font-size:24px}
   .floating-contact{bottom:100px;right:12px}
 }
 

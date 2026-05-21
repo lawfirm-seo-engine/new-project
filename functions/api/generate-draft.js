@@ -455,14 +455,33 @@ function normalizeFaq(value, fallback) {
   return faq.length ? faq : fallback;
 }
 
+const _CHO = ["g","gg","n","d","dd","r","m","b","bb","s","ss","","j","jj","ch","k","t","p","h"];
+const _JUNG = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
+const _JONG = ["","g","gg","gs","n","nj","nh","d","r","rg","rm","rb","rs","rt","rp","rh","m","b","bs","s","ss","ng","j","ch","k","t","p","h"];
+
+function hangulToRoman(text) {
+  let out = "";
+  for (const ch of String(text)) {
+    const code = ch.charCodeAt(0);
+    if (code >= 0xAC00 && code <= 0xD7A3) {
+      const off = code - 0xAC00;
+      out += _CHO[Math.floor(off / 28 / 21)] + _JUNG[Math.floor(off / 28) % 21] + _JONG[off % 28];
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
 function createSlug(value) {
-  return normalizeSpace(value)
+  return hangulToRoman(normalizeSpace(value))
     .toLowerCase()
     .replace(/https?:\/\//g, "")
     .replace(/www\./g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
+    .replace(/-{2,}/g, "-")
+    .slice(0, 60);
 }
 
 function similarity(a, b) {

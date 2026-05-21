@@ -26,17 +26,30 @@ export async function onRequestPost(context) {
     const botToken = env.TELEGRAM_BOT_TOKEN;
     const chatId = await resolveChatId(env);
 
-    if (botToken && chatId) {
+    let telegramStatus = null;
+    if (!botToken) {
+      telegramStatus = { ok: false, reason: "TELEGRAM_BOT_TOKEN 환경변수 미설정" };
+    } else if (!chatId) {
+      telegramStatus = { ok: false, reason: "Chat ID 미설정 (관리자 설정 또는 TELEGRAM_CHAT_ID 환경변수 필요)" };
+    } else {
       try {
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ chat_id: chatId, text }),
         });
-      } catch { /* 텔레그램 실패해도 접수는 성공 처리 */ }
+        if (tgRes.ok) {
+          telegramStatus = { ok: true };
+        } else {
+          const body = await tgRes.json().catch(() => ({}));
+          telegramStatus = { ok: false, status: tgRes.status, description: body.description || "" };
+        }
+      } catch (e) {
+        telegramStatus = { ok: false, reason: e.message };
+      }
     }
 
-    return json({ ok: true });
+    return json({ ok: true, telegramStatus });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }

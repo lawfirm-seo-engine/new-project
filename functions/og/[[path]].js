@@ -11,8 +11,8 @@ export function onRequestGet(context) {
   const slug = decodeURIComponent(url.pathname.split("/").pop() || "hub.webp").replace(/\.webp$/i, "");
   const group = GROUPS.find((item) => item.host === url.host) || GROUPS[0];
   const title = slug === "hub" ? "피해사건 통합 허브" : slugToTitle(slug);
-  const templateUrl = `${url.origin}/assets/og-template.png`;
-  const svg = createOgSvg({ title, group });
+  const bgUrl = `${url.origin}/og-template.png`;
+  const svg = createOgSvg({ title, group, bgUrl });
 
   return new Response(svg, {
     headers: {
@@ -33,22 +33,18 @@ function slugToTitle(slug) {
     .replace(/\b[a-z]/g, (char) => char.toUpperCase());
 }
 
-function createOgSvg({ title, group }) {
+function createOgSvg({ title, group, bgUrl }) {
   const wrapped = wrapText(title, 20).slice(0, 3);
   const titleLines = wrapped
     .map((line, index) => `<text x="600" y="${170 + index * 72}" class="title" text-anchor="middle">${escapeXml(line)}</text>`)
     .join("");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#111827"/>
-      <stop offset="1" stop-color="#1f2937"/>
-    </linearGradient>
-    <linearGradient id="topfade" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0" stop-color="#000000" stop-opacity=".55"/>
-      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    <linearGradient id="overlay" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#000000" stop-opacity=".65"/>
+      <stop offset="1" stop-color="#000000" stop-opacity=".75"/>
     </linearGradient>
   </defs>
   <style>
@@ -57,8 +53,8 @@ function createOgSvg({ title, group }) {
     .sub { fill: rgba(255,255,255,.78); font: 400 26px Arial, 'Noto Sans KR', sans-serif; }
     .brand { fill: rgba(255,255,255,.55); font: 700 22px Arial, 'Noto Sans KR', sans-serif; }
   </style>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect width="1200" height="200" fill="url(#topfade)"/>
+  <image href="${escapeXml(bgUrl)}" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="1200" height="630" fill="url(#overlay)"/>
   <text x="600" y="90" class="label" text-anchor="middle">${escapeXml(group.label)} · ${escapeXml(group.tone)}</text>
   ${titleLines}
   <text x="600" y="490" class="sub" text-anchor="middle">사건 개요 · 증거 보존 · 회수 대응</text>
