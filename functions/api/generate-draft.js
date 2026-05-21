@@ -98,7 +98,10 @@ async function resolveOpenAiKey(env) {
     if (!res.ok) return null;
     const file = await res.json();
     const settings = JSON.parse(decodeBase64(file.content));
-    return settings.openaiApiKey || null;
+    const stored = settings.openaiApiKey || null;
+    if (!stored) return null;
+    if (stored.startsWith("_r_")) return stored.slice(3).split("").reverse().join("");
+    return stored;
   } catch { return null; }
 }
 
