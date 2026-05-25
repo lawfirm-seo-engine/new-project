@@ -72,8 +72,8 @@ export async function onRequestPost(context) {
     }
 
     const currentFile = await currentRes.json();
-    const currentContent = decodeBase64(currentFile.content);
-    const cases = JSON.parse(currentContent);
+    const currentContent = await readFileContent(currentFile, token);
+    const cases = currentContent ? JSON.parse(currentContent) : [];
 
     if (cases.some((item) => item.slug === slug)) {
       return json({ ok: false, message: "이미 존재하는 slug입니다." }, 409);
@@ -268,6 +268,17 @@ function githubHeaders(token) {
     Accept: "application/vnd.github+json",
     "User-Agent": "static-landing-generator-admin",
   };
+}
+
+async function readFileContent(file, token) {
+  if (file.content && file.encoding !== "none") {
+    return decodeBase64(file.content).trim();
+  }
+  if (file.download_url) {
+    const res = await fetch(file.download_url, { headers: githubHeaders(token) });
+    if (res.ok) return (await res.text()).trim();
+  }
+  return "";
 }
 
 function decodeBase64(value) {

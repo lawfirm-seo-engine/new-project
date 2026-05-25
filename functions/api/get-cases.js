@@ -9,7 +9,7 @@ export async function onRequestGet(context) {
     );
     if (!res.ok) return json({ ok: false, message: "cases.json 로드 실패" }, 500);
     const file = await res.json();
-    const raw = file.content ? decodeBase64(file.content).trim() : "";
+    const raw = await readFileContent(file, token);
     const cases = raw ? JSON.parse(raw) : [];
     return json({ ok: true, cases });
   } catch (error) {
@@ -32,6 +32,17 @@ function githubHeaders(token) {
     Accept: "application/vnd.github+json",
     "User-Agent": "static-landing-generator-admin",
   };
+}
+
+async function readFileContent(file, token) {
+  if (file.content && file.encoding !== "none") {
+    return decodeBase64(file.content).trim();
+  }
+  if (file.download_url) {
+    const res = await fetch(file.download_url, { headers: githubHeaders(token) });
+    if (res.ok) return (await res.text()).trim();
+  }
+  return "";
 }
 
 function decodeBase64(value) {

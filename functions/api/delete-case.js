@@ -13,7 +13,8 @@ export async function onRequestPost(context) {
     if (!res.ok) return json({ ok: false, message: "cases.json 로드 실패" }, 500);
 
     const file = await res.json();
-    const cases = JSON.parse(decodeBase64(file.content));
+    const raw = await readFileContent(file, token);
+    const cases = raw ? JSON.parse(raw) : [];
     const idx = cases.findIndex((c) => c.slug === slug);
     if (idx === -1) return json({ ok: false, message: "사건을 찾을 수 없습니다." }, 404);
 
@@ -60,6 +61,17 @@ function githubHeaders(token) {
     Accept: "application/vnd.github+json",
     "User-Agent": "static-landing-generator-admin",
   };
+}
+
+async function readFileContent(file, token) {
+  if (file.content && file.encoding !== "none") {
+    return decodeBase64(file.content).trim();
+  }
+  if (file.download_url) {
+    const res = await fetch(file.download_url, { headers: githubHeaders(token) });
+    if (res.ok) return (await res.text()).trim();
+  }
+  return "";
 }
 
 function decodeBase64(value) {

@@ -62,7 +62,9 @@ async function loadCases(env) {
     { headers: githubHeaders(token) }
   );
   if (!res.ok) return [];
-  return JSON.parse(decodeBase64((await res.json()).content));
+  const file = await res.json();
+  const raw = await readFileContent(file, token);
+  return raw ? JSON.parse(raw) : [];
 }
 
 // ─── AI generation ───────────────────────────────────────────────────────────
@@ -548,6 +550,17 @@ function githubHeaders(token) {
     Accept: "application/vnd.github+json",
     "User-Agent": "static-landing-generator-admin",
   };
+}
+
+async function readFileContent(file, token) {
+  if (file.content && file.encoding !== "none") {
+    return decodeBase64(file.content).trim();
+  }
+  if (file.download_url) {
+    const res = await fetch(file.download_url, { headers: githubHeaders(token) });
+    if (res.ok) return (await res.text()).trim();
+  }
+  return "";
 }
 
 function decodeBase64(value) {
