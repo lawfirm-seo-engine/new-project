@@ -1,9 +1,60 @@
 const GROUPS = [
-  { key: "a", label: "형사고소형", siteUrl: "https://new-project-9o2.pages.dev", pathPrefix: "prosecute", suffix: "사칭 사기 형사 고소" },
-  { key: "b", label: "민사소송형", siteUrl: "https://new-project-b.pages.dev", pathPrefix: "civil", suffix: "사칭 사기 민사 소송" },
-  { key: "c", label: "성공사례형", siteUrl: "https://new-project-c.pages.dev", pathPrefix: "success", suffix: "사칭 사기 피해금 회수" },
-  { key: "d", label: "정보형", siteUrl: "https://new-project-d.pages.dev", pathPrefix: "briefing", suffix: "사칭 사기 피해 접수" },
-  { key: "e", label: "전체허브형", siteUrl: "https://new-project-e.pages.dev", pathPrefix: "case", suffix: "사칭 사기 피해 진행현황" },
+  {
+    key: "a",
+    label: "법률형",
+    siteUrl: "https://new-project-9o2.pages.dev",
+    pathPrefix: "prosecute",
+    suffix: "사기 형사고소 법적 대응",
+    intent: "형사고소, 법적제재, 형사합의, 피해금 회수",
+    primaryKeywords: ["형사고소", "사기 피해", "법적 대응", "피해금 회수", "증거 보존"],
+  },
+  {
+    key: "b",
+    label: "민사형",
+    siteUrl: "https://new-project-b.pages.dev",
+    pathPrefix: "civil",
+    suffix: "사기 민사소송 회수 절차",
+    intent: "민사소송, 가압류, 손해배상, 부당이득반환, 민사 합의",
+    primaryKeywords: ["민사소송", "가압류", "손해배상", "부당이득반환", "피해금 회수"],
+  },
+  {
+    key: "c",
+    label: "성공사례형",
+    siteUrl: "https://new-project-c.pages.dev",
+    pathPrefix: "success",
+    suffix: "사기 피해금 회수 성공사례",
+    intent: "성공사례, 지역, 회수율, 전액 회수, 일부 회수",
+    primaryKeywords: ["성공사례", "회수율", "피해금 회수", "증거 확보", "합의 회수"],
+  },
+  {
+    key: "d",
+    label: "AI브리핑형",
+    siteUrl: "https://new-project-d.pages.dev",
+    pathPrefix: "briefing",
+    suffix: "사기 사건 AI브리핑",
+    intent: "사건 개요, 피해 구조, 대응 방법, 증거 보존, 주의사항",
+    primaryKeywords: ["AI브리핑", "사건 개요", "피해 구조", "대응 방법", "증거 보존"],
+  },
+  {
+    key: "e",
+    label: "전체 허브형",
+    siteUrl: "https://new-project-e.pages.dev",
+    pathPrefix: "case",
+    suffix: "사기 피해 전체 대응 허브",
+    intent: "전체 허브, 사건명 리스트, 관련 사건, 유형별 대응 경로",
+    primaryKeywords: ["전체 허브", "관련 사건", "형사고소", "민사소송", "성공사례"],
+  },
+];
+
+const CATEGORY_RULES = [
+  { re: /공동고소|집단|단체|형사|고소|합의|검찰|경찰/i, value: "공동고소 형사대응" },
+  { re: /민사|가압류|손해배상|부당이득|반환|채권|소송/i, value: "민사소송 회수" },
+  { re: /성공|회수율|전액|일부회수|사례/i, value: "회수 성공사례" },
+  { re: /브리핑|개요|대응방법|정보|주의/i, value: "AI브리핑 정보" },
+  { re: /방송|라이브|미션|사인|충전/i, value: "방송 미션 사기" },
+  { re: /로맨스|sns|채팅|연애|외국인/i, value: "로맨스스캠 사기" },
+  { re: /카지노|게임|출금|보증금|롤링|베팅/i, value: "사설 도박 사기" },
+  { re: /코인|거래소|선물|투자|리딩|주식|증권|공모주/i, value: "투자 사기" },
 ];
 
 export async function onRequestPost(context) {
@@ -51,40 +102,37 @@ export async function onRequestPost(context) {
   }
 }
 
-// ─── Data loading ────────────────────────────────────────────────────────────
-
 async function loadCases(env) {
-  // KV 우선
   if (env.CASES) {
     const raw = await env.CASES.get("cases:index");
     if (raw) return JSON.parse(raw);
   }
-  // GitHub 폴백
+
   const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
   if (!owner || !repo || !token) return [];
+
   const res = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`,
-    { headers: githubHeaders(token) }
+    { headers: githubHeaders(token) },
   );
   if (!res.ok) return [];
+
   const file = await res.json();
   const raw = await readFileContent(file, token);
   return raw ? JSON.parse(raw) : [];
 }
 
-// ─── AI generation ───────────────────────────────────────────────────────────
-
 async function createGeneratedData({ caseName, slug, category, duplicateCheck, env }) {
   const fallback = createRuleBasedData({ caseName, slug, category, duplicateCheck });
-
   const apiKey = await resolveOpenAiKey(env) || env.OPENAI_API_KEY;
+
   if (!apiKey) {
     fallback.source = "no-key";
     return fallback;
   }
 
   try {
-    const aiResult = await callOpenAI({ caseName, category, env: { ...env, OPENAI_API_KEY: apiKey } });
+    const aiResult = await callOpenAI({ caseName, slug, category, env: { ...env, OPENAI_API_KEY: apiKey } });
     return mergeWithFallback(aiResult, fallback);
   } catch (err) {
     console.error("[generate-draft] OpenAI error:", err.message);
@@ -100,7 +148,7 @@ async function resolveOpenAiKey(env) {
     if (!owner || !repo || !token) return null;
     const res = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/data/settings.json?ref=${branch}`,
-      { headers: githubHeaders(token) }
+      { headers: githubHeaders(token) },
     );
     if (!res.ok) return null;
     const file = await res.json();
@@ -109,33 +157,63 @@ async function resolveOpenAiKey(env) {
     if (!stored) return null;
     if (stored.startsWith("_r_")) return stored.slice(3).split("").reverse().join("");
     return stored;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
-async function callOpenAI({ caseName, category, env }) {
+async function callOpenAI({ caseName, slug, category, env }) {
   const base = baseCaseName(caseName);
+  const groupGuide = GROUPS.map((group) => {
+    return `${group.key}. ${group.label}
+- 검색 의도: ${group.intent}
+- 핵심 키워드: ${group.primaryKeywords.join(", ")}
+- canonical: ${group.siteUrl}/${group.pathPrefix}/${slug}/`;
+  }).join("\n\n");
 
-  const systemPrompt = `너는 한국 투자사기 피해자 법률 대응 SEO 원고 전문 작성기다.
-사건명을 받아 5개 도메인 그룹별 랜딩 원고를 JSON으로만 반환한다. HTML·마크다운·설명문 금지.
+  const systemPrompt = `너는 한국 네이버 검색 노출을 목표로 하는 법률·피해구제 SEO 원고 작성자다.
+출력은 반드시 JSON 객체만 반환한다. HTML, 마크다운, 코드블록, 설명문은 금지한다.
 
-[그룹별 작성 방향]
-a 형사고소: 경찰 고소 접수 절차, 사기죄 요건, 계좌 지급정지·동결 신청, 고소장 작성 증거 목록, 수사 진행 흐름. 톤: 긴급하고 실질적.
-b 민사소송: 손해배상 청구(민법 750·741조), 가압류·가처분, 집행권원 확보, 상대방 재산 파악. 톤: 전략적·절차 중심.
-c 성공사례: 피해 접수→증거 보전→고소·가압류→회수까지 단계별 흐름, 지역·플랫폼별 실제 결과. 톤: 결과 중심, 과장 없이.
-d 사건정보: 사기 수법과 피해 구조 단계별 설명, 즉각 대응 방법, 핵심 증거 보존 순서. 톤: 중립적·정보성.
-e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단계별 행동 지침. 톤: 포괄적·안내형.
+[네이버 SEO 작성 원칙]
+- 제목, 설명, H1, 본문, FAQ가 같은 검색 의도를 반복해서 설명해야 한다.
+- 단순 키워드 나열이나 과도한 반복은 금지한다. 문맥 안에서 자연스럽게 반복한다.
+- 사건명은 title, description, H1, 본문 첫 문단, FAQ 1개 이상에 반드시 포함한다.
+- 각 도메인 유형은 문체와 관점이 달라야 한다. 같은 문장을 돌려쓰지 않는다.
+- 독자가 바로 행동할 수 있도록 증거 보존, 입금 중단, 상담 접수, 법적 절차를 구체적으로 쓴다.
+- 확정적 회수 보장, 승소 보장, 허위 사실 단정은 금지한다. "가능성 검토", "의심 정황", "절차 검토"처럼 표현한다.
+- 가독성을 위해 한 문단은 2~3문장으로 작성하고, 문장은 짧게 쓴다.
 
-[작성 제약]
-- 확정적 회수 보장·수익 보장 금지 (가능성, 검토, 정황 등으로 표현)
-- 재판 전 범죄 단정 금지 ("사기 의심", "관련 정황" 사용)
-- body: 완결된 단락 4개, 각 2~4문장. 업체명(base)은 자연스럽게 사용, 전체 사건명(xxx 사칭 사기)은 body 전체에서 최대 2회
-- victimCases: 구체적인 실제 피해 패턴 4개 (막연한 표현 금지)
-- description: 검색 키워드 포함 80~120자. 사건명은 1회만
+[분량 기준]
+- 각 landing.body는 7개 문단. 각 문단은 110~180자 수준의 한국어 문장 2~3개로 작성한다.
+- 각 landing.victimCases는 5개. 날짜 흐름, 연락 채널, 입금 명목, 피해자 행동, 증거 형태가 드러나게 구체적으로 작성한다.
+- 각 landing.suspiciousCompanies는 5개. 사건명 기반 사이트, 상담원 사칭 계정, 입금 계좌, 연계 법인, 재접촉 채널을 구체화한다.
+- 각 landing.faq는 7개. 질문은 검색 키워드를 포함하고, 답변은 130~220자 수준으로 구체적으로 작성한다.
+- description과 ogDescription은 80~130자, title은 28~45자, H1은 24~45자를 권장한다.
 
-반환 JSON 형식:
-{"summary":"","tags":[],"reviewNotes":[],"landings":{"a":{"description":"","ogDescription":"","body":["","","",""],"victimCases":["","","",""]},"b":{},"c":{},"d":{},"e":{}}}`;
+[유형별 차별화]
+${groupGuide}
 
-  const userPrompt = `사건명: ${caseName}\n업체명(기본): ${base}\n감지 카테고리: ${category}\n위 사건의 5개 그룹 랜딩 원고를 작성하라.`;
+[반환 JSON 형식]
+{
+  "summary": "",
+  "tags": [],
+  "reviewNotes": [],
+  "landings": {
+    "a": {"title":"","description":"","canonical":"","ogTitle":"","ogDescription":"","ogImage":"","h1":"","body":[],"victimCases":[],"suspiciousCompanies":[],"faq":[{"question":"","answer":""}]},
+    "b": {},
+    "c": {},
+    "d": {},
+    "e": {}
+  }
+}`;
+
+  const userPrompt = `사건명: ${caseName}
+업체명 기본형: ${base}
+감지 카테고리: ${category}
+
+이 사건명으로 5개 도메인 유형별 SEO 원고를 새로 작성하라.
+네이버에서 "${base} 사기", "${base} 피해", "${base} 형사고소", "${base} 피해금 회수" 검색 의도를 모두 고려하라.
+피해사례는 현재보다 더 구체적으로, 하지만 실제 확인되지 않은 날짜·실명·금액은 임의로 단정하지 말고 "수백만 원대", "추가 입금", "메신저 상담"처럼 범주형으로 표현하라.`;
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -147,8 +225,8 @@ e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단�
         { role: "user", content: userPrompt },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.75,
-      max_completion_tokens: 4500,
+      temperature: 0.65,
+      max_completion_tokens: 12000,
     }),
   });
 
@@ -167,12 +245,13 @@ function mergeWithFallback(ai, fallback) {
   const result = {
     source: "openai",
     summary: normalizeSpace(ai.summary) || fallback.summary,
-    tags: normalizeStringArray(ai.tags, fallback.tags),
+    tags: normalizeStringArray(ai.tags, fallback.tags).slice(0, 10),
     reviewNotes: normalizeStringArray(ai.reviewNotes, fallback.reviewNotes),
     landings: {},
   };
-  for (const g of GROUPS) {
-    result.landings[g.key] = mergeGroupLanding(ai.landings?.[g.key], fallback.landings[g.key]);
+
+  for (const group of GROUPS) {
+    result.landings[group.key] = mergeGroupLanding(ai.landings?.[group.key], fallback.landings[group.key]);
   }
   return result;
 }
@@ -180,15 +259,19 @@ function mergeWithFallback(ai, fallback) {
 function mergeGroupLanding(ai, fallback) {
   return {
     ...fallback,
+    title: normalizeSpace(ai?.title) || fallback.title,
     description: normalizeSpace(ai?.description) || fallback.description,
+    canonical: normalizeSpace(ai?.canonical) || fallback.canonical,
+    ogTitle: normalizeSpace(ai?.ogTitle) || fallback.ogTitle,
     ogDescription: normalizeSpace(ai?.ogDescription) || fallback.ogDescription,
-    body: normalizeStringArray(ai?.body, fallback.body),
-    victimCases: normalizeStringArray(ai?.victimCases, fallback.victimCases),
-    faq: normalizeFaq(ai?.faq, fallback.faq),
+    ogImage: normalizeSpace(ai?.ogImage) || fallback.ogImage,
+    h1: normalizeSpace(ai?.h1) || fallback.h1,
+    body: normalizeStringArray(ai?.body, fallback.body).slice(0, 9),
+    victimCases: normalizeStringArray(ai?.victimCases, fallback.victimCases).slice(0, 7),
+    suspiciousCompanies: normalizeStringArray(ai?.suspiciousCompanies, fallback.suspiciousCompanies).slice(0, 7),
+    faq: normalizeFaq(ai?.faq, fallback.faq).slice(0, 8),
   };
 }
-
-// ─── Rule-based fallback ──────────────────────────────────────────────────────
 
 function createRuleBasedData({ caseName, slug, category, duplicateCheck }) {
   const summary = createSummary(caseName, category);
@@ -198,13 +281,10 @@ function createRuleBasedData({ caseName, slug, category, duplicateCheck }) {
       ? "동일하거나 매우 유사한 사건이 있어 저장을 차단해야 합니다."
       : duplicateCheck.warn
         ? "유사 사건이 있어 기존 사건과 별도 사건인지 확인해야 합니다."
-        : "중복 위험이 낮습니다.",
-    `${category} 검색 의도 기준으로 기본 원고를 생성했습니다. OpenAI API 키가 설정되면 고품질 원고가 자동으로 생성됩니다.`,
+        : "중복 위험은 낮습니다.",
+    `${category} 검색 의도 기준으로 SEO 원고 초안을 생성했습니다. OpenAI API 키가 설정되면 더 정교한 유형별 원고가 생성됩니다.`,
   ];
-
-  const landings = Object.fromEntries(
-    GROUPS.map((g) => [g.key, createLandingData({ caseName, slug, group: g })])
-  );
+  const landings = Object.fromEntries(GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, group })]));
 
   return { source: "rule-based", summary, tags, reviewNotes, landings };
 }
@@ -212,140 +292,158 @@ function createRuleBasedData({ caseName, slug, category, duplicateCheck }) {
 function createLandingData({ caseName, slug, group }) {
   const base = baseCaseName(caseName);
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
-  const pageTitle = `${base} ${group.suffix}`;
-  const description = makeDescription(caseName, base, group.key);
-  const body = makeBody(caseName, base, group.key);
-  const victimCases = makeVictimCases(base, group.key);
-  const faq = makeFaq(group.key);
+  const title = `${base} ${group.suffix}`;
+  const description = `${caseName} 관련 ${group.intent} 검색 의도에 맞춰 피해 구조, 증거 보존, 상담 접수 전 확인할 내용을 정리합니다.`;
+  const faq = makeFaq({ caseName, base, group });
 
   return {
-    title: pageTitle,
+    title,
     description,
     canonical,
-    ogTitle: pageTitle,
+    ogTitle: title,
     ogDescription: description,
     ogImage: `${group.siteUrl}/og/${slug}.webp`,
-    h1: pageTitle,
-    body,
-    victimCases,
+    h1: `${base} ${group.label} 대응 안내`,
+    body: makeBody({ caseName, base, group }),
+    victimCases: makeVictimCases({ base, group }),
+    suspiciousCompanies: makeSuspiciousCompanies({ base }),
     faq,
-    schema: createSchemaData({ title: pageTitle, description, canonical, caseName, faq }),
+    schema: createSchemaData({ title, description, canonical, caseName, faq }),
   };
 }
 
-function makeDescription(caseName, base, key) {
-  return {
-    a: `${caseName} 피해자를 위한 형사 고소 절차 안내입니다. 계좌 지급정지, 고소장 작성, 증거 보존 방법을 확인하세요.`,
-    b: `${caseName} 피해금 회수를 위한 민사 소송 절차입니다. 가압류 신청, 손해배상 청구, 부당이득반환 전략을 안내합니다.`,
-    c: `${caseName} 피해금 회수 사례를 정리했습니다. 접수부터 회수 완료까지 실제 대응 흐름과 결과를 확인하세요.`,
-    d: `${caseName} 사건 수법과 피해 구조를 단계별로 정리합니다. 즉각 대응 방법과 핵심 증거 보존 순서를 안내합니다.`,
-    e: `${caseName} 관련 형사고소·민사소송·성공사례·사건정보를 한곳에서 확인하세요. 피해 단계별 대응 경로를 연결합니다.`,
-  }[key] || `${caseName} 피해 대응 정보입니다.`;
-}
-
-function makeBody(caseName, base, key) {
-  const bodies = {
+function makeBody({ caseName, base, group }) {
+  const typeCopy = {
     a: [
-      `${caseName} 관련 피해 신고가 지속적으로 접수되고 있습니다. 주요 피해 경로는 카카오톡·텔레그램·인스타그램 등 메신저를 통한 고수익 투자 플랫폼 유도이며, 초기 소액 출금 허용 후 대규모 입금 유도, 이후 출금 제한과 세금·수수료·보증금 명목의 추가 입금 요구가 반복되는 구조입니다.`,
-      `형사 고소는 사기죄(형법 제347조)·특정경제범죄 가중처벌 등에 관한 법률 위반 혐의로 관할 경찰서 또는 사이버수사대에 고소장을 제출하는 방식으로 시작됩니다. ${base} 관련 피해 계좌에 대한 지급정지 신청을 병행하면 추가 피해 확산을 억제하는 데 도움이 될 수 있습니다.`,
-      `고소장 작성에 필요한 핵심 증거는 입금 확인증·거래 내역·담당자와의 대화 기록·사이트·앱 화면 캡처·계좌번호와 예금주 명의입니다. ${caseName} 관련 자료는 삭제하지 말고 원본 상태로 보관해야 하며, 이미 앱이 삭제된 경우 기기를 초기화하지 않으면 디지털 포렌식을 통한 복원이 가능할 수 있습니다.`,
-      `공동 피해자가 있다면 연명 고소 방식으로 피해 규모를 명확히 하면 수사기관의 집중도를 높일 수 있습니다. 피해금 규모·피해자 수·조직적 사기 여부에 따라 적용 법조항과 형량 기준이 달라질 수 있으므로, 관련 자료를 최대한 확보한 뒤 고소 절차를 진행하는 것이 중요합니다.`,
+      `${caseName} 사건은 형사고소와 법적 대응을 함께 검토해야 하는 사기 피해 의심 사례입니다. 입금 전후 대화, 계좌 정보, 사이트 화면을 정리하면 고소장 작성과 수사기관 제출 자료를 더 명확하게 구성할 수 있습니다.`,
+      `${base} 관련 피해금 회수를 원한다면 먼저 추가 입금을 멈추고 증거를 보존해야 합니다. 형사고소는 피해 사실을 알리는 절차에 그치지 않고 계좌 추적, 관련자 특정, 합의 가능성 검토의 출발점이 됩니다.`,
+      `경찰 신고만으로 피해금이 자동 반환되는 것은 아닙니다. 형사 절차와 함께 민사적 보전 조치, 지급정지 가능성, 사기 의심 업체의 반복 패턴을 동시에 살피는 것이 필요합니다.`,
+      `상담 접수 전에는 입금 영수증, 계좌번호, 예금주, 대화방 캡처, 사이트 URL, 담당자 프로필을 한 폴더에 정리하는 것이 좋습니다. 자료가 흩어져 있으면 동일 조직의 반복 범행 여부를 놓칠 수 있습니다.`,
+      `${base} 사기 피해자가 여러 명이라면 공동 자료 정리가 도움이 됩니다. 다만 사건마다 입금 경위와 담당자 계정이 다를 수 있으므로 개별 피해 내역도 함께 구분해야 합니다.`,
+      `형사합의가 가능한지는 상대방 특정 여부와 수사 진행 상황에 따라 달라집니다. 회수 가능성을 단정하기보다 현재 증거로 어떤 절차를 먼저 밟을지 검토하는 방식이 안전합니다.`,
+      `이 페이지는 ${group.intent} 검색 의도에 맞춰 ${base} 피해자가 확인해야 할 법적 대응 순서를 정리합니다. 빠른 접수보다 중요한 것은 삭제 전 증거 보존과 추가 피해 차단입니다.`,
     ],
     b: [
-      `${caseName} 피해금 회수를 위한 민사 절차는 불법행위로 인한 손해배상 청구(민법 제750조)와 부당이득반환 청구(민법 제741조)를 중심으로 진행됩니다. 상대방의 신원과 보유 재산을 먼저 파악하는 것이 소송 전략의 핵심입니다.`,
-      `가압류·가처분은 판결 전에 상대방 재산을 동결해 이후 강제집행이 가능한 상태를 확보하는 보전처분입니다. ${base} 관련 입금 계좌나 연계 법인의 재산이 파악되면 빠르게 가압류를 신청하는 것이 중요합니다. 재산이 분산되거나 은닉되기 전에 조치를 취해야 집행력을 확보할 수 있습니다.`,
-      `민사 소송의 핵심 증거는 계좌 입금 내역·상대방과의 계약·약정 자료·담당자 정보·서비스 이용 화면입니다. 상대방 특정이 어려운 경우 형사 고소를 먼저 진행해 수사기관의 계좌 추적 결과를 활용하는 방법도 있습니다.`,
-      `소액 사건은 지급명령 신청(독촉 절차)으로 간이하게 집행권원을 확보할 수 있습니다. 피해금이 5천만 원 이상이면 ${caseName} 관련 민사 소송과 형사 고소를 병행하는 방식이 실질적 회수 가능성을 높이는 경우가 많습니다.`,
+      `${caseName} 피해금 회수는 민사소송, 가압류, 손해배상 청구를 함께 검토해야 합니다. 형사고소가 상대방 특정에 도움을 준다면 민사 절차는 확보된 자료로 실제 회수 경로를 만드는 단계입니다.`,
+      `${base} 관련 입금 계좌, 연계 법인, 담당자 명의가 확인되면 가압류 필요성을 먼저 살펴야 합니다. 상대방 재산이 이동된 뒤에는 판결을 받아도 집행이 어려워질 수 있습니다.`,
+      `민사소송에서는 피해 사실뿐 아니라 입금 원인, 기망 행위, 손해 발생, 상대방 관여 정황을 설명해야 합니다. 대화 내용과 플랫폼 화면은 청구 원인을 구성하는 핵심 자료가 됩니다.`,
+      `부당이득반환과 손해배상은 사안에 따라 함께 검토될 수 있습니다. 계약서가 없더라도 송금 내역, 상담 기록, 수익 보장 표현이 남아 있다면 청구 구조를 만들 여지가 있습니다.`,
+      `소액 피해라도 여러 차례 입금이 반복되었거나 동일 계좌 피해자가 확인되면 회수 전략이 달라질 수 있습니다. 사건 규모와 계좌 흐름을 같이 보아야 실익을 판단할 수 있습니다.`,
+      `민사 합의는 상대방이 특정되고 지급 능력 또는 합의 압박 요인이 있을 때 검토됩니다. 합의서 작성 전에는 지급 기한, 분할 조건, 불이행 시 조치까지 명확히 해야 합니다.`,
+      `이 페이지는 ${group.intent} 검색 의도에 맞춰 ${base} 피해자의 민사 회수 절차를 정리합니다. 회수 가능성은 증거 상태와 상대방 특정 가능성을 기준으로 검토해야 합니다.`,
     ],
     c: [
-      `${caseName}와 유사한 사건에서 피해 대응은 입금 계좌 지급정지 신청과 형사 고소를 병행하는 방식으로 시작된 경우가 많습니다. 초기 대응 속도가 빠를수록 계좌 내 잔여 피해금 동결 가능성이 높아집니다.`,
-      `피해금 일부 회수는 가압류가 성공적으로 이루어진 경우에 집중됩니다. ${base} 관련 상대방 명의 계좌 또는 연계 법인 재산이 확인된 경우, 강제집행으로 피해금 일부를 돌려받은 사례가 있습니다. 단, 모든 사건에서 동일한 결과가 보장되지는 않습니다.`,
-      `성공적인 대응에 공통적으로 필요한 조건은 입금 계좌 보존·담당자 연락처·사이트·앱 화면 캡처·대화 기록입니다. ${caseName} 피해자도 동일한 증거를 보존했을 경우 절차 진행이 원활하게 이루어질 가능성이 높습니다.`,
-      `수사기관의 압수수색 이후 서버 자료가 확보되거나 관련자가 구속된 경우, 형사 합의 과정에서 피해금 일부를 반환받는 경로가 생기기도 합니다. 형사·민사 절차를 동시에 진행하면 협상 가능성과 실질적인 회수 경로가 넓어질 수 있습니다.`,
+      `${caseName} 성공사례형 페이지는 유사 피해에서 어떤 자료가 회수 가능성을 높였는지 확인하기 위한 안내입니다. 실제 결과는 사건마다 다르지만, 공통적으로 빠른 증거 보존과 계좌 추적이 중요했습니다.`,
+      `${base} 피해금 회수 사례에서는 입금 직후 상담을 접수하고 대화방, 사이트 화면, 담당자 계정 정보를 보존한 경우 절차 진행이 빨랐습니다. 자료가 명확할수록 상대방 특정 가능성도 커집니다.`,
+      `전액 회수와 일부 회수는 피해액, 계좌 잔액, 관련자 특정 여부, 합의 가능성에 따라 달라집니다. 성공사례는 결과만 보는 것이 아니라 어떤 순서로 대응했는지 비교해야 합니다.`,
+      `지역별 수사기관 접수, 금융기관 지급정지, 민사 보전처분이 연결되면 회수 경로가 넓어질 수 있습니다. 단일 절차보다 형사와 민사를 병행한 사례에서 실익이 생기는 경우가 많습니다.`,
+      `${base}와 유사한 사칭 사기에서는 추가 입금 요구를 끊은 시점도 중요했습니다. 계속 입금하면 피해액이 커지고 증거가 복잡해져 회수 전략 수립이 늦어질 수 있습니다.`,
+      `성공사례를 참고할 때는 같은 업체명만 볼 것이 아니라 입금 명목, 상담 채널, 사이트 주소, 계좌명의까지 비교해야 합니다. 동일 조직이 다른 이름으로 운영되는 경우도 있습니다.`,
+      `이 페이지는 ${group.intent} 검색 의도에 맞춰 ${base} 회수 성공 가능성을 판단할 때 확인할 요소를 정리합니다. 결과 보장이 아니라 유사 대응 흐름 비교가 목적입니다.`,
     ],
     d: [
-      `${caseName}는 온라인 플랫폼 또는 메신저를 통해 고수익 투자·수익 창출 기회를 제안하며 피해자를 유인하는 방식의 사기 의심 사건입니다. 피해 구조는 초기 소액 출금 허용 → 대규모 입금 유도 → 출금 제한 → 추가 비용 요구 순으로 진행되는 경우가 전형적입니다.`,
-      `${base} 관련 피해자들이 공통적으로 경험한 핵심 패턴은 담당자·상담원을 사칭한 계정을 통한 지속적인 연락과, 원금 보장·고수익을 강조한 투자 제안입니다. 플랫폼 화면상 잔액은 표시되지만 실제 출금은 차단되거나 추가 비용 요구로 이어집니다.`,
-      `즉각적인 대응으로 가장 중요한 것은 증거 보존입니다. 대화 기록·입금 영수증·플랫폼 화면·계좌번호·담당자 이름과 연락처를 삭제하지 말고 스크린샷으로 저장하세요. 앱이 이미 삭제된 경우에도 기기 캐시·이메일 확인서·은행 거래 내역은 남아 있을 수 있습니다.`,
-      `${caseName} 사건의 법적 대응 경로는 형사 고소(사기죄)와 민사 손해배상 청구 두 가지입니다. 수사기관에 고소장을 접수하면 계좌 추적과 금융정보 제공 명령이 이루어질 수 있으며, 민사 소송을 병행해 피해금 회수를 위한 보전처분도 신청할 수 있습니다.`,
+      `${caseName} AI브리핑은 사건 구조를 빠르게 이해하려는 검색자를 위한 정보성 원고입니다. ${base} 피해는 업체명, 메신저 상담, 입금 계좌, 출금 제한이 어떻게 연결되는지 먼저 확인해야 합니다.`,
+      `일반적인 사기 의심 구조는 신뢰 형성, 소액 입금 유도, 수익 화면 노출, 출금 제한, 추가 비용 요구 순서로 진행됩니다. 이 흐름이 확인되면 추가 입금을 멈추는 것이 우선입니다.`,
+      `${base} 관련 상담원이나 담당자가 세금, 보증금, 인증비, 해제비를 요구한다면 피해 확산 가능성을 의심해야 합니다. 정상적인 금융 절차라면 출금을 위해 반복 송금을 요구하지 않습니다.`,
+      `증거 보존은 대응의 시작입니다. 대화방이 삭제되기 전 캡처하고, URL, 계좌번호, 입금증, 담당자 프로필, 앱 설치 파일 또는 다운로드 링크를 따로 저장해야 합니다.`,
+      `신고와 상담은 서로 대체 관계가 아닙니다. 신고는 수사기관 절차를 여는 행위이고, 상담은 현재 증거로 어떤 법적 대응이 가능한지 정리하는 과정입니다.`,
+      `${base} 사건을 검색하는 사람은 이미 피해를 입었거나 추가 입금 요구를 받은 경우가 많습니다. 이때 가장 위험한 행동은 상대방 말만 믿고 새 계좌로 돈을 보내는 것입니다.`,
+      `이 페이지는 ${group.intent} 검색 의도에 맞춰 ${base} 피해 구조와 즉시 해야 할 대응 방법을 정리합니다. 정보 확인 후에는 증거를 보존한 상태로 상담 접수를 진행하는 것이 좋습니다.`,
     ],
     e: [
-      `${caseName} 피해를 확인하셨다면 대응 경로는 크게 네 가지입니다. 형사 고소·민사 소송·성공사례 확인·사건정보 파악 중 현재 상황과 목적에 맞는 진입 경로를 선택하세요. 증거 확보 상황과 피해 규모에 따라 우선순위가 달라질 수 있습니다.`,
-      `형사 고소 경로는 수사기관에 고소장을 제출하고 계좌 동결·압수수색·관련자 형사처벌을 목표로 합니다. 민사 소송 경로는 ${base} 피해금 직접 회수를 위해 손해배상 청구와 가압류 보전처분을 병행하는 방식입니다. 두 절차는 동시에 진행할 수 있습니다.`,
-      `성공사례를 먼저 확인하면 ${caseName}와 유사한 피해 유형에서 어떤 절차가 효과적이었는지 파악할 수 있습니다. 비슷한 구조의 사건에서 실제 대응 흐름과 회수 경로를 비교해 전략을 수립하는 데 도움이 됩니다.`,
-      `사건정보 페이지에서는 ${base} 수법·피해 구조·핵심 증거 목록·즉각 대응 순서를 정리한 정보를 확인할 수 있습니다. 어느 경로로 대응할지 결정하기 전에 사건 구조를 먼저 파악하면 절차 선택이 수월해집니다.`,
+      `${caseName} 전체 허브는 형사고소, 민사소송, 성공사례, AI브리핑 정보를 한곳에서 연결하는 페이지입니다. ${base} 피해자가 자신의 상황에 맞는 대응 경로를 선택할 수 있도록 구성했습니다.`,
+      `형사고소 페이지는 사기 혐의와 수사 절차를 중심으로 봅니다. 민사형 페이지는 가압류와 손해배상, 부당이득반환처럼 실제 피해금 회수 절차에 초점을 둡니다.`,
+      `성공사례형 페이지는 유사 사건에서 어떤 증거와 순서가 도움이 되었는지 비교합니다. AI브리핑형 페이지는 사건 구조, 증거 보존, 즉시 대응 방법을 정보성으로 정리합니다.`,
+      `${base} 관련 피해를 처음 확인했다면 먼저 사건명, 입금 계좌, 연락 채널, 사이트 주소를 기준으로 자료를 정리해야 합니다. 이후 형사와 민사 중 어느 절차를 먼저 진행할지 판단합니다.`,
+      `같은 업체명이라도 상담원 계정, 계좌 명의, URL이 다르면 별도 사건으로 분리해야 할 수 있습니다. 반대로 동일 조직이면 피해자 자료를 묶어 보는 것이 도움이 됩니다.`,
+      `전체 허브의 목적은 검색 의도별 페이지를 연결해 중복 원고를 줄이고, 사용자가 필요한 정보를 빠르게 찾게 하는 것입니다. 네이버 크롤러 입장에서도 내부 링크 구조가 명확해집니다.`,
+      `이 페이지는 ${group.intent} 검색 의도에 맞춰 ${base} 관련 대응 정보를 연결합니다. 사건 구조를 확인한 뒤 필요한 유형의 상세 페이지로 이동해 자료를 점검하세요.`,
     ],
   };
-  return bodies[key] || [makeDescription(caseName, base, key)];
+  return typeCopy[group.key] || typeCopy.a;
 }
 
-function makeVictimCases(base, key) {
+function makeVictimCases({ base, group }) {
   const common = [
-    `${base} 플랫폼·앱에서 수익이 발생했다는 화면을 확인한 뒤 출금을 신청했으나 세금·수수료·보증금 명목으로 추가 입금을 요구받은 사례`,
-    `카카오톡·텔레그램·인스타그램 등 SNS에서 ${base} 담당자·상담원을 사칭하는 계정으로부터 투자 권유를 받고 입금을 유도받은 사례`,
-    `${base} 사이트·앱 내 잔액은 정상적으로 표시되었으나 실제 출금 요청 시 계정 제한·점검 중·심사 중 안내만 반복된 사례`,
-    `처음 소액 입금 후 출금이 한 번 가능해 신뢰가 형성된 뒤 대규모 입금을 유도받았고, 이후 연락이 두절되거나 플랫폼이 접속 불가 상태로 전환된 사례`,
+    `${base} 사이트에서 소액 수익을 보여준 뒤 출금을 신청하자 세금 또는 인증비 명목의 추가 입금을 요구받은 사례`,
+    `카카오톡·텔레그램 상담원이 ${base} 담당자를 사칭하며 지정 계좌로 입금을 안내하고, 입금 뒤 대화방 이름을 바꾼 사례`,
+    `처음에는 수십만 원대 입금으로 시작했지만 손실 복구, VIP 등급, 보증금 명목으로 반복 송금이 이어진 사례`,
+    `${base} 플랫폼 화면에는 잔액과 수익률이 표시되지만 실제 출금 버튼을 누르면 심사 중 또는 계정 제한 안내만 반복된 사례`,
+    `피해자가 환불을 요구하자 담당자가 변호사 비용, 해제 수수료, 보안 인증비를 추가로 요구하며 시간을 끈 사례`,
   ];
+
   const extra = {
-    a: `고소장 제출을 준비하던 중 상대방 측에서 소액 합의를 조건으로 고소 취하를 요청하며 추가 입금을 유도한 사례`,
-    b: `피해 계좌 지급정지 신청 후 상대방이 다른 계좌로 자금을 이동시켜 가압류 집행이 어려워진 사례`,
-    c: `형사 고소 접수 후 수사기관의 계좌 추적 과정에서 피해금 일부가 동결되어 피해자에게 반환된 사례`,
-    d: `${base} 관련 플랫폼이 갑자기 폐쇄되고 앱 다운로드 링크도 삭제되어 증거 확보가 어려워진 사례`,
-    e: `피해 후 혼자 대응을 시도했으나 형사·민사 절차 중 어느 것부터 시작해야 할지 판단하기 어려웠던 사례`,
+    a: `${base} 피해자가 경찰 신고 전 대화방을 나가 증거 일부가 사라졌지만, 입금증과 계좌번호를 보존해 형사고소 자료를 다시 구성한 사례`,
+    b: `${base} 입금 계좌 명의와 연계 법인명이 확인되어 민사 가압류 가능성을 먼저 검토한 사례`,
+    c: `${base} 유사 사건에서 피해자 여러 명의 계좌 흐름이 모여 일부 피해금 반환 협의가 진행된 사례`,
+    d: `${base} 관련 앱 설치 파일과 URL이 삭제되기 전 캡처되어 피해 구조 설명 자료로 활용된 사례`,
+    e: `${base} 사건을 형사고소와 민사소송 중 어디서 시작할지 몰라 전체 허브에서 자료를 분류한 사례`,
   };
-  return extra[key] ? [...common.slice(0, 3), extra[key]] : common.slice(0, 4);
+
+  return [...common.slice(0, 4), extra[group.key] || common[4]];
 }
 
-function makeFaq(groupKey) {
-  const Q1_ANSWER = "상담을 통해 입금 계좌·대화 기록·플랫폼 화면·담당자 정보 등 증거를 분석하여 형사·민사 절차의 전략을 수립, 회수 가능성을 구체적으로 검토합니다. 증거의 양과 상대방 특정 가능 여부가 결과에 큰 영향을 미칩니다.";
-  const Q3_ANSWER = "변호사 선임에서 후불은 불법이기에 후불이 가능하다는 곳은 변호사를 사칭하는 곳이며, 변호사가 아닌 사람의 법률 서비스 제공 또한 불법이기에 각종 전문가를 자칭하는 곳도 2차 사기 위험이 있으니 주의하시기 바랍니다.";
+function makeSuspiciousCompanies({ base }) {
+  return [
+    `${base} 공식 사이트처럼 보이지만 출금 조건으로 추가 입금을 요구하는 웹사이트 또는 앱`,
+    `${base} 고객센터, 담당자, 분석가, 변호사팀을 사칭하는 카카오톡·텔레그램 계정`,
+    `${base} 입금 안내에 사용된 개인 명의 계좌, 법인 명의 계좌, 반복 변경되는 수취 계좌`,
+    `${base} 피해자에게 세금, 보증금, 인증비, 해제비 명목으로 재입금을 요구하는 연계 업체명`,
+    `${base} 상담 종료 뒤 다른 이름으로 재접촉해 피해금 회복을 미끼로 접근하는 2차 피해 채널`,
+  ];
+}
 
-  const faqs = {
+function makeFaq({ caseName, base, group }) {
+  const shared = [
+    {
+      question: `${caseName} 피해금을 회수할 수 있나요?`,
+      answer: `회수 가능성은 입금 계좌, 상대방 특정 가능성, 증거 보존 상태에 따라 달라집니다. ${base} 관련 대화 내용, 입금증, 사이트 주소, 담당자 계정이 남아 있다면 형사와 민사 절차를 함께 검토할 수 있습니다.`,
+    },
+    {
+      question: `${base} 사기 의심 상황에서 가장 먼저 할 일은 무엇인가요?`,
+      answer: "추가 입금을 중단하고 기존 자료를 삭제하지 않는 것이 우선입니다. 입금 내역, 대화방, URL, 계좌번호, 담당자 프로필, 앱 화면을 캡처한 뒤 시간 순서대로 정리해야 합니다.",
+    },
+    {
+      question: "상담 접수 전에 어떤 자료를 준비해야 하나요?",
+      answer: "입금 영수증, 계좌번호, 예금주, 대화방 캡처, 사이트 주소, 로그인 화면, 출금 제한 안내, 담당자 연락처를 준비하면 됩니다. 자료가 부족해도 현재 남아 있는 증거부터 확인할 수 있습니다.",
+    },
+  ];
+
+  const byType = {
     a: [
-      { question: "[피해금 회수] 피해금을 돌려받을 수 있나요?", answer: Q1_ANSWER },
-      { question: "[형사 고소] 경찰 신고만으로 해결되나요?", answer: "형사 고소는 중요한 첫 단계이지만, 수사 결과만으로 피해금이 자동 환급되지는 않습니다. 민사 손해배상 청구와 가압류 보전처분을 형사 절차와 병행해야 실질적인 회수 가능성이 높아집니다." },
-      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
-      { question: "추가 입금 요구를 받았습니다. 어떻게 해야 하나요?", answer: "추가 입금은 즉시 중단하세요. 세금·수수료·보증금 명목의 추가 요구는 사기 수법의 핵심 패턴입니다. 추가 입금을 해도 출금이 허용되지 않는 경우가 대부분입니다. 기존 대화 기록과 입금 내역을 보존한 상태로 법률 상담을 먼저 진행하세요." },
-      { question: "공동고소와 단독 고소의 차이점은?", answer: "공동 대응을 위해 기다리는 시간 동안 사기범은 도주할 수 있습니다. 피해 규모와 증거 상태에 따라 단독 고소가 더 신속한 경우가 많습니다." },
-      { question: "단체소송(연대 소송)으로 진행하는게 좋은가요?", answer: "대표자 선정과 같은 사건의 피해자를 모집하는 기간이 길어져 의뢰인에게 실익이 없습니다." },
+      { question: `${base} 형사고소는 경찰 신고와 다른가요?`, answer: "경찰 신고는 피해 사실을 알리는 출발점이고, 형사고소는 피고소인, 범행 구조, 증거 목록을 정리해 처벌 의사를 명확히 하는 절차입니다. 고소장에는 입금 경위와 기망 행위를 구체적으로 써야 합니다." },
+      { question: "형사합의로 피해금 회수가 가능한가요?", answer: "상대방이 특정되고 수사 절차가 진행되면 합의 가능성을 검토할 수 있습니다. 다만 합의와 회수는 보장할 수 없으므로 계좌 추적, 지급정지, 민사 보전 조치도 함께 살피는 것이 좋습니다." },
+      { question: "공동고소가 유리한 경우는 언제인가요?", answer: "동일 사이트, 동일 계좌, 동일 상담원 계정으로 여러 피해자가 발생했다면 공동 자료 정리가 도움이 됩니다. 다만 피해 금액과 입금 경위는 개인별로 다르므로 개별 증거도 함께 준비해야 합니다." },
+      { question: "추가 입금을 요구받았는데 응해야 하나요?", answer: "세금, 보증금, 인증비, 해제비 명목의 추가 입금은 피해가 커지는 주요 패턴입니다. 출금을 조건으로 돈을 더 보내라는 요구에는 응하지 말고, 해당 메시지를 캡처해 증거로 보존해야 합니다." },
     ],
     b: [
-      { question: "[민사 회수] 민사 소송으로 피해금을 돌려받을 수 있나요?", answer: Q1_ANSWER },
-      { question: "[가압류 신청] 가압류는 언제 신청해야 하나요?", answer: "가압류는 판결 전에 상대방 재산을 동결하는 보전처분입니다. 입금 계좌나 상대방 재산이 파악되는 즉시 신청하는 것이 유리하며, 재산이 은닉되기 전에 빠르게 조치해야 집행력을 확보할 수 있습니다." },
-      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
-      { question: "민사와 형사를 동시에 진행할 수 있나요?", answer: "형사 고소와 민사 손해배상 청구는 독립된 절차로 동시에 진행이 가능합니다. 형사 수사에서 확보된 계좌 추적 결과를 민사 소송의 증거로 활용하는 방법도 있습니다." },
-      { question: "상대방 신원을 모르는데 소송이 가능한가요?", answer: "형사 고소를 먼저 진행해 수사기관의 계좌 추적으로 상대방 신원을 파악한 뒤 민사 소송을 진행하는 방법이 있습니다. 입금 계좌와 대화 내역만 있어도 절차를 시작할 수 있습니다." },
-      { question: "소액 피해도 민사 소송이 가능한가요?", answer: "소액 사건은 지급명령 신청(독촉 절차)으로 간이하게 집행권원을 확보할 수 있습니다. 피해 규모와 상관없이 증거가 있다면 절차를 진행할 수 있으며, 소액사건심판 제도도 활용 가능합니다." },
+      { question: `${base} 민사소송은 언제 검토해야 하나요?`, answer: "상대방 계좌나 연계 법인, 담당자 정보가 확인되면 민사소송과 가압류를 함께 검토할 수 있습니다. 형사고소만으로 회수가 어렵다면 손해배상 또는 부당이득반환 청구 구조를 봐야 합니다." },
+      { question: "가압류는 왜 중요한가요?", answer: "가압류는 판결 전 상대방 재산을 묶어두는 보전 절차입니다. 상대방이 자금을 이동한 뒤에는 승소해도 회수가 어려울 수 있으므로 계좌와 재산 단서가 있을 때 빠르게 검토해야 합니다." },
+      { question: "상대방 이름을 몰라도 민사 절차가 가능한가요?", answer: "처음부터 모든 정보를 알 필요는 없지만, 민사소송에는 상대방 특정이 필요합니다. 입금 계좌, 예금주, 통신 기록, 형사절차에서 확보되는 자료가 특정 단서가 될 수 있습니다." },
+      { question: "민사 합의서는 어떻게 작성해야 하나요?", answer: "합의금, 지급일, 분할 여부, 지연 시 조치, 비밀유지 범위, 불이행 시 강제집행 가능성을 명확히 해야 합니다. 구두 약속만으로는 회수 안정성이 떨어질 수 있습니다." },
     ],
     c: [
-      { question: "[피해금 회수] 실제로 피해금을 돌려받은 사례가 있나요?", answer: Q1_ANSWER },
-      { question: "[회수 기간] 피해금 회수까지 얼마나 걸리나요?", answer: "사건마다 다르지만, 계좌 지급정지와 가압류가 빠르게 이루어진 경우 수개월 내 일부 회수가 가능한 경우도 있습니다. 수사 진행 기간과 상대방 재산 현황에 따라 달라집니다." },
-      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
-      { question: "어떤 증거가 있어야 회수 성공률이 높아지나요?", answer: "입금 계좌·거래 내역·담당자와의 대화 기록·사이트·앱 화면 캡처가 모두 보존된 경우 성공률이 가장 높습니다. 상대방 특정이 가능한 정보(이름, 연락처, 사업자 정보)가 있으면 절차 진행이 원활합니다." },
-      { question: "전액 회수가 가능한가요?", answer: "전액 회수는 상대방 보유 재산과 계좌 잔액에 따라 달라집니다. 일부 회수 사례가 더 일반적이며, 형사·민사 절차를 병행하면 회수 경로가 넓어집니다." },
-      { question: "해외 사기범에게도 법적 대응이 가능한가요?", answer: "국내 계좌를 이용한 경우 계좌 지급정지와 가압류가 가능합니다. 해외 서버를 이용하더라도 국내에 관련자가 있다면 형사 처벌과 민사 청구가 가능한 경우가 있습니다." },
+      { question: `${base} 성공사례를 그대로 적용할 수 있나요?`, answer: "성공사례는 참고 자료일 뿐 같은 결과를 보장하지 않습니다. 다만 입금 계좌, 담당자 계정, 증거 보존 상태가 비슷하다면 어떤 절차를 먼저 검토할지 판단하는 데 도움이 됩니다." },
+      { question: "회수율은 무엇에 따라 달라지나요?", answer: "회수율은 계좌 잔액, 상대방 특정 여부, 피해자 수, 수사 진행 속도, 민사 보전처분 가능성에 따라 달라집니다. 빠른 접수와 증거 정리가 회수 가능성을 높이는 요소가 됩니다." },
+      { question: "전액 회수가 가능한 사건의 특징은 무엇인가요?", answer: "상대방이 빠르게 특정되고 계좌에 자금이 남아 있으며 대화와 입금 증거가 명확한 사건은 전액 또는 높은 비율의 회수 가능성을 검토할 수 있습니다. 그러나 결과는 사건별로 다릅니다." },
+      { question: "지역별 성공사례도 중요한가요?", answer: "지역 자체보다 관할 수사기관 접수, 피해자 분포, 관련 계좌 흐름이 더 중요합니다. 다만 같은 지역 피해자가 모이면 자료 정리와 상담 동선이 빨라질 수 있습니다." },
     ],
     d: [
-      { question: "[피해 구조] 이런 사기는 어떻게 진행되나요?", answer: Q1_ANSWER },
-      { question: "[증거 보존] 어떤 증거를 보존해야 하나요?", answer: "대화 기록(카카오톡·텔레그램 등), 입금 영수증, 플랫폼 화면 캡처, 계좌번호와 예금주 명의, 담당자 이름과 연락처를 삭제하지 않고 원본 보존해야 합니다. 앱이 삭제된 경우에도 기기를 초기화하지 않으면 복원이 가능할 수 있습니다." },
-      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
-      { question: "앱이 삭제된 경우 어떻게 해야 하나요?", answer: "앱을 삭제했더라도 기기 자체를 초기화하지 않았다면 디지털 포렌식을 통한 복원이 가능할 수 있습니다. 이메일 확인서, 은행 거래 내역, 카카오톡 채팅 백업도 대체 증거로 활용할 수 있습니다." },
-      { question: "2차 피해를 막으려면 어떻게 해야 하나요?", answer: "사기범 측 연락을 즉시 차단하고 추가 입금을 절대 하지 않아야 합니다. 개인정보(신분증, 계좌정보)가 유출된 경우 금융기관에 연락해 계좌 보호 조치를 취하세요." },
-      { question: "피해를 당한 뒤 얼마나 빨리 신고해야 하나요?", answer: "피해 인식 즉시 신고하는 것이 가장 좋습니다. 입금 계좌의 지급정지는 신속할수록 효과적이며, 시간이 지날수록 상대방이 자금을 이동하거나 증거를 삭제할 가능성이 높아집니다." },
+      { question: `${base} 사기 구조는 어떻게 진행되나요?`, answer: "대체로 신뢰 형성, 소액 입금 유도, 수익 화면 노출, 출금 제한, 추가 비용 요구 순서로 진행됩니다. 이 흐름이 보이면 정상 거래보다 사기 의심 정황을 먼저 검토해야 합니다." },
+      { question: "출금 심사 중이라는 말은 믿어도 되나요?", answer: "정상적인 서비스라면 출금을 위해 반복적인 세금, 보증금, 인증비를 요구하지 않습니다. 심사 중이라는 말로 시간을 끌며 추가 입금을 유도한다면 대화 내용을 보존하고 입금을 멈춰야 합니다." },
+      { question: "삭제된 대화도 복구할 수 있나요?", answer: "기기 초기화를 하지 않았다면 일부 자료가 남아 있을 수 있습니다. 메시지 백업, 이메일 알림, 통장 거래 내역, 캡처 파일, 브라우저 기록도 대체 증거가 될 수 있습니다." },
+      { question: "2차 피해는 어떻게 막나요?", answer: "피해금 회복팀, 변호사팀, 환불 대행을 사칭해 다시 접근하는 경우가 있습니다. 선입금이나 수수료를 요구하는 연락은 의심하고, 기존 사건 자료와 함께 상담에서 확인해야 합니다." },
     ],
     e: [
-      { question: "[대응 경로] 어떤 법적 대응이 가능한가요?", answer: Q1_ANSWER },
-      { question: "[형사·민사 병행] 형사와 민사 절차를 동시에 진행할 수 있나요?", answer: "형사 고소와 민사 손해배상 청구는 독립된 절차로 동시에 진행이 가능합니다. 형사 수사에서 확보된 계좌 추적 결과를 민사 소송의 증거로 활용하는 방법도 있습니다." },
-      { question: "[후불 주의] 후불제로 사건 진행을 하고 싶은데 가능한가요?", answer: Q3_ANSWER },
-      { question: "어떤 경로로 대응하는 게 가장 효과적인가요?", answer: "증거 상태와 피해 규모에 따라 다르지만, 형사 고소로 계좌 추적을 먼저 진행하고 민사 가압류를 병행하는 방식이 일반적으로 효과적입니다." },
-      { question: "해외 서버를 이용한 사기도 대응이 가능한가요?", answer: "국내 계좌를 사용했거나 국내에 관련자가 있다면 형사 처벌과 민사 청구가 가능한 경우가 있습니다. 해외 주소지 사기범도 국내 입금 계좌가 있다면 지급정지와 가압류 조치가 가능합니다." },
-      { question: "신고 시 개인정보 보호가 되나요?", answer: "수사기관에 고소장을 제출할 때 피해자 정보는 법적으로 보호되며, 가명 처리 제도도 활용 가능합니다. 법률 상담은 대화 내역이 외부에 공개되지 않습니다." },
+      { question: `${base} 관련 페이지가 여러 개인 이유는 무엇인가요?`, answer: "검색 의도에 따라 필요한 정보가 다르기 때문입니다. 형사고소는 처벌과 수사, 민사소송은 회수 절차, 성공사례는 유사 흐름, AI브리핑은 사건 구조 이해에 초점을 둡니다." },
+      { question: "어떤 페이지부터 봐야 하나요?", answer: "추가 입금 요구를 받고 있다면 AI브리핑과 형사고소 페이지를 먼저 확인하세요. 이미 피해금 회수를 준비 중이라면 민사형과 성공사례형 페이지에서 증거와 절차를 비교하는 것이 좋습니다." },
+      { question: "동일 업체명인데 다른 사건일 수 있나요?", answer: "같은 업체명이라도 URL, 계좌, 상담원 계정이 다르면 별도 사건일 수 있습니다. 반대로 다른 이름을 쓰더라도 계좌와 담당자 정보가 같다면 같은 조직 가능성을 검토해야 합니다." },
+      { question: "전체 허브는 상담 접수에 어떤 도움이 되나요?", answer: "허브에서 사건명과 유형을 먼저 분류하면 상담 시 필요한 자료가 명확해집니다. 형사, 민사, 사례, 정보성 페이지가 연결되어 있어 중복 검색 시간을 줄일 수 있습니다." },
     ],
   };
-  return faqs[groupKey] || faqs.a;
-}
 
-// ─── Schema ───────────────────────────────────────────────────────────────────
+  return [...shared, ...(byType[group.key] || byType.a)];
+}
 
 function createSchemaData({ title, description, canonical, caseName, faq }) {
   return {
@@ -383,46 +481,24 @@ function createSchemaData({ title, description, canonical, caseName, faq }) {
   };
 }
 
-// ─── Category detection ───────────────────────────────────────────────────────
-
 function detectCategory(caseName) {
-  const text = normalizeSpace(caseName).toLowerCase();
-  if (/공동고소|단체|집단|탈출|형사|고소|합의/.test(text)) return "공동고소 형사대응";
-  if (/민사|가압류|손해배상|부당이득|판결|반환/.test(text)) return "민사소송 회수";
-  if (/성공|회수율|전액|지역|사례/.test(text)) return "회수 성공사례";
-  if (/브리핑|개요|대응방법|정보|주의/.test(text)) return "사건정보";
-  if (/방송|라이브|미션|포인트|환전/.test(text)) return "방송 환전 사기";
-  if (/로맨스|sns|채팅|연애|외국인/.test(text)) return "로맨스스캠 사기";
-  if (/카지노|게임|출금|보증금|피싱/.test(text)) return "환전 피싱";
-  if (/코인|거래소|선물|투자|리딩|주식|증권|공모주/.test(text)) return "투자 사기";
-  return "형사대응";
+  const text = normalizeSpace(caseName);
+  const match = CATEGORY_RULES.find((rule) => rule.re.test(text));
+  return match?.value || "형사대응";
 }
 
 function explainCategory(caseName, category) {
-  return `${caseName} 사건명에서 감지된 키워드를 기준으로 "${category}" 카테고리를 제안했습니다.`;
+  return `${caseName} 사건명에서 감지한 키워드를 기준으로 "${category}" 카테고리를 제안했습니다.`;
 }
 
 function createSummary(caseName, category) {
-  const map = {
-    "공동고소 형사대응": `${caseName} 관련 피해자들이 입금 유도와 추가 비용 요구를 겪은 사건으로 공동고소와 형사대응 검토가 필요합니다.`,
-    "민사소송 회수": `${caseName} 피해금 회수를 위해 가압류, 손해배상, 부당이득반환 등 민사 절차 검토가 필요한 사건입니다.`,
-    "회수 성공사례": `${caseName} 피해 회수 진행 과정과 대응 포인트를 정리한 성공사례형 사건입니다.`,
-    "사건정보": `${caseName} 사건 개요, 피해 구조, 증거 보존, 대응 방법을 정보성으로 정리한 사건입니다.`,
-    "방송 환전 사기": `${caseName}에서 라이브 방송·미션·포인트 환전을 빙자해 추가 입금을 요구한 사기 의심 사건입니다.`,
-    "로맨스스캠 사기": `${caseName} 관련 SNS 접근과 친분 형성 후 플랫폼 가입·환전·보증금 명목의 입금을 유도한 사건입니다.`,
-    "환전 피싱": `${caseName}에서 출금을 조건으로 보증금·세금·인증비 등 추가 입금을 요구한 사기 의심 사건입니다.`,
-    "투자 사기": `${caseName} 명칭을 이용해 투자금 입금·수익 실현·출금 수수료 등을 반복적으로 유도한 사기 의심 사건입니다.`,
-    "형사대응": `${caseName} 관련 피해 정황을 바탕으로 입금 경위·대화 내용·계좌 정보를 정리해 형사대응이 필요한 사건입니다.`,
-  };
-  return map[category] || map["형사대응"];
+  return `${caseName} 관련 ${category} 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.`;
 }
 
 function createTags(caseName, category) {
-  const tokens = normalizeSpace(caseName).split(/[\s-]+/).filter((t) => t.length >= 2).slice(0, 4);
-  return [...new Set([...tokens, category, "피해회복", "증거보존"])];
+  const tokens = normalizeSpace(caseName).split(/[\s-]+/).filter((token) => token.length >= 2).slice(0, 4);
+  return [...new Set([...tokens, category, "사기피해", "피해금회수", "증거보존"])];
 }
-
-// ─── Duplicate detection ──────────────────────────────────────────────────────
 
 function findDuplicateRisks(caseName, slug, cases) {
   const normalizedName = normalizeForCompare(caseName);
@@ -432,7 +508,7 @@ function findDuplicateRisks(caseName, slug, cases) {
       const existingSlug = String(item.slug || "");
       const score = Math.max(
         similarity(normalizedName, normalizeForCompare(existingName)),
-        similarity(normalizeForCompare(slug), normalizeForCompare(existingSlug))
+        similarity(normalizeForCompare(slug), normalizeForCompare(existingSlug)),
       );
       return { slug: existingSlug, caseName: existingName, score: Number(score.toFixed(2)), exactSlug: existingSlug === slug };
     })
@@ -447,18 +523,18 @@ function findDuplicateRisks(caseName, slug, cases) {
   };
 }
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
-
 function normalizeStringArray(value, fallback) {
   return Array.isArray(value) && value.length ? value.map(normalizeSpace).filter(Boolean) : fallback;
 }
 
 function normalizeFaq(value, fallback) {
   if (!Array.isArray(value)) return fallback;
-  const faq = value.map((item) => ({
-    question: normalizeSpace(item?.question),
-    answer: normalizeSpace(item?.answer),
-  })).filter((item) => item.question && item.answer);
+  const faq = value
+    .map((item) => ({
+      question: normalizeSpace(item?.question),
+      answer: normalizeSpace(item?.answer),
+    }))
+    .filter((item) => item.question && item.answer);
   return faq.length ? faq : fallback;
 }
 
@@ -505,7 +581,10 @@ function tokenSet(value) {
   const chunks = normalizeForCompare(value).split(/[\s-]+/).filter(Boolean);
   const grams = [];
   for (const chunk of chunks) {
-    if (chunk.length <= 2) { grams.push(chunk); continue; }
+    if (chunk.length <= 2) {
+      grams.push(chunk);
+      continue;
+    }
     for (let i = 0; i < chunk.length - 1; i++) grams.push(chunk.slice(i, i + 2));
   }
   return new Set(grams);
@@ -517,7 +596,7 @@ function normalizeForCompare(value) {
     .replace(/https?:\/\//g, "")
     .replace(/www\./g, "")
     .replace(/\.(com|net|org|co|kr|vip|shop|site|store|io)/g, "")
-    .replace(/사기|사칭|피해|투자|리딩방|거래소|증권|주식|코인/g, "")
+    .replace(/사기|피해|투자|리딩방|거래소|증권|주식|코인/g, "")
     .replace(/[^a-z0-9가-힣\s-]/g, "")
     .trim();
 }
@@ -535,7 +614,7 @@ function today() {
 function normalizeCaseName(name) {
   let clean = String(name || "").trim();
   clean = clean.replace(/\s*(?:사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
-  return /사기/.test(clean) ? `${clean} 사칭` : `${clean} 사칭 사기`;
+  return /사기/.test(clean) ? clean : `${clean} 사칭 사기`;
 }
 
 function baseCaseName(name) {
