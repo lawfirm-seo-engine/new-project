@@ -148,7 +148,7 @@ e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단�
       ],
       response_format: { type: "json_object" },
       temperature: 0.75,
-      max_tokens: 4500,
+      max_completion_tokens: 4500,
     }),
   });
 
