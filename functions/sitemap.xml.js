@@ -36,10 +36,10 @@ export async function onRequest(context) {
 
   const { siteUrl, prefix } = group;
   const entries = [
-    `  <url><loc>${siteUrl}/</loc><lastmod>${today}</lastmod><changefreq>hourly</changefreq><priority>1.0</priority></url>`,
+    `  <url><loc>${siteUrl}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
     ...cases.map((item) => {
       const lastmod = item.updatedAt || item.createdAt || today;
-      return `  <url><loc>${siteUrl}/${prefix}/${encodeURIComponent(item.slug)}/</loc><lastmod>${lastmod}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`;
+      return `  <url><loc>${siteUrl}/${prefix}/${encodeURIComponent(item.slug)}/</loc><lastmod>${lastmod}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>`;
     }),
   ];
 

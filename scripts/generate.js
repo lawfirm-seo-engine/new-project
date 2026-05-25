@@ -462,11 +462,9 @@ function createRelatedLinks(caseItem, currentKey = "") {
 function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = "" }) {
   const slug = caseItem?.slug ? encodeURIComponent(caseItem.slug) : "";
   const links = [
-    isHub
-      ? `<meta name="robots" content="noindex, follow">`
-      : `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
-    `<meta name="NaverBot" content="${isHub ? "Noindex" : "All"}">`,
-    `<meta name="Yeti" content="${isHub ? "Noindex" : "All"}">`,
+    `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
+    `<meta name="NaverBot" content="All">`,
+    `<meta name="Yeti" content="All">`,
     ...(group.naverVerification ? [`<meta name="naver-site-verification" content="${group.naverVerification}">`] : []),
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(group.siteName)} RSS" href="/rss.xml">`,
@@ -724,7 +722,7 @@ for (const group of groups) {
   const lastmod = today;
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((url, index) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod><changefreq>${index === 0 ? "hourly" : "daily"}</changefreq><priority>${index === 0 ? "1.0" : "0.8"}</priority></url>`).join("\n")}
+${urls.map((url, index) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod><changefreq>${index === 0 ? "daily" : "daily"}</changefreq><priority>${index === 0 ? "0.7" : "0.9"}</priority></url>`).join("\n")}
 </urlset>`;
 
   await fs.outputFile(path.join(group.outDir, "sitemap.xml"), sitemap);
