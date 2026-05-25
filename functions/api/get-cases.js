@@ -9,7 +9,8 @@ export async function onRequestGet(context) {
     );
     if (!res.ok) return json({ ok: false, message: "cases.json 로드 실패" }, 500);
     const file = await res.json();
-    const cases = JSON.parse(decodeBase64(file.content));
+    const raw = file.content ? decodeBase64(file.content).trim() : "";
+    const cases = raw ? JSON.parse(raw) : [];
     return json({ ok: true, cases });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
