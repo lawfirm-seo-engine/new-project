@@ -12,14 +12,14 @@ git pull origin main
 git log --oneline -5
 ```
 
-최신 커밋이 아래 순서로 보이면 집 PC 작업분이 반영된 상태입니다.
+최신 커밋이 아래 순서로 보이면 집 PC 작업분과 이후 반영분이 모두 포함된 상태입니다.
 
 ```text
-85d73ef Slow live receipt ticker
+ef3bd91 Add handoff notes for next workstation
+fb915c1 style: 랜딩 h1 중앙 정렬, 실시간 접수 스크롤 속도 2배 느리게 (160s→320s)
+bc12236 seo: 랜딩 페이지 SEO 개선 (published_time, title 브랜드, summary, h2 사건명)
 98b5e5a Add landing receipt status widgets
 bc167c7 Refine landing SEO copy and rendering
-7e5157d Improve SEO draft generation guidance
-61ab7fb Update OpenAI model to gpt-5.4-mini
 ```
 
 ## 최근 반영 내용
@@ -40,7 +40,7 @@ bc167c7 Refine landing SEO copy and rendering
   - 생성일 기준 최근 7일 내 날짜
   - 피해금액은 1,600만원 이상 랜덤
   - 일반 문의 문구도 섞임
-- 실시간 접수 현황 스크롤 속도를 `160s`로 늦췄습니다.
+- 실시간 접수 현황 스크롤 속도는 이후 추가 커밋에서 `320s`로 더 늦춰졌습니다.
 - 하단 sticky 상담 폼 간격을 넓혔고, `긴급상담 ｜ 02-6952-3695` 문구를 오른쪽으로 이동했습니다.
 - c형 허브의 회수율 문구가 생성 때마다 흔들리지 않도록 slug 기준 고정값으로 바꿨습니다.
 
@@ -69,7 +69,7 @@ npm.cmd run generate
 - 접수 배지 표시
 - title 하단 설명에 사건명 미포함
 - 실시간 접수 현황 50건 표시
-- 실시간 접수 스크롤 `160s`
+- 실시간 접수 스크롤 `320s`
 
 ## 다음 작업 시 주의
 
