@@ -141,7 +141,7 @@ e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단�
     method: "POST",
     headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-4.5-mini",
+      model: "gpt-5.4-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
