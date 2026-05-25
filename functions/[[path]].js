@@ -102,16 +102,21 @@ export async function onRequest(context) {
 
   const slug = decodeURIComponent(parts[1]);
 
-  if (!env.CASES) {
-    return new Response("KV not configured", { status: 503 });
+  // KV 우선, 없으면 GitHub fallback
+  let caseData = null;
+
+  if (env.CASES) {
+    const raw = await env.CASES.get(`case:${slug}`);
+    if (raw) caseData = JSON.parse(raw);
   }
 
-  const raw = await env.CASES.get(`case:${slug}`);
-  if (!raw) {
+  if (!caseData) {
+    caseData = await fetchCaseFromGitHub(slug, env);
+  }
+
+  if (!caseData) {
     return new Response("사건을 찾을 수 없습니다.", { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
-
-  const caseData = JSON.parse(raw);
   const html = renderLanding(caseData, group, url.origin);
 
   return new Response(html, {
@@ -444,4 +449,47 @@ function faqHtml(items = [], caseName = "") {
     if (i < 3 && caseName) q = `[${caseName}] ` + q.replace(/^\[[^\]]*\]\s*/, "");
     return `<details><summary>${esc(q)}</summary><p>${esc(item.answer)}</p></details>`;
   }).join("\n");
+}
+
+// ─── GitHub Fallback ─────────────────────────────────────────────────────────
+
+async function fetchCaseFromGitHub(slug, env) {
+  try {
+    const owner = env.GITHUB_REPO_OWNER;
+    const repo = env.GITHUB_REPO_NAME;
+    const branch = env.GITHUB_BRANCH || "main";
+    const token = env.GITHUB_TOKEN;
+    if (!owner || !repo || !token) return null;
+
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`;
+    const res = await fetch(apiUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "static-landing-generator",
+      },
+    });
+    if (!res.ok) return null;
+
+    const file = await res.json();
+    let text = "";
+    if (file.content && file.encoding !== "none") {
+      const clean = file.content.replace(/\n/g, "");
+      text = new TextDecoder().decode(Uint8Array.from(atob(clean), (c) => c.charCodeAt(0)));
+    } else if (file.download_url) {
+      const dr = await fetch(file.download_url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "User-Agent": "static-landing-generator",
+        },
+      });
+      if (dr.ok) text = await dr.text();
+    }
+
+    if (!text) return null;
+    const cases = JSON.parse(text.trim());
+    return cases.find((c) => c.slug === slug) || null;
+  } catch {
+    return null;
+  }
 }
