@@ -54,9 +54,14 @@ export async function onRequestPost(context) {
 // ─── Data loading ────────────────────────────────────────────────────────────
 
 async function loadCases(env) {
+  // KV 우선
+  if (env.CASES) {
+    const raw = await env.CASES.get("cases:index");
+    if (raw) return JSON.parse(raw);
+  }
+  // GitHub 폴백
   const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
   if (!owner || !repo || !token) return [];
-
   const res = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`,
     { headers: githubHeaders(token) }
@@ -136,7 +141,7 @@ e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단�
     method: "POST",
     headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-4.1-mini",
+      model: "gpt-4.5-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },

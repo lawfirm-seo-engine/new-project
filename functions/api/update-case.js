@@ -76,10 +76,32 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
+    // KV 업데이트
+    if (env.CASES) {
+      await env.CASES.put(`case:${slug}`, JSON.stringify(cases[idx]));
+      const idxRaw = await env.CASES.get("cases:index");
+      if (idxRaw) {
+        const indexArr = JSON.parse(idxRaw);
+        const pos = indexArr.findIndex((e) => e.slug === slug);
+        if (pos !== -1) indexArr[pos] = buildIndexEntry(cases[idx]);
+        else indexArr.push(buildIndexEntry(cases[idx]));
+        await env.CASES.put("cases:index", JSON.stringify(indexArr));
+      }
+    }
+
     return json({ ok: true, updatedCase: cases[idx] });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+function buildIndexEntry(c) {
+  return {
+    slug: c.slug, caseName: c.caseName || "", category: c.category || "",
+    createdAt: c.createdAt || "", updatedAt: c.updatedAt || "",
+    thumbnailUrl: c.thumbnailUrl || "", landingViews: c.landingViews || 0,
+    reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
+  };
 }
 
 function githubEnv(env) {

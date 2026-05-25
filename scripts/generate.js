@@ -680,40 +680,9 @@ for (const group of groups) {
 
   await fs.outputFile(path.join(group.outDir, "index.html"), hubHtml);
 
-  for (const caseItem of cases) {
-    const landing = getLanding(caseItem, group);
-    const pageTitle = groupPageTitle(caseItem.caseName, group.key);
-    const keyword = searchKeyword(caseItem.caseName);
-    const schema = createSchemaData({
-      title: pageTitle,
-      description: landing.description,
-      canonical: landing.canonical,
-      faq: landing.faq || [],
-      groupKey: group.key,
-      caseName: caseItem.caseName,
-      keywords: keyword,
-    });
-    const html = buildPage(template, group, {
-      title: escapeHtml(pageTitle),
-      description: escapeHtml(landing.description),
-      canonical: landing.canonical,
-      ogTitle: escapeHtml(pageTitle),
-      ogDescription: escapeHtml(landing.ogDescription),
-      ogImage: caseItem.thumbnailUrl || landing.ogImage,
-      headExtra: createHeadExtra({ landing, group, caseItem, keyword }),
-      schema: JSON.stringify(schema, null, 2),
-      h1: escapeHtml(pageTitle),
-      ogThumbnail: caseItem.thumbnailUrl
-        ? `<img src="${escapeHtml(caseItem.thumbnailUrl)}" alt="${escapeHtml(pageTitle)}" class="hero-thumb" loading="lazy">`
-        : "",
-      summary: escapeHtml(landing.description),
-      content: createLandingContent(landing, group, caseItem),
-      headerCall: `<a class="header-call" href="#consult">상담 접수</a>`,
-      pageKind: "landing-page",
-    });
-
-    await fs.outputFile(path.join(group.outDir, group.pathPrefix, caseItem.slug, "index.html"), html);
-  }
+  // NOTE: Individual case landing pages are now served dynamically by functions/[[path]].js
+  // Static HTML generation for case pages has been removed (KV architecture).
+  // The sitemap still lists all case URLs so Naver can discover them.
 
   const urls = [
     `${group.siteUrl}/`,

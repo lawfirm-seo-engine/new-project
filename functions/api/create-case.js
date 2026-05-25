@@ -122,17 +122,35 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
+    // KV 저장 (개별 사건 + 인덱스 업데이트)
+    if (env.CASES) {
+      await env.CASES.put(`case:${slug}`, JSON.stringify(newCase));
+      const idxRaw = await env.CASES.get("cases:index");
+      const idx = idxRaw ? JSON.parse(idxRaw) : [];
+      idx.push(buildIndexEntry(newCase));
+      await env.CASES.put("cases:index", JSON.stringify(idx));
+    }
+
     const indexNowKey = env.INDEXNOW_KEY || "6f71f78a3dc940b9a3e1025bf8460d3c";
     pingIndexNow(slug, indexNowKey).catch(() => {});
 
     return json({
       ok: true,
-      message: "사건이 GitHub에 저장되었습니다. Pages가 자동 배포됩니다.",
+      message: "사건이 저장되었습니다.",
       case: newCase,
     });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+function buildIndexEntry(c) {
+  return {
+    slug: c.slug, caseName: c.caseName || "", category: c.category || "",
+    createdAt: c.createdAt || "", updatedAt: c.updatedAt || "",
+    thumbnailUrl: c.thumbnailUrl || "", landingViews: c.landingViews || 0,
+    reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
+  };
 }
 
 async function pingIndexNow(slug, key) {

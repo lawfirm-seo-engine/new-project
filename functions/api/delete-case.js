@@ -40,6 +40,16 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
+    // KV 삭제
+    if (env.CASES) {
+      await env.CASES.delete(`case:${slug}`);
+      const idxRaw = await env.CASES.get("cases:index");
+      if (idxRaw) {
+        const indexArr = JSON.parse(idxRaw).filter((e) => e.slug !== slug);
+        await env.CASES.put("cases:index", JSON.stringify(indexArr));
+      }
+    }
+
     return json({ ok: true, deleted });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
