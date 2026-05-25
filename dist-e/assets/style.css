@@ -460,7 +460,7 @@ button{
   list-style:none;
   margin:0;
   padding:0;
-  animation:liveReceiptDown 42s linear infinite;
+  animation:liveReceiptDown 160s linear infinite;
 }
 
 .live-receipt-track:hover{

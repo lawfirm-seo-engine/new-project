@@ -698,7 +698,7 @@ function createHubContent(group) {
             <strong class="case-title">${displayTitle}</strong>
             ${item.createdAt === today ? '<em class="today-badge">TODAY</em>' : ""}
           </span>
-          <span class="case-status">${statusLabel(group.key)}</span>
+          <span class="case-status">${statusLabel(group.key, item.slug)}</span>
           <span class="case-date">${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
           <span class="case-views">${(item.landingViews || 0).toLocaleString("ko-KR")}</span>
         </a>`;
@@ -771,9 +771,11 @@ function searchKeyword(name) {
   return `${base} 사기, ${base} 사칭 사기`;
 }
 
-function statusLabel(key) {
+function statusLabel(key, seed = key) {
   if (key === "c") {
-    return Math.random() < 0.25 ? "전액 회수" : `${randomInt(3, 80)}% 회수`;
+    return seededInt(`${seed}-success-full`, 1, 100) <= 25
+      ? "전액 회수"
+      : `${seededInt(`${seed}-success-rate`, 3, 80)}% 회수`;
   }
   return { a: "형사 진행중", b: "민사 진행중", d: "사건 접수중", e: "사건 진행중" }[key] || "진행중";
 }
