@@ -121,9 +121,9 @@ e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단�
 [작성 제약]
 - 확정적 회수 보장·수익 보장 금지 (가능성, 검토, 정황 등으로 표현)
 - 재판 전 범죄 단정 금지 ("사기 의심", "관련 정황" 사용)
-- body: 완결된 단락 4개, 각 2~4문장, 사건명 자연스럽게 2~3회 포함
+- body: 완결된 단락 4개, 각 2~4문장. 업체명(base)은 자연스럽게 사용, 전체 사건명(xxx 사칭 사기)은 body 전체에서 최대 2회
 - victimCases: 구체적인 실제 피해 패턴 4개 (막연한 표현 금지)
-- description: 검색 키워드 포함 80~120자
+- description: 검색 키워드 포함 80~120자. 사건명은 1회만
 
 반환 JSON 형식:
 {"summary":"","tags":[],"reviewNotes":[],"landings":{"a":{"description":"","ogDescription":"","body":["","","",""],"victimCases":["","","",""]},"b":{},"c":{},"d":{},"e":{}}}`;
@@ -134,7 +134,7 @@ e 전체허브: 형사·민사·사례·정보 진입 경로 안내, 피해 단�
     method: "POST",
     headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-4.5-mini",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },

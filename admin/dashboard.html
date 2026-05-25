@@ -47,7 +47,7 @@
   fetch('/api/get-cases')
     .then(r => r.json())
     .then(data => {
-      if (!data.ok) { document.getElementById('tbody').innerHTML = '<tr><td colspan="6">불러오기 실패</td></tr>'; return; }
+      if (!data.ok) { document.getElementById('tbody').innerHTML = `<tr><td colspan="6" style="color:#c0392b">불러오기 실패: ${data.message || '알 수 없는 오류'}</td></tr>`; return; }
       const cases = data.cases;
       document.getElementById('caseCount').textContent = `총 ${cases.length}건`;
       const sorted = [...cases].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));

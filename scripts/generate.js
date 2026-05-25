@@ -42,7 +42,7 @@ const groups = [
     titleSuffix: "형사고소 및 법적 대응",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
     ogSuffix: "형사고소 대응",
-    hubTitle: "사기피해 형사 사건 접수 리스트",
+    hubTitle: "대온 법률사무소 사기피해 형사 사건 접수 리스트",
     hubLead: "사기 의심 업체명과 접수 현황을 빠르게 확인하고, 동일 피해자가 모일 수 있도록 사건별 법적 대응 정보를 정리합니다.",
     tone: "긴급 대응",
     ctaTitle: "형사고소 가능성 확인",
@@ -66,7 +66,7 @@ const groups = [
     titleSuffix: "민사소송 및 회수 절차",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
     ogSuffix: "민사 회수 절차",
-    hubTitle: "민사 소송 진행 사건 리스트",
+    hubTitle: "대온 법률사무소 민사 소송 진행 사건 리스트",
     hubLead: "채권 보전과 손해배상 청구 관점에서 사건별 회수 가능성, 가압류 필요성, 합의 전략을 정리합니다.",
     tone: "회수 전략",
     ctaTitle: "민사 회수 경로 검토",
@@ -90,7 +90,7 @@ const groups = [
     titleSuffix: "회수 성공사례 분석",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
     ogSuffix: "회수 성공사례",
-    hubTitle: "피해 회수 성공 사건 리스트",
+    hubTitle: "대온 법률사무소 피해 회수 성공 사건 리스트",
     hubLead: "유사 사건의 대응 흐름과 회수율을 비교할 수 있도록 성공사례 중심으로 재구성한 사건 목록입니다.",
     tone: "결과 중심",
     ctaTitle: "유사 성공사례 비교",
@@ -114,7 +114,7 @@ const groups = [
     titleSuffix: "사건 정보",
     descriptionSuffix: "네이버 검색 노출을 고려해 사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
     ogSuffix: "사건 정보",
-    hubTitle: "피해 사건 정보 리스트",
+    hubTitle: "대온 법률사무소 피해 사건 정보 리스트",
     hubLead: "사건 구조를 빠르게 이해할 수 있도록 질문과 답변, 핵심 요약, 대응 순서를 정보성으로 제공합니다.",
     tone: "정보 요약",
     ctaTitle: "사건 구조 확인",
@@ -138,7 +138,7 @@ const groups = [
     titleSuffix: "전체 허브",
     descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
     ogSuffix: "전체 허브",
-    hubTitle: "사기피해 전체 사건 리스트",
+    hubTitle: "대온 법률사무소 사기피해 전체 사건 리스트",
     hubLead: "같은 사건을 형사고소, 민사소송, 성공사례, 정보 브리핑 관점으로 연결해 검색 의도별 진입 경로를 제공합니다.",
     tone: "통합 탐색",
     ctaTitle: "유형별 대응 보기",
@@ -462,9 +462,11 @@ function createRelatedLinks(caseItem, currentKey = "") {
 function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = "" }) {
   const slug = caseItem?.slug ? encodeURIComponent(caseItem.slug) : "";
   const links = [
-    `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
-    `<meta name="NaverBot" content="All">`,
-    `<meta name="Yeti" content="All">`,
+    isHub
+      ? `<meta name="robots" content="noindex, follow">`
+      : `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
+    `<meta name="NaverBot" content="${isHub ? "Noindex" : "All"}">`,
+    `<meta name="Yeti" content="${isHub ? "Noindex" : "All"}">`,
     ...(group.naverVerification ? [`<meta name="naver-site-verification" content="${group.naverVerification}">`] : []),
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(group.siteName)} RSS" href="/rss.xml">`,
@@ -703,7 +705,9 @@ for (const group of groups) {
       headExtra: createHeadExtra({ landing, group, caseItem, keyword }),
       schema: JSON.stringify(schema, null, 2),
       h1: escapeHtml(pageTitle),
-      ogThumbnail: "",
+      ogThumbnail: caseItem.thumbnailUrl
+        ? `<img src="${escapeHtml(caseItem.thumbnailUrl)}" alt="${escapeHtml(pageTitle)}" class="hero-thumb" loading="lazy">`
+        : "",
       summary: escapeHtml(landing.description),
       content: createLandingContent(landing, group, caseItem),
       headerCall: `<a class="header-call" href="#consult">상담 접수</a>`,
