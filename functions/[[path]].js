@@ -143,8 +143,10 @@ function renderLanding(caseData, group, origin) {
   const pageTitle = groupPageTitle(rawCaseName, group.key);
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}/`;
   const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.webp`;
-  const today = new Date().toISOString().slice(0, 10);
-  const isoNow = new Date().toISOString();
+  const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
+  const modifiedDate = new Date().toISOString().slice(0, 10);
+  const isoPublished = `${publishedDate}T00:00:00+09:00`;
+  const isoModified = new Date().toISOString();
   const keyword = `${baseCaseName(rawCaseName)} 사기, ${baseCaseName(rawCaseName)} 사칭 사기`;
 
   const headExtra = [
@@ -157,8 +159,8 @@ function renderLanding(caseData, group, origin) {
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="preload" as="image" href="/assets/og-template.png">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
-    `<meta property="article:published_time" content="${isoNow}">`,
-    `<meta property="article:modified_time" content="${isoNow}">`,
+    `<meta property="article:published_time" content="${isoPublished}">`,
+    `<meta property="article:modified_time" content="${isoModified}">`,
     `<meta property="article:author" content="대온 법률사무소">`,
     `<meta property="article:section" content="${esc(group.intent)}">`,
     `<meta name="author" content="대온 법률사무소">`,
@@ -172,7 +174,7 @@ function renderLanding(caseData, group, origin) {
         "@type": "WebPage",
         "@id": `${canonical}#webpage`,
         name: pageTitle, url: canonical, inLanguage: "ko-KR",
-        datePublished: today, dateModified: today,
+        datePublished: publishedDate, dateModified: modifiedDate,
         breadcrumb: { "@id": `${canonical}#breadcrumb` },
         author: ORGANIZATION,
       },
@@ -180,7 +182,7 @@ function renderLanding(caseData, group, origin) {
         "@type": group.key === "d" ? "NewsArticle" : "Article",
         "@id": `${canonical}#article`,
         headline: pageTitle, url: canonical, inLanguage: "ko-KR",
-        datePublished: today, dateModified: today,
+        datePublished: publishedDate, dateModified: modifiedDate,
         author: ORGANIZATION, publisher: ORGANIZATION,
         isPartOf: { "@id": `${canonical}#webpage` },
         keywords: keyword,
@@ -213,13 +215,18 @@ function renderLanding(caseData, group, origin) {
     return `<a class="${active}" href="${l.url}/">${esc(l.label)}</a>`;
   }).join("\n");
 
+  const pageSummary = esc(
+    landing.description || caseData.summary ||
+    "최근 접수 흐름과 대응 절차를 기준으로 피해 구조, 증거 보존, 상담 전 확인사항을 정리했습니다."
+  );
+
   return pageTemplate({
-    title: esc(pageTitle),
-    description: esc(landing.description || ""),
+    title: esc(`${pageTitle} | 대온 법률사무소`),
+    description: esc(landing.description || caseData.summary || ""),
     canonical,
     ogType: group.ogType,
     ogTitle: esc(pageTitle),
-    ogDescription: esc(landing.ogDescription || landing.description || ""),
+    ogDescription: esc(landing.ogDescription || landing.description || caseData.summary || ""),
     ogImage: esc(ogImage),
     siteName: esc(group.siteName),
     headExtra,
@@ -228,7 +235,7 @@ function renderLanding(caseData, group, origin) {
     tone: esc(group.tone),
     h1: esc(pageTitle),
     ogThumbnail,
-    summary: "최근 접수 흐름과 대응 절차를 기준으로 피해 구조, 증거 보존, 상담 전 확인사항을 정리했습니다.",
+    summary: pageSummary,
     receiptBadge: createReceiptBadge(caseData),
     content,
     intent: esc(group.intent),
@@ -259,10 +266,10 @@ function createLandingContent(landing, group, caseData) {
   const faqSection = group.key === "d"
     ? `<section class="article-block brief-card"><h2>${name} 사건 개요</h2>${paragraphs(body)}</section>
 <section class="article-block"><h2>${name} 피해 유형</h2>${list(victimCases)}</section>
-<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(faq, rawCaseName)}</section>`
+<section class="article-block faq"><h2>${name} 자주 묻는 질문 (FAQ)</h2>${faqHtml(faq, rawCaseName)}</section>`
     : `<section class="article-block"><p class="section-kicker">${esc(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(body)}</section>
-<section class="article-block"><h2>피해 사례</h2>${list(victimCases)}</section>
-<section class="article-block faq"><h2>FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`;
+<section class="article-block"><h2>${name} 피해 사례</h2>${list(victimCases)}</section>
+<section class="article-block faq"><h2>${name} FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`;
 
   const consultForm = createConsultForm(cn, siteName);
   const floatingWidgets = createFloatingWidgets(cn, siteName, slug);
