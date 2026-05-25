@@ -47,7 +47,7 @@
   fetch('/api/get-cases')
     .then(r => r.json())
     .then(data => {
-      if (!data.ok) { document.getElementById('tbody').innerHTML = '<tr><td colspan="6">불러오기 실패</td></tr>'; return; }
+      if (!data.ok) { document.getElementById('tbody').innerHTML = `<tr><td colspan="6" style="color:#c0392b">불러오기 실패: ${data.message || '알 수 없는 오류'}</td></tr>`; return; }
       const cases = data.cases;
       document.getElementById('caseCount').textContent = `총 ${cases.length}건`;
       const sorted = [...cases].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
@@ -61,6 +61,7 @@
           <td>${esc(c.updatedAt||'-')}</td>
           <td class="act">
             <a href="/admin/edit.html?slug=${encodeURIComponent(c.slug)}">편집</a>
+            <a href="#" onclick="setThumbnail('${esc(c.slug)}');return false;">썸네일</a>
             <a href="https://new-project-9o2.pages.dev/prosecute/${encodeURIComponent(c.slug)}/" target="_blank">A</a>
             <a href="https://new-project-b.pages.dev/civil/${encodeURIComponent(c.slug)}/" target="_blank">B</a>
             <a href="https://new-project-d.pages.dev/briefing/${encodeURIComponent(c.slug)}/" target="_blank">D</a>
@@ -89,6 +90,21 @@
     } catch (e) {
       alert('오류: ' + e.message);
     }
+  }
+
+  async function setThumbnail(slug) {
+    const url = prompt('썸네일 이미지 URL을 입력하세요 (비워두면 삭제):');
+    if (url === null) return;
+    try {
+      const res = await fetch('/api/update-case', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, action: 'update-thumbnail', value: url.trim() }),
+      });
+      const data = await res.json();
+      if (data.ok) alert('썸네일이 저장되었습니다. 다음 빌드에 반영됩니다.');
+      else alert('저장 실패: ' + (data.message || ''));
+    } catch (e) { alert('오류: ' + e.message); }
   }
 
   function esc(str) {

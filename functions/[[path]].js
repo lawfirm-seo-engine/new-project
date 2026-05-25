@@ -102,7 +102,9 @@ export async function onRequest(context) {
 
   const slug = decodeURIComponent(parts[1]);
 
-  // KV 우선, 없으면 GitHub fallback
+  // 1순위: KV
+  // 2순위: GitHub (env vars 있을 때)
+  // 3순위: project A의 공개 API (b~e 프로젝트 fallback)
   let caseData = null;
 
   if (env.CASES) {
@@ -112,6 +114,10 @@ export async function onRequest(context) {
 
   if (!caseData) {
     caseData = await fetchCaseFromGitHub(slug, env);
+  }
+
+  if (!caseData) {
+    caseData = await fetchCaseFromHubAPI(slug);
   }
 
   if (!caseData) {
@@ -244,26 +250,106 @@ function createLandingContent(landing, group, caseData) {
   const memoSection = caseData.memo
     ? `<section class="article-block memo-section"><h2>운영자 안내</h2><p>${esc(caseData.memo)}</p></section>`
     : "";
+  const body = renderBodyForLanding(landing, group, caseData);
+  const victimCases = renderVictimCasesForLanding(landing, group, caseData);
+  const faq = renderFaqForLanding(landing, group, caseData);
 
   const faqSection = group.key === "d"
-    ? `<section class="article-block brief-card"><h2>${name} 사건 개요</h2>${paragraphs(landing.body)}</section>
-<section class="article-block"><h2>${name} 피해 유형</h2>${list(landing.victimCases)}</section>
-<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(landing.faq, rawCaseName)}</section>`
-    : `<section class="article-block"><p class="section-kicker">${esc(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(landing.body)}</section>
-<section class="article-block"><h2>피해 사례</h2>${list(landing.victimCases)}</section>
-<section class="article-block faq"><h2>FAQ</h2>${faqHtml(landing.faq, rawCaseName)}</section>`;
+    ? `<section class="article-block brief-card"><h2>${name} 사건 개요</h2>${paragraphs(body)}</section>
+<section class="article-block"><h2>${name} 피해 유형</h2>${list(victimCases)}</section>
+<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(faq, rawCaseName)}</section>`
+    : `<section class="article-block"><p class="section-kicker">${esc(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(body)}</section>
+<section class="article-block"><h2>피해 사례</h2>${list(victimCases)}</section>
+<section class="article-block faq"><h2>FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`;
 
-  const relatedLinks = createRelatedLinks(caseData, group.key);
   const consultForm = createConsultForm(cn, siteName);
   const floatingWidgets = createFloatingWidgets(cn, siteName, slug);
 
-  return [faqSection, memoSection, relatedLinks, consultForm, floatingWidgets, trackScript].filter(Boolean).join("\n");
+  return [faqSection, memoSection, consultForm, floatingWidgets, trackScript].filter(Boolean).join("\n");
+}
+
+function renderBodyForLanding(landing, group, caseData) {
+  const fullName = normalizeCaseName(caseData.caseName || "");
+  const base = fullName.replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim() || fullName;
+  const original = Array.isArray(landing.body) ? landing.body.filter(Boolean) : [];
+  const additions = {
+    a: [
+      `${base} 사건은 사기죄 형법 제347조의 기망, 착오, 처분행위, 재산상 이익 취득 구조를 기준으로 검토합니다. 상대방이 허위 수익이나 출금 가능성을 말해 입금을 유도했다면 고소장에는 그 대화와 송금 흐름을 함께 정리해야 합니다.`,
+      `형사고소를 준비할 때는 입금증, 계좌번호, 예금주, 대화방 캡처, 사이트 주소, 담당자 프로필을 시간 순서로 묶는 것이 좋습니다. 상담 접수나 전화 문의 전에 이 자료를 모아두면 고소 가능성과 추가 조치 방향을 빠르게 확인할 수 있습니다.`,
+    ],
+    b: [
+      `${base} 피해금 회수는 민사소송, 가압류, 손해배상청구, 부당이득반환소송을 함께 보아야 합니다. 상대방 계좌나 연계 법인이 확인되면 판결 전 재산을 묶어두는 보전처분 필요성부터 검토합니다.`,
+      `가압류는 상대방이 자금을 옮기기 전에 집행 가능성을 확보하는 절차입니다. 손해배상과 부당이득반환 중 어떤 청구가 적절한지는 입금 경위, 기망 표현, 계약 형태, 상대방 특정 가능성에 따라 달라집니다.`,
+    ],
+    c: [
+      `${base} 유사 성공사례에서는 지급정지 후 계좌 잔액 일부가 묶인 사례, 가압류 후 합의가 진행된 사례, 수사 과정에서 반환 협의가 열린 사례가 있었습니다. 다만 전액 회수나 동일 결과를 보장할 수는 없습니다.`,
+      `성공사례를 볼 때는 결과보다 대응 순서를 비교해야 합니다. 입금 직후 증거를 보존하고 상담 접수로 자료를 정리한 사건은 계좌 추적, 형사고소, 민사 보전처분을 연결하기가 더 수월했습니다.`,
+    ],
+    d: [
+      `${base} 원고는 네이버 AI 브리핑이 이해하기 쉬운 구조를 목표로 합니다. 사건 개요, 피해 구조, 즉시 대응, 증거 목록을 질문과 답변처럼 정리하면 검색자가 필요한 정보를 빠르게 파악할 수 있습니다.`,
+      `AI 브리핑 노출을 고려할 때는 과장된 홍보 문구보다 명확한 사실 구조가 중요합니다. 업체명, 입금 명목, 출금 제한, 추가 비용 요구, 상담 접수 전 준비 자료를 균형 있게 설명해야 합니다.`,
+    ],
+    e: [
+      `${base} 전체 허브는 형사고소, 민사소송, 성공사례, AI 브리핑 정보를 균형 있게 연결합니다. 사건을 처음 확인한 사람은 전체 흐름을 보고, 급한 경우 전화나 카톡 상담으로 증거 상태를 먼저 점검할 수 있습니다.`,
+      `같은 사건이라도 처벌을 원하면 형사형, 회수를 원하면 민사형, 유사 결과를 보고 싶으면 성공사례형, 구조를 파악하려면 브리핑형이 적합합니다. 전체 허브는 이 선택을 돕는 안내 페이지입니다.`,
+    ],
+  }[group.key] || [];
+
+  return [...original, ...additions].slice(0, 9);
+}
+
+function renderVictimCasesForLanding(landing, group, caseData) {
+  const fullName = normalizeCaseName(caseData.caseName || "");
+  const base = fullName.replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim() || fullName;
+  const original = Array.isArray(landing.victimCases) ? landing.victimCases.filter(Boolean) : [];
+  const additions = [
+    `${base} 상담원이 카카오톡이나 텔레그램으로 접근해 소액 수익 화면을 보여준 뒤 세금, 보증금, 인증비 명목의 추가 입금을 요구한 사례`,
+    `피해자가 출금을 요청하자 심사 중이라는 안내만 반복되고, 입금 계좌와 담당자 계정이 며칠 사이 바뀐 사례`,
+    `환불을 요구한 뒤 피해금 회복팀 또는 법무팀을 사칭한 계정이 다시 연락해 선입금 수수료를 요구한 2차 피해 사례`,
+    `입금증, 계좌번호, 대화 캡처는 남아 있지만 사이트가 폐쇄되어 상담 접수 단계에서 증거를 다시 정리한 사례`,
+    `여러 피해자가 같은 계좌 또는 유사 URL을 확인해 형사고소와 민사 가압류 가능성을 함께 검토한 사례`,
+  ];
+  return [...original, ...additions].slice(0, 5);
+}
+
+function renderFaqForLanding(landing, group, caseData) {
+  const fullName = normalizeCaseName(caseData.caseName || "");
+  const base = fullName.replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim() || fullName;
+  const original = Array.isArray(landing.faq) ? landing.faq.filter((item) => item?.question && item?.answer) : [];
+  const shared = [
+    { question: "전화나 카톡 상담은 언제 이용하면 좋나요?", answer: "추가 입금 요구가 계속되거나 대화방 삭제가 예상되면 전화나 카톡 상담으로 먼저 증거 상태를 점검하는 것이 좋습니다. 상담 접수 전이라도 입금증, 계좌번호, 대화 캡처를 준비하면 초기 판단이 빨라집니다." },
+    { question: "2차 피해를 막으려면 무엇을 조심해야 하나요?", answer: "피해금 회복팀, 환불 대행, 법무팀을 사칭해 선입금을 요구하는 연락을 조심해야 합니다. 기존 사건 자료를 넘기기 전 상대방 신원과 절차를 확인하고, 수수료 선입금 요구에는 응하지 않는 것이 안전합니다." },
+  ];
+  const additions = {
+    a: [
+      { question: "사기죄 형법 제347조 검토에는 어떤 자료가 필요한가요?", answer: "기망 표현, 입금 경위, 출금 제한 안내, 추가 비용 요구 메시지가 중요합니다. 상대방이 허위 사실로 착오를 일으키고 송금을 유도했다는 흐름을 계좌 자료와 함께 정리해야 합니다." },
+      { question: "형사고소 전 상담 접수를 먼저 해도 되나요?", answer: "가능합니다. 상담 접수 단계에서 증거 목록과 고소장 구성 방향을 먼저 확인하면 경찰 접수 전 빠진 자료를 보완할 수 있습니다. 급하면 전화나 카톡 상담으로 현재 자료부터 점검할 수 있습니다." },
+    ],
+    b: [
+      { question: "가압류와 민사소송은 어떤 순서로 보나요?", answer: "상대방 계좌나 재산 단서가 있으면 가압류 같은 보전처분을 먼저 검토하고, 이후 손해배상청구나 부당이득반환소송을 준비합니다. 재산이 이동되기 전에 판단하는 것이 중요합니다." },
+      { question: "손해배상과 부당이득반환은 무엇이 다른가요?", answer: "손해배상은 불법행위로 발생한 손해를 청구하는 구조이고, 부당이득반환은 법률상 원인 없이 얻은 이익의 반환을 구하는 구조입니다. 사건 자료에 따라 함께 검토될 수 있습니다." },
+    ],
+    c: [
+      { question: "어떤 성공사례를 참고해야 하나요?", answer: "지급정지 후 일부 회수, 가압류 후 합의, 수사 중 반환 협의처럼 절차가 구체적으로 이어진 사례를 참고해야 합니다. 결과만 보지 말고 증거 보존과 접수 시점을 비교하는 것이 좋습니다." },
+      { question: "성공사례와 내 사건이 비슷한지 어떻게 확인하나요?", answer: "업체명보다 계좌, URL, 상담원 계정, 입금 명목, 출금 제한 방식이 더 중요합니다. 상담 접수 시 이 자료를 제시하면 유사 사례와 비교해 절차 방향을 검토할 수 있습니다." },
+    ],
+    d: [
+      { question: "네이버 AI 브리핑에 맞는 원고 구조는 무엇인가요?", answer: "사건 개요, 피해 방식, 즉시 대응, 증거 보존, 상담 접수 전 준비 자료가 질문과 답변처럼 명확해야 합니다. 과도한 홍보보다 정보성 문장이 브리핑형 원고에 더 적합합니다." },
+      { question: "AI 브리핑형 페이지에서도 상담 유도 문구가 필요한가요?", answer: "필요합니다. 다만 노골적인 광고보다 증거를 보존한 뒤 전화나 카톡 상담으로 현재 상황을 확인하라는 실용적인 안내가 더 자연스럽습니다." },
+    ],
+    e: [
+      { question: "전체 허브에서는 어떤 균형이 중요한가요?", answer: "형사고소, 민사 회수, 성공사례, 정보 브리핑을 한쪽으로 치우치지 않게 연결해야 합니다. 사용자가 자신의 목적에 맞는 페이지로 이동할 수 있도록 안내하는 것이 핵심입니다." },
+      { question: "처음 방문자는 어디서 상담을 시작하면 좋나요?", answer: "사건 구조를 모르면 전체 허브에서 자료를 분류하고, 급한 추가 입금 요구가 있다면 전화 또는 카톡 상담으로 먼저 확인하는 것이 좋습니다. 이후 형사형이나 민사형으로 이동하면 됩니다." },
+    ],
+  }[group.key] || [];
+
+  return [...original, ...additions, ...shared].slice(0, 7);
 }
 
 function createConsultForm(cn, siteName) {
   return `<section class="article-block consult-form-section" id="consult">
   <h2>상담 접수</h2>
-  <p>이름, 연락처, 피해금액을 입력하시면 담당자가 빠르게 연락드립니다.</p>
+  <p>추가 입금 요구를 받았거나 출금이 막혔다면 지금 자료를 남겨주세요. 상담 접수 후 전화 또는 카톡으로 입금 내역, 대화 캡처, 계좌 정보를 확인해 초기 대응 방향을 안내합니다.</p>
   <form class="consult-form" id="consultForm">
     <input type="text" name="cname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="phone" placeholder="연락처 (010-xxxx-xxxx)" required autocomplete="tel">
@@ -324,17 +410,6 @@ function createFloatingWidgets(cn, siteName, slug) {
     } catch(err) { msg.textContent = '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
   });
 </script>`;
-}
-
-function createRelatedLinks(caseData, currentKey) {
-  const name = esc(caseData.caseName || "");
-  const slug = encodeURIComponent(caseData.slug);
-  return `<div class="related-grid">
-    ${CROSS_LINKS.map((l) => {
-      const active = l.key === currentKey ? " is-active" : "";
-      return `<a class="related-card${active}" href="${l.url}/${l.prefix}/${slug}/"><span>${l.label}</span><strong>${name}</strong></a>`;
-    }).join("\n")}
-  </div>`;
 }
 
 // ─── Template ─────────────────────────────────────────────────────────────────
@@ -436,19 +511,39 @@ function themeColor(key) {
 }
 
 function paragraphs(items = []) {
-  return (items || []).map((item) => `<p>${esc(item)}</p>`).join("\n");
+  return (items || []).map((item) => `<p>${withSentenceBreaks(item)}</p>`).join("\n");
 }
 
 function list(items = []) {
-  return `<ul>${(items || []).map((item) => `<li>${esc(item)}</li>`).join("\n")}</ul>`;
+  return `<ul>${(items || []).map((item) => `<li>${withSentenceBreaks(item)}</li>`).join("\n")}</ul>`;
 }
 
 function faqHtml(items = [], caseName = "") {
   return (items || []).map((item, i) => {
     let q = item.question || "";
-    if (i < 3 && caseName) q = `[${caseName}] ` + q.replace(/^\[[^\]]*\]\s*/, "");
-    return `<details><summary>${esc(q)}</summary><p>${esc(item.answer)}</p></details>`;
+    if (i === 0 && caseName && !q.includes(caseName)) q = `[${caseName}] ` + q.replace(/^\[[^\]]*\]\s*/, "");
+    return `<details><summary>${esc(q)}</summary><p>${withSentenceBreaks(item.answer)}</p></details>`;
   }).join("\n");
+}
+
+function withSentenceBreaks(value = "") {
+  return esc(value).replace(/([.!?])\s+/g, "$1<br>");
+}
+
+// ─── Hub API Fallback (b~e → project A에서 데이터 조회) ───────────────────────
+
+async function fetchCaseFromHubAPI(slug) {
+  try {
+    const res = await fetch(
+      `https://new-project-9o2.pages.dev/api/get-case?slug=${encodeURIComponent(slug)}`,
+      { headers: { "User-Agent": "static-landing-worker" } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.ok && data.case ? data.case : null;
+  } catch {
+    return null;
+  }
 }
 
 // ─── GitHub Fallback ─────────────────────────────────────────────────────────
