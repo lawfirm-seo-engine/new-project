@@ -241,6 +241,13 @@
     <textarea id="summary" placeholder="요약" readonly required></textarea>
   </form>
 
+  <div id="successBox" style="display:none;margin-top:16px;padding:18px 20px;background:#edf7ed;border:1px solid #b2dfb2;border-radius:8px;color:#145b22">
+    <strong id="successTitle">✅ 저장 완료</strong>
+    <div id="successLinks" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px"></div>
+    <p style="margin:12px 0 0;font-size:12px;color:#3d7a4a">랜딩페이지 반영까지 최대 30초 소요될 수 있습니다. 링크가 열리지 않으면 잠시 후 다시 시도하세요.</p>
+    <button type="button" onclick="resetForNewCase()" style="margin-top:14px;padding:10px 18px;background:#1f4fd8;color:#fff;border:0;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">+ 새 사건 생성</button>
+  </div>
+
   <section id="reviewPanel" class="panel" aria-live="polite">
     <strong>AI 데이터 검수 결과</strong>
     <div id="reviewStatus" class="status"></div>
@@ -260,6 +267,14 @@
       { key: "e", label: "E 전체허브형" },
     ];
 
+    const LANDING_GROUPS = [
+      { label: "A 형사고소", url: "https://new-project-9o2.pages.dev", prefix: "prosecute" },
+      { label: "B 민사소송", url: "https://new-project-b.pages.dev", prefix: "civil" },
+      { label: "C 성공사례", url: "https://new-project-c.pages.dev", prefix: "success" },
+      { label: "D 사건정보", url: "https://new-project-d.pages.dev", prefix: "briefing" },
+      { label: "E 전체허브", url: "https://new-project-e.pages.dev", prefix: "case" },
+    ];
+
     const caseNameEl = document.getElementById("caseName");
     const slugEl = document.getElementById("slug");
     const categoryEl = document.getElementById("category");
@@ -271,10 +286,15 @@
     const landingEditorEl = document.getElementById("landingEditor");
     const generateDraftButtonEl = document.getElementById("generateDraftButton");
     const submitButtonEl = document.getElementById("submitButton");
+    const successBoxEl = document.getElementById("successBox");
+    const successTitleEl = document.getElementById("successTitle");
+    const successLinksEl = document.getElementById("successLinks");
 
     let generatedCase = null;
     let editedLandings = {};
     let activePreviewKey = "a";
+    let isSaving = false;
+    const savedSlugs = new Set(); // 이번 세션에서 저장된 slug 추적
 
     function val(id) {
       return (document.getElementById(id)?.value || "").trim();
@@ -331,6 +351,31 @@
       slugEl.value = "";
       categoryEl.value = "";
       summaryEl.value = "";
+    }
+
+    function resetForNewCase() {
+      caseNameEl.value = "";
+      resetGeneratedData();
+      messageEl.textContent = "";
+      successBoxEl.style.display = "none";
+      successLinksEl.innerHTML = "";
+      isSaving = false;
+    }
+
+    function showSaveSuccess(slug, caseName) {
+      successTitleEl.textContent = `✅ "${caseName}" 저장 완료!`;
+      successLinksEl.innerHTML = "";
+      for (const g of LANDING_GROUPS) {
+        const a = document.createElement("a");
+        a.href = `${g.url}/${g.prefix}/${encodeURIComponent(slug)}/`;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = g.label;
+        a.style.cssText = "display:inline-block;padding:6px 12px;background:#1f4fd8;color:#fff;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none";
+        successLinksEl.appendChild(a);
+      }
+      successBoxEl.style.display = "block";
+      messageEl.textContent = "";
     }
 
     function renderGeneratedData(data) {
@@ -553,23 +598,45 @@
         return;
       }
 
-      messageEl.textContent = "사건 저장 중...";
-      submitButtonEl.disabled = true;
+      if (isSaving) return; // 중복 클릭 방지
 
       const caseToSave = buildSubmitCase();
 
-      const res = await fetch("/api/create-case", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(caseToSave),
-      });
-      const data = await res.json();
+      // 이번 세션에서 이미 저장된 slug면 링크만 표시
+      if (savedSlugs.has(caseToSave.slug)) {
+        showSaveSuccess(caseToSave.slug, caseToSave.caseName);
+        return;
+      }
 
-      if (data.ok) {
-        messageEl.textContent = "사건 저장 완료. 정적 HTML은 배포 생성 단계에서 출력됩니다.";
-      } else {
-        messageEl.textContent = JSON.stringify(data, null, 2);
+      isSaving = true;
+      messageEl.textContent = "사건 저장 중...";
+      submitButtonEl.disabled = true;
+
+      try {
+        const res = await fetch("/api/create-case", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(caseToSave),
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          savedSlugs.add(caseToSave.slug);
+          showSaveSuccess(caseToSave.slug, caseToSave.caseName);
+        } else if (res.status === 409) {
+          // 이미 서버에 존재 → 링크만 표시
+          savedSlugs.add(caseToSave.slug);
+          showSaveSuccess(caseToSave.slug, caseToSave.caseName);
+          successTitleEl.textContent += " (이미 등록된 사건)";
+        } else {
+          messageEl.textContent = data.message || JSON.stringify(data, null, 2);
+          submitButtonEl.disabled = false;
+          isSaving = false;
+        }
+      } catch (err) {
+        messageEl.textContent = "저장 오류: " + err.message;
         submitButtonEl.disabled = false;
+        isSaving = false;
       }
     });
   </script>

@@ -401,6 +401,24 @@ button{
   margin-bottom:18px;
 }
 
+.memo-section{
+  background:#fffbe6;
+  border-left:4px solid #f0a500;
+  border-radius:8px;
+}
+.memo-section h2{
+  color:#a06800;
+  font-size:15px !important;
+  margin-bottom:8px !important;
+}
+.memo-section p{
+  color:#5a3e00;
+  font-size:15px;
+  line-height:1.7;
+  margin:0;
+  white-space:pre-line;
+}
+
 .article-block h2,
 .related h2,
 .cta h2{
