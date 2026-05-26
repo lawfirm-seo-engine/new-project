@@ -717,7 +717,7 @@ function createHubContent(group) {
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function normName(n){var c=String(n||'').trim().replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c+' 사칭':c+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
-  function getStatus(slug){if(GKEY==='c'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%78+3)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
+  function getStatus(slug){if(GKEY==='c'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
   function setupSearch(){
     var inp=document.getElementById('case-search');
     if(!inp)return;
@@ -819,7 +819,7 @@ function statusLabel(key, seed = key) {
   if (key === "c") {
     return seededInt(`${seed}-success-full`, 1, 100) <= 25
       ? "전액 회수"
-      : `${seededInt(`${seed}-success-rate`, 3, 80)}% 회수`;
+      : `${seededInt(`${seed}-success-rate`, 48, 97)}% 회수`;
   }
   return { a: "형사 진행중", b: "민사 진행중", d: "사건 접수중", e: "사건 진행중" }[key] || "진행중";
 }
