@@ -179,7 +179,6 @@ async function callOpenAI({ caseName, slug, env }) {
 [분량 기준]
 - 각 landing.body는 7개 문단. 각 문단은 110~180자 수준의 한국어 문장 2~3개로 작성한다.
 - 각 landing.victimCases는 5개. 날짜 흐름, 연락 채널, 입금 명목, 피해자 행동, 증거 형태가 드러나게 구체적으로 작성한다.
-- 각 landing.suspiciousCompanies는 5개. 사건명 기반 사이트, 상담원 사칭 계정, 입금 계좌, 연계 법인, 재접촉 채널을 구체화한다.
 - 각 landing.faq는 7개. 질문은 검색 키워드를 포함하고, 답변은 130~220자 수준으로 구체적으로 작성한다.
 - description과 ogDescription은 80~130자, title은 28~45자, H1은 24~45자를 권장한다.
 
@@ -199,7 +198,7 @@ ${groupGuide}
   "tags": [],
   "reviewNotes": [],
   "landings": {
-    "a": {"title":"","description":"","canonical":"","ogTitle":"","ogDescription":"","ogImage":"","h1":"","body":[],"victimCases":[],"suspiciousCompanies":[],"faq":[{"question":"","answer":""}]},
+    "a": {"title":"","description":"","canonical":"","ogTitle":"","ogDescription":"","ogImage":"","h1":"","body":[],"victimCases":[],"faq":[{"question":"","answer":""}]},
     "b": {},
     "c": {},
     "d": {},

@@ -354,6 +354,7 @@ function createConsultForm(caseItem, group) {
 
 function createLandingContent(landing, group, caseItem) {
   const name = escapeHtml(normalizeCaseName(caseItem.caseName));
+  const baseName = escapeHtml(baseCaseName(caseItem.caseName || caseItem.name || ""));
   const form = createConsultForm(caseItem, group);
   const widgets = createFloatingWidgets(caseItem, group);
   const slug = escapeHtml(caseItem.slug);
@@ -370,9 +371,9 @@ function createLandingContent(landing, group, caseItem) {
 
   if (group.key === "d") {
     return [
-      `<section class="article-block brief-card"><h2>${name} 사건 개요</h2>${paragraphs(body)}</section>`,
+      `<section class="article-block brief-card"><h2>${baseName} 사기 피해 구조</h2>${paragraphs(body)}</section>`,
       `<section class="article-block"><h2>${name} 피해 유형</h2>${list(victimCases)}</section>`,
-      `<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(faq, rawCaseName)}</section>`,
+      `<section class="article-block faq"><h2>${name} 자주 묻는 질문 (FAQ)</h2>${faqHtml(faq, rawCaseName)}</section>`,
       liveStatus,
       memoSection,
       form,
@@ -411,8 +412,8 @@ function renderBodyForLanding(landing, group, caseItem) {
       `성공사례를 볼 때는 결과보다 대응 순서를 비교해야 합니다. 입금 직후 증거를 보존하고 상담 접수로 자료를 정리한 사건은 계좌 추적, 형사고소, 민사 보전처분을 연결하기가 더 수월했습니다.`,
     ],
     d: [
-      `${compactName} 원고는 네이버 AI 브리핑이 이해하기 쉬운 구조를 목표로 합니다. 사건 개요, 피해 구조, 즉시 대응, 증거 목록을 질문과 답변처럼 정리하면 검색자가 필요한 정보를 빠르게 파악할 수 있습니다.`,
-      `AI 브리핑 노출을 고려할 때는 과장된 홍보 문구보다 명확한 사실 구조가 중요합니다. 업체명, 입금 명목, 출금 제한, 추가 비용 요구, 상담 접수 전 준비 자료를 균형 있게 설명해야 합니다.`,
+      `${compactName} 사기 피해는 신뢰 형성, 소액 유도, 수익 화면 노출, 출금 제한, 추가 비용 요구 순서로 진행되는 경우가 많습니다. 이 흐름이 확인되면 추가 입금을 멈추고 증거를 먼저 보존해야 합니다.`,
+      `수사기관 신고와 법률 상담은 별도 절차입니다. 신고는 형사 수사를 여는 행위이고, 상담은 현재 증거로 어떤 법적 대응이 가능한지 확인하는 과정입니다. 두 절차는 동시에 진행할 수 있습니다.`,
     ],
     e: [
       `${compactName} 전체 허브는 형사고소, 민사소송, 성공사례, AI 브리핑 정보를 균형 있게 연결합니다. 사건을 처음 확인한 사람은 전체 흐름을 보고, 급한 경우 전화나 카톡 상담으로 증거 상태를 먼저 점검할 수 있습니다.`,
@@ -457,8 +458,8 @@ function renderFaqForLanding(landing, group, caseItem) {
       { question: "성공사례와 내 사건이 비슷한지 어떻게 확인하나요?", answer: "업체명보다 계좌, URL, 상담원 계정, 입금 명목, 출금 제한 방식이 더 중요합니다. 상담 접수 시 이 자료를 제시하면 유사 사례와 비교해 절차 방향을 검토할 수 있습니다." },
     ],
     d: [
-      { question: "네이버 AI 브리핑에 맞는 원고 구조는 무엇인가요?", answer: "사건 개요, 피해 방식, 즉시 대응, 증거 보존, 상담 접수 전 준비 자료가 질문과 답변처럼 명확해야 합니다. 과도한 홍보보다 정보성 문장이 브리핑형 원고에 더 적합합니다." },
-      { question: "AI 브리핑형 페이지에서도 상담 유도 문구가 필요한가요?", answer: "필요합니다. 다만 노골적인 광고보다 증거를 보존한 뒤 전화나 카톡 상담으로 현재 상황을 확인하라는 실용적인 안내가 더 자연스럽습니다." },
+      { question: "입금 직후 가장 먼저 해야 할 일은 무엇인가요?", answer: "추가 입금을 즉시 중단하고 대화방 캡처, 입금증, 계좌번호, 사이트 주소, 담당자 연락처를 삭제하지 않고 보존해야 합니다. 자료가 남아 있을수록 이후 형사·민사 절차에서 대응 가능성이 높아집니다." },
+      { question: "추가 입금 요구를 받았는데 응해야 하나요?", answer: "세금, 보증금, 인증비, 해제비 명목의 추가 요구는 피해가 확산되는 핵심 패턴입니다. 출금을 조건으로 돈을 더 요구한다면 즉시 입금을 중단하고 해당 메시지를 캡처해 증거로 보존해야 합니다." },
     ],
     e: [
       { question: "전체 허브에서는 어떤 균형이 중요한가요?", answer: "형사고소, 민사 회수, 성공사례, 정보 브리핑을 한쪽으로 치우치지 않게 연결해야 합니다. 사용자가 자신의 목적에 맞는 페이지로 이동할 수 있도록 안내하는 것이 핵심입니다." },
