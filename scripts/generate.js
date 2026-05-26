@@ -693,7 +693,7 @@ function createHubContent(group) {
       const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
       const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`;
       return `
-        <a href="${url}" class="case-row" data-title="${caseName}">
+        <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}">
           <span class="case-no">${sortedCases.length - index}</span>
           <span class="case-title-wrap">
             <strong class="case-title">${displayTitle}</strong>
@@ -706,10 +706,63 @@ function createHubContent(group) {
     })
     .join("\n");
 
+  // Inline dynamic-loader — fetches /api/get-cases and prepends any cases not already in the DOM.
+  // Uses IIFE + vanilla JS only, no frameworks.
+  const dynScript = `<script>
+(function(){
+  var PREFIX=${JSON.stringify(group.pathPrefix)};
+  var SUFFIX=${JSON.stringify(suffix)};
+  var GKEY=${JSON.stringify(group.key)};
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function normName(n){var c=String(n||'').trim().replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c+' 사칭':c+' 사칭 사기';}
+  function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
+  function getStatus(slug){if(GKEY==='c'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%78+3)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
+  function setupSearch(){
+    var inp=document.getElementById('case-search');
+    if(!inp)return;
+    var n=inp.cloneNode(true);inp.parentNode.replaceChild(n,inp);
+    n.addEventListener('input',function(){
+      var q=n.value.trim().toLowerCase();
+      document.querySelectorAll('.case-row').forEach(function(r){r.style.display=r.dataset.title.toLowerCase().indexOf(q)>=0?'grid':'none';});
+    });
+  }
+  setupSearch();
+  fetch('/api/get-cases',{cache:'no-cache'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d||!d.ok||!Array.isArray(d.cases))return;
+      var all=d.cases.slice().sort(function(a,b){return(b.createdAt||'').localeCompare(a.createdAt||'');});
+      var existing=new Set([].map.call(document.querySelectorAll('.case-row[data-slug]'),function(el){return el.dataset.slug;}));
+      var newItems=all.filter(function(c){return!existing.has(c.slug);});
+      if(!newItems.length)return;
+      var total=all.length;
+      var hdr=document.querySelector('.case-table-header');
+      if(!hdr)return;
+      for(var i=newItems.length-1;i>=0;i--){
+        var item=newItems[i];
+        var cn=esc(normName(item.caseName||''));
+        var dt=SUFFIX?cn+' '+SUFFIX:cn;
+        var a=document.createElement('a');
+        a.href='/'+PREFIX+'/'+encodeURIComponent(item.slug)+'/';
+        a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;
+        a.innerHTML='<span class="case-no">'+(total-i)+'</span>'
+          +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
+          +'<span class="case-status">'+esc(getStatus(item.slug))+'</span>'
+          +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'
+          +'<span class="case-views">'+((item.landingViews||0).toLocaleString('ko-KR'))+'</span>';
+        hdr.insertAdjacentElement('afterend',a);
+      }
+      var statEl=document.getElementById('statTotal');
+      if(statEl)statEl.textContent=total.toLocaleString('ko-KR');
+      setupSearch();
+    }).catch(function(){});
+})();
+</script>`;
+
   return `
     <section class="hub-stats-section">
       <div class="hub-stats">
-        <div><strong>${cases.length.toLocaleString("ko-KR")}</strong><span>등록 사건</span></div>
+        <div><strong id="statTotal">${cases.length.toLocaleString("ko-KR")}</strong><span>등록 사건</span></div>
         <div><strong>${totalReports.toLocaleString("ko-KR")}</strong><span>누적 접수</span></div>
         <div><strong>${totalViews.toLocaleString("ko-KR")}</strong><span>조회수</span></div>
       </div>
@@ -726,18 +779,7 @@ function createHubContent(group) {
       <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
       ${rows}
     </section>
-    <script>
-      const searchInput = document.getElementById("case-search");
-      const rows = Array.from(document.querySelectorAll(".case-row"));
-      if (searchInput) {
-        searchInput.addEventListener("input", () => {
-          const query = searchInput.value.trim().toLowerCase();
-          rows.forEach((row) => {
-            row.style.display = row.dataset.title.toLowerCase().includes(query) ? "grid" : "none";
-          });
-        });
-      }
-    </script>`;
+    ${dynScript}`;
 }
 
 function normalizeCaseName(name) {

@@ -39,7 +39,13 @@ function githubEnv(env) {
 }
 
 function githubHeaders(token) {
-  return { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "static-landing-generator-admin" };
+  return {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "User-Agent": "static-landing-generator-admin",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+  };
 }
 
 function decodeBase64(value) {
