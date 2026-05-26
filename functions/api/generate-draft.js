@@ -277,7 +277,7 @@ function mergeGroupLanding(ai, fallback, caseName) {
     canonical: normalizeSpace(ai?.canonical) || fallback.canonical,
     ogTitle: normalizeSpace(ai?.ogTitle) || fallback.ogTitle,
     ogDescription: normalizeSpace(ai?.ogDescription) || fallback.ogDescription,
-    ogImage: normalizeSpace(ai?.ogImage) || fallback.ogImage,
+    ogImage: fallback.ogImage, // AI 값 무시 — 항상 /og/{slug}.webp 고정
     h1: normalizeSpace(ai?.h1) || fallback.h1,
     body: normalizeStringArray(ai?.body, fallback.body).slice(0, 9),
     victimCases: normalizeStringArray(ai?.victimCases, fallback.victimCases).slice(0, 7),
