@@ -522,12 +522,21 @@ function themeColor(key) {
   return { a: "#111827", b: "#173b57", c: "#174333", d: "#25314d", e: "#3b2f52" }[key] || "#111827";
 }
 
+function toStr(item) {
+  if (typeof item === "string") return item;
+  if (item && typeof item === "object") {
+    return item.text || item.case || item.description || item.value || item.content ||
+      Object.values(item).find((v) => typeof v === "string" && v.length > 5) || "";
+  }
+  return String(item || "");
+}
+
 function paragraphs(items = []) {
-  return (items || []).map((item) => `<p>${withSentenceBreaks(item)}</p>`).join("\n");
+  return (items || []).map((item) => `<p>${withSentenceBreaks(toStr(item))}</p>`).join("\n");
 }
 
 function list(items = []) {
-  return `<ul>${(items || []).map((item) => `<li>${withSentenceBreaks(item)}</li>`).join("\n")}</ul>`;
+  return `<ul>${(items || []).map((item) => `<li>${withSentenceBreaks(toStr(item))}</li>`).join("\n")}</ul>`;
 }
 
 function faqHtml(items = [], caseName = "") {

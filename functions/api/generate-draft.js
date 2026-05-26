@@ -526,7 +526,17 @@ function findDuplicateRisks(caseName, slug, cases) {
 }
 
 function normalizeStringArray(value, fallback) {
-  return Array.isArray(value) && value.length ? value.map(normalizeSpace).filter(Boolean) : fallback;
+  if (!Array.isArray(value) || !value.length) return fallback;
+  return value.map((item) => {
+    if (typeof item === "string") return normalizeSpace(item);
+    if (item && typeof item === "object") {
+      // AI가 객체로 반환한 경우 문자열 값 추출
+      const str = item.text || item.case || item.description || item.value || item.content ||
+        Object.values(item).find((v) => typeof v === "string" && v.length > 5) || "";
+      return normalizeSpace(str);
+    }
+    return "";
+  }).filter(Boolean);
 }
 
 function normalizeFaq(value, fallback) {
