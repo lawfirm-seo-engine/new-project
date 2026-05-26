@@ -214,30 +214,43 @@ ${groupGuide}
 네이버에서 "${base} 사기", "${base} 피해", "${base} 형사고소", "${base} 피해금 회수" 검색 의도를 모두 고려하라.
 피해사례는 현재보다 더 구체적으로, 하지만 실제 확인되지 않은 날짜·실명·금액은 임의로 단정하지 말고 "수백만 원대", "추가 입금", "메신저 상담"처럼 범주형으로 표현하라.`;
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "gpt-5.4-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.65,
-      max_completion_tokens: 12000,
-    }),
+  const requestBody = JSON.stringify({
+    model: "gpt-5.4-mini",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.65,
+    max_completion_tokens: 12000,
   });
 
-  if (!res.ok) {
+  const RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);
+  let lastErr = null;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 1500 * attempt));
+
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
+      body: requestBody,
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content;
+      if (!text) throw new Error("OpenAI 응답 없음");
+      return JSON.parse(text);
+    }
+
     const errText = await res.text();
-    throw new Error(`OpenAI ${res.status}: ${errText.slice(0, 300)}`);
+    lastErr = new Error(`OpenAI ${res.status}: ${errText.slice(0, 300)}`);
+
+    if (!RETRY_STATUSES.has(res.status)) throw lastErr; // 재시도 불필요한 오류
   }
 
-  const data = await res.json();
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) throw new Error("OpenAI 응답 없음");
-  return JSON.parse(text);
+  throw lastErr;
 }
 
 function mergeWithFallback(ai, fallback, caseName) {
