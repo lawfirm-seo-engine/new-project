@@ -64,7 +64,7 @@ export async function onRequestPost(context) {
     const slug = createSlug(baseCaseName(rawName));
     const category = DEFAULT_CATEGORY;
     const duplicateCheck = findDuplicateRisks(caseName, slug, cases);
-    const generated = await createGeneratedData({ caseName, slug, duplicateCheck, env });
+    const generated = await createGeneratedData({ caseName, slug, duplicateCheck });
 
     return json({
       ok: true,
@@ -113,186 +113,10 @@ async function loadCases(env) {
   return raw ? JSON.parse(raw) : [];
 }
 
-async function createGeneratedData({ caseName, slug, duplicateCheck, env }) {
-  const fallback = createRuleBasedData({ caseName, slug, duplicateCheck });
-  const apiKey = await resolveOpenAiKey(env) || env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    fallback.source = "no-key";
-    return fallback;
-  }
-
-  try {
-    const aiResult = await callOpenAI({ caseName, slug, env: { ...env, OPENAI_API_KEY: apiKey } });
-    return mergeWithFallback(aiResult, fallback, caseName);
-  } catch (err) {
-    console.error("[generate-draft] OpenAI error:", err.message);
-    fallback.source = "openai-error";
-    fallback.reviewNotes.unshift(`OpenAI 오류: ${err.message}`);
-    return fallback;
-  }
+async function createGeneratedData({ caseName, slug, duplicateCheck }) {
+  return createRuleBasedData({ caseName, slug, duplicateCheck });
 }
 
-async function resolveOpenAiKey(env) {
-  try {
-    const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
-    if (!owner || !repo || !token) return null;
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/data/settings.json?ref=${branch}`,
-      { headers: githubHeaders(token) },
-    );
-    if (!res.ok) return null;
-    const file = await res.json();
-    const settings = JSON.parse(decodeBase64(file.content));
-    const stored = settings.openaiApiKey || null;
-    if (!stored) return null;
-    if (stored.startsWith("_r_")) return stored.slice(3).split("").reverse().join("");
-    return stored;
-  } catch {
-    return null;
-  }
-}
-
-async function callOpenAI({ caseName, slug, env }) {
-  const base = baseCaseName(caseName);
-  const groupGuide = GROUPS.map((group) => {
-    return `${group.key}. ${group.label}
-- 검색 의도: ${group.intent}
-- 핵심 키워드: ${group.primaryKeywords.join(", ")}
-- canonical: ${group.siteUrl}/${group.pathPrefix}/${slug}/`;
-  }).join("\n\n");
-
-  const systemPrompt = `너는 한국 네이버 검색 노출을 목표로 하는 법률·피해구제 SEO 원고 작성자다.
-출력은 반드시 JSON 객체만 반환한다. HTML, 마크다운, 코드블록, 설명문은 금지한다.
-
-[네이버 SEO 작성 원칙]
-- 제목, 설명, H1, 본문, FAQ가 같은 검색 의도를 반복해서 설명해야 한다.
-- 단순 키워드 나열이나 과도한 반복은 금지한다. 문맥 안에서 자연스럽게 반복한다.
-- 사건명은 title, description, H1, 본문 첫 문단, FAQ 1~3번 질문에 포함한다.
-- FAQ 7개 전체에 사건명을 반복하지 않는다. 1~3번 질문은 전체 사건명, 나머지는 절차·증거·상담 키워드 중심으로 쓴다.
-- 각 도메인 유형은 문체와 관점이 달라야 한다. 같은 문장을 돌려쓰지 않는다.
-- 독자가 바로 행동할 수 있도록 증거 보존, 입금 중단, 상담 접수, 법적 절차를 구체적으로 쓴다.
-- 마지막 문단에는 "상담 접수", "전화", "카톡 상담" 중 1~2개를 자연스럽게 넣되 과장하지 않는다.
-- 확정적 회수 보장, 승소 보장, 허위 사실 단정은 금지한다. "가능성 검토", "의심 정황", "절차 검토"처럼 표현한다.
-- 가독성을 위해 한 문단은 2~3문장으로 작성하고, 문장은 짧게 쓴다.
-
-[분량 기준]
-- 각 landing.body는 7개 문단. 각 문단은 110~180자 수준의 한국어 문장 2~3개로 작성한다.
-- 각 landing.victimCases는 5개. 날짜 흐름, 연락 채널, 입금 명목, 피해자 행동, 증거 형태가 드러나게 구체적으로 작성한다.
-- 각 landing.faq는 7개. 질문은 검색 키워드를 포함하고, 답변은 130~220자 수준으로 구체적으로 작성한다.
-- description과 ogDescription은 80~130자, title은 28~45자, H1은 24~45자를 권장한다.
-
-[유형별 차별화]
-${groupGuide}
-
-[유형별 필수 내용]
-- a 법률형: 사기죄 형법 제347조의 기망, 착오, 처분행위, 재산상 이익 구조를 설명하고 형사고소 자료를 안내한다.
-- b 민사형: 가압류, 손해배상청구, 부당이득반환소송, 민사 합의, 집행 가능성을 중심으로 쓴다.
-- c 성공사례형: 전액 회수 보장처럼 쓰지 말고, "지급정지 후 일부 회수", "가압류 후 합의", "수사 중 반환 협의"처럼 있었을 법한 유형별 성공 흐름을 사례형으로 설명한다.
-- d AI브리핑형: 네이버 AI 브리핑에 노출될 수 있도록 질문형 소제목에 답하듯 사건 개요, 피해 구조, 즉시 대응, 증거 목록을 균형 있게 쓴다.
-- e 전체 허브형: 형사, 민사, 성공사례, 정보 브리핑의 균형을 맞추고 어느 페이지로 이동해야 하는지 안내한다.
-
-[반환 JSON 형식]
-{
-  "summary": "",
-  "tags": [],
-  "reviewNotes": [],
-  "landings": {
-    "a": {"title":"","description":"","canonical":"","ogTitle":"","ogDescription":"","ogImage":"","h1":"","body":[],"victimCases":[],"faq":[{"question":"","answer":""}]},
-    "b": {},
-    "c": {},
-    "d": {},
-    "e": {}
-  }
-}`;
-
-  const userPrompt = `사건명: ${caseName}
-업체명 기본형: ${base}
-카테고리: 사용하지 않음
-
-이 사건명으로 5개 도메인 유형별 SEO 원고를 새로 작성하라.
-네이버에서 "${base} 사기", "${base} 피해", "${base} 형사고소", "${base} 피해금 회수" 검색 의도를 모두 고려하라.
-피해사례는 현재보다 더 구체적으로, 하지만 실제 확인되지 않은 날짜·실명·금액은 임의로 단정하지 말고 "수백만 원대", "추가 입금", "메신저 상담"처럼 범주형으로 표현하라.`;
-
-  const requestBody = JSON.stringify({
-    model: "gpt-5.4-mini",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-    response_format: { type: "json_object" },
-    temperature: 0.65,
-    max_completion_tokens: 12000,
-  });
-
-  const RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);
-  let lastErr = null;
-
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) await new Promise((r) => setTimeout(r, 1500 * attempt));
-
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-      body: requestBody,
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content;
-      if (!text) throw new Error("OpenAI 응답 없음");
-      return JSON.parse(text);
-    }
-
-    const errText = await res.text();
-    lastErr = new Error(`OpenAI ${res.status}: ${errText.slice(0, 300)}`);
-
-    if (!RETRY_STATUSES.has(res.status)) throw lastErr; // 재시도 불필요한 오류
-  }
-
-  throw lastErr;
-}
-
-function mergeWithFallback(ai, fallback, caseName) {
-  const result = {
-    source: "openai",
-    summary: normalizeSpace(ai.summary) || fallback.summary,
-    tags: normalizeStringArray(ai.tags, fallback.tags).slice(0, 10),
-    reviewNotes: normalizeStringArray(ai.reviewNotes, fallback.reviewNotes),
-    landings: {},
-  };
-
-  for (const group of GROUPS) {
-    result.landings[group.key] = mergeGroupLanding(ai.landings?.[group.key], fallback.landings[group.key], caseName);
-  }
-  return result;
-}
-
-function mergeGroupLanding(ai, fallback, caseName) {
-  const faq = ensureFaqCaseName(normalizeFaq(ai?.faq, fallback.faq).slice(0, 8), caseName);
-  const landing = {
-    ...fallback,
-    title: normalizeSpace(ai?.title) || fallback.title,
-    description: normalizeSpace(ai?.description) || fallback.description,
-    canonical: normalizeSpace(ai?.canonical) || fallback.canonical,
-    ogTitle: normalizeSpace(ai?.ogTitle) || fallback.ogTitle,
-    ogDescription: normalizeSpace(ai?.ogDescription) || fallback.ogDescription,
-    ogImage: fallback.ogImage, // AI 값 무시 — 항상 /og/{slug}.webp 고정
-    h1: normalizeSpace(ai?.h1) || fallback.h1,
-    body: normalizeStringArray(ai?.body, fallback.body).slice(0, 9),
-    victimCases: normalizeStringArray(ai?.victimCases, fallback.victimCases).slice(0, 7),
-    suspiciousCompanies: normalizeStringArray(ai?.suspiciousCompanies, fallback.suspiciousCompanies).slice(0, 7),
-    faq,
-  };
-  landing.schema = createSchemaData({
-    title: landing.title,
-    description: landing.description,
-    canonical: landing.canonical,
-    caseName,
-    faq,
-  });
-  return landing;
-}
 
 function createRuleBasedData({ caseName, slug, duplicateCheck }) {
   const summary = createSummary(caseName);
@@ -303,7 +127,7 @@ function createRuleBasedData({ caseName, slug, duplicateCheck }) {
       : duplicateCheck.warn
         ? "유사 사건이 있어 기존 사건과 별도 사건인지 확인해야 합니다."
         : "중복 위험은 낮습니다.",
-    "카테고리 세부 분류 없이 사건명 검색 의도 기준으로 SEO 원고 초안을 생성했습니다. OpenAI API 키가 설정되면 더 정교한 사건별 원고가 생성됩니다.",
+    "사건명 검색 의도 기준으로 SEO 원고를 생성했습니다.",
   ];
   const landings = Object.fromEntries(GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, group })]));
 
@@ -538,64 +362,6 @@ function findDuplicateRisks(caseName, slug, cases) {
   };
 }
 
-function normalizeStringArray(value, fallback) {
-  if (!Array.isArray(value) || !value.length) return fallback;
-  return value.map((item) => {
-    if (typeof item === "string") return normalizeSpace(item);
-    if (item && typeof item === "object") {
-      // AI가 객체로 반환한 경우 문자열 값 추출
-      const str = item.text || item.case || item.description || item.value || item.content ||
-        Object.values(item).find((v) => typeof v === "string" && v.length > 5) || "";
-      return normalizeSpace(str);
-    }
-    return "";
-  }).filter(Boolean);
-}
-
-function normalizeFaq(value, fallback) {
-  if (!Array.isArray(value)) return fallback;
-  const faq = value
-    .map((item) => ({
-      question: normalizeSpace(item?.question),
-      answer: normalizeSpace(item?.answer),
-    }))
-    .filter((item) => item.question && item.answer);
-  return faq.length ? faq : fallback;
-}
-
-function ensureFaqCaseName(faq, caseName) {
-  const normalizedCaseName = normalizeSpace(caseName);
-  const base = baseCaseName(normalizedCaseName);
-  if (!normalizedCaseName) return faq;
-
-  return faq.map((item, index) => {
-    const question = normalizeSpace(item.question);
-
-    if (index <= 2) {
-      // Q1~Q3: 전체 사건명 포함 강제
-      if (question.includes(normalizedCaseName)) return { ...item, question };
-      if (base && question.includes(base)) {
-        return {
-          ...item,
-          question: normalizeSpace(question.replace(base, normalizedCaseName).replace(/사기\s+사기/g, "사기")),
-        };
-      }
-      return { ...item, question: normalizeSpace(`${normalizedCaseName} 관련 ${question}`) };
-    }
-
-    // Q4+: 사건명·업체명을 질문에서 제거
-    let stripped = question;
-    for (const name of [normalizedCaseName, base]) {
-      if (!name || !stripped.includes(name)) continue;
-      stripped = stripped
-        .replace(new RegExp(escapeRegex(name) + "(\\s*(?:사칭\\s*사기)?)?(\\s*관련)?\\s*", "g"), "")
-        .trim();
-    }
-    // 앞에 남은 조사(은/는/이/가/을/를/의/에서) 제거
-    stripped = normalizeSpace(stripped).replace(/^(?:은|는|이|가|을|를|의|에서|에게|으로|로|과|와)\s+/, "");
-    return { ...item, question: stripped || question };
-  });
-}
 
 function escapeRegex(s) {
   return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
