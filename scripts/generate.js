@@ -1,5 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
+import sharp from "sharp";
 
 const root = process.cwd();
 const dataPath = path.join(root, "data", "cases.json");
@@ -856,6 +857,13 @@ for (const group of groups) {
 
   if (await fs.pathExists(publicDir)) {
     await fs.copy(publicDir, path.join(group.outDir, "assets"));
+
+    // og-template.png → og-template.webp 1회 변환 (빌드 타임, 파일 1개)
+    const pngSrc = path.join(group.outDir, "assets", "og-template.png");
+    const webpDest = path.join(group.outDir, "assets", "og-template.webp");
+    if (await fs.pathExists(pngSrc) && !(await fs.pathExists(webpDest))) {
+      await sharp(pngSrc).webp({ quality: 85 }).toFile(webpDest);
+    }
   }
 
   if (group.key === "a") {

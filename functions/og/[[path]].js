@@ -8,10 +8,11 @@ export async function onRequestGet(context) {
   const { request, env } = context;
   const origin = new URL(request.url).origin;
 
-  // Fetch template from static assets binding
+  // Fetch template from static assets binding (webp 우선, 없으면 png 폴백)
   let asset;
   try {
-    asset = await env.ASSETS.fetch(new Request(`${origin}/assets/og-template.png`));
+    asset = await env.ASSETS.fetch(new Request(`${origin}/assets/og-template.webp`));
+    if (!asset.ok) asset = await env.ASSETS.fetch(new Request(`${origin}/assets/og-template.png`));
   } catch {
     asset = null;
   }
@@ -20,11 +21,12 @@ export async function onRequestGet(context) {
     return new Response("Not found", { status: 404 });
   }
 
+  const contentType = asset.headers.get("Content-Type") || "image/png";
   const body = await asset.arrayBuffer();
 
   return new Response(body, {
     headers: {
-      "Content-Type": "image/png",
+      "Content-Type": contentType,
       "Cache-Control": "public, max-age=31536000, immutable",
       "CDN-Cache-Control": "public, max-age=31536000",
       "Cloudflare-CDN-Cache-Control": "public, max-age=31536000",
