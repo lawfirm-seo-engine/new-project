@@ -144,9 +144,9 @@ function renderLanding(caseData, group, origin) {
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}/`;
   const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.webp`;
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
-  const modifiedDate = new Date().toISOString().slice(0, 10);
+  const modifiedDate = caseData.updatedAt || publishedDate;
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
-  const isoModified = new Date().toISOString();
+  const isoModified = `${modifiedDate}T00:00:00+09:00`;
   const keyword = `${baseCaseName(rawCaseName)} 사기, ${baseCaseName(rawCaseName)} 사칭 사기`;
 
   const headExtra = [
