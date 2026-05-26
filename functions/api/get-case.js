@@ -44,6 +44,8 @@ function githubHeaders(token) {
     Authorization: `Bearer ${token}`,
     Accept: "application/vnd.github+json",
     "User-Agent": "static-landing-generator",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
   };
 }
 

@@ -686,6 +686,8 @@ async function fetchCaseFromGitHub(slug, env) {
         Authorization: `Bearer ${token}`,
         Accept: "application/vnd.github+json",
         "User-Agent": "static-landing-generator",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
       },
     });
     if (!res.ok) return null;
