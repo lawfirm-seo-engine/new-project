@@ -1,14 +1,4 @@
-const ALLOWED_CATEGORIES = [
-  "공동고소 형사대응",
-  "민사소송 회수",
-  "회수 성공사례",
-  "사건정보",
-  "방송 환전 사기",
-  "로맨스스캠 사기",
-  "환전 피싱",
-  "투자 사기",
-  "형사대응",
-];
+const DEFAULT_CATEGORY = "형사대응";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -17,23 +7,15 @@ export async function onRequestPost(context) {
     const body = await request.json();
     const caseName = normalizeSpace(body.caseName);
     const slug = normalizeSpace(body.slug);
-    const category = normalizeSpace(body.category);
+    const category = DEFAULT_CATEGORY;
     const summary = normalizeSpace(body.summary);
     const landings = body.landings && typeof body.landings === "object" ? body.landings : null;
     const tags = Array.isArray(body.tags) ? body.tags.map(normalizeSpace).filter(Boolean) : [];
     const landingViews = Number.isInteger(body.landingViews) ? body.landingViews : randomInt(140, 8000, slug);
     const reports = Number.isInteger(body.reports) ? body.reports : randomInt(4, 34, `${slug}-reports`);
 
-    if (!caseName || !slug || !category || !summary) {
+    if (!caseName || !slug || !summary) {
       return json({ ok: false, message: "필수 입력값이 누락되었습니다." }, 400);
-    }
-
-    if (!ALLOWED_CATEGORIES.includes(category)) {
-      return json({
-        ok: false,
-        message: "허용되지 않은 카테고리입니다. AI 원고 생성으로 카테고리를 다시 검수해주세요.",
-        category,
-      }, 400);
     }
 
     if (!hasRequiredLandingData(landings)) {

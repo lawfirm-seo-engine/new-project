@@ -37,17 +37,17 @@
   <table>
     <thead>
       <tr>
-        <th>No.</th><th>사건명</th><th>카테고리</th><th>등록일</th><th>수정일</th><th>관리</th>
+        <th>No.</th><th>사건명</th><th>등록일</th><th>수정일</th><th>관리</th>
       </tr>
     </thead>
-    <tbody id="tbody"><tr><td colspan="7" class="loading">로딩 중...</td></tr></tbody>
+    <tbody id="tbody"><tr><td colspan="5" class="loading">로딩 중...</td></tr></tbody>
   </table>
 </div>
 <script>
   fetch('/api/get-cases')
     .then(r => r.json())
     .then(data => {
-      if (!data.ok) { document.getElementById('tbody').innerHTML = `<tr><td colspan="6" style="color:#c0392b">불러오기 실패: ${data.message || '알 수 없는 오류'}</td></tr>`; return; }
+      if (!data.ok) { document.getElementById('tbody').innerHTML = `<tr><td colspan="5" style="color:#c0392b">불러오기 실패: ${data.message || '알 수 없는 오류'}</td></tr>`; return; }
       const cases = data.cases;
       document.getElementById('caseCount').textContent = `총 ${cases.length}건`;
       const sorted = [...cases].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
@@ -56,7 +56,6 @@
         <tr id="row-${esc(c.slug)}">
           <td>${sorted.length - i}</td>
           <td><strong>${esc(c.caseName)}</strong>${c.memo ? ' <span style="color:#8a96a8;font-size:12px">📝</span>' : ''}</td>
-          <td><span class="badge">${esc(c.category)}</span></td>
           <td>${esc(c.createdAt||'-')}</td>
           <td>${esc(c.updatedAt||'-')}</td>
           <td class="act">
@@ -69,7 +68,7 @@
           </td>
         </tr>`).join('');
     })
-    .catch(() => { document.getElementById('tbody').innerHTML = '<tr><td colspan="6">로딩 오류</td></tr>'; });
+    .catch(() => { document.getElementById('tbody').innerHTML = '<tr><td colspan="5">로딩 오류</td></tr>'; });
 
   async function deleteCase(slug, name) {
     if (!confirm(`"${name}" 사건을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;

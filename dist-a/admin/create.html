@@ -237,7 +237,7 @@
     </div>
 
     <input id="slug" type="text" placeholder="slug" readonly required />
-    <input id="category" type="text" placeholder="카테고리" readonly required />
+    <input id="category" type="hidden" />
     <textarea id="summary" placeholder="요약" readonly required></textarea>
   </form>
 
@@ -357,7 +357,6 @@
           : status === "warning"
             ? "주의: 유사 사건이 있습니다. 기존 사건과 별도인지 확인하세요."
             : "통과: 중복 위험이 낮습니다.",
-        data.review.categoryReason,
         ...(data.review.notes || []),
         ...(data.review.duplicateCheck.matches || []).map((item) => `유사 후보: ${item.caseName || item.slug} / ${item.slug} / ${Math.round(item.score * 100)}%`),
       ].join("\n");

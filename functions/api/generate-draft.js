@@ -46,16 +46,7 @@ const GROUPS = [
   },
 ];
 
-const CATEGORY_RULES = [
-  { re: /공동고소|집단|단체|형사|고소|합의|검찰|경찰/i, value: "공동고소 형사대응" },
-  { re: /민사|가압류|손해배상|부당이득|반환|채권|소송/i, value: "민사소송 회수" },
-  { re: /성공|회수율|전액|일부회수|사례/i, value: "회수 성공사례" },
-  { re: /브리핑|개요|대응방법|정보|주의/i, value: "AI브리핑 정보" },
-  { re: /방송|라이브|미션|사인|충전/i, value: "방송 미션 사기" },
-  { re: /로맨스|sns|채팅|연애|외국인/i, value: "로맨스스캠 사기" },
-  { re: /카지노|게임|출금|보증금|롤링|베팅/i, value: "사설 도박 사기" },
-  { re: /코인|거래소|선물|투자|리딩|주식|증권|공모주/i, value: "투자 사기" },
-];
+const DEFAULT_CATEGORY = "형사대응";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -71,9 +62,9 @@ export async function onRequestPost(context) {
 
     const cases = await loadCases(env);
     const slug = createSlug(baseCaseName(rawName));
-    const category = detectCategory(caseName);
+    const category = DEFAULT_CATEGORY;
     const duplicateCheck = findDuplicateRisks(caseName, slug, cases);
-    const generated = await createGeneratedData({ caseName, slug, category, duplicateCheck, env });
+    const generated = await createGeneratedData({ caseName, slug, duplicateCheck, env });
 
     return json({
       ok: true,
@@ -92,7 +83,7 @@ export async function onRequestPost(context) {
       review: {
         status: duplicateCheck.block ? "blocked" : duplicateCheck.warn ? "warning" : "pass",
         duplicateCheck,
-        categoryReason: explainCategory(caseName, category),
+        categoryReason: explainCategory(),
         notes: generated.reviewNotes,
         source: generated.source,
       },
@@ -122,8 +113,8 @@ async function loadCases(env) {
   return raw ? JSON.parse(raw) : [];
 }
 
-async function createGeneratedData({ caseName, slug, category, duplicateCheck, env }) {
-  const fallback = createRuleBasedData({ caseName, slug, category, duplicateCheck });
+async function createGeneratedData({ caseName, slug, duplicateCheck, env }) {
+  const fallback = createRuleBasedData({ caseName, slug, duplicateCheck });
   const apiKey = await resolveOpenAiKey(env) || env.OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -132,8 +123,8 @@ async function createGeneratedData({ caseName, slug, category, duplicateCheck, e
   }
 
   try {
-    const aiResult = await callOpenAI({ caseName, slug, category, env: { ...env, OPENAI_API_KEY: apiKey } });
-    return mergeWithFallback(aiResult, fallback);
+    const aiResult = await callOpenAI({ caseName, slug, env: { ...env, OPENAI_API_KEY: apiKey } });
+    return mergeWithFallback(aiResult, fallback, caseName);
   } catch (err) {
     console.error("[generate-draft] OpenAI error:", err.message);
     fallback.source = "openai-error";
@@ -162,7 +153,7 @@ async function resolveOpenAiKey(env) {
   }
 }
 
-async function callOpenAI({ caseName, slug, category, env }) {
+async function callOpenAI({ caseName, slug, env }) {
   const base = baseCaseName(caseName);
   const groupGuide = GROUPS.map((group) => {
     return `${group.key}. ${group.label}
@@ -177,8 +168,8 @@ async function callOpenAI({ caseName, slug, category, env }) {
 [네이버 SEO 작성 원칙]
 - 제목, 설명, H1, 본문, FAQ가 같은 검색 의도를 반복해서 설명해야 한다.
 - 단순 키워드 나열이나 과도한 반복은 금지한다. 문맥 안에서 자연스럽게 반복한다.
-- 사건명은 title, description, H1, 본문 첫 문단, FAQ 첫 질문에 포함한다.
-- FAQ 7개 전체에 사건명을 반복하지 않는다. 첫 질문은 전체 사건명, 2~3개 질문은 업체명 기본형, 나머지는 절차·증거·상담 키워드 중심으로 쓴다.
+- 사건명은 title, description, H1, 본문 첫 문단, FAQ 1~3번 질문에 포함한다.
+- FAQ 7개 전체에 사건명을 반복하지 않는다. 1~3번 질문은 전체 사건명, 나머지는 절차·증거·상담 키워드 중심으로 쓴다.
 - 각 도메인 유형은 문체와 관점이 달라야 한다. 같은 문장을 돌려쓰지 않는다.
 - 독자가 바로 행동할 수 있도록 증거 보존, 입금 중단, 상담 접수, 법적 절차를 구체적으로 쓴다.
 - 마지막 문단에는 "상담 접수", "전화", "카톡 상담" 중 1~2개를 자연스럽게 넣되 과장하지 않는다.
@@ -218,7 +209,7 @@ ${groupGuide}
 
   const userPrompt = `사건명: ${caseName}
 업체명 기본형: ${base}
-감지 카테고리: ${category}
+카테고리: 사용하지 않음
 
 이 사건명으로 5개 도메인 유형별 SEO 원고를 새로 작성하라.
 네이버에서 "${base} 사기", "${base} 피해", "${base} 형사고소", "${base} 피해금 회수" 검색 의도를 모두 고려하라.
@@ -250,7 +241,7 @@ ${groupGuide}
   return JSON.parse(text);
 }
 
-function mergeWithFallback(ai, fallback) {
+function mergeWithFallback(ai, fallback, caseName) {
   const result = {
     source: "openai",
     summary: normalizeSpace(ai.summary) || fallback.summary,
@@ -260,13 +251,14 @@ function mergeWithFallback(ai, fallback) {
   };
 
   for (const group of GROUPS) {
-    result.landings[group.key] = mergeGroupLanding(ai.landings?.[group.key], fallback.landings[group.key]);
+    result.landings[group.key] = mergeGroupLanding(ai.landings?.[group.key], fallback.landings[group.key], caseName);
   }
   return result;
 }
 
-function mergeGroupLanding(ai, fallback) {
-  return {
+function mergeGroupLanding(ai, fallback, caseName) {
+  const faq = ensureFaqCaseName(normalizeFaq(ai?.faq, fallback.faq).slice(0, 8), caseName);
+  const landing = {
     ...fallback,
     title: normalizeSpace(ai?.title) || fallback.title,
     description: normalizeSpace(ai?.description) || fallback.description,
@@ -278,20 +270,28 @@ function mergeGroupLanding(ai, fallback) {
     body: normalizeStringArray(ai?.body, fallback.body).slice(0, 9),
     victimCases: normalizeStringArray(ai?.victimCases, fallback.victimCases).slice(0, 7),
     suspiciousCompanies: normalizeStringArray(ai?.suspiciousCompanies, fallback.suspiciousCompanies).slice(0, 7),
-    faq: normalizeFaq(ai?.faq, fallback.faq).slice(0, 8),
+    faq,
   };
+  landing.schema = createSchemaData({
+    title: landing.title,
+    description: landing.description,
+    canonical: landing.canonical,
+    caseName,
+    faq,
+  });
+  return landing;
 }
 
-function createRuleBasedData({ caseName, slug, category, duplicateCheck }) {
-  const summary = createSummary(caseName, category);
-  const tags = createTags(caseName, category);
+function createRuleBasedData({ caseName, slug, duplicateCheck }) {
+  const summary = createSummary(caseName);
+  const tags = createTags(caseName);
   const reviewNotes = [
     duplicateCheck.block
       ? "동일하거나 매우 유사한 사건이 있어 저장을 차단해야 합니다."
       : duplicateCheck.warn
         ? "유사 사건이 있어 기존 사건과 별도 사건인지 확인해야 합니다."
         : "중복 위험은 낮습니다.",
-    `${category} 검색 의도 기준으로 SEO 원고 초안을 생성했습니다. OpenAI API 키가 설정되면 더 정교한 유형별 원고가 생성됩니다.`,
+    "카테고리 세부 분류 없이 사건명 검색 의도 기준으로 SEO 원고 초안을 생성했습니다. OpenAI API 키가 설정되면 더 정교한 사건별 원고가 생성됩니다.",
   ];
   const landings = Object.fromEntries(GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, group })]));
 
@@ -409,11 +409,11 @@ function makeFaq({ caseName, base, group }) {
       answer: `회수 가능성은 입금 계좌, 상대방 특정 가능성, 증거 보존 상태에 따라 달라집니다. ${base} 관련 대화 내용, 입금증, 사이트 주소, 담당자 계정이 남아 있다면 형사와 민사 절차를 함께 검토할 수 있습니다.`,
     },
     {
-      question: `${base} 사기 의심 상황에서 가장 먼저 할 일은 무엇인가요?`,
+      question: `${caseName} 의심 상황에서 가장 먼저 할 일은 무엇인가요?`,
       answer: "추가 입금을 중단하고 기존 자료를 삭제하지 않는 것이 우선입니다. 입금 내역, 대화방, URL, 계좌번호, 담당자 프로필, 앱 화면을 캡처한 뒤 시간 순서대로 정리해야 합니다.",
     },
     {
-      question: "상담 접수 전에 어떤 자료를 준비해야 하나요?",
+      question: `${caseName} 상담 접수 전에 어떤 자료를 준비해야 하나요?`,
       answer: "입금 영수증, 계좌번호, 예금주, 대화방 캡처, 사이트 주소, 로그인 화면, 출금 제한 안내, 담당자 연락처를 준비하면 됩니다. 자료가 부족해도 현재 남아 있는 증거부터 확인할 수 있습니다.",
     },
   ];
@@ -490,23 +490,17 @@ function createSchemaData({ title, description, canonical, caseName, faq }) {
   };
 }
 
-function detectCategory(caseName) {
-  const text = normalizeSpace(caseName);
-  const match = CATEGORY_RULES.find((rule) => rule.re.test(text));
-  return match?.value || "형사대응";
+function explainCategory() {
+  return "카테고리 자동 분류는 사용하지 않습니다.";
 }
 
-function explainCategory(caseName, category) {
-  return `${caseName} 사건명에서 감지한 키워드를 기준으로 "${category}" 카테고리를 제안했습니다.`;
+function createSummary(caseName) {
+  return `${caseName} 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.`;
 }
 
-function createSummary(caseName, category) {
-  return `${caseName} 관련 ${category} 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.`;
-}
-
-function createTags(caseName, category) {
+function createTags(caseName) {
   const tokens = normalizeSpace(caseName).split(/[\s-]+/).filter((token) => token.length >= 2).slice(0, 4);
-  return [...new Set([...tokens, category, "사기피해", "피해금회수", "증거보존"])];
+  return [...new Set([...tokens, "사기피해", "피해금회수", "증거보존"])];
 }
 
 function findDuplicateRisks(caseName, slug, cases) {
@@ -545,6 +539,44 @@ function normalizeFaq(value, fallback) {
     }))
     .filter((item) => item.question && item.answer);
   return faq.length ? faq : fallback;
+}
+
+function ensureFaqCaseName(faq, caseName) {
+  const normalizedCaseName = normalizeSpace(caseName);
+  const base = baseCaseName(normalizedCaseName);
+  if (!normalizedCaseName) return faq;
+
+  return faq.map((item, index) => {
+    const question = normalizeSpace(item.question);
+
+    if (index <= 2) {
+      // Q1~Q3: 전체 사건명 포함 강제
+      if (question.includes(normalizedCaseName)) return { ...item, question };
+      if (base && question.includes(base)) {
+        return {
+          ...item,
+          question: normalizeSpace(question.replace(base, normalizedCaseName).replace(/사기\s+사기/g, "사기")),
+        };
+      }
+      return { ...item, question: normalizeSpace(`${normalizedCaseName} 관련 ${question}`) };
+    }
+
+    // Q4+: 사건명·업체명을 질문에서 제거
+    let stripped = question;
+    for (const name of [normalizedCaseName, base]) {
+      if (!name || !stripped.includes(name)) continue;
+      stripped = stripped
+        .replace(new RegExp(escapeRegex(name) + "(\\s*(?:사칭\\s*사기)?)?(\\s*관련)?\\s*", "g"), "")
+        .trim();
+    }
+    // 앞에 남은 조사(은/는/이/가/을/를/의/에서) 제거
+    stripped = normalizeSpace(stripped).replace(/^(?:은|는|이|가|을|를|의|에서|에게|으로|로|과|와)\s+/, "");
+    return { ...item, question: stripped || question };
+  });
+}
+
+function escapeRegex(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 const _CHO = ["g","gg","n","d","dd","r","m","b","bb","s","ss","","j","jj","ch","k","t","p","h"];
