@@ -676,7 +676,7 @@ function withSentenceBreaks(value = "") {
 
 function createReceiptBadge(caseData) {
   const count = Number(caseData.reports) > 0 ? Number(caseData.reports) : seededInt(`${caseData.slug}-reports`, 4, 34);
-  const date = formatDate(caseData.createdAt || new Date().toISOString().slice(0, 10));
+  const date = formatDate(new Date().toISOString().slice(0, 10));
   return `<div class="receipt-badge" aria-label="상담 접수 현황"><span>상담 접수</span><strong>${count.toLocaleString("ko-KR")}</strong><span>건+</span><em>(${date} 기준)</em></div>`;
 }
 

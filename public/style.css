@@ -778,6 +778,10 @@ button{
   line-height:1.8;
 }
 
+.footer-info span{
+  display:block;
+}
+
 .footer-info a{
   color:var(--muted);
 }
@@ -798,21 +802,25 @@ button{
 }
 
 .footer-nav a{
-  padding:2px 7px;
-  border:1px solid var(--line);
+  padding:1px 6px;
+  border:1px solid transparent;
   border-radius:var(--radius);
   color:var(--muted);
   background:transparent;
-  font-size:11px;
-  font-weight:700;
-  opacity:.7;
+  font-size:10px;
+  font-weight:600;
+  opacity:.38;
 }
 
 .footer-nav a.is-active{
-  opacity:1;
-  border-color:color-mix(in srgb, var(--muted) 50%, var(--line));
+  opacity:.55;
+  border-color:transparent;
   color:var(--muted);
   background:transparent;
+}
+
+.footer-nav a:hover{
+  opacity:.6;
 }
 
 @media(max-width:980px){
