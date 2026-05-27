@@ -139,15 +139,15 @@ export async function onRequest(context) {
 function renderLanding(caseData, group, origin) {
   const landing = caseData.landings?.[group.key] || {};
   const rawCaseName = caseData.caseName || "";
-  const dispName = normalizeCaseName(rawCaseName);
   const pageTitle = groupPageTitle(rawCaseName, group.key);
+  const pageH1 = groupPageH1(rawCaseName, group.key);
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}/`;
   const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.webp`;
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = caseData.updatedAt || publishedDate;
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
-  const keyword = `${baseCaseName(rawCaseName)} 사기, ${baseCaseName(rawCaseName)} 사칭 사기`;
+  const keyword = searchKeyword(rawCaseName);
 
   const headExtra = [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
@@ -194,7 +194,7 @@ function renderLanding(caseData, group, origin) {
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "홈", item: group.siteUrl + "/" },
           { "@type": "ListItem", position: 2, name: breadcrumbLabel(group.key), item: group.siteUrl + "/" },
-          { "@type": "ListItem", position: 3, name: baseCaseName(rawCaseName) || rawCaseName, item: canonical },
+          { "@type": "ListItem", position: 3, name: primaryCaseKeyword(rawCaseName) || rawCaseName, item: canonical },
         ],
       },
       {
@@ -235,11 +235,12 @@ function renderLanding(caseData, group, origin) {
     schema,
     bodyClass: `${group.bodyClass} landing-page`,
     tone: esc(group.tone),
-    h1: esc(pageTitle),
+    h1: esc(pageH1),
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName),
     ogThumbnail,
     summary: pageSummary,
     receiptBadge: createReceiptBadge(caseData),
+    heroCta: createHeroCta(),
     content,
     intent: esc(group.intent),
     ctaTitle: esc(group.ctaTitle),
@@ -251,8 +252,7 @@ function renderLanding(caseData, group, origin) {
 }
 
 function createLandingContent(landing, group, caseData) {
-  const name = esc(normalizeCaseName(caseData.caseName));
-  const baseName = esc(baseCaseName(caseData.caseName || ""));
+  const name = esc(primaryCaseKeyword(caseData.caseName));
   const rawCaseName = caseData.caseName || "";
   const slug = esc(caseData.slug);
   const cn = esc(normalizeCaseName(caseData.caseName));
@@ -266,25 +266,32 @@ function createLandingContent(landing, group, caseData) {
   const victimCases = renderVictimCasesForLanding(landing, group, caseData);
   const faq = renderFaqForLanding(landing, group, caseData);
   const liveStatus = createLiveReceiptStatus(caseData);
+  const evidenceCheck = createEvidenceCheckSection();
+  const inlineCta = createInlineCta();
 
   const faqSection = group.key === "d"
-    ? `<section class="article-block brief-card"><h2>${baseName} 사기 피해 구조</h2>${paragraphs(body)}</section>
-<section class="article-block"><h2>${name} 피해 유형</h2>${list(victimCases)}</section>
-<section class="article-block faq"><h2>${name} 자주 묻는 질문 (FAQ)</h2>${faqHtml(faq, rawCaseName)}</section>`
+    ? `<section class="article-block brief-card"><h2>${name} 피해 구조</h2>${paragraphs(body)}</section>
+<section class="article-block"><h2>구체적인 피해 유형</h2>${list(victimCases)}</section>
+${evidenceCheck}
+${inlineCta}
+<section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(faq, rawCaseName)}</section>`
     : `<section class="article-block"><p class="section-kicker">${esc(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(body)}</section>
-<section class="article-block"><h2>${name} 피해 사례</h2>${list(victimCases)}</section>
-<section class="article-block faq"><h2>${name} FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`;
+<section class="article-block"><h2>구체적인 피해 사례</h2>${list(victimCases)}</section>
+${evidenceCheck}
+${inlineCta}
+<section class="article-block faq"><h2>FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`;
 
   const consultForm = createConsultForm(cn, siteName);
   const floatingWidgets = createFloatingWidgets(cn, siteName, slug);
 
-  return [faqSection, liveStatus, memoSection, consultForm, floatingWidgets, trackScript].filter(Boolean).join("\n");
+  return [faqSection, liveStatus, createInlineCta("실시간 접수와 비슷한 정황이 있다면 추가 입금 전에 현재 자료부터 점검해 보세요."), memoSection, consultForm, floatingWidgets, trackScript].filter(Boolean).join("\n");
 }
 
 function renderBodyForLanding(landing, group, caseData) {
-  const fullName = normalizeCaseName(caseData.caseName || "");
-  const base = fullName.replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim() || fullName;
-  const original = Array.isArray(landing.body) ? landing.body.filter(Boolean) : [];
+  const base = primaryCaseKeyword(caseData.caseName || "");
+  const original = Array.isArray(landing.body)
+    ? landing.body.filter(Boolean).map((item, index) => reduceCaseNameText(item, caseData.caseName, index < 2))
+    : [];
   const additions = {
     a: [
       `${base} 사건은 사기죄 형법 제347조의 기망, 착오, 처분행위, 재산상 이익 취득 구조를 기준으로 검토합니다. 상대방이 허위 수익이나 출금 가능성을 말해 입금을 유도했다면 고소장에는 그 대화와 송금 흐름을 함께 정리해야 합니다.`,
@@ -312,15 +319,17 @@ function renderBodyForLanding(landing, group, caseData) {
 }
 
 function renderVictimCasesForLanding(landing, group, caseData) {
-  const fullName = normalizeCaseName(caseData.caseName || "");
-  const base = fullName.replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim() || fullName;
-  const original = Array.isArray(landing.victimCases) ? landing.victimCases.filter(Boolean) : [];
+  const base = primaryCaseKeyword(caseData.caseName || "");
+  const brand = secondaryCaseKeyword(caseData.caseName || "").replace(/\s*피해 대응$/, "") || "담당자";
+  const original = Array.isArray(landing.victimCases)
+    ? landing.victimCases.filter(Boolean).map((item, index) => reduceCaseNameText(item, caseData.caseName, index === 0))
+    : [];
   const additions = [
-    `${base} 상담원이 카카오톡이나 텔레그램으로 접근해 소액 수익 화면을 보여준 뒤 세금, 보증금, 인증비 명목의 추가 입금을 요구한 사례`,
-    `피해자가 출금을 요청하자 심사 중이라는 안내만 반복되고, 입금 계좌와 담당자 계정이 며칠 사이 바뀐 사례`,
-    `환불을 요구한 뒤 피해금 회복팀 또는 법무팀을 사칭한 계정이 다시 연락해 선입금 수수료를 요구한 2차 피해 사례`,
-    `입금증, 계좌번호, 대화 캡처는 남아 있지만 사이트가 폐쇄되어 상담 접수 단계에서 증거를 다시 정리한 사례`,
-    `여러 피해자가 같은 계좌 또는 유사 URL을 확인해 형사고소와 민사 가압류 가능성을 함께 검토한 사례`,
+    `직장인 피해자가 카카오톡 오픈채팅방에서 수익 인증 화면을 보고 1차로 320만원을 보낸 뒤, 출금 직전 세금과 보증금 명목으로 추가 780만원을 요구받은 사례`,
+    `자영업자가 유튜브 광고를 통해 가입한 뒤 ${brand} 관계자를 사칭한 담당자에게 안내를 받았고, 출금 신청 당일 계좌와 담당자 계정이 동시에 바뀐 사례`,
+    `소액 수익금 18만원을 먼저 지급받아 안심한 뒤 투자금을 키웠으나, 환불 요청 후 피해금 회복팀이라는 계정이 다시 접근해 선입금 수수료를 요구한 2차 피해 사례`,
+    `입금증, 계좌번호, 대화 캡처는 남아 있었지만 사이트가 폐쇄되어 상담 접수 단계에서 브라우저 기록과 문자 알림까지 다시 정리한 사례`,
+    `여러 피해자가 같은 수취 계좌와 유사 URL을 확인해 형사고소 자료와 민사 가압류 가능성을 함께 검토한 사례`,
   ];
   return [...original, ...additions].slice(0, 5);
 }
@@ -366,7 +375,7 @@ function createConsultForm(cn, siteName) {
   <form class="consult-form" id="consultForm">
     <input type="text" name="cname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="phone" placeholder="연락처 (010-xxxx-xxxx)" required autocomplete="tel">
-    <input type="text" name="amount" placeholder="피해금액 (예: 500만원)" required>
+    <input type="text" name="amount" placeholder="대략적인 피해금액" required>
     <button type="submit">상담 접수</button>
   </form>
   <p class="consult-msg" id="consultMsg"></p>
@@ -394,15 +403,15 @@ function createConsultForm(cn, siteName) {
 function createFloatingWidgets(cn, siteName, slug) {
   return `<div class="floating-contact">
   <a href="tel:02-6952-3695" class="float-btn phone">전화문의</a>
-  <a href="http://pf.kakao.com/_xcypmn/chat" class="float-btn kakao" target="_blank" rel="noopener noreferrer">카톡상담</a>
+  <a href="http://pf.kakao.com/_xcypmn/chat" class="float-btn kakao" target="_blank" rel="noopener noreferrer">카톡으로 캡처 보내기</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
-  <span class="sticky-title">긴급상담 ｜ 02-6952-3695</span>
+  <span class="sticky-title">추가 입금 전 긴급 점검</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
-    <input type="text" name="samount" placeholder="피해금액" required>
-    <button type="submit">상담 접수</button>
+    <input type="text" name="samount" placeholder="대략적인 피해금액" required>
+    <button type="submit">확인 요청</button>
   </form>
   <span id="stickyMsg" class="sticky-msg"></span>
 </div>
@@ -418,9 +427,9 @@ function createFloatingWidgets(cn, siteName, slug) {
         body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: '${cn}', domain: '${siteName}' })
       });
       var data = await res.json();
-      if (data.ok) { msg.textContent = '접수 완료!'; msg.className = 'sticky-msg ok'; this.reset(); btn.disabled = false; btn.textContent = '상담 접수'; }
-      else { msg.textContent = data.message || '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
-    } catch(err) { msg.textContent = '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '상담 접수'; }
+      if (data.ok) { msg.textContent = '접수 완료!'; msg.className = 'sticky-msg ok'; this.reset(); btn.disabled = false; btn.textContent = '확인 요청'; }
+      else { msg.textContent = data.message || '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '확인 요청'; }
+    } catch(err) { msg.textContent = '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '확인 요청'; }
   });
 </script>`;
 }
@@ -462,6 +471,7 @@ function pageTemplate(d) {
       ${d.ogThumbnail}
       <p class="summary">${d.summary}</p>
       ${d.receiptBadge || ""}
+      ${d.heroCta || ""}
     </section>
     <div class="page-shell">
       ${d.content}
@@ -515,10 +525,50 @@ function baseCaseName(name) {
   return String(name || "").trim().replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim();
 }
 
+function primaryCaseKeyword(name) {
+  const clean = baseCaseName(name);
+  const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
+  return (match ? match[1] : clean).trim();
+}
+
+function secondaryCaseKeyword(name) {
+  const clean = baseCaseName(name);
+  const primary = primaryCaseKeyword(name);
+  let tail = clean.slice(primary.length).trim();
+  tail = tail.replace(/db증권/ig, "DB증권");
+  if (!tail) return "";
+  return /사칭|피해/.test(tail) ? `${tail} 피해 대응` : `${tail} 사칭 피해 대응`;
+}
+
 function groupPageTitle(name, key) {
-  const base = baseCaseName(name);
-  const s = { a: "사칭 사기 형사 고소", b: "사칭 사기 민사 소송", c: "사칭 사기 피해금 회수", d: "사칭 사기 피해 접수", e: "사칭 사기 피해 진행현황" };
-  return `${base} ${s[key] || "사칭 사기"}`;
+  const base = primaryCaseKeyword(name);
+  const secondary = secondaryCaseKeyword(name);
+  const s = {
+    a: "형사고소",
+    b: "민사소송",
+    c: "피해금 회수 사례",
+    d: "AI브리핑",
+    e: "피해 진행현황",
+  };
+  return `${base} ${s[key] || "피해 대응"}${secondary ? ` | ${secondary}` : ""}`;
+}
+
+function groupPageH1(name, key) {
+  const base = primaryCaseKeyword(name);
+  const s = {
+    a: "형사고소 대응",
+    b: "민사소송 대응",
+    c: "피해금 회수 사례",
+    d: "AI브리핑",
+    e: "피해 진행현황",
+  };
+  return `${base} ${s[key] || "피해 대응"}`;
+}
+
+function searchKeyword(name) {
+  const base = primaryCaseKeyword(name);
+  const secondary = secondaryCaseKeyword(name).replace(/\s*피해 대응$/, "");
+  return [base, `${base} 피해`, secondary, secondary && `${secondary} 사칭`].filter(Boolean).join(", ");
 }
 
 function themeColor(key) {
@@ -530,7 +580,7 @@ function breadcrumbLabel(key) {
 }
 
 function createHtmlBreadcrumb(group, caseName) {
-  const current = baseCaseName(caseName) || normalizeCaseName(caseName);
+  const current = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
   return `<nav class="breadcrumb" aria-label="breadcrumb">
     <a href="${group.siteUrl}/">홈</a>
     <span>${esc(breadcrumbLabel(group.key))}</span>
@@ -564,8 +614,65 @@ function faqHtml(items = [], caseName = "") {
     if (shouldKeepName && caseName && !caseNameVariants(caseName).some((name) => q.includes(name))) {
       q = `[${caseName}] ` + q.replace(/^\[[^\]]*\]\s*/, "");
     }
-    return `<details><summary>${esc(q)}</summary><p>${withSentenceBreaks(item.answer)}</p></details>`;
+    return `<details><summary>${esc(q)}</summary><p>${withSentenceBreaks(addFaqCta(item.answer))}</p></details>`;
   }).join("\n");
+}
+
+function reduceCaseNameText(value, caseName, keepFirst = false) {
+  let text = toStr(value);
+  const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
+  const primary = primaryCaseKeyword(caseName);
+  let used = false;
+  names.forEach((name) => {
+    if (!name) return;
+    if (keepFirst && !used && primary) {
+      text = text.replace(name, primary);
+      used = true;
+    }
+    text = text.split(name).join(keepFirst ? "해당 사건" : "이 사건");
+  });
+  return text.replace(/\s{2,}/g, " ").trim();
+}
+
+function createHeroCta() {
+  return `<div class="hero-cta">
+    <p>출금 지연, 추가 입금 요구, 대화방 삭제 정황이 있다면 지금 자료부터 확인하세요.</p>
+    <div>
+      <a href="#consult" class="hero-cta-primary">상담 접수하기</a>
+      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증·대화 캡처 보내기</a>
+    </div>
+  </div>`;
+}
+
+function createEvidenceCheckSection() {
+  return `<section class="article-block evidence-check">
+  <p class="section-kicker">3분 증거 점검</p>
+  <h2>상담 전 이것만 먼저 확인하세요</h2>
+  <ul>
+    <li>입금증, 계좌번호, 예금주가 남아 있는지 확인</li>
+    <li>카카오톡·텔레그램 대화방과 담당자 프로필 캡처</li>
+    <li>사이트 주소, 로그인 화면, 출금 제한 안내 저장</li>
+    <li>세금·보증금·인증비 등 추가 입금 요구 메시지 보존</li>
+  </ul>
+  <a href="http://pf.kakao.com/_xcypmn/chat" target="_blank" rel="noopener noreferrer">카톡으로 자료 점검 요청</a>
+</section>`;
+}
+
+function createInlineCta(text = "비슷한 피해 흐름이 보인다면 추가 입금 전에 상담 접수로 현재 자료부터 확인하세요.") {
+  return `<aside class="inline-cta">
+  <strong>추가 입금 전 긴급 점검</strong>
+  <p>${esc(text)}</p>
+  <div>
+    <a href="#consult">상담 접수</a>
+    <a href="tel:0269523695">전화 상담</a>
+  </div>
+</aside>`;
+}
+
+function addFaqCta(answer = "") {
+  const text = String(answer || "");
+  if (/상담 접수|카톡 상담|전화/.test(text)) return text;
+  return `${text} 입금증과 대화 캡처가 있다면 상담 접수나 카톡 상담으로 먼저 자료 상태를 확인할 수 있습니다.`;
 }
 
 function withSentenceBreaks(value = "") {
