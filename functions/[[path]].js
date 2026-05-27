@@ -406,7 +406,7 @@ function createFloatingWidgets(cn, siteName, slug) {
   <a href="http://pf.kakao.com/_xcypmn/chat" class="float-btn kakao" target="_blank" rel="noopener noreferrer">카톡으로 캡처 보내기</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
-  <span class="sticky-title">추가 입금 전 긴급 점검</span>
+  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6952-3695</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
@@ -681,7 +681,7 @@ function withSentenceBreaks(value = "") {
 
 function createReceiptBadge(caseData) {
   const count = Number(caseData.reports) > 0 ? Number(caseData.reports) : seededInt(`${caseData.slug}-reports`, 4, 34);
-  const date = formatDate(caseData.createdAt || caseData.updatedAt || new Date().toISOString().slice(0, 10));
+  const date = formatDate(caseData.createdAt || new Date().toISOString().slice(0, 10));
   return `<div class="receipt-badge" aria-label="상담 접수 현황"><span>상담 접수</span><strong>${count.toLocaleString("ko-KR")}</strong><span>건+</span><em>(${date} 기준)</em></div>`;
 }
 
