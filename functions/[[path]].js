@@ -676,8 +676,7 @@ function withSentenceBreaks(value = "") {
 
 function createReceiptBadge(caseData) {
   const count = Number(caseData.reports) > 0 ? Number(caseData.reports) : seededInt(`${caseData.slug}-reports`, 4, 34);
-  const date = formatDate(new Date().toISOString().slice(0, 10));
-  return `<div class="receipt-badge" aria-label="상담 접수 현황"><span>상담 접수</span><strong>${count.toLocaleString("ko-KR")}</strong><span>건+</span><em>(${date} 기준)</em></div>`;
+  return `<div class="receipt-badge" aria-label="상담 접수 현황"><span>상담 접수</span><strong>${count.toLocaleString("ko-KR")}</strong><span>건+</span><em id="rBadgeDate"></em></div><script>(function(){var d=new Date();document.getElementById('rBadgeDate').textContent='('+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()+' 기준)';})();</script>`;
 }
 
 function createLiveReceiptStatus(caseData) {
