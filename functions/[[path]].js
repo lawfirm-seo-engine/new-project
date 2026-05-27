@@ -485,17 +485,12 @@ function pageTemplate(d) {
   </main>
   <footer class="site-footer">
     <div class="footer-inner">
-      <div class="footer-brand">
-        <img src="/assets/logo.png" alt="대온 법률사무소">
-      </div>
-      <nav class="footer-nav" aria-label="카테고리 바로가기">${d.footerLinks}</nav>
       <address class="footer-info">
-        <span>대표변호사 : 신동우</span>
-        <span>주소 : 서울 서초구 서초대로 250 스타갤러리브릿지빌딩 802호</span>
-        <span>전화번호 : <a href="tel:0269523695">02-6952-3695</a></span>
-        <span>이메일 : <a href="mailto:noleosi@daeonlaw.co.kr">noleosi@daeonlaw.co.kr</a></span>
+        <span>대온 법률사무소&nbsp;&nbsp;대표변호사 : 신동우 ｜ 전화번호 : <a href="tel:0269523695">02-6952-3695</a></span>
+        <span>주소 : 서울 서초구 서초대로 250 스타갤러리브릿지빌딩 802호 ｜ 이메일 : <a href="mailto:noleosi@daeonlaw.co.kr">noleosi@daeonlaw.co.kr</a></span>
       </address>
       <p class="copyright">COPYRIGHT © 2024 대온 법률사무소 All rights reserved.</p>
+      <nav class="footer-nav" aria-label="카테고리 바로가기">${d.footerLinks}</nav>
     </div>
   </footer>
 </body>
