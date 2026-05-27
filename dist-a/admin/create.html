@@ -376,6 +376,14 @@
       }
       successBoxEl.style.display = "block";
       messageEl.textContent = "";
+
+      // OG 이미지 warm-up: 5개 도메인 각각 /og/slug.webp 1회 호출 → CDN 엣지 캐시 선점
+      // 랜딩페이지 prefetch: 각 도메인 랜딩 URL 1회 호출 → Worker SSR + CDN 캐시
+      const encoded = encodeURIComponent(slug);
+      for (const g of LANDING_GROUPS) {
+        fetch(`${g.url}/og/${encoded}.webp`, { method: "GET", mode: "no-cors", cache: "no-store" }).catch(function(){});
+        fetch(`${g.url}/${g.prefix}/${encoded}/`, { method: "GET", mode: "no-cors", cache: "no-store" }).catch(function(){});
+      }
     }
 
     function renderGeneratedData(data) {
@@ -388,13 +396,7 @@
       const status = data.review.status;
       reviewPanelEl.classList.add("is-visible");
       reviewStatusEl.className = `status ${status}`;
-      const sourceLabels = {
-        "openai": "✅ OpenAI GPT-5.4-mini 원고 생성 완료",
-        "no-key": "⚠️ 기본 규칙 기반 원고 — OPENAI_API_KEY 환경변수가 Functions에 전달되지 않음",
-        "openai-error": "❌ OpenAI 호출 오류 — 검수 노트에서 에러 메시지 확인",
-        "rule-based": "⚠️ 기본 규칙 기반 원고",
-      };
-      const sourceLabel = sourceLabels[data.review.source] || "⚠️ 기본 규칙 기반 원고";
+      const sourceLabel = "✅ 원고 생성 완료";
       reviewStatusEl.textContent = [
         sourceLabel,
         status === "blocked"

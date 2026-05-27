@@ -193,7 +193,8 @@ function renderLanding(caseData, group, origin) {
         "@id": `${canonical}#breadcrumb`,
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "홈", item: group.siteUrl + "/" },
-          { "@type": "ListItem", position: 2, name: rawCaseName, item: canonical },
+          { "@type": "ListItem", position: 2, name: breadcrumbLabel(group.key), item: group.siteUrl + "/" },
+          { "@type": "ListItem", position: 3, name: baseCaseName(rawCaseName) || rawCaseName, item: canonical },
         ],
       },
       {
@@ -235,6 +236,7 @@ function renderLanding(caseData, group, origin) {
     bodyClass: `${group.bodyClass} landing-page`,
     tone: esc(group.tone),
     h1: esc(pageTitle),
+    breadcrumb: createHtmlBreadcrumb(group, rawCaseName),
     ogThumbnail,
     summary: pageSummary,
     receiptBadge: createReceiptBadge(caseData),
@@ -453,6 +455,7 @@ function pageTemplate(d) {
     ${d.headerCall}
   </header>
   <main>
+    ${d.breadcrumb || ""}
     <section class="hero">
       <p class="eyebrow">${d.tone}</p>
       <h1>${d.h1}</h1>
@@ -520,6 +523,19 @@ function groupPageTitle(name, key) {
 
 function themeColor(key) {
   return { a: "#111827", b: "#173b57", c: "#174333", d: "#25314d", e: "#3b2f52" }[key] || "#111827";
+}
+
+function breadcrumbLabel(key) {
+  return { a: "형사고소", b: "민사소송", c: "성공사례", d: "AI브리핑", e: "전체허브" }[key] || "사건";
+}
+
+function createHtmlBreadcrumb(group, caseName) {
+  const current = baseCaseName(caseName) || normalizeCaseName(caseName);
+  return `<nav class="breadcrumb" aria-label="breadcrumb">
+    <a href="${group.siteUrl}/">홈</a>
+    <span>${esc(breadcrumbLabel(group.key))}</span>
+    <strong>${esc(current)}</strong>
+  </nav>`;
 }
 
 function toStr(item) {

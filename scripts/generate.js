@@ -249,13 +249,15 @@ function createFallbackLanding(caseItem, group) {
       "화면상 잔액은 보이지만 실제 출금이 제한된 사례",
     ],
     faq,
-    schema: createSchemaData({ title: pageTitle, description, canonical, faq, groupKey: group.key, caseName, keywords: searchKeyword(caseName) }),
+    schema: createSchemaData({ title: pageTitle, description, canonical, faq, groupKey: group.key, caseName, keywords: searchKeyword(caseName), caseItem }),
   };
 }
 
-function createSchemaData({ title, description, canonical, faq, groupKey = "a", caseName = "", keywords = "" }) {
+function createSchemaData({ title, description, canonical, faq, groupKey = "a", caseName = "", keywords = "", caseItem = {} }) {
   const siteUrl = canonical.split("/").slice(0, 3).join("/");
   const articleType = groupKey === "d" ? "NewsArticle" : "Article";
+  const publishedDate = caseItem.createdAt || today;
+  const modifiedDate = caseItem.updatedAt || publishedDate;
 
   const webPage = {
     "@type": "WebPage",
@@ -264,8 +266,8 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
     description,
     url: canonical,
     inLanguage: "ko-KR",
-    datePublished: today,
-    dateModified: today,
+    datePublished: publishedDate,
+    dateModified: modifiedDate,
     breadcrumb: { "@id": `${canonical}#breadcrumb` },
     author: ORGANIZATION,
     ...(keywords ? { keywords } : {}),
@@ -278,8 +280,8 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
     description,
     url: canonical,
     inLanguage: "ko-KR",
-    datePublished: today,
-    dateModified: today,
+    datePublished: publishedDate,
+    dateModified: modifiedDate,
     author: ORGANIZATION,
     publisher: ORGANIZATION,
     isPartOf: { "@id": `${canonical}#webpage` },
@@ -303,7 +305,8 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
         "@id": `${canonical}#breadcrumb`,
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "홈", item: siteUrl + "/" },
-          { "@type": "ListItem", position: 2, name: caseName || title, item: canonical },
+          { "@type": "ListItem", position: 2, name: breadcrumbLabel(groupKey), item: siteUrl + "/" },
+          { "@type": "ListItem", position: 3, name: baseCaseName(caseName) || caseName || title, item: canonical },
         ],
       },
       {
@@ -654,9 +657,10 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     links.push(`<meta name="classification" content="${escapeHtml(group.intent)}">`);
     links.push(`<meta property="og:updated_time" content="${today}">`);
   } else {
-    const isoNow = new Date().toISOString();
-    links.push(`<meta property="article:published_time" content="${isoNow}">`);
-    links.push(`<meta property="article:modified_time" content="${isoNow}">`);
+    const publishedDate = caseItem?.createdAt || today;
+    const modifiedDate = caseItem?.updatedAt || publishedDate;
+    links.push(`<meta property="article:published_time" content="${publishedDate}T00:00:00+09:00">`);
+    links.push(`<meta property="article:modified_time" content="${modifiedDate}T00:00:00+09:00">`);
     links.push(`<meta property="article:author" content="대온 법률사무소">`);
     links.push(`<meta property="article:section" content="${escapeHtml(group.intent)}">`);
     links.push(`<meta name="author" content="대온 법률사무소">`);
@@ -674,6 +678,19 @@ function themeColor(key) {
     d: "#25314d",
     e: "#3b2f52",
   }[key];
+}
+
+function breadcrumbLabel(key) {
+  return { a: "형사고소", b: "민사소송", c: "성공사례", d: "AI브리핑", e: "전체허브" }[key] || "사건";
+}
+
+function createHtmlBreadcrumb(group, caseItem) {
+  const current = baseCaseName(caseItem.caseName || caseItem.name || "") || normalizeCaseName(caseItem.caseName || caseItem.name || "");
+  return `<nav class="breadcrumb" aria-label="breadcrumb">
+    <a href="${group.siteUrl}/">홈</a>
+    <span>${escapeHtml(breadcrumbLabel(group.key))}</span>
+    <strong>${escapeHtml(current)}</strong>
+  </nav>`;
 }
 
 function randomInt(min, max) {
@@ -836,6 +853,7 @@ function buildPage(template, group, data) {
     ctaText: escapeHtml(group.ctaText),
     ctaLabel: escapeHtml(group.ctaLabel),
     receiptBadge: "",
+    breadcrumb: "",
     ogType: group.ogType,
     ...data,
   });
@@ -910,20 +928,23 @@ for (const group of groups) {
   // The sitemap still lists all case URLs so Naver can discover them.
 
   const urls = [
-    `${group.siteUrl}/`,
-    ...cases.map((item) => `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`),
+    { loc: `${group.siteUrl}/`, lastmod: today, priority: "0.3" },
+    ...cases.map((item) => ({
+      loc: `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`,
+      lastmod: item.updatedAt || item.createdAt || today,
+      priority: "0.9",
+    })),
   ];
-  const lastmod = today;
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((url, index) => `  <url><loc>${url}</loc><lastmod>${lastmod}</lastmod><changefreq>${index === 0 ? "daily" : "daily"}</changefreq><priority>${index === 0 ? "0.7" : "0.9"}</priority></url>`).join("\n")}
+${urls.map((item) => `  <url><loc>${item.loc}</loc><lastmod>${item.lastmod}</lastmod><changefreq>daily</changefreq><priority>${item.priority}</priority></url>`).join("\n")}
 </urlset>`;
 
   await fs.outputFile(path.join(group.outDir, "sitemap.xml"), sitemap);
 
   const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap><loc>${group.siteUrl}/sitemap.xml</loc><lastmod>${lastmod}</lastmod></sitemap>
+  <sitemap><loc>${group.siteUrl}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>
 </sitemapindex>`;
 
   await fs.outputFile(path.join(group.outDir, "sitemap-index.xml"), sitemapIndex);

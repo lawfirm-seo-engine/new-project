@@ -16,27 +16,11 @@ export async function onRequest(context) {
   }
 
   const today = new Date().toISOString().slice(0, 10);
-  let cases = [];
-
-  try {
-    const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
-    if (owner && repo && token) {
-      const res = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`,
-        { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "static-landing-generator-sitemap" } }
-      );
-      if (res.ok) {
-        const file = await res.json();
-        cases = JSON.parse(decodeBase64(file.content));
-      }
-    }
-  } catch (_) {
-    // serve with empty cases on error
-  }
+  const cases = await loadCases(env);
 
   const { siteUrl, prefix } = group;
   const entries = [
-    `  <url><loc>${siteUrl}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
+    `  <url><loc>${siteUrl}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.3</priority></url>`,
     ...cases.map((item) => {
       const lastmod = item.updatedAt || item.createdAt || today;
       return `  <url><loc>${siteUrl}/${prefix}/${encodeURIComponent(item.slug)}/</loc><lastmod>${lastmod}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>`;
@@ -54,6 +38,50 @@ ${entries.join("\n")}
       "Cache-Control": "public, max-age=300",
     },
   });
+}
+
+async function loadCases(env) {
+  const branch = env.GITHUB_BRANCH || "main";
+  const owner = env.GITHUB_REPO_OWNER || "lawfirm-seo-engine";
+  const repo = env.GITHUB_REPO_NAME || "new-project";
+  const token = env.GITHUB_TOKEN;
+
+  const apiCases = await loadCasesFromGitHubApi({ owner, repo, branch, token });
+  if (apiCases.length) return apiCases;
+
+  const rawCases = await loadCasesFromRawGitHub({ owner, repo, branch });
+  if (rawCases.length) return rawCases;
+
+  return [];
+}
+
+async function loadCasesFromGitHubApi({ owner, repo, branch, token }) {
+  if (!owner || !repo || !token) return [];
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`,
+      { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "static-landing-generator-sitemap" } }
+    );
+    if (!res.ok) return [];
+    const file = await res.json();
+    return JSON.parse(decodeBase64(file.content));
+  } catch {
+    return [];
+  }
+}
+
+async function loadCasesFromRawGitHub({ owner, repo, branch }) {
+  if (!owner || !repo) return [];
+  try {
+    const res = await fetch(
+      `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/data/cases.json`,
+      { headers: { "User-Agent": "static-landing-generator-sitemap" } }
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
 }
 
 function decodeBase64(value) {
