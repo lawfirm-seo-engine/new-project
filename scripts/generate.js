@@ -151,6 +151,7 @@ const groups = [
   // ── law-* 도메인 ────────────────────────────────────────────────────────────
   {
     key: "a",
+    landingKey: "la",
     outDir: path.join(root, "dist-law-a"),
     template: "group-a.html",
     siteUrl: "https://law-a.pages.dev",
@@ -175,6 +176,7 @@ const groups = [
   },
   {
     key: "b",
+    landingKey: "lb",
     outDir: path.join(root, "dist-law-b"),
     template: "group-b.html",
     siteUrl: "https://law-b.pages.dev",
@@ -199,6 +201,7 @@ const groups = [
   },
   {
     key: "c",
+    landingKey: "lc",
     outDir: path.join(root, "dist-law-c"),
     template: "group-c.html",
     siteUrl: "https://law-c.pages.dev",
@@ -223,6 +226,7 @@ const groups = [
   },
   {
     key: "d",
+    landingKey: "ld",
     outDir: path.join(root, "dist-law-d"),
     template: "group-d.html",
     siteUrl: "https://law-d.pages.dev",
@@ -247,6 +251,7 @@ const groups = [
   },
   {
     key: "e",
+    landingKey: "le",
     outDir: path.join(root, "dist-law-e"),
     template: "group-e.html",
     siteUrl: "https://law-e.pages.dev",
@@ -290,7 +295,8 @@ function replaceAllPlaceholders(template, data) {
 }
 
 function getLanding(caseItem, group) {
-  return caseItem.landings?.[group.key] || createFallbackLanding(caseItem, group);
+  const landingKey = group.landingKey || group.key;
+  return caseItem.landings?.[landingKey] || caseItem.landings?.[group.key] || createFallbackLanding(caseItem, group);
 }
 
 function makeFallbackFaq(groupKey) {
@@ -344,13 +350,14 @@ function makeFallbackFaq(groupKey) {
 
 function createFallbackLanding(caseItem, group) {
   const caseName = caseItem.caseName || caseItem.name;
-  const pageTitle = groupPageTitle(caseName, group.key);
-  const pageH1 = groupPageH1(caseName, group.key);
+  const landingKey = group.landingKey || group.key;
+  const pageTitle = groupPageTitle(caseName, landingKey);
+  const pageH1 = groupPageH1(caseName, landingKey);
   const dispName = normalizeCaseName(caseName);
   const slug = caseItem.slug;
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
   const description = `${dispName} 관련 ${group.descriptionSuffix}`;
-  const faq = makeFallbackFaq(group.key);
+  const faq = makeFallbackFaq(landingKey);
 
   return {
     title: pageTitle,
@@ -371,7 +378,7 @@ function createFallbackLanding(caseItem, group) {
       "화면상 잔액은 보이지만 실제 출금이 제한된 사례",
     ],
     faq,
-    schema: createSchemaData({ title: pageTitle, description, canonical, faq, groupKey: group.key, caseName, keywords: searchKeyword(caseName), caseItem }),
+    schema: createSchemaData({ title: pageTitle, description, canonical, faq, groupKey: landingKey, caseName, keywords: searchKeyword(caseName), caseItem }),
   };
 }
 
@@ -1069,6 +1076,11 @@ function groupPageTitle(name, groupKey) {
     c: "피해금 회수 사례",
     d: "AI브리핑",
     e: "피해 진행현황",
+    la: "금융피해 형사고소",
+    lb: "피해금 회수 전략",
+    lc: "실제 회수 사례",
+    ld: "AI 금융사기 분석",
+    le: "금융사기 피해 허브",
   };
   return `${base} ${suffixes[groupKey] || "피해 대응"}${secondary ? ` | ${secondary}` : ""}`;
 }
@@ -1081,6 +1093,11 @@ function groupPageH1(name, groupKey) {
     c: "피해금 회수 사례",
     d: "AI브리핑",
     e: "피해 진행현황",
+    la: "금융피해 형사고소 대응",
+    lb: "피해금 회수 전략",
+    lc: "실제 회수 사례 아카이브",
+    ld: "AI 금융사기 브리핑",
+    le: "금융사기 사건 허브",
   };
   return `${base} ${suffixes[groupKey] || "피해 대응"}`;
 }
@@ -1088,7 +1105,8 @@ function groupPageH1(name, groupKey) {
 function searchKeyword(name) {
   const base = primaryCaseKeyword(name);
   const secondary = secondaryCaseKeyword(name).replace(/\s*피해 대응$/, "");
-  return [base, `${base} 피해`, secondary, secondary && `${secondary} 사칭`].filter(Boolean).join(", ");
+  const secondaryExtra = secondary && !/사칭$/.test(secondary.trim()) ? `${secondary} 사칭` : "";
+  return [base, `${base} 피해`, secondary, secondaryExtra].filter(Boolean).join(", ");
 }
 
 function statusLabel(key, seed = key) {
@@ -1217,7 +1235,7 @@ ${urls.map((item) => `  <url><loc>${item.loc}</loc><lastmod>${item.lastmod}</las
     <description>${escapeHtml(group.descriptionSuffix)}</description>
     ${cases.map((item) => {
       const landing = getLanding(item, group);
-      const rssTitle = groupPageTitle(item.caseName, group.key);
+      const rssTitle = landing.title || groupPageTitle(item.caseName, group.landingKey || group.key);
       return `
     <item>
       <title>${escapeHtml(rssTitle)}</title>

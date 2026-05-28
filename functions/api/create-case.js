@@ -167,7 +167,7 @@ async function pingIndexNow(slug, key) {
 function hasRequiredLandingData(landings) {
   if (!landings) return false;
 
-  return ["a", "b", "c", "d", "e"].every((key) => {
+  return ["a", "b", "c", "d", "e", "la", "lb", "lc", "ld", "le"].every((key) => {
     const item = landings[key];
     return item &&
       item.title &&

@@ -265,6 +265,11 @@
       { key: "c", label: "C 성공사례형" },
       { key: "d", label: "D 정보형" },
       { key: "e", label: "E 전체허브형" },
+      { key: "la", label: "lA 금융피해형" },
+      { key: "lb", label: "lB 회수전략형" },
+      { key: "lc", label: "lC 사례아카이브형" },
+      { key: "ld", label: "lD AI브리핑형" },
+      { key: "le", label: "lE 사건허브형" },
     ];
 
     const LANDING_GROUPS = [
@@ -382,7 +387,7 @@
       successBoxEl.style.display = "block";
       messageEl.textContent = "";
 
-      // OG 이미지 warm-up: 5개 도메인 각각 /og/slug.webp 1회 호출 → CDN 엣지 캐시 선점
+      // OG 이미지 warm-up: 10개 도메인 각각 /og/slug.webp 1회 호출 → CDN 엣지 캐시 선점
       // 랜딩페이지 prefetch: 각 도메인 랜딩 URL 1회 호출 → Worker SSR + CDN 캐시
       const encoded = encodeURIComponent(slug);
       for (const g of LANDING_GROUPS) {
