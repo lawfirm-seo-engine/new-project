@@ -193,8 +193,7 @@ function renderLanding(caseData, group, origin) {
         "@id": `${canonical}#breadcrumb`,
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "홈", item: group.siteUrl + "/" },
-          { "@type": "ListItem", position: 2, name: breadcrumbLabel(group.key), item: group.siteUrl + "/" },
-          { "@type": "ListItem", position: 3, name: primaryCaseKeyword(rawCaseName) || rawCaseName, item: canonical },
+          { "@type": "ListItem", position: 2, name: primaryCaseKeyword(rawCaseName) || rawCaseName, item: canonical },
         ],
       },
       {
@@ -563,7 +562,8 @@ function groupPageH1(name, key) {
 function searchKeyword(name) {
   const base = primaryCaseKeyword(name);
   const secondary = secondaryCaseKeyword(name).replace(/\s*피해 대응$/, "");
-  return [base, `${base} 피해`, secondary, secondary && `${secondary} 사칭`].filter(Boolean).join(", ");
+  const secondaryExtra = secondary && !/사칭$/.test(secondary.trim()) ? `${secondary} 사칭` : "";
+  return [base, `${base} 피해`, secondary, secondaryExtra].filter(Boolean).join(", ");
 }
 
 function themeColor(key) {
