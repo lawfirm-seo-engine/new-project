@@ -25,6 +25,53 @@ export async function onRequestPost(context) {
       }, 400);
     }
 
+    const now = today();
+    const newCase = {
+      slug,
+      caseName,
+      category,
+      landingViews,
+      reports,
+      createdAt: normalizeSpace(body.createdAt) || now,
+      updatedAt: normalizeSpace(body.updatedAt) || now,
+      summary,
+      tags,
+      landings,
+    };
+
+    if (env.CASES) {
+      const existingRaw = await env.CASES.get(`case:${slug}`);
+      if (existingRaw) {
+        return json({ ok: false, message: "?대? 議댁옱?섎뒗 slug?낅땲??" }, 409);
+      }
+
+      const idxRaw = await env.CASES.get("cases:index");
+      const idx = idxRaw ? JSON.parse(idxRaw) : [];
+      const similarCase = findTooSimilarCase({ caseName, slug, cases: idx });
+
+      if (similarCase) {
+        return json({
+          ok: false,
+          message: "?좎궗?섍굅??以묐났???ш굔??媛먯??섏뿀?듬땲?? 湲곗〈 ?ш굔怨?蹂꾨룄 ?ш굔?몄? ?뺤씤?댁＜?몄슂.",
+          similarCase,
+        }, 409);
+      }
+
+      await env.CASES.put(`case:${slug}`, JSON.stringify(newCase));
+      idx.push(buildIndexEntry(newCase));
+      await env.CASES.put("cases:index", JSON.stringify(idx));
+
+      const indexNowKey = env.INDEXNOW_KEY || "6f71f78a3dc940b9a3e1025bf8460d3c";
+      context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
+
+      return json({
+        ok: true,
+        message: "?ш굔????λ릺?덉뒿?덈떎.",
+        case: newCase,
+        storage: "kv",
+      });
+    }
+
     const repoOwner = env.GITHUB_REPO_OWNER;
     const repoName = env.GITHUB_REPO_NAME;
     const branch = env.GITHUB_BRANCH || "main";
@@ -71,20 +118,6 @@ export async function onRequestPost(context) {
       }, 409);
     }
 
-    const now = today();
-    const newCase = {
-      slug,
-      caseName,
-      category,
-      landingViews,
-      reports,
-      createdAt: normalizeSpace(body.createdAt) || now,
-      updatedAt: normalizeSpace(body.updatedAt) || now,
-      summary,
-      tags,
-      landings,
-    };
-
     cases.push(newCase);
 
     const newContent = JSON.stringify(cases, null, 2);
@@ -104,22 +137,14 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
-    // KV 저장 (개별 사건 + 인덱스 업데이트)
-    if (env.CASES) {
-      await env.CASES.put(`case:${slug}`, JSON.stringify(newCase));
-      const idxRaw = await env.CASES.get("cases:index");
-      const idx = idxRaw ? JSON.parse(idxRaw) : [];
-      idx.push(buildIndexEntry(newCase));
-      await env.CASES.put("cases:index", JSON.stringify(idx));
-    }
-
     const indexNowKey = env.INDEXNOW_KEY || "6f71f78a3dc940b9a3e1025bf8460d3c";
-    pingIndexNow(slug, indexNowKey).catch(() => {});
+    context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
 
     return json({
       ok: true,
       message: "사건이 저장되었습니다.",
       case: newCase,
+      storage: "github",
     });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
