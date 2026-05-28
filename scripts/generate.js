@@ -965,7 +965,7 @@ function createHubContent(group) {
     });
   }
   setupSearch();
-  fetch('/api/get-cases',{cache:'no-cache'})
+  fetch('https://new-project-9o2.pages.dev/api/get-cases',{cache:'no-cache'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
       if(!d||!d.ok||!Array.isArray(d.cases))return;
