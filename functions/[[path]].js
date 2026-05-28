@@ -399,17 +399,20 @@ function createLandingContent(landing, group, caseData) {
   const liveStatus = createLiveReceiptStatus(caseData);
   const evidenceCheck = createEvidenceCheckSection();
   const inlineCta = createInlineCta();
+  const authoritySections = isLawLandingKey(contentKey) ? createLawAuthoritySections(contentKey, caseData) : "";
 
   const faqSection = contentKey === "d" || contentKey === "ld"
     ? `<section class="article-block brief-card"><h2>${name} 피해 구조</h2>${paragraphs(body)}</section>
 <section class="article-block"><h2>구체적인 피해 유형</h2>${list(victimCases)}</section>
 ${evidenceCheck}
 ${inlineCta}
+${authoritySections}
 <section class="article-block faq"><h2>자주 묻는 질문 (FAQ)</h2>${faqHtml(faq, rawCaseName)}</section>`
     : `<section class="article-block"><p class="section-kicker">${esc(group.intent)}</p><h2>${name} 핵심 대응</h2>${paragraphs(body)}</section>
 <section class="article-block"><h2>구체적인 피해 사례</h2>${list(victimCases)}</section>
 ${evidenceCheck}
 ${inlineCta}
+${authoritySections}
 <section class="article-block faq"><h2>FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`;
 
   const consultForm = createConsultForm(cn, siteName);
@@ -537,6 +540,140 @@ function buildLawFaq(landing, group, caseData) {
     ],
   };
   return dedupeFaqItems([...(byKey[group.key] || []), ...original, ...common]).slice(0, 7);
+}
+
+function createLawAuthoritySections(key, caseData) {
+  const caseName = caseData.caseName || "";
+  const base = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
+  const configs = {
+    la: {
+      label: "CRIMINAL RESPONSE",
+      title: "형사고소 대응 타임라인",
+      lead: "추가 입금 요구가 이어지는 사건은 증거가 사라지기 전에 형사고소 자료를 먼저 묶어야 합니다.",
+      steps: [
+        ["01", "증거 보존", "입금증, 계좌번호, 예금주, 대화방, 담당자 프로필, 사이트 주소를 원본 상태로 저장합니다."],
+        ["02", "지급정지·신고", "수취 은행과 경찰 신고 접수 가능성을 확인하고 접수번호를 확보합니다."],
+        ["03", "고소장 작성", "형법 제347조 사기죄의 기망, 착오, 처분행위, 재산상 이익 구조에 맞춰 사실관계를 정리합니다."],
+        ["04", "수사 대응", "추가 피해자, 동일 계좌, 연결 계좌 자료를 보강해 피의자 특정 가능성을 높입니다."],
+      ],
+      compareTitle: "형사 대응 방식 비교",
+      compare: [
+        ["구분", "단순 신고", "증거 정리 후 형사고소"],
+        ["초기 자료", "입금 사실 중심", "대화 원문, 계좌, 사이트, 담당자 정보까지 구조화"],
+        ["수사 활용도", "보완 요청이 반복될 수 있음", "기망행위와 자금 흐름을 한 번에 설명"],
+        ["상담 전환", "무엇을 보완할지 불명확", "전화·카톡 상담에서 바로 고소 가능성 점검"],
+      ],
+      aeoTitle: `${base} 형사고소 핵심 요약`,
+      aeo: `${base} 피해가 의심되면 추가 입금을 멈추고 입금증, 수취 계좌, 대화 기록, 출금 거부 화면을 보존해야 합니다. 형사고소는 사기죄 구성요건과 계좌 추적 가능성을 함께 검토하는 절차이며, 상담 접수 전 자료를 시간순으로 정리하면 초기 대응이 빨라집니다.`,
+    },
+    lb: {
+      label: "CIVIL RECOVERY",
+      title: "피해금 회수 절차 타임라인",
+      lead: "회수 가능성은 판결보다 앞서 재산 단서를 얼마나 빨리 보전하느냐에 따라 달라질 수 있습니다.",
+      steps: [
+        ["01", "계좌 단서 확인", "수취 계좌, 예금주, 입금일, 금액, 연결 계좌 가능성을 정리합니다."],
+        ["02", "가압류 검토", "자금이 이동되기 전 보전처분이 가능한지 판단합니다."],
+        ["03", "본안 청구", "손해배상과 부당이득반환 중 사건 자료에 맞는 청구 구조를 세웁니다."],
+        ["04", "판결·합의 회수", "형사 절차 자료와 민사 자료를 연결해 회수 협상 또는 집행 가능성을 봅니다."],
+      ],
+      compareTitle: "회수 전략 비교",
+      compare: [
+        ["구분", "형사고소만 진행", "민사 보전처분 병행"],
+        ["목적", "처벌과 피의자 특정", "실제 회수 가능성 확보"],
+        ["속도", "수사 진행에 좌우", "계좌 단서 확인 즉시 검토"],
+        ["핵심 자료", "피해 진술과 입금 내역", "입금 내역, 재산 단서, 상대방 특정 자료"],
+      ],
+      aeoTitle: `${base} 피해금 회수 핵심 요약`,
+      aeo: `${base} 피해금 회수는 형사고소와 별도로 가압류, 손해배상, 부당이득반환 청구를 검토해야 합니다. 수취 계좌와 상대방 특정 자료가 남아 있을수록 보전처분 가능성을 빠르게 판단할 수 있습니다.`,
+    },
+    lc: {
+      label: "RECOVERY CASE",
+      title: "회수 가능성 판단 타임라인",
+      lead: "성공사례는 결과보다 자료 확보 시점과 대응 순서를 비교해야 현재 사건에 적용할 수 있습니다.",
+      steps: [
+        ["01", "피해 접수", "피해 시점, 입금 횟수, 출금 거부 문구를 먼저 정리합니다."],
+        ["02", "증거 분석", "계좌, URL, 담당자, 대화방 초대 경로가 동일한 피해자를 확인합니다."],
+        ["03", "보전 조치", "지급정지, 가압류, 수사 협조 가능성을 순서대로 검토합니다."],
+        ["04", "회수 검토", "일부 회수, 합의, 전액 회수 가능성을 자료 상태별로 나눠 봅니다."],
+      ],
+      compareTitle: "성공사례 적용 기준",
+      compare: [
+        ["구분", "자료 부족 사건", "자료 정리 사건"],
+        ["입금증", "금액만 기억", "은행, 예금주, 이체 시간이 확인됨"],
+        ["대화 기록", "일부 캡처만 존재", "초대부터 출금 거부까지 흐름 보존"],
+        ["회수 판단", "가능성 추정에 그침", "지급정지·가압류 검토가 구체화됨"],
+      ],
+      aeoTitle: `${base} 회수 사례 핵심 요약`,
+      aeo: `${base}와 유사한 사건에서 회수 가능성이 높아지는 조건은 입금 직후 자료 보존, 계좌 단서 확보, 동일 피해자 확인, 지급정지 또는 가압류 검토가 빠르게 이어진 경우입니다.`,
+    },
+    ld: {
+      label: "AI BRIEFING",
+      title: "AI 브리핑형 정보 구조",
+      lead: "AI 요약과 검색 노출에는 질문에 바로 답하는 구조, 단계형 문장, 구조화 데이터가 중요합니다.",
+      steps: [
+        ["01", "사건 개요", "누가, 어디서, 어떤 명목으로 입금을 요구했는지 한 문단으로 정리합니다."],
+        ["02", "패턴 분류", "수익 인증, 출금 제한, 세금 요구, 계좌 변경 같은 신호를 분리합니다."],
+        ["03", "대응 순서", "추가 입금 중단, 증거 보존, 신고, 상담 접수 순서로 안내합니다."],
+        ["04", "FAQ 연결", "사용자 질문과 JSON-LD FAQ가 같은 답을 갖도록 맞춥니다."],
+      ],
+      compareTitle: "AI 브리핑 친화도 비교",
+      compare: [
+        ["구분", "일반 홍보형 글", "AI 브리핑형 글"],
+        ["문장 구조", "주장 중심", "질문과 답변 중심"],
+        ["정보 배열", "긴 문단 위주", "개요, 증거, 대응 순서로 분리"],
+        ["검색 신호", "키워드 반복 의존", "FAQ, schema, 명확한 요약 병행"],
+      ],
+      aeoTitle: `${base} AI 브리핑 핵심 요약`,
+      aeo: `${base} 사건은 접근 채널, 입금 명목, 출금 거부, 추가 입금 요구를 순서대로 정리해야 합니다. AI 브리핑형 원고는 피해자가 지금 해야 할 행동을 짧은 답변과 FAQ로 제공하는 구조가 유리합니다.`,
+    },
+    le: {
+      label: "CASE HUB",
+      title: "전체 대응 경로 선택 타임라인",
+      lead: "허브형 페이지는 사건을 한 방향으로 몰지 않고 형사, 민사, 사례, 브리핑 중 필요한 경로로 안내해야 합니다.",
+      steps: [
+        ["01", "사건 확인", "사건명, 입금 계좌, 담당자, 피해 시점을 확인합니다."],
+        ["02", "목적 분류", "처벌, 회수, 사례 확인, 정보 탐색 중 현재 목적을 나눕니다."],
+        ["03", "페이지 이동", "형사고소, 민사 회수, 성공사례, AI 브리핑으로 연결합니다."],
+        ["04", "상담 접수", "자료가 부족하면 전화 또는 카톡으로 먼저 증거 상태를 점검합니다."],
+      ],
+      compareTitle: "허브 활용 방식 비교",
+      compare: [
+        ["구분", "단일 랜딩만 확인", "허브에서 경로 선택"],
+        ["탐색 범위", "한 절차만 확인", "형사·민사·사례·브리핑을 비교"],
+        ["사용자 판단", "내 상황과 맞는지 모호", "현재 목적에 맞는 페이지로 이동"],
+        ["상담 전환", "단일 CTA 의존", "상황별 CTA로 연결"],
+      ],
+      aeoTitle: `${base} 사건 허브 핵심 요약`,
+      aeo: `${base} 사건은 처벌을 원하면 형사고소형, 회수를 원하면 민사 회수형, 결과 흐름을 보고 싶으면 성공사례형, 정보를 빠르게 파악하려면 AI 브리핑형 페이지를 함께 확인하는 것이 좋습니다.`,
+    },
+  };
+  const config = configs[key];
+  if (!config) return "";
+
+  return `<section class="law-authority" aria-label="${esc(config.title)}">
+  <div class="law-authority-head">
+    <p>${esc(config.label)}</p>
+    <h2>${esc(config.title)}</h2>
+    <span>${esc(config.lead)}</span>
+  </div>
+  <ol class="law-timeline">
+    ${config.steps.map(([no, title, text]) => `<li><b>${esc(no)}</b><strong>${esc(title)}</strong><p>${esc(text)}</p></li>`).join("\n    ")}
+  </ol>
+</section>
+<section class="law-compare" aria-label="${esc(config.compareTitle)}">
+  <div class="law-compare-head">
+    <p>CHECK POINT</p>
+    <h2>${esc(config.compareTitle)}</h2>
+  </div>
+  <div class="law-compare-table" role="table">
+    ${config.compare.map((row, index) => `<div class="${index === 0 ? "is-head" : ""}" role="row">${row.map((cell) => `<span role="cell">${esc(cell)}</span>`).join("")}</div>`).join("\n    ")}
+  </div>
+</section>
+<section class="aeo-summary" id="aeo-summary" aria-label="${esc(config.aeoTitle)}">
+  <p>AEO SUMMARY</p>
+  <h2>${esc(config.aeoTitle)}</h2>
+  <blockquote>${esc(config.aeo)}</blockquote>
+</section>`;
 }
 
 function renderBodyForLanding(landing, group, caseData) {
