@@ -866,7 +866,6 @@ function createHtmlBreadcrumb(group, caseItem) {
   const current = primaryCaseKeyword(caseItem.caseName || caseItem.name || "") || normalizeCaseName(caseItem.caseName || caseItem.name || "");
   return `<nav class="breadcrumb" aria-label="breadcrumb">
     <a href="${group.siteUrl}/">홈</a>
-    <span>${escapeHtml(breadcrumbLabel(group.key))}</span>
     <strong>${escapeHtml(current)}</strong>
   </nav>`;
 }
@@ -876,6 +875,41 @@ function randomInt(min, max) {
 }
 
 const HUB_SUFFIX = { a: "형사고소", b: "민사소송", c: "성공사례", d: "사건정보", e: "진행현황" };
+
+function createHubFloatingWidgets(group) {
+  const sn = JSON.stringify(group.siteName);
+  return `<div class="floating-contact">
+  <a href="tel:02-6952-3695" class="float-btn phone">전화문의</a>
+  <a href="http://pf.kakao.com/_xcypmn/chat" class="float-btn kakao" target="_blank" rel="noopener noreferrer">카톡으로 캡처 보내기</a>
+</div>
+<div class="sticky-bar" id="stickyBar">
+  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6952-3695</span>
+  <form class="sticky-form" id="stickyConsultForm">
+    <input type="text" name="sname" placeholder="이름" required autocomplete="name">
+    <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
+    <input type="text" name="samount" placeholder="대략적인 피해금액" required>
+    <button type="submit">확인 요청</button>
+  </form>
+  <span id="stickyMsg" class="sticky-msg"></span>
+</div>
+<script>
+  document.getElementById('stickyConsultForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var btn = this.querySelector('button'); var msg = document.getElementById('stickyMsg');
+    btn.disabled = true; btn.textContent = '접수 중...';
+    msg.textContent = ''; msg.className = 'sticky-msg';
+    try {
+      var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: ${sn}, domain: ${sn} })
+      });
+      var data = await res.json();
+      if (data.ok) { msg.textContent = '접수 완료!'; msg.className = 'sticky-msg ok'; this.reset(); btn.disabled = false; btn.textContent = '확인 요청'; }
+      else { msg.textContent = data.message || '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '확인 요청'; }
+    } catch(err) { msg.textContent = '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '확인 요청'; }
+  });
+</script>`;
+}
 
 function createHubContent(group) {
   const sortedCases = [...cases].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
@@ -970,13 +1004,13 @@ function createHubContent(group) {
     <section class="hub-stats-section">
       <div class="hub-stats">
         <div>
-          <strong id="statTotal">${cases.length.toLocaleString("ko-KR")}</strong>
           <span>등록 사건</span>
+          <strong id="statTotal">${cases.length.toLocaleString("ko-KR")}</strong>
           <em class="stat-today" id="statTodayCount">오늘 추가 +${todayCases}</em>
         </div>
         <div>
-          <strong id="statReports">${totalReports.toLocaleString("ko-KR")}</strong>
           <span>누적 접수</span>
+          <strong id="statReports">${totalReports.toLocaleString("ko-KR")}</strong>
           <em class="stat-today" id="statTodayReports">오늘 추가 +${todayReports}</em>
         </div>
       </div>
@@ -1142,7 +1176,8 @@ for (const group of groups) {
     ogThumbnail: "",
     summary: "",
     content: createHubContent(group),
-    headerCall: "",
+    headerCall: `<a class="header-call" href="#consult">상담 접수</a>`,
+    floatingWidgets: createHubFloatingWidgets(group),
     pageKind: "hub-page",
   });
 

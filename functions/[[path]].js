@@ -649,7 +649,6 @@ function createHtmlBreadcrumb(group, caseName) {
   const current = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
   return `<nav class="breadcrumb" aria-label="breadcrumb">
     <a href="${group.siteUrl}/">홈</a>
-    <span>${esc(breadcrumbLabel(group.key))}</span>
     <strong>${esc(current)}</strong>
   </nav>`;
 }
