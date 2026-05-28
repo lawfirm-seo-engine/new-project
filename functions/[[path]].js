@@ -60,6 +60,7 @@ const GROUPS = {
   // ── law-* 도메인 ────────────────────────────────────────────────────────────
   "law-a.pages.dev": {
     key: "a", pathPrefix: "prosecute", bodyClass: "domain-a",
+    landingKey: "la",
     siteName: "금융피해 대응센터", shortName: "금융피해 대응센터",
     intent: "형사고소 · 법적제재 · 형사합의 · 회수", tone: "긴급 대응",
     ctaTitle: "형사고소 가능성 확인",
@@ -71,6 +72,7 @@ const GROUPS = {
   },
   "law-b.pages.dev": {
     key: "b", pathPrefix: "civil", bodyClass: "domain-b",
+    landingKey: "lb",
     siteName: "피해금 회수 전략센터", shortName: "피해금 회수 전략센터",
     intent: "민사소송 · 가압류 · 손해배상 · 부당이득반환", tone: "회수 전략",
     ctaTitle: "민사 회수 경로 검토",
@@ -82,6 +84,7 @@ const GROUPS = {
   },
   "law-c.pages.dev": {
     key: "c", pathPrefix: "success", bodyClass: "domain-c",
+    landingKey: "lc",
     siteName: "실제 회수 사례 아카이브", shortName: "실제 회수 사례 아카이브",
     intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수", tone: "결과 중심",
     ctaTitle: "유사 성공사례 비교",
@@ -93,6 +96,7 @@ const GROUPS = {
   },
   "law-d.pages.dev": {
     key: "d", pathPrefix: "briefing", bodyClass: "domain-d",
+    landingKey: "ld",
     siteName: "AI 금융사기 브리핑", shortName: "AI 금융사기 브리핑",
     intent: "사건 개요 · 대응 방법 · 정보 요약", tone: "정보 요약",
     ctaTitle: "사건 구조 확인",
@@ -104,6 +108,7 @@ const GROUPS = {
   },
   "law-e.pages.dev": {
     key: "e", pathPrefix: "case", bodyClass: "domain-e",
+    landingKey: "le",
     siteName: "금융사기 사건 허브", shortName: "금융사기 사건 허브",
     intent: "전체 사건 허브 · 유형별 연결 · 관련 사건", tone: "통합 탐색",
     ctaTitle: "유형별 대응 보기",
@@ -193,10 +198,11 @@ export async function onRequest(context) {
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function renderLanding(caseData, group, origin) {
-  const landing = caseData.landings?.[group.key] || {};
+  const lk = group.landingKey ?? group.key;
+  const landing = caseData.landings?.[lk] || caseData.landings?.[group.key] || {};
   const rawCaseName = caseData.caseName || "";
-  const pageTitle = groupPageTitle(rawCaseName, group.key);
-  const pageH1 = groupPageH1(rawCaseName, group.key);
+  const pageTitle = groupPageTitle(rawCaseName, lk);
+  const pageH1 = groupPageH1(rawCaseName, lk);
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}/`;
   const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.webp`;
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
@@ -235,14 +241,14 @@ function renderLanding(caseData, group, origin) {
         author: ORGANIZATION,
       },
       {
-        "@type": group.key === "d" ? "NewsArticle" : "Article",
+        "@type": (group.key === "d" || lk === "ld") ? "NewsArticle" : "Article",
         "@id": `${canonical}#article`,
         headline: pageTitle, url: canonical, inLanguage: "ko-KR",
         datePublished: publishedDate, dateModified: modifiedDate,
         author: ORGANIZATION, publisher: ORGANIZATION,
         isPartOf: { "@id": `${canonical}#webpage` },
         keywords: keyword,
-        ...(group.key === "d" ? { speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", "h2", ".article-block > p"] } } : {}),
+        ...((group.key === "d" || lk === "ld") ? { speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", "h2", ".article-block > p"] } } : {}),
       },
       {
         "@type": "BreadcrumbList",
@@ -598,6 +604,11 @@ function groupPageTitle(name, key) {
     c: "피해금 회수 사례",
     d: "AI브리핑",
     e: "피해 진행현황",
+    la: "금융피해 형사고소",
+    lb: "피해금 회수 전략",
+    lc: "실제 회수 사례",
+    ld: "AI 금융사기 분석",
+    le: "금융사기 피해 허브",
   };
   return `${base} ${s[key] || "피해 대응"}${secondary ? ` | ${secondary}` : ""}`;
 }
@@ -610,6 +621,11 @@ function groupPageH1(name, key) {
     c: "피해금 회수 사례",
     d: "AI브리핑",
     e: "피해 진행현황",
+    la: "금융피해 형사고소 대응",
+    lb: "피해금 회수 전략",
+    lc: "실제 회수 사례 아카이브",
+    ld: "AI 금융사기 브리핑",
+    le: "금융사기 사건 허브",
   };
   return `${base} ${s[key] || "피해 대응"}`;
 }
