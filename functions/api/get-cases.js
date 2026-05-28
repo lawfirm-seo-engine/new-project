@@ -2,13 +2,7 @@ export async function onRequestGet(context) {
   const { env } = context;
 
   try {
-    // KV 우선, 없으면 GitHub 폴백
-    if (env.CASES) {
-      const raw = await env.CASES.get("cases:index");
-      if (raw) return json({ ok: true, cases: JSON.parse(raw) });
-    }
-
-    // GitHub 폴백 (KV 마이그레이션 전 또는 KV 미설정 시)
+    // GitHub을 항상 1순위로 사용 (모든 10개 프로젝트가 동일한 최신 데이터를 받기 위해)
     const { repoOwner, repoName, branch, token } = githubEnv(env);
     const res = await fetch(
       `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/cases.json?ref=${branch}`,

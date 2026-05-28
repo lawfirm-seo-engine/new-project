@@ -42,7 +42,7 @@ export async function onRequestPost(context) {
     if (env.CASES) {
       const existingRaw = await env.CASES.get(`case:${slug}`);
       if (existingRaw) {
-        return json({ ok: false, message: "?대? 議댁옱?섎뒗 slug?낅땲??" }, 409);
+        return json({ ok: false, message: "이미 존재하는 slug입니다." }, 409);
       }
 
       const idxRaw = await env.CASES.get("cases:index");
@@ -52,7 +52,7 @@ export async function onRequestPost(context) {
       if (similarCase) {
         return json({
           ok: false,
-          message: "?좎궗?섍굅??以묐났???ш굔??媛먯??섏뿀?듬땲?? 湲곗〈 ?ш굔怨?蹂꾨룄 ?ш굔?몄? ?뺤씤?댁＜?몄슂.",
+          message: "유사하거나 중복된 사건이 감지되었습니다. 기존 사건과 별도 사건인지 확인해주세요.",
           similarCase,
         }, 409);
       }
@@ -61,14 +61,23 @@ export async function onRequestPost(context) {
       idx.push(buildIndexEntry(newCase));
       await env.CASES.put("cases:index", JSON.stringify(idx));
 
+      // GitHub에도 동기화 — 모든 law-* 프로젝트가 최신 사건을 볼 수 있도록
+      const repoOwner = env.GITHUB_REPO_OWNER;
+      const repoName = env.GITHUB_REPO_NAME;
+      const branch = env.GITHUB_BRANCH || "main";
+      const token = env.GITHUB_TOKEN;
+      if (repoOwner && repoName && token) {
+        context.waitUntil?.(addCaseToGitHub(newCase, repoOwner, repoName, branch, token).catch(() => {}));
+      }
+
       const indexNowKey = env.INDEXNOW_KEY || "6f71f78a3dc940b9a3e1025bf8460d3c";
       context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
 
       return json({
         ok: true,
-        message: "?ш굔????λ릺?덉뒿?덈떎.",
+        message: "사건이 저장되었습니다.",
         case: newCase,
-        storage: "kv",
+        storage: "kv+github",
       });
     }
 
@@ -149,6 +158,40 @@ export async function onRequestPost(context) {
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+async function addCaseToGitHub(newCase, owner, repo, branch, token) {
+  const filePath = "data/cases.json";
+  const fileRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
+    { headers: githubHeaders(token) }
+  );
+  if (!fileRes.ok) return;
+
+  const fileInfo = await fileRes.json();
+  const currentContent = await readFileContent(fileInfo, token);
+  const cases = currentContent ? JSON.parse(currentContent) : [];
+
+  // 이미 존재하면 추가하지 않음
+  if (cases.some((c) => c.slug === newCase.slug)) return;
+
+  cases.push(newCase);
+  cases.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+
+  const newContent = JSON.stringify(cases, null, 2);
+  await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+    {
+      method: "PUT",
+      headers: githubHeaders(token),
+      body: JSON.stringify({
+        message: `Add case: ${newCase.caseName}`,
+        content: encodeBase64(newContent),
+        sha: fileInfo.sha,
+        branch,
+      }),
+    }
+  );
 }
 
 function buildIndexEntry(c) {
