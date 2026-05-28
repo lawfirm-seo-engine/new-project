@@ -210,21 +210,46 @@ function renderLanding(caseData, group, origin) {
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
   const keyword = searchKeyword(rawCaseName);
+  const renderedFaq = renderFaqForLanding(landing, { ...group, key: lk }, caseData);
+  const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
+  const seoDescription = createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
+  const articleTags = createArticleTags(rawCaseName, lk);
 
   const headExtra = [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
     `<meta name="NaverBot" content="All">`,
     `<meta name="Yeti" content="All">`,
+    `<meta http-equiv="content-language" content="ko">`,
+    `<link rel="alternate" hreflang="ko" href="${canonical}">`,
     group.naverVerification ? `<meta name="naver-site-verification" content="${group.naverVerification}">` : "",
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${esc(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="preload" as="image" href="/assets/og-template.png">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
+    `<meta property="og:image:alt" content="${esc(pageTitle)}">`,
+    `<meta property="og:image:type" content="image/webp">`,
+    `<meta property="og:image:width" content="1536">`,
+    `<meta property="og:image:height" content="864">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    `<meta name="twitter:title" content="${esc(pageTitle)}">`,
+    `<meta name="twitter:description" content="${esc(seoDescription)}">`,
+    `<meta name="twitter:image" content="${esc(ogImage)}">`,
+    `<meta name="geo.region" content="KR-11">`,
+    `<meta name="geo.placename" content="서울특별시 서초구">`,
+    `<meta name="geo.position" content="37.4904;127.0133">`,
+    `<meta name="ICBM" content="37.4904, 127.0133">`,
+    `<meta name="date" content="${publishedDate}">`,
+    `<meta name="subject" content="${esc(group.intent)}">`,
+    `<meta name="citation_title" content="${esc(pageTitle)}">`,
+    `<meta name="citation_author" content="대온 법률사무소">`,
+    `<meta name="citation_publisher" content="대온 법률사무소">`,
+    `<meta name="citation_date" content="${publishedDate}">`,
     `<meta property="article:published_time" content="${isoPublished}">`,
     `<meta property="article:modified_time" content="${isoModified}">`,
     `<meta property="article:author" content="대온 법률사무소">`,
     `<meta property="article:section" content="${esc(group.intent)}">`,
+    ...articleTags.map((tag) => `<meta property="article:tag" content="${esc(tag)}">`),
     `<meta name="author" content="대온 법률사무소">`,
     keyword ? `<meta name="keywords" content="${esc(keyword)}">` : "",
   ].filter(Boolean).join("\n  ");
@@ -259,8 +284,18 @@ function renderLanding(caseData, group, origin) {
         ],
       },
       {
+        "@type": "LegalService",
+        "@id": `${group.siteUrl}/#legalservice`,
+        name: group.siteName,
+        url: group.siteUrl,
+        telephone: "02-6952-3695",
+        areaServed: "KR",
+        parentOrganization: ORGANIZATION,
+        serviceType: group.intent,
+      },
+      {
         "@type": "FAQPage",
-        mainEntity: (landing.faq || []).map((item) => ({
+        mainEntity: schemaFaq.map((item) => ({
           "@type": "Question", name: item.question,
           acceptedAnswer: { "@type": "Answer", text: item.answer },
         })),
@@ -285,11 +320,11 @@ function renderLanding(caseData, group, origin) {
 
   return pageTemplate({
     title: esc(`${pageTitle} | 대온 법률사무소`),
-    description: esc(landing.description || caseData.summary || ""),
+    description: esc(seoDescription),
     canonical,
     ogType: group.ogType,
     ogTitle: esc(pageTitle),
-    ogDescription: esc(landing.ogDescription || landing.description || caseData.summary || ""),
+    ogDescription: esc(createSeoDescription(landing.ogDescription || landing.description || caseData.summary || "", rawCaseName, lk)),
     ogImage: esc(ogImage),
     siteName: esc(group.siteName),
     headExtra,
@@ -383,7 +418,132 @@ ${inlineCta}
   return [faqSection, liveStatus, createInlineCta("실시간 접수와 비슷한 정황이 있다면 추가 입금 전에 현재 자료부터 점검해 보세요."), memoSection, consultForm, floatingWidgets, trackScript].filter(Boolean).join("\n");
 }
 
+function isLawLandingKey(key) {
+  return ["la", "lb", "lc", "ld", "le"].includes(key);
+}
+
+function lawLandingLabel(key) {
+  return {
+    la: "금융피해 형사고소",
+    lb: "피해금 회수 전략",
+    lc: "실제 회수 사례",
+    ld: "AI 금융사기 브리핑",
+    le: "금융사기 사건 허브",
+  }[key] || "금융사기 대응";
+}
+
+function buildLawBody(landing, group, caseData) {
+  const caseName = caseData.caseName || "";
+  const base = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
+  const brand = secondaryCaseKeyword(caseName) || base;
+  const original = Array.isArray(landing.body) ? landing.body.filter(Boolean).map(toStr) : [];
+  const additions = {
+    la: [
+      `${base} 피해는 입금 계좌, 예금주, 금융기관명, 이체 일시를 먼저 확보해야 형사고소와 지급정지 검토를 동시에 진행할 수 있습니다. 출금 거부 직후 세금, 보증금, 인증비를 요구받았다면 추가 입금을 멈추고 계좌 단서부터 보존해야 합니다.`,
+      `형법 제347조 사기죄는 기망행위, 착오, 처분행위, 재산상 이익 취득 구조를 봅니다. ${brand} 관련 안내가 허위 수익, 원금 보장, 출금 가능성처럼 표시됐다면 대화 원문과 입금 흐름을 시간순으로 묶어야 합니다.`,
+      `고소장에는 단순히 돈을 돌려달라는 내용보다 언제 누구에게 어떤 설명을 듣고 어느 계좌로 입금했는지가 중요합니다. 담당자 프로필, 초대 링크, 사이트 주소, 앱 화면, 출금 제한 문구가 함께 있으면 피의자 특정 가능성을 높일 수 있습니다.`,
+      `상담 접수 전에는 입금증과 대화 캡처만 있어도 1차 검토가 가능합니다. 자료가 흩어져 있다면 전화나 카톡 상담으로 먼저 현재 증거 상태를 점검한 뒤 고소장 작성 범위와 추가 확보 자료를 정리하는 편이 빠릅니다.`,
+    ],
+    lb: [
+      `${base} 피해금 회수는 형사고소만으로 끝나지 않습니다. 수취 계좌 잔액, 연결 계좌, 명의자 재산 단서가 확인되는 즉시 가압류와 손해배상 청구 가능성을 함께 검토해야 합니다.`,
+      `민사 절차에서는 입금 경위와 기망 표현을 증거로 정리해 불법행위 손해배상 또는 부당이득반환 청구 구조를 세웁니다. 계좌가 이미 비어 있더라도 연결된 법인, 모집책, 수익금 이동 경로가 있으면 보전처분 방향이 달라질 수 있습니다.`,
+      `가압류는 판결 전 재산을 묶어두는 절차라서 속도가 중요합니다. 상담 단계에서 수취 은행, 예금주, 입금일, 금액, 상대방 식별 정보를 정리하면 회수 전략 판단이 빨라집니다.`,
+    ],
+    lc: [
+      `${base}와 유사한 사건에서 회수 가능성이 높았던 흐름은 피해 직후 지급정지, 계좌 단서 확보, 공동 피해자 확인, 민사 보전처분이 빠르게 연결된 경우였습니다.`,
+      `성공사례형 페이지에서는 단순히 전액 회수 여부만 보지 말고 어떤 자료가 언제 확보됐는지를 봐야 합니다. 입금증, 대화 원문, 사이트 화면, 담당자 계정이 남아 있을수록 합의나 일부 회수 가능성을 검토하기 쉽습니다.`,
+      `지역별 상담 사례를 보면 출금 거부 후 24~72시간 안에 자료를 정리한 사건과 몇 주 뒤 접수한 사건은 계좌 추적 속도에서 차이가 큽니다. 현재 자료가 일부뿐이어도 먼저 점검하는 것이 좋습니다.`,
+    ],
+    ld: [
+      `${base} AI 금융사기 브리핑은 접근 채널, 수익 약속, 입금 명목, 출금 거부, 추가 비용 요구를 순서대로 분석합니다. 네이버 AI 브리핑에 적합한 정보형 구조를 위해 질문과 답변, 대응 순서, 증거 체크리스트를 분명하게 나눕니다.`,
+      `${brand} 관련 정황은 단순 투자 실패와 구분해야 합니다. 허위 담당자, 사칭 프로필, 조작된 수익 화면, 출금 제한 메시지, 세금 선납 요구가 함께 나타나면 금융사기 패턴으로 볼 수 있습니다.`,
+      `AI 요약에 노출되려면 본문 안에 사건 개요, 피해자가 먼저 할 일, 신고와 상담의 차이, 준비 자료가 명확해야 합니다. 그래서 이 페이지는 추가 입금 중단, 증거 보존, 계좌 정보 정리, 상담 접수 순서로 답을 제공합니다.`,
+    ],
+    le: [
+      `${base} 금융사기 사건 허브는 형사고소, 민사 회수, 실제 회수 사례, AI 브리핑을 한 번에 비교하도록 구성합니다. 처음 방문한 피해자는 현재 상황이 처벌 중심인지 회수 중심인지 먼저 나눠보는 것이 좋습니다.`,
+      `같은 이름의 사건이라도 입금 계좌, 담당자 계정, 피해 시점이 다르면 대응 경로가 달라질 수 있습니다. 허브에서는 여러 관점의 랜딩을 연결해 사용자가 필요한 페이지로 이동하도록 돕습니다.`,
+      `추가 입금 요구가 진행 중이면 형사고소형 페이지와 전화 상담을 먼저 보고, 이미 송금이 끝난 뒤라면 피해금 회수 전략과 성공사례를 함께 확인하는 방식이 효율적입니다.`,
+    ],
+  };
+  return dedupeTextItems([...original, ...(additions[group.key] || [])]).slice(0, 10);
+}
+
+function buildLawVictimCases(landing, group, caseData) {
+  const caseName = caseData.caseName || "";
+  const base = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
+  const original = Array.isArray(landing.victimCases) ? landing.victimCases.filter(Boolean).map(toStr) : [];
+  const examples = {
+    la: [
+      `피해자는 카카오톡 오픈채팅방에서 수익 인증 화면을 본 뒤 1차로 420만원을 입금했고, 출금 단계에서 세금 680만원을 추가 요구받았습니다. 입금증, 수취 계좌, 담당자 프로필을 보존해 형사고소 자료로 정리했습니다.`,
+      `리딩방 운영자가 ${base} 담당자라며 별도 앱 설치를 안내했고, 앱 화면에는 수익금이 표시됐지만 실제 출금은 막혔습니다. 피해자는 로그인 화면과 출금 거부 문구를 녹화해 증거로 남겼습니다.`,
+      `환불팀이라는 계정이 다시 접근해 복구 수수료를 요구한 사례에서는 기존 대화방, 새 담당자 계정, 추가 입금 계좌를 함께 비교해 2차 피해 정황을 확인했습니다.`,
+    ],
+    lb: [
+      `피해자는 총 2,300만원을 여러 계좌로 나누어 송금했고, 마지막 계좌의 예금주 정보가 남아 있어 가압류 가능성을 먼저 검토했습니다.`,
+      `출금 보증금 명목으로 추가 송금을 요구받은 뒤 상담을 접수한 사례에서는 손해배상 청구와 부당이득반환 청구 중 어떤 구성이 유리한지 입금 경위별로 나눠 판단했습니다.`,
+      `동일 수취 계좌 피해자가 추가 확인되어 각자의 입금 시간과 금액을 비교했고, 공동 자료를 토대로 민사 보전처분 필요성을 검토했습니다.`,
+    ],
+    lc: [
+      `입금 당일 지급정지 요청과 경찰 신고 접수번호 확보가 함께 이뤄진 사례에서는 계좌 이동 전 일부 금액이 묶여 회수 협의의 출발점이 됐습니다.`,
+      `대화방이 삭제되기 전 전체 캡처와 담당자 프로필을 보존한 피해자는 수사기관 제출 자료가 명확해 동일 조직 여부 판단에 도움이 됐습니다.`,
+      `피해자가 여럿 모인 사건에서는 동일 URL, 동일 계좌, 같은 출금 제한 문구가 확인되어 합의 협상과 엄벌 탄원 준비가 함께 진행됐습니다.`,
+    ],
+    ld: [
+      `AI 브리핑 기준으로 보면 첫 접촉은 무료 리딩방, 두 번째 단계는 수익 인증, 세 번째 단계는 출금 제한과 추가 입금 요구로 이어진 패턴이 확인됐습니다.`,
+      `피해자는 "다음 주 환불" 안내를 반복해서 받았지만 실제로는 계좌 변경과 담당자 교체가 이어졌습니다. 이 흐름은 단순 지연보다 사기 의심 신호로 분류됩니다.`,
+      `앱 내 잔고와 실제 금융기관 거래내역이 일치하지 않은 사례에서는 조작 화면 가능성을 전제로 원본 캡처와 송금 내역을 분리해 정리했습니다.`,
+    ],
+    le: [
+      `처음에는 형사고소 가능성만 문의했지만, 상담 과정에서 가압류와 피해금 회수 전략까지 함께 검토할 필요가 확인된 사례입니다.`,
+      `피해자는 성공사례만 찾다가 자신의 사건은 계좌 단서가 부족하다는 점을 확인했고, 먼저 AI 브리핑형 체크리스트로 증거를 다시 정리했습니다.`,
+      `같은 사건명으로 여러 피해자가 접수되면서 각자 다른 계좌와 담당자 계정을 사용한 정황이 확인되어 허브에서 대응 경로를 나눠 안내했습니다.`,
+    ],
+  };
+  return dedupeTextItems([...original, ...(examples[group.key] || [])]).slice(0, 6);
+}
+
+function buildLawFaq(landing, group, caseData) {
+  const caseName = caseData.caseName || "";
+  const original = Array.isArray(landing.faq) ? landing.faq.filter((item) => item?.question && item?.answer) : [];
+  const common = [
+    { question: "전화나 카톡 상담은 언제 이용하면 좋나요?", answer: "추가 입금 요구가 계속되거나 대화방 삭제가 예상되면 전화나 카톡 상담으로 먼저 증거 상태를 점검하는 것이 좋습니다. 상담 접수 전이라도 입금증, 계좌번호, 대화 캡처를 준비하면 초기 판단이 빨라집니다." },
+    { question: "2차 피해를 막으려면 무엇을 조심해야 하나요?", answer: "피해금 회복팀, 환불 대행, 법무팀을 사칭해 선입금을 요구하는 연락을 조심해야 합니다. 기존 사건 자료를 넘기기 전 상대방 신원과 절차를 확인하고, 수수료 선입금 요구에는 응하지 않는 것이 안전합니다." },
+  ];
+  const byKey = {
+    la: [
+      { question: `${caseName} 형사고소는 어떤 자료부터 준비해야 하나요?`, answer: "입금증, 수취 계좌, 예금주, 대화 캡처, 사이트 주소, 담당자 프로필을 먼저 정리해야 합니다. 사기죄 구성요건과 계좌 추적 가능성을 함께 보기 위해 시간순 정리가 중요합니다." },
+      { question: "금융피해 신고와 형사고소는 어떻게 다른가요?", answer: "금융피해 신고는 계좌 제한과 피해 확산 방지 목적이 강하고, 형사고소는 피의자 특정과 처벌을 요구하는 절차입니다. 두 절차를 함께 진행하면 대응 범위가 넓어집니다." },
+      { question: "추가 입금 요구가 오면 어떻게 해야 하나요?", answer: "세금, 보증금, 인증비, 해제비 명목의 추가 요구는 사기 사건에서 반복되는 패턴입니다. 입금을 멈추고 요구 메시지와 계좌 안내를 캡처해 상담 단계에서 점검해야 합니다." },
+    ],
+    lb: [
+      { question: `${caseName} 피해금 회수는 가능한가요?`, answer: "회수 가능성은 계좌 잔액, 상대방 특정 가능성, 보전처분 속도에 따라 달라집니다. 형사고소와 별도로 가압류, 손해배상, 부당이득반환 청구를 함께 검토해야 합니다." },
+      { question: "가압류는 언제 검토해야 하나요?", answer: "수취 계좌나 연결 재산 단서가 확인되는 즉시 검토하는 것이 좋습니다. 판결 전 재산이 빠져나가면 실제 회수가 어려워질 수 있습니다." },
+      { question: "손해배상과 부당이득반환은 어떻게 다른가요?", answer: "손해배상은 불법행위로 발생한 손해를 청구하는 구조이고, 부당이득반환은 법률상 원인 없이 받은 이익의 반환을 구하는 구조입니다. 사건 자료에 따라 병행 검토할 수 있습니다." },
+    ],
+    lc: [
+      { question: `${caseName}와 유사한 회수 사례는 어떤 공통점이 있나요?`, answer: "입금 직후 자료 보존, 지급정지 요청, 동일 피해자 확인, 민사 보전처분 검토가 빠르게 이어진 사건에서 회수 가능성이 높았습니다." },
+      { question: "성공사례를 볼 때 가장 중요한 기준은 무엇인가요?", answer: "전액 회수 여부보다 어떤 증거가 언제 확보됐는지, 계좌 단서가 남아 있었는지, 형사와 민사가 어떻게 연결됐는지를 봐야 합니다." },
+      { question: "일부 회수라도 가능성이 있나요?", answer: "계좌 잔액 일부가 묶이거나 합의가 진행되는 경우 일부 회수 가능성이 있습니다. 입금 내역과 상대방 특정 자료가 남아 있다면 먼저 상담으로 가능성을 확인해야 합니다." },
+    ],
+    ld: [
+      { question: `${caseName} AI 브리핑은 어떤 정보를 요약하나요?`, answer: "접근 채널, 입금 명목, 출금 거부, 추가 입금 요구, 증거 보존 순서를 요약합니다. 피해자가 바로 확인해야 할 행동 순서를 중심으로 정리합니다." },
+      { question: "네이버 AI 브리핑 노출에는 어떤 원고 구조가 유리한가요?", answer: "질문형 소제목, 짧은 답변, 단계별 대응, FAQ, 구조화 데이터가 함께 있는 정보형 원고가 유리합니다. 사건명 반복보다 사용자의 질문에 직접 답하는 구성이 중요합니다." },
+      { question: "단순 투자 실패와 사기는 어떻게 구분하나요?", answer: "허위 수익 화면, 담당자 사칭, 출금 제한, 세금 선납 요구, 계좌 변경이 함께 나타나면 단순 손실보다 사기 정황으로 볼 수 있습니다." },
+    ],
+    le: [
+      { question: `${caseName} 허브에서는 무엇을 먼저 보면 되나요?`, answer: "현재 목적이 처벌인지 회수인지부터 나누면 됩니다. 추가 입금 요구가 있으면 형사고소형을 먼저 보고, 송금 후 회수를 원하면 민사 회수형과 사례형을 함께 보는 것이 좋습니다." },
+      { question: "허브 페이지와 개별 랜딩페이지의 차이는 무엇인가요?", answer: "허브는 여러 대응 경로를 연결하는 안내 페이지이고, 개별 랜딩은 형사고소, 민사 회수, 성공사례, AI 브리핑처럼 특정 검색 의도에 맞춰 깊게 설명하는 페이지입니다." },
+      { question: "어떤 상담 경로를 선택해야 하나요?", answer: "대화방 삭제나 추가 입금 요구가 있으면 전화 상담이 빠르고, 입금증과 캡처가 정리돼 있다면 카톡 상담으로 자료를 보내 점검받을 수 있습니다." },
+    ],
+  };
+  return dedupeFaqItems([...(byKey[group.key] || []), ...original, ...common]).slice(0, 7);
+}
+
 function renderBodyForLanding(landing, group, caseData) {
+  if (isLawLandingKey(group.key)) {
+    return buildLawBody(landing, group, caseData);
+  }
+
   const base = primaryCaseKeyword(caseData.caseName || "");
   const original = Array.isArray(landing.body)
     ? landing.body.filter(Boolean).map((item, index) => reduceCaseNameText(item, caseData.caseName, index < 2))
@@ -435,6 +595,10 @@ function renderBodyForLanding(landing, group, caseData) {
 }
 
 function renderVictimCasesForLanding(landing, group, caseData) {
+  if (isLawLandingKey(group.key)) {
+    return buildLawVictimCases(landing, group, caseData);
+  }
+
   const base = primaryCaseKeyword(caseData.caseName || "");
   const brand = secondaryCaseKeyword(caseData.caseName || "").replace(/\s*피해 대응$/, "") || "담당자";
   const original = Array.isArray(landing.victimCases)
@@ -445,6 +609,10 @@ function renderVictimCasesForLanding(landing, group, caseData) {
 }
 
 function renderFaqForLanding(landing, group, caseData) {
+  if (isLawLandingKey(group.key)) {
+    return buildLawFaq(landing, group, caseData);
+  }
+
   const fullName = normalizeCaseName(caseData.caseName || "");
   const base = fullName.replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim() || fullName;
   const original = Array.isArray(landing.faq) ? landing.faq.filter((item) => item?.question && item?.answer) : [];
@@ -632,7 +800,7 @@ function pageTemplate(d) {
     <div class="page-shell">
       ${d.content}
     </div>
-    <section id="consult" class="cta">
+    <section id="consult-final" class="cta">
       <p class="eyebrow">${d.intent}</p>
       <h2>${d.ctaTitle}</h2>
       <p>${d.ctaText}</p>
@@ -776,6 +944,77 @@ function faqHtml(items = [], caseName = "") {
     }
     return `<details><summary>${esc(q)}</summary><p>${withSentenceBreaks(addFaqCta(item.answer))}</p></details>`;
   }).join("\n");
+}
+
+function schemaFaqItems(items = [], caseName = "") {
+  const names = caseNameVariants(caseName).filter(Boolean);
+  return dedupeFaqItems(items).map((item, i) => {
+    let question = item.question || "";
+    const shouldKeepName = i < 3;
+    question = cleanFaqQuestion(question, names, shouldKeepName ? caseName : "");
+    if (shouldKeepName && caseName && !names.some((name) => question.includes(name))) {
+      question = `[${caseName}] ` + question.replace(/^\[[^\]]*\]\s*/, "");
+    }
+    return {
+      question,
+      answer: addFaqCta(item.answer || ""),
+    };
+  });
+}
+
+function dedupeFaqItems(items = []) {
+  const seen = new Set();
+  return (items || []).filter((item) => {
+    if (!item?.question || !item?.answer) return false;
+    const key = normalizeDedupeText(item.question);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function dedupeTextItems(items = []) {
+  const seen = new Set();
+  return (items || []).map(toStr).filter((item) => {
+    const key = normalizeDedupeText(item);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function normalizeDedupeText(value = "") {
+  return String(value)
+    .replace(/\[[^\]]+\]/g, "")
+    .replace(/[“”"'`]/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/VIP340수익프로젝트|사기|리딩방|사칭|금융피해/g, "")
+    .trim()
+    .slice(0, 80);
+}
+
+function createSeoDescription(description = "", caseName = "", key = "") {
+  const desc = String(description || "").trim();
+  const primary = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
+  if (isLawLandingKey(key) && primary && !desc.includes(primary)) {
+    return `${primary} 피해라면 ${desc || "입금 계좌, 대화 기록, 출금 거부 정황을 기준으로 형사고소와 피해금 회수 가능성을 점검합니다."}`.slice(0, 150);
+  }
+  return (desc || "입금 내역, 대화 내용, 사이트 주소를 기준으로 피해 구조와 대응 가능성을 정리합니다.").slice(0, 150);
+}
+
+function createArticleTags(caseName = "", key = "") {
+  const primary = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
+  const topic = lawLandingLabel(key);
+  if (!primary) return [topic];
+  const common = [primary, `${primary} 피해`, `${primary} 상담`, topic];
+  const byKey = {
+    la: [`${primary} 형사고소`, `${primary} 사기죄`, "지급정지", "계좌추적"],
+    lb: [`${primary} 피해금 회수`, "가압류", "손해배상", "부당이득반환"],
+    lc: [`${primary} 회수 사례`, "성공사례", "피해금 회수율"],
+    ld: [`${primary} AI 브리핑`, "금융사기 분석", "증거 보존"],
+    le: [`${primary} 사건 허브`, "형사 민사 대응", "금융사기 대응"],
+  };
+  return [...new Set([...common, ...(byKey[key] || [])])].slice(0, 8);
 }
 
 function reduceCaseNameText(value, caseName, keepFirst = false) {
