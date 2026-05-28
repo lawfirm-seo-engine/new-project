@@ -48,9 +48,16 @@
       
     <section class="hub-stats-section">
       <div class="hub-stats">
-        <div><strong id="statTotal">40</strong><span>등록 사건</span></div>
-        <div><strong>801</strong><span>누적 접수</span></div>
-        <div><strong>174,988</strong><span>조회수</span></div>
+        <div>
+          <strong id="statTotal">42</strong>
+          <span>등록 사건</span>
+          <em class="stat-today" id="statTodayCount">오늘 추가 +6</em>
+        </div>
+        <div>
+          <strong id="statReports">836</strong>
+          <span>누적 접수</span>
+          <em class="stat-today" id="statTodayReports">오늘 추가 +114</em>
+        </div>
       </div>
     </section>
     <div class="case-search-wrap">
@@ -65,7 +72,7 @@
       <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
       
         <a href="/success/thrwikifx-sagi-georaeso/" class="case-row" data-title="thrwikifx 사기 거래소 사칭" data-slug="thrwikifx-sagi-georaeso">
-          <span class="case-no">40</span>
+          <span class="case-no">42</span>
           <span class="case-title-wrap">
             <strong class="case-title">thrwikifx 사기 거래소 사칭 성공사례</strong>
             <em class="today-badge">TODAY</em>
@@ -76,7 +83,7 @@
         </a>
 
         <a href="/success/thrwikifx-com-sagi-saiteu/" class="case-row" data-title="thrwikifx.com 사기 사이트 사칭" data-slug="thrwikifx-com-sagi-saiteu">
-          <span class="case-no">39</span>
+          <span class="case-no">41</span>
           <span class="case-title-wrap">
             <strong class="case-title">thrwikifx.com 사기 사이트 사칭 성공사례</strong>
             <em class="today-badge">TODAY</em>
@@ -87,7 +94,7 @@
         </a>
 
         <a href="/success/gipeutudei-saching-sagi-bueob/" class="case-row" data-title="기프투데이 사칭 사기 부업 사칭" data-slug="gipeutudei-saching-sagi-bueob">
-          <span class="case-no">38</span>
+          <span class="case-no">40</span>
           <span class="case-title-wrap">
             <strong class="case-title">기프투데이 사칭 사기 부업 사칭 성공사례</strong>
             <em class="today-badge">TODAY</em>
@@ -97,15 +104,37 @@
           <span class="case-views">3,351</span>
         </a>
 
-        <a href="/success/hotelreviewlove-sagi-ribyu-arba/" class="case-row" data-title="hotelreviewlove 사기 리뷰 알바 사칭" data-slug="hotelreviewlove-sagi-ribyu-arba">
-          <span class="case-no">37</span>
+        <a href="/success/funcoffee-com-sagi-keopi-beuraendeu-tuja/" class="case-row" data-title="funcoffee.com 사기 커피 브랜드 투자 사칭" data-slug="funcoffee-com-sagi-keopi-beuraendeu-tuja">
+          <span class="case-no">39</span>
           <span class="case-title-wrap">
-            <strong class="case-title">hotelreviewlove 사기 리뷰 알바 사칭 성공사례</strong>
+            <strong class="case-title">funcoffee.com 사기 커피 브랜드 투자 사칭 성공사례</strong>
             <em class="today-badge">TODAY</em>
           </span>
-          <span class="case-status">64% 회수</span>
+          <span class="case-status">전액 회수</span>
           <span class="case-date">2026-05-28</span>
-          <span class="case-views">252</span>
+          <span class="case-views">7,747</span>
+        </a>
+
+        <a href="/success/tueoseutikes-sagi-tikes-yemae/" class="case-row" data-title="투어스티켓 사기 티켓 예매 사칭" data-slug="tueoseutikes-sagi-tikes-yemae">
+          <span class="case-no">38</span>
+          <span class="case-title-wrap">
+            <strong class="case-title">투어스티켓 사기 티켓 예매 사칭 성공사례</strong>
+            <em class="today-badge">TODAY</em>
+          </span>
+          <span class="case-status">80% 회수</span>
+          <span class="case-date">2026-05-28</span>
+          <span class="case-views">3,243</span>
+        </a>
+
+        <a href="/success/jieieijeonsi-sagi-bueob/" class="case-row" data-title="지에이에이전시 사기 부업 사칭" data-slug="jieieijeonsi-sagi-bueob">
+          <span class="case-no">37</span>
+          <span class="case-title-wrap">
+            <strong class="case-title">지에이에이전시 사기 부업 사칭 성공사례</strong>
+            <em class="today-badge">TODAY</em>
+          </span>
+          <span class="case-status">전액 회수</span>
+          <span class="case-date">2026-05-28</span>
+          <span class="case-views">7,641</span>
         </a>
 
         <a href="/success/techoftrade-sagi-tekeuobeuteureideu-jadongmaemae-ridingbang/" class="case-row" data-title="techoftrade 사기 테크오브트레이드 자동매매 리딩방 사칭" data-slug="techoftrade-sagi-tekeuobeuteureideu-jadongmaemae-ridingbang">
@@ -550,6 +579,16 @@
       }
       var statEl=document.getElementById('statTotal');
       if(statEl)statEl.textContent=total.toLocaleString('ko-KR');
+      var totalReps=all.reduce(function(s,c){return s+(c.reports||0);},0);
+      var repEl=document.getElementById('statReports');
+      if(repEl)repEl.textContent=totalReps.toLocaleString('ko-KR');
+      var todayStr=new Date().toISOString().slice(0,10);
+      var todayCnt=all.filter(function(c){return c.createdAt===todayStr;}).length;
+      var todayRep=all.filter(function(c){return c.createdAt===todayStr;}).reduce(function(s,c){return s+(c.reports||0);},0);
+      var tcEl=document.getElementById('statTodayCount');
+      if(tcEl)tcEl.textContent='오늘 추가 +'+todayCnt;
+      var trEl=document.getElementById('statTodayReports');
+      if(trEl)trEl.textContent='오늘 추가 +'+todayRep;
       setupSearch();
     }).catch(function(){});
 })();

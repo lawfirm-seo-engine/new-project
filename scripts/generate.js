@@ -879,8 +879,9 @@ const HUB_SUFFIX = { a: "형사고소", b: "민사소송", c: "성공사례", d:
 
 function createHubContent(group) {
   const sortedCases = [...cases].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-  const totalViews = cases.reduce((sum, c) => sum + (c.landingViews || 0), 0);
   const totalReports = cases.reduce((sum, c) => sum + (c.reports || 0), 0);
+  const todayCases   = cases.filter((c) => c.createdAt === today).length;
+  const todayReports = cases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
   const suffix = HUB_SUFFIX[group.key] || "";
 
   const rows = sortedCases
@@ -950,6 +951,16 @@ function createHubContent(group) {
       }
       var statEl=document.getElementById('statTotal');
       if(statEl)statEl.textContent=total.toLocaleString('ko-KR');
+      var totalReps=all.reduce(function(s,c){return s+(c.reports||0);},0);
+      var repEl=document.getElementById('statReports');
+      if(repEl)repEl.textContent=totalReps.toLocaleString('ko-KR');
+      var todayStr=new Date().toISOString().slice(0,10);
+      var todayCnt=all.filter(function(c){return c.createdAt===todayStr;}).length;
+      var todayRep=all.filter(function(c){return c.createdAt===todayStr;}).reduce(function(s,c){return s+(c.reports||0);},0);
+      var tcEl=document.getElementById('statTodayCount');
+      if(tcEl)tcEl.textContent='오늘 추가 +'+todayCnt;
+      var trEl=document.getElementById('statTodayReports');
+      if(trEl)trEl.textContent='오늘 추가 +'+todayRep;
       setupSearch();
     }).catch(function(){});
 })();
@@ -958,9 +969,16 @@ function createHubContent(group) {
   return `
     <section class="hub-stats-section">
       <div class="hub-stats">
-        <div><strong id="statTotal">${cases.length.toLocaleString("ko-KR")}</strong><span>등록 사건</span></div>
-        <div><strong>${totalReports.toLocaleString("ko-KR")}</strong><span>누적 접수</span></div>
-        <div><strong>${totalViews.toLocaleString("ko-KR")}</strong><span>조회수</span></div>
+        <div>
+          <strong id="statTotal">${cases.length.toLocaleString("ko-KR")}</strong>
+          <span>등록 사건</span>
+          <em class="stat-today" id="statTodayCount">오늘 추가 +${todayCases}</em>
+        </div>
+        <div>
+          <strong id="statReports">${totalReports.toLocaleString("ko-KR")}</strong>
+          <span>누적 접수</span>
+          <em class="stat-today" id="statTodayReports">오늘 추가 +${todayReports}</em>
+        </div>
       </div>
     </section>
     <div class="case-search-wrap">

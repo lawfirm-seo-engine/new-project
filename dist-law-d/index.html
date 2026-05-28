@@ -47,9 +47,16 @@
       
     <section class="hub-stats-section">
       <div class="hub-stats">
-        <div><strong id="statTotal">42</strong><span>등록 사건</span></div>
-        <div><strong>836</strong><span>누적 접수</span></div>
-        <div><strong>193,367</strong><span>조회수</span></div>
+        <div>
+          <strong id="statTotal">42</strong>
+          <span>등록 사건</span>
+          <em class="stat-today" id="statTodayCount">오늘 추가 +6</em>
+        </div>
+        <div>
+          <strong id="statReports">836</strong>
+          <span>누적 접수</span>
+          <em class="stat-today" id="statTodayReports">오늘 추가 +114</em>
+        </div>
       </div>
     </section>
     <div class="case-search-wrap">
@@ -571,6 +578,16 @@
       }
       var statEl=document.getElementById('statTotal');
       if(statEl)statEl.textContent=total.toLocaleString('ko-KR');
+      var totalReps=all.reduce(function(s,c){return s+(c.reports||0);},0);
+      var repEl=document.getElementById('statReports');
+      if(repEl)repEl.textContent=totalReps.toLocaleString('ko-KR');
+      var todayStr=new Date().toISOString().slice(0,10);
+      var todayCnt=all.filter(function(c){return c.createdAt===todayStr;}).length;
+      var todayRep=all.filter(function(c){return c.createdAt===todayStr;}).reduce(function(s,c){return s+(c.reports||0);},0);
+      var tcEl=document.getElementById('statTodayCount');
+      if(tcEl)tcEl.textContent='오늘 추가 +'+todayCnt;
+      var trEl=document.getElementById('statTodayReports');
+      if(trEl)trEl.textContent='오늘 추가 +'+todayRep;
       setupSearch();
     }).catch(function(){});
 })();

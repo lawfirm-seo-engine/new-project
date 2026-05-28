@@ -44,6 +44,19 @@
   </table>
 </div>
 <script>
+  const DOMAINS = [
+    { label:'A',  url:'https://new-project-9o2.pages.dev', prefix:'prosecute' },
+    { label:'B',  url:'https://new-project-b.pages.dev',   prefix:'civil' },
+    { label:'C',  url:'https://new-project-c.pages.dev',   prefix:'success' },
+    { label:'D',  url:'https://new-project-d.pages.dev',   prefix:'briefing' },
+    { label:'E',  url:'https://new-project-e.pages.dev',   prefix:'case' },
+    { label:'lA', url:'https://law-a.pages.dev',           prefix:'prosecute' },
+    { label:'lB', url:'https://law-b.pages.dev',           prefix:'civil' },
+    { label:'lC', url:'https://law-c.pages.dev',           prefix:'success' },
+    { label:'lD', url:'https://law-d.pages.dev',           prefix:'briefing' },
+    { label:'lE', url:'https://law-e.pages.dev',           prefix:'case' },
+  ];
+
   fetch('/api/get-cases')
     .then(r => r.json())
     .then(data => {
@@ -61,9 +74,7 @@
           <td class="act">
             <a href="/admin/edit.html?slug=${encodeURIComponent(c.slug)}">편집</a>
             <a href="#" onclick="setThumbnail('${esc(c.slug)}');return false;">썸네일</a>
-            <a href="https://new-project-9o2.pages.dev/prosecute/${encodeURIComponent(c.slug)}/" target="_blank">A</a>
-            <a href="https://new-project-b.pages.dev/civil/${encodeURIComponent(c.slug)}/" target="_blank">B</a>
-            <a href="https://new-project-d.pages.dev/briefing/${encodeURIComponent(c.slug)}/" target="_blank">D</a>
+            ${DOMAINS.map(d=>`<a href="${d.url}/${d.prefix}/${encodeURIComponent(c.slug)}/" target="_blank">${d.label}</a>`).join('')}
             <button class="btn danger" style="padding:0 10px;height:30px;font-size:12px" onclick="deleteCase('${esc(c.slug)}','${esc(c.caseName)}')">삭제</button>
           </td>
         </tr>`).join('');
