@@ -299,6 +299,7 @@
     const successBoxEl = document.getElementById("successBox");
     const successTitleEl = document.getElementById("successTitle");
     const successLinksEl = document.getElementById("successLinks");
+    const API_ORIGIN = location.protocol === "file:" ? "https://new-project-9o2.pages.dev" : "";
 
     let generatedCase = null;
     let editedLandings = {};
@@ -308,6 +309,39 @@
 
     function val(id) {
       return (document.getElementById(id)?.value || "").trim();
+    }
+
+    async function fetchJson(path, options = {}) {
+      const res = await fetch(`${API_ORIGIN}${path}`, {
+        ...options,
+        credentials: API_ORIGIN ? "include" : "same-origin",
+        headers: {
+          Accept: "application/json",
+          ...(options.headers || {}),
+        },
+      });
+      const text = await res.text();
+      const contentType = res.headers.get("content-type") || "";
+
+      if (!contentType.includes("application/json")) {
+        const preview = text
+          .replace(/<script[\s\S]*?<\/script>/gi, "")
+          .replace(/<style[\s\S]*?<\/style>/gi, "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 220);
+        throw new Error(`서버가 JSON이 아닌 응답을 반환했습니다. (${res.status} ${res.statusText}) ${preview || text.slice(0, 120)}`);
+      }
+
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (error) {
+        throw new Error(`JSON 파싱 오류: ${error.message}. 응답 일부: ${text.slice(0, 180)}`);
+      }
+
+      return { res, data };
     }
 
     function lines(id) {
@@ -581,12 +615,11 @@
       generateDraftButtonEl.disabled = true;
 
       try {
-        const res = await fetch("/api/generate-draft", {
+        const { data } = await fetchJson("/api/generate-draft", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ caseName }),
         });
-        const data = await res.json();
 
         if (!data.ok) {
           messageEl.textContent = data.message || "AI 데이터 생성에 실패했습니다.";
@@ -625,12 +658,11 @@
       submitButtonEl.disabled = true;
 
       try {
-        const res = await fetch("/api/create-case", {
+        const { res, data } = await fetchJson("/api/create-case", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(caseToSave),
         });
-        const data = await res.json();
 
         if (data.ok) {
           savedSlugs.add(caseToSave.slug);
