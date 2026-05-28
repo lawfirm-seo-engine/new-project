@@ -296,7 +296,7 @@ function replaceAllPlaceholders(template, data) {
 
 function getLanding(caseItem, group) {
   const landingKey = group.landingKey || group.key;
-  return caseItem.landings?.[landingKey] || caseItem.landings?.[group.key] || createFallbackLanding(caseItem, group);
+  return caseItem.landings?.[landingKey] || createFallbackLanding(caseItem, group);
 }
 
 function makeFallbackFaq(groupKey) {

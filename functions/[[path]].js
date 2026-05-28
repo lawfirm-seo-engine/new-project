@@ -199,7 +199,7 @@ export async function onRequest(context) {
 
 function renderLanding(caseData, group, origin) {
   const lk = group.landingKey ?? group.key;
-  const landing = caseData.landings?.[lk] || caseData.landings?.[group.key] || {};
+  const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
   const rawCaseName = caseData.caseName || "";
   const pageTitle = groupPageTitle(rawCaseName, lk);
   const pageH1 = groupPageH1(rawCaseName, lk);
@@ -312,7 +312,42 @@ function renderLanding(caseData, group, origin) {
   });
 }
 
+function createFallbackLanding(caseData, group, key) {
+  const caseName = caseData.caseName || "";
+  const base = primaryCaseKeyword(caseName);
+  const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}/`;
+  const descriptions = {
+    a: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 증거 상태와 사건 구조 기준으로 정리합니다.",
+    b: "민사소송, 가압류, 손해배상, 부당이득반환 절차와 회수 가능성을 사건별로 정리합니다.",
+    c: "피해금 회수 성공사례와 유사 사건의 대응 흐름, 회수율을 비교해 정리합니다.",
+    d: "사건 개요, 피해 구조, 증거 보존 방법, 즉시 대응 순서를 정보성 문체로 정리합니다.",
+    e: "형사, 민사, 성공사례, 정보 브리핑 관점에서 사건별 대응 경로를 한곳에서 연결합니다.",
+    la: "금융피해 신고 절차, 형사고소, 계좌 추적, 지급정지 방법을 금융피해 사례 기준으로 정리합니다.",
+    lb: "피해금 회수 전략, 민사소송, 가압류, 부당이득반환 절차와 단계별 회수 경로를 정리합니다.",
+    lc: "실제 회수 사례 아카이브에서 유사 사건의 대응 흐름, 회수 결과, 증거 활용 방식을 비교합니다.",
+    ld: "AI 분석 기반 금융사기 패턴, 즉시 대응 방법, 증거 보존 순서를 브리핑 형식으로 정리합니다.",
+    le: "금융사기 사건 허브에서 형사, 민사, 사례, AI 브리핑을 사건별로 연결하고 대응 경로를 통합합니다.",
+  };
+  const title = groupPageTitle(caseName, key);
+  const description = descriptions[key] || group.descriptionSuffix || "";
+
+  return {
+    title,
+    description,
+    canonical,
+    ogTitle: title,
+    ogDescription: description,
+    ogImage: `${group.siteUrl}/og/${caseData.slug}.webp`,
+    h1: groupPageH1(caseName, key),
+    body: fallbackBody(base, key),
+    victimCases: fallbackVictimCases(key),
+    faq: fallbackFaq(caseName, base, key),
+  };
+}
+
 function createLandingContent(landing, group, caseData) {
+  const contentKey = group.landingKey || group.key;
+  const contentGroup = { ...group, key: contentKey };
   const name = esc(primaryCaseKeyword(caseData.caseName));
   const rawCaseName = caseData.caseName || "";
   const slug = esc(caseData.slug);
@@ -323,14 +358,14 @@ function createLandingContent(landing, group, caseData) {
   const memoSection = caseData.memo
     ? `<section class="article-block memo-section"><h2>운영자 안내</h2><p>${esc(caseData.memo)}</p></section>`
     : "";
-  const body = renderBodyForLanding(landing, group, caseData);
-  const victimCases = renderVictimCasesForLanding(landing, group, caseData);
-  const faq = renderFaqForLanding(landing, group, caseData);
+  const body = renderBodyForLanding(landing, contentGroup, caseData);
+  const victimCases = renderVictimCasesForLanding(landing, contentGroup, caseData);
+  const faq = renderFaqForLanding(landing, contentGroup, caseData);
   const liveStatus = createLiveReceiptStatus(caseData);
   const evidenceCheck = createEvidenceCheckSection();
   const inlineCta = createInlineCta();
 
-  const faqSection = group.key === "d"
+  const faqSection = contentKey === "d" || contentKey === "ld"
     ? `<section class="article-block brief-card"><h2>${name} 피해 구조</h2>${paragraphs(body)}</section>
 <section class="article-block"><h2>구체적인 피해 유형</h2>${list(victimCases)}</section>
 ${evidenceCheck}
@@ -374,6 +409,26 @@ function renderBodyForLanding(landing, group, caseData) {
       `${base} 전체 허브는 형사고소, 민사소송, 성공사례, AI 브리핑 정보를 균형 있게 연결합니다. 사건을 처음 확인한 사람은 전체 흐름을 보고, 급한 경우 전화나 카톡 상담으로 증거 상태를 먼저 점검할 수 있습니다.`,
       `같은 사건이라도 처벌을 원하면 형사형, 회수를 원하면 민사형, 유사 결과를 보고 싶으면 성공사례형, 구조를 파악하려면 브리핑형이 적합합니다. 전체 허브는 이 선택을 돕는 안내 페이지입니다.`,
     ],
+    la: [
+      `${base} 금융피해는 입금 계좌, 예금주, 금융기관명, 이체 일시를 먼저 확보해야 합니다. 형사고소와 함께 지급정지 가능성을 확인하면 자금 이동 전에 계좌 단서를 묶을 수 있습니다.`,
+      `금융기관 신고, 경찰 접수, 금융감독원 민원은 서로 역할이 다릅니다. 대화 캡처와 입금증을 시간순으로 정리하면 계좌 추적과 고소장 작성이 빨라집니다.`,
+    ],
+    lb: [
+      `${base} 피해금 회수 전략은 상대방 특정과 자산 보전 가능성에서 시작합니다. 수취 계좌, 연계 법인, 담당자 연락처를 기준으로 가압류와 본안소송 실익을 함께 봅니다.`,
+      `민사 회수는 판결보다 먼저 자산을 묶을 수 있는지가 중요합니다. 손해배상과 부당이득반환 중 어떤 구성이 맞는지는 입금 경위와 기망 자료에 따라 달라집니다.`,
+    ],
+    lc: [
+      `${base} 실제 회수 사례를 보면 지급정지, 계좌 동결, 가압류, 합의가 단계적으로 연결된 경우가 많습니다. 결과보다 어떤 증거를 언제 확보했는지가 더 중요합니다.`,
+      `회수 사례 아카이브는 동일한 결과를 보장하는 자료가 아니라 대응 순서를 비교하는 기준입니다. 대화 전체와 입금 흐름이 남아 있을수록 회수 경로 검토가 선명해집니다.`,
+    ],
+    ld: [
+      `${base} AI 금융사기 브리핑은 접근 채널, 수익 화면 노출, 담당자 교체, 출금 거부, 추가 입금 요구를 하나의 흐름으로 분석합니다.`,
+      `출금 심사 지연, 세금·보증금 요구, 계정 차단이 함께 나타나면 정상 투자 실패보다 금융사기 패턴을 먼저 의심해야 합니다. 증거는 삭제 전 원본 상태로 보존해야 합니다.`,
+    ],
+    le: [
+      `${base} 금융사기 사건 허브는 형사고소, 민사 회수, 실제 사례, AI 브리핑을 한 사건 안에서 연결합니다. 처음 방문자는 현재 목적에 맞는 대응 경로를 고를 수 있습니다.`,
+      `같은 업체명이라도 계좌와 담당자 정보가 다르면 별도 사건일 수 있고, 다른 이름이라도 계좌 명의가 같으면 동일 조직 가능성이 있습니다. 허브는 이 비교를 돕습니다.`,
+    ],
   }[group.key] || [];
 
   return [...original, ...additions].slice(0, 9);
@@ -385,13 +440,7 @@ function renderVictimCasesForLanding(landing, group, caseData) {
   const original = Array.isArray(landing.victimCases)
     ? landing.victimCases.filter(Boolean).map((item, index) => reduceCaseNameText(item, caseData.caseName, index === 0))
     : [];
-  const additions = [
-    `직장인 피해자가 카카오톡 오픈채팅방에서 수익 인증 화면을 보고 1차로 320만원을 보낸 뒤, 출금 직전 세금과 보증금 명목으로 추가 780만원을 요구받은 사례`,
-    `자영업자가 유튜브 광고를 통해 가입한 뒤 ${brand} 관계자를 사칭한 담당자에게 안내를 받았고, 출금 신청 당일 계좌와 담당자 계정이 동시에 바뀐 사례`,
-    `소액 수익금 18만원을 먼저 지급받아 안심한 뒤 투자금을 키웠으나, 환불 요청 후 피해금 회복팀이라는 계정이 다시 접근해 선입금 수수료를 요구한 2차 피해 사례`,
-    `입금증, 계좌번호, 대화 캡처는 남아 있었지만 사이트가 폐쇄되어 상담 접수 단계에서 브라우저 기록과 문자 알림까지 다시 정리한 사례`,
-    `여러 피해자가 같은 수취 계좌와 유사 URL을 확인해 형사고소 자료와 민사 가압류 가능성을 함께 검토한 사례`,
-  ];
+  const additions = fallbackVictimCases(group.key, brand);
   return [...original, ...additions].slice(0, 5);
 }
 
@@ -424,9 +473,55 @@ function renderFaqForLanding(landing, group, caseData) {
       { question: "전체 허브에서는 어떤 균형이 중요한가요?", answer: "형사고소, 민사 회수, 성공사례, 정보 브리핑을 한쪽으로 치우치지 않게 연결해야 합니다. 사용자가 자신의 목적에 맞는 페이지로 이동할 수 있도록 안내하는 것이 핵심입니다." },
       { question: "처음 방문자는 어디서 상담을 시작하면 좋나요?", answer: "사건 구조를 모르면 전체 허브에서 자료를 분류하고, 급한 추가 입금 요구가 있다면 전화 또는 카톡 상담으로 먼저 확인하는 것이 좋습니다. 이후 형사형이나 민사형으로 이동하면 됩니다." },
     ],
+    la: [
+      { question: "금융피해 신고는 어디에 해야 하나요?", answer: "경찰청 사이버수사대, 금융감독원 불법금융신고센터, 금융정보분석원 신고를 병행해 볼 수 있습니다. 수취 계좌와 금융기관 정보가 있으면 지급정지 검토가 빨라집니다." },
+      { question: "대포통장이 사용돼도 추적이 가능한가요?", answer: "대포통장이더라도 계좌 간 자금 이동, 예금주 정보, 연결 계좌를 추적해 실제 가담자 특정 가능성을 확인할 수 있습니다." },
+    ],
+    lb: [
+      { question: "피해금 회수 전략은 어디서 시작하나요?", answer: "상대방 특정과 자산 보전 가능성부터 봅니다. 계좌 명의, 법인 정보, 통신 기록을 정리한 뒤 가압류와 본안소송 경로를 검토합니다." },
+      { question: "가압류와 본안소송은 어떻게 다른가요?", answer: "가압류는 판결 전 재산을 묶는 절차이고, 본안소송은 손해배상 또는 부당이득반환 판결을 받는 절차입니다. 둘은 함께 검토될 수 있습니다." },
+    ],
+    lc: [
+      { question: "실제 회수 사례에서 공통점은 무엇인가요?", answer: "빠른 지급정지 문의, 완전한 대화 캡처, 입금증 보존, 피해자 간 동일 계좌 확인이 공통적으로 중요했습니다." },
+      { question: "아카이브 사례를 그대로 적용할 수 있나요?", answer: "같은 결과를 보장할 수는 없지만, 증거 상태와 계좌 흐름이 비슷하면 어떤 절차를 우선할지 판단하는 데 도움이 됩니다." },
+    ],
+    ld: [
+      { question: "AI 브리핑은 무엇을 기준으로 보나요?", answer: "접근 채널, 신뢰 형성 방식, 수익 화면 노출, 출금 제한, 추가 입금 요구, 담당자 차단 여부를 함께 분석합니다." },
+      { question: "금융사기와 단순 투자 실패는 어떻게 구분하나요?", answer: "출금 거부와 추가 입금 요구, 담당자 연락 차단, 수익 보장 표현이 있으면 금융사기 정황으로 우선 검토해야 합니다." },
+    ],
+    le: [
+      { question: "금융사기 허브는 어떤 정보를 연결하나요?", answer: "형사고소, 민사 회수, 실제 사례, AI 브리핑 페이지를 한 사건 기준으로 연결해 대응 경로를 비교할 수 있게 합니다." },
+      { question: "어느 페이지부터 봐야 하나요?", answer: "추가 입금 요구가 진행 중이면 AI 브리핑과 형사고소형을 먼저 보고, 회수를 준비 중이면 민사형과 사례형을 함께 보는 것이 좋습니다." },
+    ],
   }[group.key] || [];
 
   return [...original, ...additions, ...shared].slice(0, 7);
+}
+
+function fallbackBody(base, key) {
+  return renderBodyForLanding({ body: [] }, { key }, { caseName: base }).slice(0, 7);
+}
+
+function fallbackVictimCases(key, brand = "담당자") {
+  const common = [
+    `직장인 피해자가 카카오톡 오픈채팅방에서 수익 인증 화면을 보고 1차로 320만원을 보낸 뒤, 출금 직전 세금과 보증금 명목으로 추가 780만원을 요구받은 사례`,
+    `자영업자가 유튜브 광고를 통해 가입한 뒤 ${brand} 관계자를 사칭한 담당자에게 안내를 받았고, 출금 신청 당일 계좌와 담당자 계정이 동시에 바뀐 사례`,
+    `소액 수익금 18만원을 먼저 지급받아 안심한 뒤 투자금을 키웠으나, 환불 요청 후 피해금 회복팀이라는 계정이 다시 접근해 선입금 수수료를 요구한 2차 피해 사례`,
+    `입금증, 계좌번호, 대화 캡처는 남아 있었지만 사이트가 폐쇄되어 상담 접수 단계에서 브라우저 기록과 문자 알림까지 다시 정리한 사례`,
+    `여러 피해자가 같은 수취 계좌와 유사 URL을 확인해 형사고소 자료와 민사 가압류 가능성을 함께 검토한 사례`,
+  ];
+  const law = [
+    `피해자는 모바일뱅킹 이체 직후 수취 계좌의 은행명, 예금주, 거래 일시를 정리했고, 같은 날 지급정지 문의와 경찰 신고 접수번호 확보를 병행한 사례`,
+    `정상 금융상품처럼 설명받았지만 출금 단계에서 보증금과 인증비를 요구받아 앱 화면 녹화, 계좌 변경 내역, 담당자 프로필을 별도 보존한 사례`,
+    `환불을 기다리던 중 금융피해 회복팀이라는 새 계정이 접근해 선입금 요구 메시지를 2차 피해 정황으로 보존한 사례`,
+    `같은 수취 계좌로 입금한 피해자가 추가 확인되어 입금 시간, 금액, 대화방 초대 경로를 비교한 사례`,
+    `금융감독원 민원과 형사고소 자료를 함께 정리해 계좌 제한 가능성과 추가 피해 확산 차단을 검토한 사례`,
+  ];
+  return String(key || "").startsWith("l") ? law : common;
+}
+
+function fallbackFaq(caseName, base, key) {
+  return renderFaqForLanding({ faq: [] }, { key }, { caseName }).slice(0, 7);
 }
 
 function createConsultForm(cn, siteName) {
