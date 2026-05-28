@@ -4,6 +4,12 @@ const GROUP_MAP = {
   "new-project-c.pages.dev": { prefix: "success", siteUrl: "https://new-project-c.pages.dev" },
   "new-project-d.pages.dev": { prefix: "briefing", siteUrl: "https://new-project-d.pages.dev" },
   "new-project-e.pages.dev": { prefix: "case", siteUrl: "https://new-project-e.pages.dev" },
+  // law-* 도메인
+  "law-a.pages.dev": { prefix: "prosecute", siteUrl: "https://law-a.pages.dev" },
+  "law-b.pages.dev": { prefix: "civil", siteUrl: "https://law-b.pages.dev" },
+  "law-c.pages.dev": { prefix: "success", siteUrl: "https://law-c.pages.dev" },
+  "law-d.pages.dev": { prefix: "briefing", siteUrl: "https://law-d.pages.dev" },
+  "law-e.pages.dev": { prefix: "case", siteUrl: "https://law-e.pages.dev" },
 };
 
 export async function onRequest(context) {

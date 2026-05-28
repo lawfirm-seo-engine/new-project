@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://law-b.pages.dev/sitemap-index.xml
+Sitemap: https://law-b.pages.dev/sitemap.xml

@@ -142,6 +142,11 @@ async function pingIndexNow(slug, key) {
     { host: "new-project-c.pages.dev", prefix: "success" },
     { host: "new-project-d.pages.dev", prefix: "briefing" },
     { host: "new-project-e.pages.dev", prefix: "case" },
+    { host: "law-a.pages.dev", prefix: "prosecute" },
+    { host: "law-b.pages.dev", prefix: "civil" },
+    { host: "law-c.pages.dev", prefix: "success" },
+    { host: "law-d.pages.dev", prefix: "briefing" },
+    { host: "law-e.pages.dev", prefix: "case" },
   ];
   await Promise.allSettled(
     groups.map(({ host, prefix }) =>
