@@ -2,8 +2,20 @@ export async function onRequestGet(context) {
   const { env } = context;
 
   try {
-    // GitHub을 항상 1순위로 사용 (모든 10개 프로젝트가 동일한 최신 데이터를 받기 위해)
+    // KV 우선: create-case.js가 KV에 동기 쓰기하므로 항상 최신 데이터 보장
+    if (env.CASES) {
+      const idxRaw = await env.CASES.get("cases:index");
+      if (idxRaw) {
+        const cases = JSON.parse(idxRaw);
+        return json({ ok: true, cases, source: "kv" });
+      }
+    }
+
+    // KV 없으면 GitHub fallback
     const { repoOwner, repoName, branch, token } = githubEnv(env);
+    if (!repoOwner || !repoName || !token) {
+      return json({ ok: false, message: "환경변수 누락" }, 500);
+    }
     const res = await fetch(
       `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/cases.json?ref=${branch}`,
       { headers: githubHeaders(token) }
@@ -11,9 +23,9 @@ export async function onRequestGet(context) {
     if (!res.ok) return json({ ok: false, message: "cases.json 로드 실패" }, 500);
 
     const file = await res.json();
-    const raw = await readFileContent(file, token, env);
+    const raw = await readFileContent(file, token);
     const cases = raw ? JSON.parse(raw) : [];
-    return json({ ok: true, cases });
+    return json({ ok: true, cases, source: "github" });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
@@ -29,7 +41,12 @@ async function readFileContent(file, token) {
 }
 
 function githubEnv(env) {
-  return { repoOwner: env.GITHUB_REPO_OWNER, repoName: env.GITHUB_REPO_NAME, branch: env.GITHUB_BRANCH || "main", token: env.GITHUB_TOKEN };
+  return {
+    repoOwner: env.GITHUB_REPO_OWNER,
+    repoName: env.GITHUB_REPO_NAME,
+    branch: env.GITHUB_BRANCH || "main",
+    token: env.GITHUB_TOKEN,
+  };
 }
 
 function githubHeaders(token) {
