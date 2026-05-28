@@ -67,7 +67,7 @@ const GROUPS = {
     ctaText: "입금 내역, 대화 내용, 사이트 주소를 기준으로 고소장 작성과 계좌 추적 방향을 검토합니다.",
     ctaLabel: "피해 사실 접수", ogType: "article",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
-    naverVerification: "",
+    naverVerification: "f2ddde82410ec6af775d6ea2aa4952bbb56aa1ab",
     siteUrl: "https://law-a.pages.dev",
   },
   "law-b.pages.dev": {
@@ -79,7 +79,7 @@ const GROUPS = {
     ctaText: "상대방 특정 가능성, 입금 계좌, 계약·약정 자료를 기준으로 보전처분과 본안소송을 함께 봅니다.",
     ctaLabel: "회수 절차 문의", ogType: "article",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
-    naverVerification: "",
+    naverVerification: "df4104477628408f1b9f971d360d7a9207c8f894",
     siteUrl: "https://law-b.pages.dev",
   },
   "law-c.pages.dev": {
@@ -91,7 +91,7 @@ const GROUPS = {
     ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
     ctaLabel: "사례 비교 문의", ogType: "article",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
-    naverVerification: "",
+    naverVerification: "220c61ef5bdb2bae3d4cf69b16c583f743f48a37",
     siteUrl: "https://law-c.pages.dev",
   },
   "law-d.pages.dev": {
@@ -103,7 +103,7 @@ const GROUPS = {
     ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
     ctaLabel: "정보 확인", ogType: "article",
     descriptionSuffix: "네이버 검색 노출을 고려해 사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
-    naverVerification: "",
+    naverVerification: "d33ae2f29806237bbb7bbdab033a054d7691a6e5",
     siteUrl: "https://law-d.pages.dev",
   },
   "law-e.pages.dev": {
@@ -115,7 +115,7 @@ const GROUPS = {
     ctaText: "하나의 사건을 법적 대응, 회수 절차, 사례, 정보 요약 관점으로 나누어 확인할 수 있습니다.",
     ctaLabel: "관련 정보 확인", ogType: "article",
     descriptionSuffix: "금융사기 사건 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
-    naverVerification: "",
+    naverVerification: "38944ffeef5410881604cfefef4c3df44de7db93",
     siteUrl: "https://law-e.pages.dev",
   },
 };
