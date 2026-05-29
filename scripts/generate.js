@@ -486,6 +486,38 @@ function createConsultForm(caseItem, group) {
 }
 
 function createLandingContent(landing, group, caseItem) {
+  {
+    const _keyword = escapeHtml(seoCaseKeyword(caseItem.caseName || caseItem.name || ""));
+    const _form = createConsultForm(caseItem, group);
+    const _widgets = createFloatingWidgets(caseItem, group);
+    const _slug = escapeHtml(caseItem.slug);
+    const _trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${_slug}'})}).catch(function(){});})();</script>`;
+    const _memoSection = caseItem.memo
+      ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${escapeHtml(caseItem.memo)}</p></section>`
+      : "";
+    const _rawCaseName = caseItem.caseName || caseItem.name || "";
+    const _body = renderBodyForLanding(landing, group, caseItem);
+    const _victimCases = renderVictimCasesForLanding(landing, group, caseItem);
+    const _faq = renderFaqForLanding(landing, group, caseItem);
+    const _introBody = _body.slice(0, 3);
+    const _methodBody = _body.slice(3, 8);
+
+    return [
+      createHeroCta(),
+      createAeoOverviewSection(caseItem, group.key),
+      `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName)}${paragraphs(_introBody)}</section>`,
+      `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName))}</section>`,
+      `<section class="article-block"><h2>${_keyword} 피해 사례</h2>${list(_victimCases)}</section>`,
+      `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
+      `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
+      createLiveReceiptStatus(caseItem),
+      _memoSection,
+      _form,
+      _widgets,
+      _trackScript,
+    ].filter(Boolean).join("\n");
+  }
+
   const name = escapeHtml(primaryCaseKeyword(caseItem.caseName || caseItem.name || ""));
   const form = createConsultForm(caseItem, group);
   const widgets = createFloatingWidgets(caseItem, group);
@@ -532,6 +564,59 @@ function createLandingContent(landing, group, caseItem) {
     widgets,
     trackScript,
   ].filter(Boolean).join("\n");
+}
+
+function createSeoDescription(description = "", caseName = "", key = "") {
+  const primary = seoCaseKeyword(caseName);
+  const desc = String(description || "").trim();
+  const fallback = primary
+    ? `${primary} 피해가 의심된다면 추가 입금을 중단하세요. 텔레그램 리딩방, 허위 수익 인증, 출금 지연, 세금·보증금 요구 정황을 기준으로 대응 방법과 피해금 회수 가능성을 점검합니다.`
+    : "입금 내역, 대화 기록, 사이트 주소를 기준으로 사기 피해 정황과 대응 방법을 정리합니다.";
+  if (!primary) return (desc || fallback).slice(0, 150);
+  return (!desc || !desc.toLowerCase().includes(primary.toLowerCase()) ? fallback : desc).slice(0, 150);
+}
+
+function createHeroCta() {
+  return `<div class="hero-cta">
+    <p>출금 지연, 추가 입금 요구, 대화방 삭제 정황이 있다면 본문을 읽기 전에 현재 자료부터 점검하세요.</p>
+    <div>
+      <a href="#consult" class="hero-cta-primary">상담 접수하기</a>
+      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증·대화 캡처 보내기</a>
+      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 02-6952-3695 전화문의</a>
+    </div>
+  </div>`;
+}
+
+function createAeoOverviewSection(caseItem, key) {
+  const keyword = escapeHtml(seoCaseKeyword(caseItem.caseName || caseItem.name || ""));
+  const summary = createSeoDescription(caseItem.summary || "", caseItem.caseName || caseItem.name || "", key);
+  return `<section class="aeo-summary" id="aeo-summary" aria-label="${keyword} 핵심 요약">
+  <h2>${keyword} 핵심 요약</h2>
+  <p>${withSentenceBreaks(summary)}</p>
+</section>`;
+}
+
+function createConfirmedSignals(caseName) {
+  const keyword = escapeHtml(seoCaseKeyword(caseName));
+  const items = [
+    `${keyword} 또는 유사 명칭으로 전문 투자회사처럼 접근`,
+    "텔레그램·카카오톡 리딩방에서 허위 수익 인증과 투자 권유 반복",
+    "초기에는 소액 수익 또는 출금 가능 화면을 보여준 뒤 고액 입금 유도",
+    "출금 신청 후 세금·보증금·인증비·계정 해제비 명목의 추가 입금 요구",
+    "담당자 계정 삭제, 대화방 폐쇄, 사이트 접속 차단 등 증거 소멸 정황",
+  ];
+  return `<div class="confirmed-signals"><h3>확인된 피해 정황</h3>${list(items)}</div>`;
+}
+
+function createScamMethodItems(caseName) {
+  const keyword = seoCaseKeyword(caseName);
+  return [
+    `${keyword} 명칭을 사용해 정상 투자자문 또는 리딩 서비스처럼 신뢰를 형성합니다.`,
+    "단체 대화방에서 바람잡이 계정이 수익 인증, 출금 인증, 후기 메시지를 반복합니다.",
+    "소액 입금 후 화면상 수익을 보여주고 VIP 등급, 단계별 프로젝트, 단기 고수익 명목으로 추가 입금을 요구합니다.",
+    "출금 단계에서 세금, 보증금, 인증비, 계정 해제비를 먼저 내야 한다고 안내합니다.",
+    "피해자가 항의하면 담당자를 바꾸거나 대화방을 닫고, 환불팀·복구팀을 사칭한 2차 연락으로 이어질 수 있습니다.",
+  ];
 }
 
 function renderBodyForLanding(landing, group, caseItem) {
@@ -689,6 +774,17 @@ function faqHtml(items = [], caseName = "") {
 }
 
 function createEvidenceCheckSection() {
+  return `<section class="evidence-check">
+  <p class="section-kicker">3분 증거 점검</p>
+  <h3>상담 전 이것만 먼저 확인하세요</h3>
+  <ul>
+    <li>입금증, 계좌번호, 예금주가 남아 있는지 확인</li>
+    <li>카카오톡·텔레그램 대화방과 담당자 프로필 캡처</li>
+    <li>사이트 주소, 로그인 화면, 출금 제한 안내 저장</li>
+    <li>세금·보증금·인증비 등 추가 입금 요구 메시지 보존</li>
+  </ul>
+</section>`;
+
   return `<section class="article-block evidence-check">
   <p class="section-kicker">3분 증거 점검</p>
   <h2>상담 전 이것만 먼저 확인하세요</h2>
@@ -703,6 +799,8 @@ function createEvidenceCheckSection() {
 }
 
 function createInlineCta(text = "비슷한 피해 흐름이 보인다면 추가 입금 전에 상담 접수로 현재 자료부터 확인하세요.") {
+  return "";
+
   return `<aside class="inline-cta">
   <strong>추가 입금 전 긴급 점검</strong>
   <p>${escapeHtml(text)}</p>
@@ -714,6 +812,8 @@ function createInlineCta(text = "비슷한 피해 흐름이 보인다면 추가 
 }
 
 function addFaqCta(answer = "") {
+  return String(answer || "");
+
   const text = String(answer || "");
   if (/상담 접수|카톡 상담|전화/.test(text)) return text;
   return `${text} 입금증과 대화 캡처가 있다면 상담 접수나 카톡 상담으로 먼저 자료 상태를 확인할 수 있습니다.`;
@@ -1068,38 +1168,42 @@ function secondaryCaseKeyword(name) {
 }
 
 function groupPageTitle(name, groupKey) {
-  const base = primaryCaseKeyword(name);
-  const secondary = secondaryCaseKeyword(name);
+  const base = seoCaseKeyword(name);
   const suffixes = {
-    a: "형사고소",
-    b: "민사소송",
-    c: "피해금 회수 사례",
-    d: "AI브리핑",
-    e: "피해 진행현황",
-    la: "금융피해 형사고소",
-    lb: "피해금 회수 전략",
-    lc: "실제 회수 사례",
-    ld: "피해 구조 분석",
-    le: "피해 대응 허브",
+    a: "사칭 피해 대응 | 리딩방 투자사기 형사고소·피해금 회수",
+    b: "사칭 피해 대응 | 민사소송·가압류·손해배상",
+    c: "사칭 피해 사례 | 회수 가능성·대응 흐름",
+    d: "사기 수법 분석 | 피해 대응 방법·증거 보존",
+    e: "사기 피해 허브 | 수법·사례·대응 방법",
+    la: "사칭 피해 대응 | 금융피해 형사고소·계좌 추적",
+    lb: "피해금 회수 전략 | 가압류·부당이득반환",
+    lc: "실제 회수 사례 | 금융사기 피해 대응",
+    ld: "사기 수법 분석 | AI 금융사기 브리핑",
+    le: "금융사기 피해 허브 | 수법·사례·대응 방법",
   };
-  return `${base} ${suffixes[groupKey] || "피해 대응"}${secondary ? ` | ${secondary}` : ""}`;
+  return `${base} ${suffixes[groupKey] || "사칭 피해 대응"}`;
 }
 
 function groupPageH1(name, groupKey) {
-  const base = primaryCaseKeyword(name);
+  const base = seoCaseKeyword(name);
   const suffixes = {
-    a: "형사고소 대응",
-    b: "민사소송 대응",
-    c: "피해금 회수 사례",
-    d: "AI브리핑",
-    e: "피해 진행현황",
-    la: "금융피해 형사고소 대응",
-    lb: "피해금 회수 전략",
-    lc: "실제 회수 사례 아카이브",
-    ld: "피해 구조 브리핑",
-    le: "피해 대응 허브",
+    a: "사칭, 리딩방 투자 피해 대응",
+    b: "사칭, 피해금 회수와 민사 대응",
+    c: "사칭, 피해 사례와 회수 가능성",
+    d: "사칭, 수법과 대응 방법",
+    e: "사칭, 피해 대응 종합 안내",
+    la: "사칭, 금융피해 형사 대응",
+    lb: "사칭, 피해금 회수 전략",
+    lc: "사칭, 실제 회수 사례",
+    ld: "사칭, 금융사기 수법 분석",
+    le: "사칭, 금융피해 통합 안내",
   };
-  return `${base} ${suffixes[groupKey] || "피해 대응"}`;
+  return `${base} ${suffixes[groupKey] || "사칭 피해 대응"}`;
+}
+
+function seoCaseKeyword(name) {
+  const base = primaryCaseKeyword(name) || normalizeCaseName(name);
+  return String(base || "").replace(/[A-Za-z][A-Za-z0-9 .&_-]*/g, (part) => part.toUpperCase()).trim();
 }
 
 function searchKeyword(name) {
@@ -1194,7 +1298,7 @@ for (const group of groups) {
     ogThumbnail: "",
     summary: "",
     content: createHubContent(group),
-    headerCall: `<a class="header-call" href="#consult">상담 접수</a>`,
+    headerCall: "",
     floatingWidgets: createHubFloatingWidgets(group),
     pageKind: "hub-page",
   });
