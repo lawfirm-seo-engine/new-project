@@ -941,6 +941,12 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   if (isHub) {
     links.push(`<meta name="classification" content="${escapeHtml(group.intent)}">`);
     links.push(`<meta property="og:updated_time" content="${today}">`);
+    links.push(`<meta property="og:image:type" content="image/webp">`);
+    links.push(`<meta property="og:image:width" content="1536">`);
+    links.push(`<meta property="og:image:height" content="1024">`);
+    links.push(`<meta property="og:image:alt" content="${escapeHtml(group.hubTitle)}">`);
+    links.push(`<meta name="twitter:card" content="summary_large_image">`);
+    links.push(`<meta name="twitter:image" content="${group.siteUrl}/assets/og-template.webp">`);
   } else {
     const publishedDate = caseItem?.createdAt || today;
     const modifiedDate = caseItem?.updatedAt || publishedDate;
@@ -1277,7 +1283,7 @@ for (const group of groups) {
     canonical: `${group.siteUrl}/`,
     ogTitle: escapeHtml(hubTitle),
     ogDescription: escapeHtml(hubDescription),
-    ogImage: `${group.siteUrl}/og/hub.webp`,
+    ogImage: `${group.siteUrl}/assets/og-template.webp`,
     headExtra: createHeadExtra({ group, isHub: true }),
     schema: JSON.stringify({
       "@context": "https://schema.org",
