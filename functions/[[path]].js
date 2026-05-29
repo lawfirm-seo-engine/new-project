@@ -468,15 +468,27 @@ function createHeroTypingBlock(caseName) {
   <p class="hero-typing-s">추가 입금을 요구받고 있다면 즉시 중단하세요.</p>
   <p class="hero-typing-l1">출금 지연, 세금·보증금 요구, 환전 제한은 금융사기에서 반복적으로 나타나는 대표적인 패턴입니다.</p>
   <p class="hero-typing-l2">금융피해 대응센터 상담을 통해 현재 상황에 맞는 대응 절차를 확인해 보시기 바랍니다.</p>
-</div>`;
+</div>
+<script>(function(){var CYCLE=9400;function restart(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.style.animation='none';l2.style.animation='none';void l1.offsetWidth;void l2.offsetWidth;l1.style.animation='';l2.style.animation='';setTimeout(restart,CYCLE);}setTimeout(restart,CYCLE);})();</script>`;
 }
 
 function createAeoOverviewSection(caseData, key) {
   const keyword = esc(seoCaseKeyword(caseData.caseName || ""));
-  const summary = createSeoDescription(caseData.summary || "", caseData.caseName || "", key);
-  return `<section class="aeo-summary" id="aeo-summary" aria-label="${keyword} 핵심 요약">
-  <h2>${keyword} 핵심 요약</h2>
-  <p>${withSentenceBreaks(summary)}</p>
+  const caseName = caseData.caseName || "";
+  const base = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
+  const lawAeo = {
+    la: { t: `${base} 형사고소 핵심 요약`, b: `${base} 피해가 의심되면 추가 입금을 멈추고 입금증, 수취 계좌, 대화 기록, 출금 거부 화면을 보존해야 합니다. 형사고소는 사기죄 구성요건과 계좌 추적 가능성을 함께 검토하는 절차이며, 상담 접수 전 자료를 시간순으로 정리하면 초기 대응이 빨라집니다.` },
+    lb: { t: `${base} 피해금 회수 핵심 요약`, b: `${base} 피해금 회수는 형사고소와 별도로 가압류, 손해배상, 부당이득반환 청구를 검토해야 합니다. 수취 계좌와 상대방 특정 자료가 남아 있을수록 보전처분 가능성을 빠르게 판단할 수 있습니다.` },
+    lc: { t: `${base} 회수 사례 핵심 요약`, b: `${base}와 유사한 사건에서 회수 가능성이 높아지는 조건은 입금 직후 자료 보존, 계좌 단서 확보, 동일 피해자 확인, 지급정지 또는 가압류 검토가 빠르게 이어진 경우입니다.` },
+    ld: { t: `${base} 피해 구조 요약`, b: `${base} 사건은 접근 채널, 입금 명목, 출금 거부, 추가 입금 요구를 순서대로 정리해야 합니다. 지금 해야 할 행동은 추가 입금 중단, 증거 보존, 신고 접수입니다.` },
+    le: { t: `${base} 피해 대응 요약`, b: `${base} 사건은 처벌을 원하면 형사고소형, 회수를 원하면 민사 회수형, 결과 흐름을 보고 싶으면 성공사례형, 사건 구조를 먼저 파악하려면 브리핑형 페이지를 함께 확인하는 것이 좋습니다.` },
+  };
+  const cfg = lawAeo[key];
+  const title = cfg ? esc(cfg.t) : `${keyword} 핵심 요약`;
+  const body = cfg ? esc(cfg.b) : withSentenceBreaks(createSeoDescription(caseData.summary || "", caseName, key));
+  return `<section class="aeo-summary" id="aeo-summary" aria-label="${title}">
+  <h2>${title}</h2>
+  <blockquote>${body}</blockquote>
 </section>`;
 }
 
@@ -760,10 +772,6 @@ function createLawAuthoritySections(key, caseData) {
   <div class="law-compare-table" role="table">
     ${config.compare.map((row, index) => `<div class="${index === 0 ? "is-head" : ""}" role="row">${row.map((cell) => `<span role="cell">${esc(cell)}</span>`).join("")}</div>`).join("\n    ")}
   </div>
-</section>
-<section class="aeo-summary" id="aeo-summary" aria-label="${esc(config.aeoTitle)}">
-  <h2>${esc(config.aeoTitle)}</h2>
-  <blockquote>${esc(config.aeo)}</blockquote>
 </section>`;
 }
 
