@@ -234,6 +234,67 @@ a{color:inherit;text-decoration:none}
   font-size:18px;
 }
 
+/* ── Hero typing block ───────────────────────────── */
+@keyframes hero-type{
+  from{width:0}
+  to{width:100%}
+}
+
+.hero-typing{
+  max-width:700px;
+  margin:22px auto 0;
+  text-align:center;
+}
+
+.hero-typing-q{
+  margin:0 0 6px;
+  font-size:clamp(16px,2.1vw,20px);
+  font-weight:900;
+  line-height:1.35;
+  color:var(--primary);
+}
+
+.hero-typing-s{
+  margin:0 0 14px;
+  font-size:clamp(14px,1.8vw,16px);
+  font-weight:700;
+  color:var(--text);
+}
+
+.hero-typing-l1,
+.hero-typing-l2{
+  display:block;
+  overflow:hidden;
+  white-space:nowrap;
+  width:0;
+  margin:0 0 4px;
+  font-size:clamp(12px,1.4vw,13px);
+  color:var(--muted);
+  line-height:1.7;
+}
+
+.hero-typing-l1{
+  animation:hero-type 2.5s steps(44,end) 1s forwards;
+}
+
+.hero-typing-l2{
+  animation:hero-type 2.4s steps(38,end) 3.8s forwards;
+}
+
+.domain-a .hero .hero-typing-q{color:#fff}
+.domain-a .hero .hero-typing-s{color:rgba(255,255,255,.85)}
+.domain-a .hero .hero-typing-l1,
+.domain-a .hero .hero-typing-l2{color:rgba(255,255,255,.62)}
+
+@media(max-width:640px){
+  .hero-typing-l1,
+  .hero-typing-l2{
+    white-space:normal;
+    width:auto;
+    animation:none;
+  }
+}
+
 .receipt-badge{
   width:max-content;
   max-width:calc(100% - 40px);
@@ -749,10 +810,6 @@ button{
     linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, #111827), #0f172a 64%, #101018);
 }
 
-.hero .aeo-summary{
-  margin-top:24px;
-  margin-bottom:0;
-}
 
 .aeo-summary blockquote{
   position:relative;

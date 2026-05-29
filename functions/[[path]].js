@@ -338,7 +338,7 @@ function renderLanding(caseData, group, origin) {
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName),
     ogThumbnail,
     summary: pageSummary,
-    aeoSection: createAeoOverviewSection(caseData, lk),
+    heroTyping: createHeroTypingBlock(rawCaseName),
     receiptBadge: createReceiptBadge(caseData),
     heroCta: "",
     content,
@@ -407,6 +407,7 @@ function createLandingContent(landing, group, caseData) {
     return [
       createHeroCta(),
       `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName)}${paragraphs(_introBody)}</section>`,
+      createAeoOverviewSection(caseData, _contentKey),
       `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName))}</section>`,
       `<section class="article-block"><h2>${_keyword} 피해 사례</h2>${list(_victimCases)}</section>`,
       `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
@@ -458,6 +459,16 @@ ${authoritySections}
   const floatingWidgets = createFloatingWidgets(cn, siteName, slug);
 
   return [faqSection, liveStatus, createInlineCta("실시간 접수와 비슷한 정황이 있다면 추가 입금 전에 현재 자료부터 점검해 보세요."), memoSection, consultForm, floatingWidgets, trackScript].filter(Boolean).join("\n");
+}
+
+function createHeroTypingBlock(caseName) {
+  const keyword = esc(seoCaseKeyword(caseName));
+  return `<div class="hero-typing">
+  <p class="hero-typing-q"><strong>${keyword} 사칭 피해가 의심되나요?</strong></p>
+  <p class="hero-typing-s">추가 입금을 요구받고 있다면 즉시 중단하세요.</p>
+  <p class="hero-typing-l1">출금 지연, 세금·보증금 요구, 환전 제한은 금융사기에서 반복적으로 나타나는 대표적인 패턴입니다.</p>
+  <p class="hero-typing-l2">금융피해 대응센터 상담을 통해 현재 상황에 맞는 대응 절차를 확인해 보시기 바랍니다.</p>
+</div>`;
 }
 
 function createAeoOverviewSection(caseData, key) {
@@ -1010,7 +1021,7 @@ function pageTemplate(d) {
       <p class="eyebrow">${d.tone}</p>
       <h1>${d.h1}</h1>
       ${d.ogThumbnail}
-      ${d.aeoSection || ""}
+      ${d.heroTyping || ""}
       ${d.receiptBadge || ""}
       ${d.heroCta || ""}
     </section>
