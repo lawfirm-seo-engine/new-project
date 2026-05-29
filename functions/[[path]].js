@@ -254,26 +254,57 @@ function renderLanding(caseData, group, origin) {
     keyword ? `<meta name="keywords" content="${esc(keyword)}">` : "",
   ].filter(Boolean).join("\n  ");
 
+  const caseKeywordForSchema = primaryCaseKeyword(rawCaseName) || rawCaseName;
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${group.siteUrl}/#website`,
+        name: group.siteName,
+        url: group.siteUrl,
+        inLanguage: "ko-KR",
+        publisher: { "@id": "https://new-project-9o2.pages.dev/#organization" },
+      },
       {
         "@type": "WebPage",
         "@id": `${canonical}#webpage`,
         name: pageTitle, description: seoDescription, url: canonical, inLanguage: "ko-KR",
         datePublished: publishedDate, dateModified: modifiedDate,
+        isPartOf: { "@id": `${group.siteUrl}/#website` },
+        primaryImageOfPage: { "@id": `${canonical}#primaryimage` },
         breadcrumb: { "@id": `${canonical}#breadcrumb` },
         speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", ".aeo-summary", ".article-block > p", "#faq-list"] },
-        author: ORGANIZATION,
+        author: { "@id": "https://new-project-9o2.pages.dev/#organization" },
+        hasPart: CROSS_LINKS.map((l) => ({
+          "@type": "SiteNavigationElement",
+          name: l.label,
+          url: `${l.url}/`,
+        })),
+      },
+      {
+        "@type": "ImageObject",
+        "@id": `${canonical}#primaryimage`,
+        url: ogImage,
+        contentUrl: ogImage,
+        width: 1536,
+        height: 864,
+        caption: pageTitle,
+        inLanguage: "ko-KR",
+        representativeOfPage: true,
       },
       {
         "@type": (group.key === "d" || lk === "ld") ? "NewsArticle" : "Article",
         "@id": `${canonical}#article`,
         headline: pageTitle, description: seoDescription, url: canonical, inLanguage: "ko-KR",
         datePublished: publishedDate, dateModified: modifiedDate,
-        author: ORGANIZATION, publisher: ORGANIZATION,
+        author: [
+          { "@id": "https://new-project-9o2.pages.dev/#organization" },
+          { "@id": "https://new-project-9o2.pages.dev/#person-attorney" },
+        ],
+        publisher: { "@id": "https://new-project-9o2.pages.dev/#organization" },
         isPartOf: { "@id": `${canonical}#webpage` },
-        image: { "@type": "ImageObject", url: ogImage },
+        image: { "@id": `${canonical}#primaryimage` },
         about: [searchKeyword(rawCaseName), group.intent].filter(Boolean),
         keywords: keyword,
         speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", ".aeo-summary", ".article-block > p", "#faq-list"] },
@@ -283,18 +314,43 @@ function renderLanding(caseData, group, origin) {
         "@id": `${canonical}#breadcrumb`,
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "홈", item: group.siteUrl + "/" },
-          { "@type": "ListItem", position: 2, name: primaryCaseKeyword(rawCaseName) || rawCaseName, item: canonical },
+          { "@type": "ListItem", position: 2, name: caseKeywordForSchema, item: canonical },
         ],
       },
       {
         "@type": "LegalService",
         "@id": `${group.siteUrl}/#legalservice`,
         name: group.siteName,
+        legalName: "법률사무소 대온",
         url: group.siteUrl,
         telephone: "02-6952-3695",
+        email: "noleosi@daeonlaw.co.kr",
         areaServed: "KR",
-        parentOrganization: ORGANIZATION,
+        parentOrganization: { "@id": "https://new-project-9o2.pages.dev/#organization" },
         serviceType: group.intent,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "서초대로 250 스타갤러리브릿지빌딩 802호",
+          addressLocality: "서초구",
+          addressRegion: "서울특별시",
+          addressCountry: "KR",
+        },
+        contactPoint: [
+          {
+            "@type": "ContactPoint",
+            telephone: "02-6952-3695",
+            contactType: "customer service",
+            availableLanguage: "Korean",
+          },
+          {
+            "@type": "ContactPoint",
+            url: "http://pf.kakao.com/_xcypmn/chat",
+            contactType: "customer service",
+            availableLanguage: "Korean",
+          },
+        ],
+        sameAs: ["https://cafe.naver.com/daeonlawfintech"],
+        knowsAbout: ["금융사기", "사기죄 형사고소", "피해금 회수", "가압류", "손해배상청구", "사기 피해 대응"],
       },
       {
         "@type": "FAQPage",
@@ -303,6 +359,20 @@ function renderLanding(caseData, group, origin) {
           acceptedAnswer: { "@type": "Answer", text: item.answer },
         })),
       },
+      {
+        "@type": "HowTo",
+        "@id": `${canonical}#howto`,
+        name: `${caseKeywordForSchema} 피해 발생 후 대응 방법`,
+        description: "금융사기 피해가 의심될 때 즉시 해야 할 증거 보존 순서",
+        totalTime: "PT5M",
+        step: [
+          { "@type": "HowToStep", position: 1, name: "입금 자료 확인", text: "입금증, 계좌번호, 예금주가 남아 있는지 확인합니다." },
+          { "@type": "HowToStep", position: 2, name: "대화 캡처", text: "카카오톡·텔레그램 대화방과 담당자 프로필을 캡처합니다." },
+          { "@type": "HowToStep", position: 3, name: "사이트 정보 저장", text: "사이트 주소, 로그인 화면, 출금 제한 안내를 저장합니다." },
+          { "@type": "HowToStep", position: 4, name: "추가 요구 메시지 보존", text: "세금·보증금·인증비 등 추가 입금 요구 메시지를 보존합니다." },
+        ],
+      },
+      { ...PERSON_ATTORNEY },
     ],
   }, null, 2);
 
@@ -1054,11 +1124,50 @@ function pageTemplate(d) {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const ORGANIZATION = {
-  "@type": "Organization",
+  "@type": ["Organization", "LegalService"],
   "@id": "https://new-project-9o2.pages.dev/#organization",
   name: "대온 법률사무소",
+  legalName: "법률사무소 대온",
+  alternateName: "대온 법률사무소",
   url: "https://new-project-9o2.pages.dev",
+  telephone: "02-6952-3695",
+  email: "noleosi@daeonlaw.co.kr",
   logo: { "@type": "ImageObject", url: "https://new-project-9o2.pages.dev/assets/logo.png" },
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "서초대로 250 스타갤러리브릿지빌딩 802호",
+    addressLocality: "서초구",
+    addressRegion: "서울특별시",
+    addressCountry: "KR",
+  },
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      telephone: "02-6952-3695",
+      contactType: "customer service",
+      availableLanguage: "Korean",
+    },
+    {
+      "@type": "ContactPoint",
+      url: "http://pf.kakao.com/_xcypmn/chat",
+      contactType: "customer service",
+      availableLanguage: "Korean",
+    },
+  ],
+  sameAs: ["https://cafe.naver.com/daeonlawfintech"],
+  knowsAbout: ["금융사기", "사기죄 형사고소", "피해금 회수", "가압류", "손해배상청구", "사기 피해 대응"],
+};
+
+const PERSON_ATTORNEY = {
+  "@type": "Person",
+  "@id": "https://new-project-9o2.pages.dev/#person-attorney",
+  name: "신동우",
+  honorificPrefix: "변호사",
+  jobTitle: "대표변호사",
+  worksFor: { "@id": "https://new-project-9o2.pages.dev/#organization" },
+  knowsAbout: ["금융사기", "사기죄 형사고소", "피해금 회수", "가압류", "손해배상"],
+  sameAs: ["https://cafe.naver.com/daeonlawfintech"],
+  email: "noleosi@daeonlaw.co.kr",
 };
 
 function esc(v = "") {
