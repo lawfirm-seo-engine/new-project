@@ -34,7 +34,6 @@ export async function onRequest(context) {
     url.pathname.startsWith("/admin") ||
     url.pathname.startsWith("/api/create-case") ||
     url.pathname.startsWith("/api/generate-draft") ||
-    url.pathname.startsWith("/api/get-cases") ||
     url.pathname.startsWith("/api/update-case") ||
     url.pathname.startsWith("/api/admin-settings") ||
     url.pathname.startsWith("/api/delete-case") ||
