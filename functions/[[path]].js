@@ -338,6 +338,7 @@ function renderLanding(caseData, group, origin) {
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName),
     ogThumbnail,
     summary: pageSummary,
+    aeoSection: createAeoOverviewSection(caseData, lk),
     receiptBadge: createReceiptBadge(caseData),
     heroCta: "",
     content,
@@ -405,7 +406,6 @@ function createLandingContent(landing, group, caseData) {
 
     return [
       createHeroCta(),
-      createAeoOverviewSection(caseData, _contentKey),
       `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName)}${paragraphs(_introBody)}</section>`,
       `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName))}</section>`,
       `<section class="article-block"><h2>${_keyword} 피해 사례</h2>${list(_victimCases)}</section>`,
@@ -472,8 +472,8 @@ function createAeoOverviewSection(caseData, key) {
 function createConfirmedSignals(caseName) {
   const keyword = esc(seoCaseKeyword(caseName));
   const items = [
-    `${keyword} 또는 유사 명칭으로 전문 투자회사처럼 접근`,
-    "텔레그램·카카오톡 리딩방에서 허위 수익 인증과 투자 권유 반복",
+    `${keyword} 또는 유사 명칭으로 실제 플랫폼처럼 접근`,
+    "텔레그램·카카오톡·네이버밴드·인스타·쓰레드 등에서 허위 수익 인증과 투자 권유 반복",
     "초기에는 소액 수익 또는 출금 가능 화면을 보여준 뒤 고액 입금 유도",
     "출금 신청 후 세금·보증금·인증비·계정 해제비 명목의 추가 입금 요구",
     "담당자 계정 삭제, 대화방 폐쇄, 사이트 접속 차단 등 증거 소멸 정황",
@@ -484,7 +484,7 @@ function createConfirmedSignals(caseName) {
 function createScamMethodItems(caseName) {
   const keyword = seoCaseKeyword(caseName);
   return [
-    `${keyword} 명칭을 사용해 정상 투자자문 또는 리딩 서비스처럼 신뢰를 형성합니다.`,
+    `${keyword} 명칭을 사용해 정상 업체 또는 플랫폼처럼 신뢰를 형성합니다.`,
     "단체 대화방에서 바람잡이 계정이 수익 인증, 출금 인증, 후기 메시지를 반복합니다.",
     "소액 입금 후 화면상 수익을 보여주고 VIP 등급, 단계별 프로젝트, 단기 고수익 명목으로 추가 입금을 요구합니다.",
     "출금 단계에서 세금, 보증금, 인증비, 계정 해제비를 먼저 내야 한다고 안내합니다.",
@@ -549,7 +549,7 @@ function buildLawVictimCases(landing, group, caseData) {
   const examples = {
     la: [
       `피해자는 카카오톡 오픈채팅방에서 수익 인증 화면을 본 뒤 1차로 420만원을 입금했고, 출금 단계에서 세금 680만원을 추가 요구받았습니다. 입금증, 수취 계좌, 담당자 프로필을 보존해 형사고소 자료로 정리했습니다.`,
-      `리딩방 운영자가 ${base} 담당자라며 별도 앱 설치를 안내했고, 앱 화면에는 수익금이 표시됐지만 실제 출금은 막혔습니다. 피해자는 로그인 화면과 출금 거부 문구를 녹화해 증거로 남겼습니다.`,
+      `${base} 담당자라며 별도 앱 설치를 안내한 계정이 있었고, 앱 화면에는 수익금이 표시됐지만 실제 출금은 막혔습니다. 피해자는 로그인 화면과 출금 거부 문구를 녹화해 증거로 남겼습니다.`,
       `환불팀이라는 계정이 다시 접근해 복구 수수료를 요구한 사례에서는 기존 대화방, 새 담당자 계정, 추가 입금 계좌를 함께 비교해 2차 피해 정황을 확인했습니다.`,
     ],
     lb: [
@@ -563,7 +563,7 @@ function buildLawVictimCases(landing, group, caseData) {
       `피해자가 여럿 모인 사건에서는 동일 URL, 동일 계좌, 같은 출금 제한 문구가 확인되어 합의 협상과 엄벌 탄원 준비가 함께 진행됐습니다.`,
     ],
     ld: [
-      `AI 브리핑 기준으로 보면 첫 접촉은 무료 리딩방, 두 번째 단계는 수익 인증, 세 번째 단계는 출금 제한과 추가 입금 요구로 이어진 패턴이 확인됐습니다.`,
+      `AI 브리핑 기준으로 보면 첫 접촉은 온라인 채팅방, 두 번째 단계는 소액 지급 또는 화면 수익 노출, 세 번째 단계는 출금 제한과 추가 입금 요구로 이어진 패턴이 확인됐습니다.`,
       `피해자는 "다음 주 환불" 안내를 반복해서 받았지만 실제로는 계좌 변경과 담당자 교체가 이어졌습니다. 이 흐름은 단순 지연보다 사기 의심 신호로 분류됩니다.`,
       `앱 내 잔고와 실제 금융기관 거래내역이 일치하지 않은 사례에서는 조작 화면 가능성을 전제로 원본 캡처와 송금 내역을 분리해 정리했습니다.`,
     ],
@@ -889,9 +889,9 @@ function fallbackBody(base, key) {
 
 function fallbackVictimCases(key, brand = "담당자") {
   const common = [
-    `직장인 피해자가 카카오톡 오픈채팅방에서 수익 인증 화면을 보고 1차로 320만원을 보낸 뒤, 출금 직전 세금과 보증금 명목으로 추가 780만원을 요구받은 사례`,
-    `자영업자가 유튜브 광고를 통해 가입한 뒤 ${brand} 관계자를 사칭한 담당자에게 안내를 받았고, 출금 신청 당일 계좌와 담당자 계정이 동시에 바뀐 사례`,
-    `소액 수익금 18만원을 먼저 지급받아 안심한 뒤 투자금을 키웠으나, 환불 요청 후 피해금 회복팀이라는 계정이 다시 접근해 선입금 수수료를 요구한 2차 피해 사례`,
+    `피해자가 온라인 채팅방에서 ${brand} 관계자를 사칭한 담당자로부터 안내를 받고 1차로 320만원을 보낸 뒤, 출금 직전 세금과 보증금 명목으로 추가 780만원을 요구받은 사례`,
+    `${brand} 담당자라는 계정이 별도 사이트 또는 앱 가입을 유도했고, 출금 신청 당일 계좌와 담당자 계정이 동시에 바뀐 사례`,
+    `소액을 먼저 지급받아 안심한 뒤 입금액을 늘렸으나, 환불 요청 후 피해금 회복팀이라는 계정이 다시 접근해 선입금 수수료를 요구한 2차 피해 사례`,
     `입금증, 계좌번호, 대화 캡처는 남아 있었지만 사이트가 폐쇄되어 상담 접수 단계에서 브라우저 기록과 문자 알림까지 다시 정리한 사례`,
     `여러 피해자가 같은 수취 계좌와 유사 URL을 확인해 형사고소 자료와 민사 가압류 가능성을 함께 검토한 사례`,
   ];
@@ -1010,7 +1010,7 @@ function pageTemplate(d) {
       <p class="eyebrow">${d.tone}</p>
       <h1>${d.h1}</h1>
       ${d.ogThumbnail}
-      <p class="summary">${d.summary}</p>
+      ${d.aeoSection || ""}
       ${d.receiptBadge || ""}
       ${d.heroCta || ""}
     </section>
@@ -1073,7 +1073,7 @@ function secondaryCaseKeyword(name) {
 function groupPageTitle(name, key) {
   const base = seoCaseKeyword(name);
   const suffixes = {
-    a: "사칭 피해 대응 | 리딩방 투자사기 형사고소·피해금 회수",
+    a: "사칭 피해 대응 | 투자 피해 대응 형사고소·피해금 회수",
     b: "사칭 피해 대응 | 민사소송·가압류·손해배상",
     c: "사칭 피해 사례 | 회수 가능성·대응 흐름",
     d: "사기 수법 분석 | 피해 대응 방법·증거 보존",
@@ -1090,7 +1090,7 @@ function groupPageTitle(name, key) {
 function groupPageH1(name, key) {
   const base = seoCaseKeyword(name);
   const suffixes = {
-    a: "사칭, 리딩방 투자 피해 대응",
+    a: "사칭, 투자 피해 대응",
     b: "사칭, 피해금 회수와 민사 대응",
     c: "사칭, 피해 사례와 회수 가능성",
     d: "사칭, 수법과 대응 방법",

@@ -265,9 +265,8 @@ a{color:inherit;text-decoration:none}
 }
 
 .hero-cta{
-  width:fit-content;
-  max-width:min(680px,calc(100% - 40px));
-  margin:22px auto 0;
+  width:min(1180px,calc(100% - 40px));
+  margin:22px auto 28px;
   padding:18px 22px;
   border:1px solid color-mix(in srgb, var(--accent) 34%, var(--line));
   border-radius:var(--radius);
@@ -277,9 +276,9 @@ a{color:inherit;text-decoration:none}
 }
 
 .domain-a .hero-cta{
-  background:rgba(255,255,255,.1);
-  border-color:rgba(255,255,255,.18);
-  color:#fff;
+  background:rgba(255,255,255,.92);
+  border-color:color-mix(in srgb, var(--accent) 34%, var(--line));
+  color:var(--text);
 }
 
 .hero-cta p{
@@ -748,6 +747,11 @@ button{
   padding:28px;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, #111827), #0f172a 64%, #101018);
+}
+
+.hero .aeo-summary{
+  margin-top:24px;
+  margin-bottom:0;
 }
 
 .aeo-summary blockquote{
