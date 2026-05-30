@@ -1199,8 +1199,13 @@ function secondaryCaseKeyword(name) {
   return /사칭|피해/.test(tail) ? `${tail} 피해 대응` : `${tail} 사칭 피해 대응`;
 }
 
+function stripTrailingFraudWords(base) {
+  // Remove trailing 사칭·사기 to prevent duplication when suffix also starts with these words
+  return base.replace(/\s*(사칭\s*사기|사칭|사기)\s*$/, "").trim() || base;
+}
+
 function groupPageTitle(name, key) {
-  const base = seoCaseKeyword(name);
+  const base = stripTrailingFraudWords(seoCaseKeyword(name));
   const suffixes = {
     a: "사칭 피해 대응 | 투자 피해 대응 형사고소·피해금 회수",
     b: "사칭 피해 대응 | 민사소송·가압류·손해배상",
@@ -1217,7 +1222,7 @@ function groupPageTitle(name, key) {
 }
 
 function groupPageH1(name, key) {
-  const base = seoCaseKeyword(name);
+  const base = stripTrailingFraudWords(seoCaseKeyword(name));
   const suffixes = {
     a: "사칭, 투자 피해 대응",
     b: "사칭, 피해금 회수와 민사 대응",
