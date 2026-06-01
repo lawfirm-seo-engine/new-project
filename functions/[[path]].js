@@ -241,8 +241,8 @@ function renderLanding(caseData, group, origin) {
   const pageH1 = groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const OLD_URL_CANONICAL = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-  const isNoSuffixSlug = url.host === "new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
-  const oldSuffixOverride = url.host === "new-project-9o2.pages.dev" && OLD_URL_CANONICAL[caseData.slug];
+  const isNoSuffixSlug = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
+  const oldSuffixOverride = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_CANONICAL[caseData.slug];
   const urlSuffix = isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.webp`;
