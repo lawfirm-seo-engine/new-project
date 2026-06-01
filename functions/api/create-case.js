@@ -165,14 +165,10 @@ async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
   if (!env.CASES) return;
   const idxRaw = await env.CASES.get("cases:index");
   if (!idxRaw) return;
-  const index = JSON.parse(idxRaw);
+  const index = JSON.parse(idxRaw).filter((e) => e.slug);
 
-  const full = [];
-  for (const entry of index) {
-    if (!entry.slug) continue;
-    const raw = await env.CASES.get(`case:${entry.slug}`);
-    full.push(raw ? JSON.parse(raw) : entry);
-  }
+  const raws = await Promise.all(index.map((e) => env.CASES.get(`case:${e.slug}`)));
+  const full = index.map((e, i) => { try { return raws[i] ? JSON.parse(raws[i]) : e; } catch { return e; } });
   full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
 
   const filePath = "data/cases.json";
