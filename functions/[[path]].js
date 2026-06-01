@@ -3,7 +3,7 @@
 
 const GROUPS = {
   "new-project-9o2.pages.dev": {
-    key: "a", pathPrefix: "prosecute", bodyClass: "domain-a",
+    key: "a", pathPrefix: "prosecute", urlSlugSuffix: "prosecute", bodyClass: "domain-a",
     siteName: "피해금 추적 법률센터", shortName: "형사고소 센터",
     intent: "형사고소 · 법적제재 · 형사합의 · 회수", tone: "긴급 대응",
     ctaTitle: "형사고소 가능성 확인",
@@ -14,7 +14,7 @@ const GROUPS = {
     siteUrl: "https://new-project-9o2.pages.dev",
   },
   "new-project-b.pages.dev": {
-    key: "b", pathPrefix: "civil", bodyClass: "domain-b",
+    key: "b", pathPrefix: "civil", urlSlugSuffix: "civil", bodyClass: "domain-b",
     siteName: "민사 회수 전략실", shortName: "민사 회수",
     intent: "민사소송 · 가압류 · 손해배상 · 부당이득반환", tone: "회수 전략",
     ctaTitle: "민사 회수 경로 검토",
@@ -25,7 +25,7 @@ const GROUPS = {
     siteUrl: "https://new-project-b.pages.dev",
   },
   "new-project-c.pages.dev": {
-    key: "c", pathPrefix: "success", bodyClass: "domain-c",
+    key: "c", pathPrefix: "success", urlSlugSuffix: "success", bodyClass: "domain-c",
     siteName: "피해 회수 성공사례", shortName: "성공사례",
     intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수", tone: "결과 중심",
     ctaTitle: "유사 성공사례 비교",
@@ -36,7 +36,7 @@ const GROUPS = {
     siteUrl: "https://new-project-c.pages.dev",
   },
   "new-project-d.pages.dev": {
-    key: "d", pathPrefix: "briefing", bodyClass: "domain-d",
+    key: "d", pathPrefix: "briefing", urlSlugSuffix: "briefing", bodyClass: "domain-d",
     siteName: "피해 사건 정보", shortName: "사건 정보",
     intent: "사건 개요 · 대응 방법 · 정보 요약", tone: "정보 요약",
     ctaTitle: "사건 구조 확인",
@@ -47,7 +47,7 @@ const GROUPS = {
     siteUrl: "https://new-project-d.pages.dev",
   },
   "new-project-e.pages.dev": {
-    key: "e", pathPrefix: "case", bodyClass: "domain-e",
+    key: "e", pathPrefix: "case", urlSlugSuffix: "case", bodyClass: "domain-e",
     siteName: "사기피해 통합 허브", shortName: "전체 허브",
     intent: "전체 사건 허브 · 유형별 연결 · 관련 사건", tone: "통합 탐색",
     ctaTitle: "유형별 대응 보기",
@@ -59,7 +59,7 @@ const GROUPS = {
   },
   // ── law-* 도메인 ────────────────────────────────────────────────────────────
   "law-a.pages.dev": {
-    key: "a", pathPrefix: "prosecute", bodyClass: "domain-a",
+    key: "a", pathPrefix: "prosecute", urlSlugSuffix: "legal-action", bodyClass: "domain-a",
     landingKey: "la",
     siteName: "금융피해 대응센터", shortName: "금융피해 대응센터",
     intent: "형사고소 · 법적제재 · 형사합의 · 회수", tone: "긴급 대응",
@@ -71,7 +71,7 @@ const GROUPS = {
     siteUrl: "https://law-a.pages.dev",
   },
   "law-b.pages.dev": {
-    key: "b", pathPrefix: "civil", bodyClass: "domain-b",
+    key: "b", pathPrefix: "civil", urlSlugSuffix: "recovery", bodyClass: "domain-b",
     landingKey: "lb",
     siteName: "피해금 회수 전략센터", shortName: "피해금 회수 전략센터",
     intent: "민사소송 · 가압류 · 손해배상 · 부당이득반환", tone: "회수 전략",
@@ -83,7 +83,7 @@ const GROUPS = {
     siteUrl: "https://law-b.pages.dev",
   },
   "law-c.pages.dev": {
-    key: "c", pathPrefix: "success", bodyClass: "domain-c",
+    key: "c", pathPrefix: "success", urlSlugSuffix: "solution", bodyClass: "domain-c",
     landingKey: "lc",
     siteName: "실제 회수 사례 아카이브", shortName: "실제 회수 사례 아카이브",
     intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수", tone: "결과 중심",
@@ -95,7 +95,7 @@ const GROUPS = {
     siteUrl: "https://law-c.pages.dev",
   },
   "law-d.pages.dev": {
-    key: "d", pathPrefix: "briefing", bodyClass: "domain-d",
+    key: "d", pathPrefix: "briefing", urlSlugSuffix: "report", bodyClass: "domain-d",
     landingKey: "ld",
     siteName: "피해 구조 브리핑", shortName: "피해 구조 브리핑",
     intent: "사건 개요 · 대응 방법 · 정보 요약", tone: "정보 요약",
@@ -107,7 +107,7 @@ const GROUPS = {
     siteUrl: "https://law-d.pages.dev",
   },
   "law-e.pages.dev": {
-    key: "e", pathPrefix: "case", bodyClass: "domain-e",
+    key: "e", pathPrefix: "case", urlSlugSuffix: "incident", bodyClass: "domain-e",
     landingKey: "le",
     siteName: "금융피해 통합 허브", shortName: "금융피해 통합 허브",
     intent: "전체 사건 허브 · 유형별 연결 · 관련 사건", tone: "통합 탐색",
@@ -155,13 +155,36 @@ export async function onRequest(context) {
   const group = GROUPS[url.host];
   if (!group) return next();
 
-  // /[pathPrefix]/[slug]/ 형태의 랜딩 페이지만 처리
+  // /[pathPrefix]/[slug]-[suffix]/ 형태의 랜딩 페이지만 처리
   const parts = pathname.replace(/^\/|\/$/g, "").split("/");
   if (parts.length !== 2 || parts[0] !== group.pathPrefix || !parts[1]) {
     return next();
   }
 
-  const slug = decodeURIComponent(parts[1]);
+  const urlSlug = decodeURIComponent(parts[1]);
+  const suffix = group.urlSlugSuffix;
+
+  // 예외 슬러그: new-project-9o2의 3개 URL은 suffix 없이 그대로 사용
+  const NO_SUFFIX_SLUGS = [
+    "soiraeb-sagi-syopingmor",
+    "grucompany-sagi-syopingmor",
+    "geuruaenkeompeoni-sagi-syopingmor",
+  ];
+  const isException = url.host === "new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS.includes(urlSlug);
+
+  // suffix가 있는 경우 URL에서 suffix를 제거해 실제 KV 조회 슬러그를 얻음
+  let slug;
+  if (isException) {
+    slug = urlSlug;
+  } else if (suffix && urlSlug.endsWith(`-${suffix}`)) {
+    slug = urlSlug.slice(0, -(suffix.length + 1));
+  } else if (suffix && !urlSlug.endsWith(`-${suffix}`)) {
+    // suffix 없는 URL은 suffix 있는 URL로 301 리디렉션
+    const redirectUrl = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(urlSlug)}-${suffix}/`;
+    return new Response(null, { status: 301, headers: { Location: redirectUrl } });
+  } else {
+    slug = urlSlug;
+  }
 
   // 1순위: KV
   // 2순위: GitHub (env vars 있을 때)
@@ -203,7 +226,10 @@ function renderLanding(caseData, group, origin) {
   const rawCaseName = caseData.caseName || "";
   const pageTitle = groupPageTitle(rawCaseName, lk);
   const pageH1 = groupPageH1(rawCaseName, lk);
-  const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}/`;
+  const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+  const isExceptionSlug = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
+  const urlSuffix = (group.urlSlugSuffix && !isExceptionSlug) ? `-${group.urlSlugSuffix}` : "";
+  const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.webp`;
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = caseData.updatedAt || publishedDate;
@@ -425,7 +451,10 @@ function renderLanding(caseData, group, origin) {
 function createFallbackLanding(caseData, group, key) {
   const caseName = caseData.caseName || "";
   const base = primaryCaseKeyword(caseName);
-  const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}/`;
+  const NO_SUFFIX_SLUGS_FB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+  const isExcept = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_FB.includes(caseData.slug);
+  const fbUrlSuffix = (group.urlSlugSuffix && !isExcept) ? `-${group.urlSlugSuffix}` : "";
+  const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${fbUrlSuffix}/`;
   const descriptions = {
     a: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 증거 상태와 사건 구조 기준으로 정리합니다.",
     b: "민사소송, 가압류, 손해배상, 부당이득반환 절차와 회수 가능성을 사건별로 정리합니다.",

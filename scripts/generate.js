@@ -34,6 +34,7 @@ const groups = [
     template: "group-a.html",
     siteUrl: "https://new-project-9o2.pages.dev",
     pathPrefix: "prosecute",
+    urlSlugSuffix: "prosecute",
     bodyClass: "domain-a",
     siteName: "피해금 추적 법률센터",
     shortName: "형사고소 센터",
@@ -58,6 +59,7 @@ const groups = [
     template: "group-b.html",
     siteUrl: "https://new-project-b.pages.dev",
     pathPrefix: "civil",
+    urlSlugSuffix: "civil",
     bodyClass: "domain-b",
     siteName: "민사 회수 전략실",
     shortName: "민사 회수",
@@ -82,6 +84,7 @@ const groups = [
     template: "group-c.html",
     siteUrl: "https://new-project-c.pages.dev",
     pathPrefix: "success",
+    urlSlugSuffix: "success",
     bodyClass: "domain-c",
     siteName: "피해 회수 성공사례",
     shortName: "성공사례",
@@ -106,6 +109,7 @@ const groups = [
     template: "group-d.html",
     siteUrl: "https://new-project-d.pages.dev",
     pathPrefix: "briefing",
+    urlSlugSuffix: "briefing",
     bodyClass: "domain-d",
     siteName: "피해 사건 정보",
     shortName: "사건 정보",
@@ -130,6 +134,7 @@ const groups = [
     template: "group-e.html",
     siteUrl: "https://new-project-e.pages.dev",
     pathPrefix: "case",
+    urlSlugSuffix: "case",
     bodyClass: "domain-e",
     siteName: "사기피해 통합 허브",
     shortName: "전체 허브",
@@ -156,6 +161,7 @@ const groups = [
     template: "group-a.html",
     siteUrl: "https://law-a.pages.dev",
     pathPrefix: "prosecute",
+    urlSlugSuffix: "legal-action",
     bodyClass: "domain-a",
     siteName: "금융피해 대응센터",
     shortName: "금융피해 대응센터",
@@ -181,6 +187,7 @@ const groups = [
     template: "group-b.html",
     siteUrl: "https://law-b.pages.dev",
     pathPrefix: "civil",
+    urlSlugSuffix: "recovery",
     bodyClass: "domain-b",
     siteName: "피해금 회수 전략센터",
     shortName: "피해금 회수 전략센터",
@@ -206,6 +213,7 @@ const groups = [
     template: "group-c.html",
     siteUrl: "https://law-c.pages.dev",
     pathPrefix: "success",
+    urlSlugSuffix: "solution",
     bodyClass: "domain-c",
     siteName: "실제 회수 사례 아카이브",
     shortName: "실제 회수 사례 아카이브",
@@ -231,6 +239,7 @@ const groups = [
     template: "group-d.html",
     siteUrl: "https://law-d.pages.dev",
     pathPrefix: "briefing",
+    urlSlugSuffix: "report",
     bodyClass: "domain-d",
     siteName: "피해 구조 브리핑",
     shortName: "피해 구조 브리핑",
@@ -256,6 +265,7 @@ const groups = [
     template: "group-e.html",
     siteUrl: "https://law-e.pages.dev",
     pathPrefix: "case",
+    urlSlugSuffix: "incident",
     bodyClass: "domain-e",
     siteName: "금융피해 통합 허브",
     shortName: "금융피해 통합 허브",
@@ -355,7 +365,10 @@ function createFallbackLanding(caseItem, group) {
   const pageH1 = groupPageH1(caseName, landingKey);
   const dispName = normalizeCaseName(caseName);
   const slug = caseItem.slug;
-  const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
+  const NO_SUFFIX_SLUGS_FB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+  const isExceptFB = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_FB.includes(slug);
+  const fbSlugSuffix = (group.urlSlugSuffix && !isExceptFB) ? `-${group.urlSlugSuffix}` : "";
+  const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}${fbSlugSuffix}/`;
   const description = `${dispName} 관련 ${group.descriptionSuffix}`;
   const faq = makeFallbackFaq(landingKey);
 
@@ -1035,7 +1048,10 @@ function createHubContent(group) {
     .map((item, index) => {
       const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
       const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
-      const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`;
+      const NO_SUFFIX_SLUGS_HUB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+      const isExceptHub = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_HUB.includes(item.slug);
+      const hubSlugSuffix = (group.urlSlugSuffix && !isExceptHub) ? `-${group.urlSlugSuffix}` : "";
+      const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}${hubSlugSuffix}/`;
       return `
         <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}">
           <span class="case-no">${sortedCases.length - index}</span>
@@ -1315,13 +1331,18 @@ for (const group of groups) {
   // Static HTML generation for case pages has been removed (KV architecture).
   // The sitemap still lists all case URLs so Naver can discover them.
 
+  const NO_SUFFIX_SLUGS_SITEMAP = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const urls = [
     { loc: `${group.siteUrl}/`, lastmod: today, priority: "0.3" },
-    ...cases.map((item) => ({
-      loc: `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(item.slug)}/`,
-      lastmod: item.updatedAt || item.createdAt || today,
-      priority: "0.9",
-    })),
+    ...cases.map((item) => {
+      const isExcept = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_SITEMAP.includes(item.slug);
+      const slugSuffix = (group.urlSlugSuffix && !isExcept) ? `-${group.urlSlugSuffix}` : "";
+      return {
+        loc: `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(item.slug)}${slugSuffix}/`,
+        lastmod: item.updatedAt || item.createdAt || today,
+        priority: "0.9",
+      };
+    }),
   ];
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
