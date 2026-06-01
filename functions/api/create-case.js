@@ -161,14 +161,11 @@ export async function onRequestPost(context) {
 }
 
 async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
-  // KV cases:index 전체 읽기 → GitHub 전체 교체 (race condition 없음)
+  // cases:index(메타데이터)만 GitHub에 저장 — landings는 KV 전용
   if (!env.CASES) return;
   const idxRaw = await env.CASES.get("cases:index");
   if (!idxRaw) return;
-  const index = JSON.parse(idxRaw).filter((e) => e.slug);
-
-  const raws = await Promise.all(index.map((e) => env.CASES.get(`case:${e.slug}`)));
-  const full = index.map((e, i) => { try { return raws[i] ? JSON.parse(raws[i]) : e; } catch { return e; } });
+  const full = JSON.parse(idxRaw).filter((e) => e.slug);
   full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
 
   const filePath = "data/cases.json";

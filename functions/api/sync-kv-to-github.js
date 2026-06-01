@@ -32,21 +32,12 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "KV index 가 빈 배열입니다." }, 404);
     }
 
-    // ── 2. 각 케이스 전체 데이터 병렬 읽기 ────────────────────────────────
+    // ── 2. cases:index 엔트리만 사용 (landings 제외 — KV에만 보관)
+    // landings 포함 시 수십 MB로 Worker 메모리 초과. GitHub cases.json은
+    // sitemap/허브 생성용 메타데이터 전용으로 사용.
     let fromIndex = 0;
-
-    const raws = await Promise.all(
-      index.map((entry) => (entry.slug ? env.CASES.get(`case:${entry.slug}`) : Promise.resolve(null)))
-    );
-
-    const full = index.map((entry, i) => {
-      const raw = raws[i];
-      if (raw) {
-        try { return JSON.parse(raw); } catch { fromIndex++; return entry; }
-      }
-      fromIndex++;
-      return entry;
-    }).filter((_, i) => index[i].slug);
+    const full = index.filter((e) => e.slug).map((e) => { fromIndex++; return e; });
+    fromIndex = 0; // index 엔트리만 사용하므로 fromIndex 불필요
 
     // ── 3. createdAt 기준 정렬 ───────────────────────────────────────────────
     full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
