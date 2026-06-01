@@ -110,7 +110,7 @@ export async function onRequestPost(context) {
     const slug = createSlug(baseCaseName(rawName));
     const category = DEFAULT_CATEGORY;
     const duplicateCheck = findDuplicateRisks(caseName, slug, cases);
-    const generated = await createGeneratedData({ caseName, slug, duplicateCheck });
+    const generated = await createGeneratedData({ caseName, slug, duplicateCheck, env });
 
     return json({
       ok: true,
@@ -159,12 +159,12 @@ async function loadCases(env) {
   return raw ? JSON.parse(raw) : [];
 }
 
-async function createGeneratedData({ caseName, slug, duplicateCheck }) {
-  return createRuleBasedData({ caseName, slug, duplicateCheck });
+async function createGeneratedData({ caseName, slug, duplicateCheck, env }) {
+  return createRuleBasedData({ caseName, slug, duplicateCheck, env });
 }
 
 
-function createRuleBasedData({ caseName, slug, duplicateCheck }) {
+async function createRuleBasedData({ caseName, slug, duplicateCheck, env }) {
   const summary = createSummary(caseName);
   const tags = createTags(caseName);
   const reviewNotes = [
@@ -175,15 +175,17 @@ function createRuleBasedData({ caseName, slug, duplicateCheck }) {
         : "중복 위험은 낮습니다.",
     "사건명 검색 의도 기준으로 SEO 원고를 생성했습니다.",
   ];
-  const landings = Object.fromEntries(GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, group })]));
+  const templates = env ? await readTemplates(env) : {};
+  const landings = Object.fromEntries(GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, group, templates })]));
 
   return { source: "rule-based", summary, tags, reviewNotes, landings };
 }
 
-function createLandingData({ caseName, slug, group }) {
+function createLandingData({ caseName, slug, group, templates = {} }) {
   const base = primaryCaseKeyword(caseName);
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
   const title = groupPageTitle(caseName, group.key);
+  const seed = `${slug}-${group.key}`;
   const descByType = {
     a: `형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 증거 상태와 사건 구조 기준으로 정리합니다.`,
     b: `민사소송, 가압류, 손해배상, 부당이득반환 절차와 회수 가능성을 사건별로 정리합니다.`,
@@ -197,7 +199,21 @@ function createLandingData({ caseName, slug, group }) {
     le: `금융사기 사건 허브에서 형사, 민사, 사례, AI 브리핑을 사건별로 연결하고 대응 경로를 통합합니다.`,
   };
   const description = descByType[group.key] || `${group.intent} 관련 피해 구조와 대응 절차를 정리합니다.`;
-  const faq = makeFaq({ caseName, base, group });
+  // template-based variant selection (deterministic per slug+group)
+  const scamIntroItems = templates.scamIntro
+    ? applyTemplate(pickVariant(templates.scamIntro, seed) || [], caseName)
+    : null;
+  const scamMethodItems = templates.scamMethod
+    ? applyTemplate(pickVariant(templates.scamMethod, seed + "m") || [], caseName)
+    : null;
+  const templateVictimCases = templates.scamExample
+    ? applyTemplate(pickVariant(templates.scamExample, seed + "e") || [], caseName)
+    : null;
+
+  const body = reduceBodyDensity(makeBody({ caseName, base, group }), caseName);
+  const victimCases = templateVictimCases?.length > 0 ? templateVictimCases : makeVictimCases({ base, group });
+  const rawFaq = makeFaq({ caseName, base, group });
+  const faq = reduceFaqDensity(rawFaq, caseName);
 
   return {
     title,
@@ -207,11 +223,13 @@ function createLandingData({ caseName, slug, group }) {
     ogDescription: description,
     ogImage: `${group.siteUrl}/og/${slug}.webp`,
     h1: groupPageH1(caseName, group.key),
-    body: makeBody({ caseName, base, group }),
-    victimCases: makeVictimCases({ base, group }),
+    body,
+    victimCases,
     suspiciousCompanies: makeSuspiciousCompanies({ caseName }),
     faq,
     schema: createSchemaData({ title, description, canonical, caseName, faq }),
+    ...(scamIntroItems ? { scamIntroItems } : {}),
+    ...(scamMethodItems ? { scamMethodItems } : {}),
   };
 }
 
@@ -530,6 +548,72 @@ function findDuplicateRisks(caseName, slug, cases) {
 
 function escapeRegex(s) {
   return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// ─── 템플릿 파일 로딩 ─────────────────────────────────────────────────────────
+
+async function readTemplates(env) {
+  const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
+  if (!owner || !repo || !token) return {};
+  const read = async (filename) => {
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/data/${filename}?ref=${branch}`,
+        { headers: githubHeaders(token) },
+      );
+      if (!res.ok) return null;
+      const file = await res.json();
+      const raw = await readFileContent(file, token);
+      return raw ? parseVariants(raw) : null;
+    } catch { return null; }
+  };
+  const [scamIntro, scamMethod, scamExample] = await Promise.all([
+    read("scam-intro.txt"),
+    read("scam-method.txt"),
+    read("scam-example.txt"),
+  ]);
+  return { scamIntro, scamMethod, scamExample };
+}
+
+function parseVariants(raw) {
+  return String(raw).split(/^---\s*$/m)
+    .map((b) => b.trim().split("\n").map((l) => l.trim()).filter(Boolean))
+    .filter((v) => v.length > 0);
+}
+
+function pickVariant(variants, seed) {
+  if (!variants || variants.length === 0) return null;
+  let h = 2166136261 >>> 0;
+  for (const c of String(seed)) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+  return variants[h % variants.length];
+}
+
+function applyTemplate(items, caseName) {
+  const kw = primaryCaseKeyword(caseName) || caseName;
+  return items.map((s) => s.replace(/000/g, kw));
+}
+
+// ─── SEO 키워드 밀도 감소 ──────────────────────────────────────────────────────
+
+function reduceBodyDensity(body, caseName) {
+  const kw = primaryCaseKeyword(caseName);
+  if (!kw) return body;
+  const re = new RegExp(escapeRegex(kw), "g");
+  const subs = ["이 업체", "해당 플랫폼", "위 조직", "이 사기 조직"];
+  let n = 0;
+  return body.map((p) =>
+    p.replace(re, () => (++n <= 1 ? kw : subs[(n - 2) % subs.length])),
+  );
+}
+
+function reduceFaqDensity(faq, caseName) {
+  const names = [caseName, primaryCaseKeyword(caseName)].filter(Boolean);
+  return faq.map((item, i) => {
+    if (i < 3) return item; // 앞 3개 질문은 사건명 유지 (SEO 의도)
+    let q = item.question;
+    names.forEach((n) => { q = q.split(n).join("").replace(/\s+/g, " ").trim(); });
+    return { ...item, question: q };
+  });
 }
 
 const _CHO = ["g","gg","n","d","dd","r","m","b","bb","s","ss","","j","jj","ch","k","t","p","h"];

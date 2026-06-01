@@ -32,6 +32,7 @@
   <div class="top-nav">
     <a class="btn" href="/admin/create.html">+ 새 사건 생성</a>
     <button class="btn sec" onclick="syncKvToGithub()">KV→GitHub 동기화</button>
+    <button class="btn sec" onclick="batchApplyTemplates()">템플릿 일괄 적용</button>
     <a class="btn sec" href="/admin/settings.html">텔레그램 설정</a>
     <a class="btn sec" href="/admin/logout">로그아웃</a>
   </div>
@@ -135,6 +136,22 @@
     } finally {
       btn.disabled = false; btn.textContent = 'KV→GitHub 동기화';
     }
+  }
+
+  async function batchApplyTemplates() {
+    if (!confirm('scam-intro/method/example 템플릿을 전체 사건에 일괄 적용하고\nSEO 키워드 밀도를 감소시킵니다.\n계속하시겠습니까?')) return;
+    const btn = document.querySelector('button.btn.sec[onclick="batchApplyTemplates()"]');
+    btn.disabled = true; btn.textContent = '처리 중...';
+    try {
+      const res = await fetch('/api/batch-apply-templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const data = await res.json();
+      if (data.ok) {
+        alert('완료!\n전체: ' + data.total + '건\nKV 업데이트: ' + data.updatedKV + '건\nGitHub 업데이트: ' + data.githubUpdated + '건' + (data.errors?.length ? '\n오류: ' + data.errors.length + '건' : ''));
+      } else {
+        alert('실패: ' + (data.message || '알 수 없는 오류'));
+      }
+    } catch (e) { alert('오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '템플릿 일괄 적용'; }
   }
 
   function esc(str) {

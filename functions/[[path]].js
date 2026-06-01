@@ -477,9 +477,9 @@ function createLandingContent(landing, group, caseData) {
 
     return [
       createHeroCta(),
-      `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName)}${paragraphs(_introBody)}</section>`,
+      `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName, landing)}${paragraphs(_introBody)}</section>`,
       createAeoOverviewSection(caseData, _contentKey),
-      `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName))}</section>`,
+      `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName, landing))}</section>`,
       `<section class="article-block"><h2>${_keyword} 피해 사례</h2>${list(_victimCases)}</section>`,
       `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
       _authoritySections,
@@ -563,7 +563,11 @@ function createAeoOverviewSection(caseData, key) {
 </section>`;
 }
 
-function createConfirmedSignals(caseName) {
+function createConfirmedSignals(caseName, landing) {
+  // landing.scamIntroItems 있으면 우선 사용 (템플릿 기반), 없으면 fallback
+  if (Array.isArray(landing?.scamIntroItems) && landing.scamIntroItems.length > 0) {
+    return `<div class="confirmed-signals"><h3>확인된 피해 정황</h3>${list(landing.scamIntroItems)}</div>`;
+  }
   const keyword = esc(seoCaseKeyword(caseName));
   const items = [
     `${keyword} 또는 유사 명칭으로 실제 플랫폼처럼 접근`,
@@ -575,7 +579,11 @@ function createConfirmedSignals(caseName) {
   return `<div class="confirmed-signals"><h3>확인된 피해 정황</h3>${list(items)}</div>`;
 }
 
-function createScamMethodItems(caseName) {
+function createScamMethodItems(caseName, landing) {
+  // landing.scamMethodItems 있으면 우선 사용 (템플릿 기반), 없으면 fallback
+  if (Array.isArray(landing?.scamMethodItems) && landing.scamMethodItems.length > 0) {
+    return landing.scamMethodItems;
+  }
   const keyword = seoCaseKeyword(caseName);
   return [
     `${keyword} 명칭을 사용해 정상 업체 또는 플랫폼처럼 신뢰를 형성합니다.`,
