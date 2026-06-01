@@ -514,7 +514,7 @@ function createLandingContent(landing, group, caseData) {
     const _memoSection = caseData.memo
       ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${esc(caseData.memo)}</p></section>`
       : "";
-    const _body = renderBodyForLanding(landing, _contentGroup, caseData);
+    const _body = renderBodyForLanding(landing, _contentGroup, caseData).map((item) => reduceCaseNameText(item, _rawCaseName, false));
     const _victimCases = renderVictimCasesForLanding(landing, _contentGroup, caseData);
     const _faq = renderFaqForLanding(landing, _contentGroup, caseData);
     const _authoritySections = isLawLandingKey(_contentKey) ? createLawAuthoritySections(_contentKey, caseData) : "";
@@ -522,7 +522,7 @@ function createLandingContent(landing, group, caseData) {
     const _methodBody = _body.slice(3, 8);
 
     return [
-      createHeroCta(),
+      createHeroCta(_rawCaseName),
       `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName, landing)}${paragraphs(_introBody)}</section>`,
       createAeoOverviewSection(caseData, _contentKey),
       `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName, landing))}</section>`,
@@ -579,6 +579,18 @@ ${authoritySections}
 }
 
 function createHeroTypingBlock(caseName) {
+  {
+    const keyword = esc(seoCaseKeyword(caseName));
+    const question = keyword ? `${keyword} 피해가 의심되나요?` : "사기 피해가 의심되나요?";
+    return `<div class="hero-typing">
+  <p class="hero-typing-q"><strong>${question}</strong></p>
+  <p class="hero-typing-s">추가 입금을 요구받고 있다면 즉시 중단하세요.</p>
+  <p class="hero-typing-l1">출금 지연, 세금·보증금 요구, 환전 제한은 금융사기에서 반복적으로 나타나는 대표적인 패턴입니다.</p>
+  <p class="hero-typing-l2">금융피해 대응센터 상담을 통해 현재 상황에 맞는 대응 절차를 확인해 보시기 바랍니다.</p>
+</div>
+<script>(function(){var CYCLE=9400;function restart(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.style.animation='none';l2.style.animation='none';void l1.offsetWidth;void l2.offsetWidth;l1.style.animation='';l2.style.animation='';setTimeout(restart,CYCLE);}setTimeout(restart,CYCLE);})();</script>`;
+  }
+
   const keyword = esc(seoCaseKeyword(caseName));
   return `<div class="hero-typing">
   <p class="hero-typing-q"><strong>${keyword} 사칭 피해가 의심되나요?</strong></p>
@@ -602,14 +614,33 @@ function createAeoOverviewSection(caseData, key) {
   };
   const cfg = lawAeo[key];
   const title = cfg ? esc(cfg.t) : `${keyword} 핵심 요약`;
-  const body = cfg ? esc(cfg.b) : withSentenceBreaks(createSeoDescription(caseData.summary || "", caseName, key));
+  const body = cfg ? esc(cfg.b) : withSentenceBreaks(createNeutralAeoSummary(caseName));
   return `<section class="aeo-summary" id="aeo-summary" aria-label="${title}">
   <h2>${title}</h2>
   <blockquote>${body}</blockquote>
 </section>`;
 }
 
+function createNeutralAeoSummary(caseName = "") {
+  const detail = secondaryCaseKeyword(caseName).replace(/\s*피해 대응\s*$/, "").trim();
+  const channel = detail ? `${detail} 관련 ` : "";
+  return `${channel}출금 지연, 추가 입금 요구, 허위 수익 인증, 담당자 연락 두절 정황이 있다면 입금 내역과 대화 기록을 먼저 보존해야 합니다. 상담 전에는 계좌 정보, 사이트 주소, 프로필 캡처를 시간 순서로 정리하는 것이 좋습니다.`;
+}
+
 function createConfirmedSignals(caseName, landing) {
+  {
+    const items = Array.isArray(landing?.scamIntroItems) && landing.scamIntroItems.length > 0
+      ? landing.scamIntroItems.map((item) => reduceCaseNameText(item, caseName, false))
+      : [
+          "해당 명칭 또는 유사 명칭으로 실제 브랜드처럼 접근",
+          "텔레그램·카카오톡·네이버밴드 등에서 허위 수익 인증과 투자 권유 반복",
+          "초기에는 소액 수익 또는 출금 가능 화면을 보여준 뒤 고액 입금 유도",
+          "출금 신청 후 세금·보증금·인증비·계정 해제비 명목의 추가 입금 요구",
+          "담당자 계정 삭제, 대화방 폐쇄, 사이트 접속 차단 등 증거 소멸 정황",
+        ];
+    return `<div class="confirmed-signals"><h3>확인된 피해 정황</h3>${list(items)}</div>`;
+  }
+
   // landing.scamIntroItems 있으면 우선 사용 (템플릿 기반), 없으면 fallback
   if (Array.isArray(landing?.scamIntroItems) && landing.scamIntroItems.length > 0) {
     return `<div class="confirmed-signals"><h3>확인된 피해 정황</h3>${list(landing.scamIntroItems)}</div>`;
@@ -626,6 +657,17 @@ function createConfirmedSignals(caseName, landing) {
 }
 
 function createScamMethodItems(caseName, landing) {
+  if (Array.isArray(landing?.scamMethodItems) && landing.scamMethodItems.length > 0) {
+    return landing.scamMethodItems.map((item) => reduceCaseNameText(item, caseName, false));
+  }
+  return [
+    "유명인·증권사·투자 리딩방 명칭을 사용해 정상 업체 또는 플랫폼처럼 신뢰를 형성합니다.",
+    "단체 대화방에서 바람잡이 계정이 수익 인증, 출금 인증, 후기 메시지를 반복합니다.",
+    "소액 입금 후 화면상 수익을 보여주고 VIP 등급, 단계별 프로젝트, 단기 고수익 명목으로 추가 입금을 요구합니다.",
+    "출금 단계에서 세금, 보증금, 인증비, 계정 해제비를 먼저 내야 한다고 안내합니다.",
+    "피해자가 항의하면 담당자를 바꾸거나 대화방을 닫고, 환불팀·복구팀을 사칭한 2차 연락으로 이어질 수 있습니다.",
+  ];
+
   // landing.scamMethodItems 있으면 우선 사용 (템플릿 기반), 없으면 fallback
   if (Array.isArray(landing?.scamMethodItems) && landing.scamMethodItems.length > 0) {
     return landing.scamMethodItems;
@@ -1259,6 +1301,23 @@ function stripTrailingFraudWords(base) {
 }
 
 function groupPageTitle(name, key) {
+  {
+    const base = seoCaseKeyword(name);
+    const suffixes = {
+      a: "피해 형사고소",
+      b: "피해금 회수 민사소송",
+      c: "피해 사례와 회수 가능성",
+      d: "수법 분석과 대응 방법",
+      e: "피해 사건 정보",
+      la: "피해 법적 대응",
+      lb: "피해금 회수 전략",
+      lc: "실제 회수 가능성",
+      ld: "수법 분석 리포트",
+      le: "피해 대응 가이드",
+    };
+    return joinSeoPhrase(base, suffixes[key] || "피해 형사고소");
+  }
+
   const base = stripTrailingFraudWords(seoCaseKeyword(name));
   const suffixes = {
     a:  "사칭 피해 형사고소",
@@ -1278,6 +1337,19 @@ function groupPageTitle(name, key) {
 function groupPageH1(name, key) {
   // H1 = title without "| 대온 법률사무소" — share suffix map with groupPageTitle
   return groupPageTitle(name, key);
+}
+
+function joinSeoPhrase(base = "", suffix = "") {
+  const left = String(base || "").trim();
+  let right = String(suffix || "").trim();
+  if (!left) return right;
+  ["사칭", "사기", "피해", "대응"].forEach((word) => {
+    const duplicate = `${word} ${word}`;
+    while (`${left} ${right}`.includes(duplicate)) {
+      right = right.replace(new RegExp(`^${word}\\s+`), "");
+    }
+  });
+  return `${left} ${right}`.replace(/\s+/g, " ").trim();
 }
 
 function seoCaseKeyword(name) {
@@ -1301,7 +1373,7 @@ function breadcrumbLabel(key) {
 }
 
 function createHtmlBreadcrumb(group, caseName) {
-  const current = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
+  const current = "긴급 대응";
   return `<nav class="breadcrumb" aria-label="breadcrumb">
     <a href="${group.siteUrl}/">홈</a>
     <strong>${esc(current)}</strong>
@@ -1435,7 +1507,27 @@ function reduceCaseNameText(value, caseName, keepFirst = false) {
   return text.replace(/\s{2,}/g, " ").trim();
 }
 
-function createHeroCta() {
+function createHeroCta(caseName = "") {
+  return `<div class="hero-cta">
+    <p class="hero-cta-lead">입금 전 자료를 먼저 확인하세요.</p>
+    <div>
+      <a href="#consult" class="hero-cta-primary">상담<br>접수하기</a>
+      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증<br>대화 캡처 보내기</a>
+      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 문의<br>02-6952-3695</a>
+    </div>
+  </div>`;
+
+  const keyword = esc(seoCaseKeyword(caseName));
+  const lead = keyword ? `${keyword} 피해가 의심되나요?` : "사기 피해가 의심되나요?";
+  return `<div class="hero-cta">
+    <p class="hero-cta-lead">${lead}</p>
+    <div>
+      <a href="#consult" class="hero-cta-primary">상담<br>접수하기</a>
+      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증<br>대화 캡처 보내기</a>
+      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 문의<br>02-6952-3695</a>
+    </div>
+  </div>`;
+
   return `<div class="hero-cta">
     <p class="hero-cta-lead">출금 지연, 추가 입금 요구, 대화방 삭제 정황이 있다면 본문을 읽기 전에 현재 자료부터 점검하세요.</p>
     <div>
@@ -1549,7 +1641,8 @@ function createLiveReceiptRows(caseData) {
 function caseNameVariants(caseName = "") {
   const normalized = normalizeCaseName(caseName);
   const base = baseCaseName(caseName);
-  return [...new Set([caseName, normalized, base].map((v) => String(v || "").trim()).filter((v) => v.length > 1))];
+  const primary = primaryCaseKeyword(caseName);
+  return [...new Set([caseName, normalized, base, primary].map((v) => String(v || "").trim()).filter((v) => v.length > 1))];
 }
 
 function cleanFaqQuestion(question, names, keepName) {
