@@ -1040,14 +1040,17 @@ function createHubFloatingWidgets(group) {
 }
 
 function createHubContent(group) {
-  const sortedCases = [...cases].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  // caseNoMap: slug → 1-based insertion order (position in original cases.json array)
+  const caseNoMap = new Map(cases.map((c, i) => [c.slug, i + 1]));
+  // Sort by insertion order descending: newest-added first (No.324 → No.1)
+  const sortedCases = [...cases].reverse();
   const totalReports = cases.reduce((sum, c) => sum + (c.reports || 0), 0);
   const todayCases   = cases.filter((c) => c.createdAt === today).length;
   const todayReports = cases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
   const suffix = HUB_SUFFIX[group.key] || "";
 
   const rows = sortedCases
-    .map((item, index) => {
+    .map((item) => {
       const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
       const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
       const NO_SUFFIX_SLUGS_HUB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
@@ -1058,7 +1061,7 @@ function createHubContent(group) {
       const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}${hubSlugSuffix}/`;
       return `
         <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}">
-          <span class="case-no">${sortedCases.length - index}</span>
+          <span class="case-no">${caseNoMap.get(item.slug) ?? ""}</span>
           <span class="case-title-wrap">
             <strong class="case-title">${displayTitle}</strong>
             ${item.createdAt === today ? '<em class="today-badge">TODAY</em>' : ""}
@@ -1095,11 +1098,13 @@ function createHubContent(group) {
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
       if(!d||!d.ok||!Array.isArray(d.cases))return;
-      var all=d.cases.slice().sort(function(a,b){return(b.createdAt||'').localeCompare(a.createdAt||'');});
+      var orig=d.cases;
+      var noMap={};orig.forEach(function(c,i){noMap[c.slug]=i+1;});
+      var all=orig.slice().reverse();
       var existing=new Set([].map.call(document.querySelectorAll('.case-row[data-slug]'),function(el){return el.dataset.slug;}));
       var newItems=all.filter(function(c){return!existing.has(c.slug);});
       if(!newItems.length)return;
-      var total=all.length;
+      var total=orig.length;
       var hdr=document.querySelector('.case-table-header');
       if(!hdr)return;
       for(var i=newItems.length-1;i>=0;i--){
@@ -1109,7 +1114,7 @@ function createHubContent(group) {
         var a=document.createElement('a');
         a.href='/'+PREFIX+'/'+encodeURIComponent(item.slug)+'/';
         a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;
-        a.innerHTML='<span class="case-no">'+(total-i)+'</span>'
+        a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
           +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
           +'<span class="case-status">'+esc(getStatus(item.slug))+'</span>'
           +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'

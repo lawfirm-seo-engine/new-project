@@ -1261,18 +1261,18 @@ function stripTrailingFraudWords(base) {
 function groupPageTitle(name, key) {
   const base = stripTrailingFraudWords(seoCaseKeyword(name));
   const suffixes = {
-    a: "사칭 피해 대응 | 투자 피해 대응 형사고소·피해금 회수",
-    b: "사칭 피해 대응 | 민사소송·가압류·손해배상",
-    c: "사칭 피해 사례 | 회수 가능성·대응 흐름",
-    d: "사기 수법 분석 | 피해 대응 방법·증거 보존",
-    e: "사기 피해 허브 | 수법·사례·대응 방법",
-    la: "사칭 피해 대응 | 금융피해 형사고소·계좌 추적",
-    lb: "피해금 회수 전략 | 가압류·부당이득반환",
-    lc: "실제 회수 사례 | 금융사기 피해 대응",
-    ld: "사기 수법 분석 | AI 금융사기 브리핑",
-    le: "금융사기 피해 허브 | 수법·사례·대응 방법",
+    a:  "사칭 피해 형사고소",
+    b:  "사칭 피해 합의·민사소송",
+    c:  "사칭 피해 대응 사례",
+    d:  "사기 수법 분석",
+    e:  "사기 사건 정보",
+    la: "금융사기 법적 대응",
+    lb: "피해금 회수 방법",
+    lc: "금융사기 해결 사례",
+    ld: "금융사기 분석 리포트",
+    le: "금융사기 사건 가이드",
   };
-  return `${base} ${suffixes[key] || "사칭 피해 대응"}`;
+  return `${base} ${suffixes[key] || "사칭 피해 형사고소"}`;
 }
 
 function groupPageH1(name, key) {
@@ -1449,19 +1449,11 @@ function reduceCaseNameText(value, caseName, keepFirst = false) {
 
 function createHeroCta() {
   return `<div class="hero-cta">
-    <p>출금 지연, 추가 입금 요구, 대화방 삭제 정황이 있다면 본문을 읽기 전에 현재 자료부터 점검하세요.</p>
+    <p class="hero-cta-lead">출금 지연, 추가 입금 요구, 대화방 삭제 정황이 있다면 본문을 읽기 전에 현재 자료부터 점검하세요.</p>
     <div>
-      <a href="#consult" class="hero-cta-primary">상담 접수하기</a>
-      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증·대화 캡처 보내기</a>
-      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 02-6952-3695 전화문의</a>
-    </div>
-  </div>`;
-
-  return `<div class="hero-cta">
-    <p>출금 지연, 추가 입금 요구, 대화방 삭제 정황이 있다면 지금 자료부터 확인하세요.</p>
-    <div>
-      <a href="#consult" class="hero-cta-primary">상담 접수하기</a>
-      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증·대화 캡처 보내기</a>
+      <a href="#consult" class="hero-cta-primary">상담/<br>접수하기</a>
+      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증/<br>대화 캡처 보내기</a>
+      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 문의/<br>02-6952-3695</a>
     </div>
   </div>`;
 }
