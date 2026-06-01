@@ -61,13 +61,13 @@ export async function onRequestPost(context) {
       idx.push(buildIndexEntry(newCase));
       await env.CASES.put("cases:index", JSON.stringify(idx));
 
-      // GitHub에도 동기화 — 모든 law-* 프로젝트가 최신 사건을 볼 수 있도록
+      // GitHub에도 동기화 — KV 전체를 덮어쓰는 방식으로 race condition 방지
       const repoOwner = env.GITHUB_REPO_OWNER;
       const repoName = env.GITHUB_REPO_NAME;
       const branch = env.GITHUB_BRANCH || "main";
       const token = env.GITHUB_TOKEN;
       if (repoOwner && repoName && token) {
-        context.waitUntil?.(addCaseToGitHub(newCase, repoOwner, repoName, branch, token).catch(() => {}));
+        context.waitUntil?.(syncAllCasesToGitHub(env, repoOwner, repoName, branch, token).catch(() => {}));
       }
 
       const indexNowKey = env.INDEXNOW_KEY || "6f71f78a3dc940b9a3e1025bf8460d3c";
@@ -160,33 +160,37 @@ export async function onRequestPost(context) {
   }
 }
 
-async function addCaseToGitHub(newCase, owner, repo, branch, token) {
+async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
+  // KV cases:index 전체 읽기 → GitHub 전체 교체 (race condition 없음)
+  if (!env.CASES) return;
+  const idxRaw = await env.CASES.get("cases:index");
+  if (!idxRaw) return;
+  const index = JSON.parse(idxRaw);
+
+  const full = [];
+  for (const entry of index) {
+    if (!entry.slug) continue;
+    const raw = await env.CASES.get(`case:${entry.slug}`);
+    full.push(raw ? JSON.parse(raw) : entry);
+  }
+  full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+
   const filePath = "data/cases.json";
   const fileRes = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
     { headers: githubHeaders(token) }
   );
   if (!fileRes.ok) return;
-
   const fileInfo = await fileRes.json();
-  const currentContent = await readFileContent(fileInfo, token);
-  const cases = currentContent ? JSON.parse(currentContent) : [];
 
-  // 이미 존재하면 추가하지 않음
-  if (cases.some((c) => c.slug === newCase.slug)) return;
-
-  cases.push(newCase);
-  cases.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
-
-  const newContent = JSON.stringify(cases, null, 2);
   await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
     {
       method: "PUT",
       headers: githubHeaders(token),
       body: JSON.stringify({
-        message: `Add case: ${newCase.caseName}`,
-        content: encodeBase64(newContent),
+        message: `sync: KV→GitHub ${full.length} cases`,
+        content: encodeBase64(JSON.stringify(full, null, 2)),
         sha: fileInfo.sha,
         branch,
       }),
@@ -204,31 +208,34 @@ function buildIndexEntry(c) {
 }
 
 async function pingIndexNow(slug, key) {
+  const NO_SUFFIX = new Set(["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"]);
   const groups = [
-    { host: "new-project-9o2.pages.dev", prefix: "prosecute" },
-    { host: "new-project-b.pages.dev", prefix: "civil" },
-    { host: "new-project-c.pages.dev", prefix: "success" },
-    { host: "new-project-d.pages.dev", prefix: "briefing" },
-    { host: "new-project-e.pages.dev", prefix: "case" },
-    { host: "law-a.pages.dev", prefix: "prosecute" },
-    { host: "law-b.pages.dev", prefix: "civil" },
-    { host: "law-c.pages.dev", prefix: "success" },
-    { host: "law-d.pages.dev", prefix: "briefing" },
-    { host: "law-e.pages.dev", prefix: "case" },
+    { host: "new-project-9o2.pages.dev", prefix: "prosecute", suffix: "prosecute" },
+    { host: "new-project-b.pages.dev", prefix: "civil", suffix: "civil" },
+    { host: "new-project-c.pages.dev", prefix: "success", suffix: "success" },
+    { host: "new-project-d.pages.dev", prefix: "briefing", suffix: "briefing" },
+    { host: "new-project-e.pages.dev", prefix: "case", suffix: "case" },
+    { host: "law-a.pages.dev", prefix: "prosecute", suffix: "legal-action" },
+    { host: "law-b.pages.dev", prefix: "civil", suffix: "recovery" },
+    { host: "law-c.pages.dev", prefix: "success", suffix: "solution" },
+    { host: "law-d.pages.dev", prefix: "briefing", suffix: "report" },
+    { host: "law-e.pages.dev", prefix: "case", suffix: "incident" },
   ];
   await Promise.allSettled(
-    groups.map(({ host, prefix }) =>
-      fetch("https://searchadvisor.naver.com/indexnow", {
+    groups.map(({ host, prefix, suffix }) => {
+      const isException = host === "new-project-9o2.pages.dev" && NO_SUFFIX.has(slug);
+      const urlSlug = (suffix && !isException) ? `${slug}-${suffix}` : slug;
+      return fetch("https://searchadvisor.naver.com/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({
           host,
           key,
           keyLocation: `https://${host}/${key}.txt`,
-          urlList: [`https://${host}/${prefix}/${encodeURIComponent(slug)}/`],
+          urlList: [`https://${host}/${prefix}/${encodeURIComponent(urlSlug)}/`],
         }),
-      })
-    )
+      });
+    })
   );
 }
 

@@ -5,11 +5,37 @@ export async function onRequestPost(context) {
     const { slug } = await request.json();
     if (!slug) return json({ ok: false, message: "slug 필수" }, 400);
 
+    let deletedName = slug;
+
+    // KV 우선 삭제
+    if (env.CASES) {
+      const raw = await env.CASES.get(`case:${slug}`);
+      if (!raw) return json({ ok: false, message: "사건을 찾을 수 없습니다." }, 404);
+      deletedName = JSON.parse(raw).caseName || slug;
+
+      await env.CASES.delete(`case:${slug}`);
+      const idxRaw = await env.CASES.get("cases:index");
+      if (idxRaw) {
+        const indexArr = JSON.parse(idxRaw).filter((e) => e.slug !== slug);
+        await env.CASES.put("cases:index", JSON.stringify(indexArr));
+      }
+
+      // KV 전체를 GitHub에 동기화 (race condition 없음)
+      const { repoOwner, repoName, branch, token } = githubEnv(env);
+      if (repoOwner && repoName && token) {
+        context.waitUntil?.(syncAllCasesToGitHub(env, repoOwner, repoName, branch, token).catch(() => {}));
+      }
+
+      return json({ ok: true, deleted: deletedName });
+    }
+
+    // KV 없는 환경: GitHub 직접 수정
     const { repoOwner, repoName, branch, token } = githubEnv(env);
     const filePath = "data/cases.json";
-    const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
-
-    const res = await fetch(apiUrl, { headers: githubHeaders(token) });
+    const res = await fetch(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`,
+      { headers: githubHeaders(token) }
+    );
     if (!res.ok) return json({ ok: false, message: "cases.json 로드 실패" }, 500);
 
     const file = await res.json();
@@ -18,7 +44,7 @@ export async function onRequestPost(context) {
     const idx = cases.findIndex((c) => c.slug === slug);
     if (idx === -1) return json({ ok: false, message: "사건을 찾을 수 없습니다." }, 404);
 
-    const deleted = cases[idx].caseName;
+    deletedName = cases[idx].caseName;
     cases.splice(idx, 1);
 
     const updateRes = await fetch(
@@ -40,20 +66,47 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
-    // KV 삭제
-    if (env.CASES) {
-      await env.CASES.delete(`case:${slug}`);
-      const idxRaw = await env.CASES.get("cases:index");
-      if (idxRaw) {
-        const indexArr = JSON.parse(idxRaw).filter((e) => e.slug !== slug);
-        await env.CASES.put("cases:index", JSON.stringify(indexArr));
-      }
-    }
-
-    return json({ ok: true, deleted });
+    return json({ ok: true, deleted: deletedName });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
+  if (!env.CASES) return;
+  const idxRaw = await env.CASES.get("cases:index");
+  if (!idxRaw) return;
+  const index = JSON.parse(idxRaw);
+
+  const full = [];
+  for (const entry of index) {
+    if (!entry.slug) continue;
+    const raw = await env.CASES.get(`case:${entry.slug}`);
+    full.push(raw ? JSON.parse(raw) : entry);
+  }
+  full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+
+  const filePath = "data/cases.json";
+  const fileRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
+    { headers: githubHeaders(token) }
+  );
+  if (!fileRes.ok) return;
+  const fileInfo = await fileRes.json();
+
+  await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+    {
+      method: "PUT",
+      headers: githubHeaders(token),
+      body: JSON.stringify({
+        message: `sync: KV→GitHub ${full.length} cases`,
+        content: encodeBase64(JSON.stringify(full, null, 2)),
+        sha: fileInfo.sha,
+        branch,
+      }),
+    }
+  );
 }
 
 function githubEnv(env) {
