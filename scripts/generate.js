@@ -34,7 +34,7 @@ const groups = [
     template: "group-a.html",
     siteUrl: "https://new-project-9o2.pages.dev",
     pathPrefix: "prosecute",
-    urlSlugSuffix: "prosecute",
+    urlSlugSuffix: "litigation",
     bodyClass: "domain-a",
     siteName: "피해금 추적 법률센터",
     shortName: "형사고소 센터",
@@ -59,7 +59,7 @@ const groups = [
     template: "group-b.html",
     siteUrl: "https://new-project-b.pages.dev",
     pathPrefix: "civil",
-    urlSlugSuffix: "civil",
+    urlSlugSuffix: "settlement",
     bodyClass: "domain-b",
     siteName: "민사 회수 전략실",
     shortName: "민사 회수",
@@ -84,7 +84,7 @@ const groups = [
     template: "group-c.html",
     siteUrl: "https://new-project-c.pages.dev",
     pathPrefix: "success",
-    urlSlugSuffix: "success",
+    urlSlugSuffix: "result",
     bodyClass: "domain-c",
     siteName: "피해 회수 성공사례",
     shortName: "성공사례",
@@ -109,7 +109,7 @@ const groups = [
     template: "group-d.html",
     siteUrl: "https://new-project-d.pages.dev",
     pathPrefix: "briefing",
-    urlSlugSuffix: "briefing",
+    urlSlugSuffix: "review",
     bodyClass: "domain-d",
     siteName: "피해 사건 정보",
     shortName: "사건 정보",
@@ -134,7 +134,7 @@ const groups = [
     template: "group-e.html",
     siteUrl: "https://new-project-e.pages.dev",
     pathPrefix: "case",
-    urlSlugSuffix: "case",
+    urlSlugSuffix: "issue",
     bodyClass: "domain-e",
     siteName: "사기피해 통합 허브",
     shortName: "전체 허브",
@@ -366,8 +366,10 @@ function createFallbackLanding(caseItem, group) {
   const dispName = normalizeCaseName(caseName);
   const slug = caseItem.slug;
   const NO_SUFFIX_SLUGS_FB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
-  const isExceptFB = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_FB.includes(slug);
-  const fbSlugSuffix = (group.urlSlugSuffix && !isExceptFB) ? `-${group.urlSlugSuffix}` : "";
+  const OLD_URL_FB_GEN = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+  const isExceptFB = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_FB.includes(slug);
+  const oldSuffixFBGen = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_FB_GEN[slug];
+  const fbSlugSuffix = isExceptFB ? "" : oldSuffixFBGen ? `-${oldSuffixFBGen}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}${fbSlugSuffix}/`;
   const description = `${dispName} 관련 ${group.descriptionSuffix}`;
   const faq = makeFallbackFaq(landingKey);
@@ -1049,8 +1051,10 @@ function createHubContent(group) {
       const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
       const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
       const NO_SUFFIX_SLUGS_HUB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
-      const isExceptHub = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_HUB.includes(item.slug);
-      const hubSlugSuffix = (group.urlSlugSuffix && !isExceptHub) ? `-${group.urlSlugSuffix}` : "";
+      const OLD_URL_HUB = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+      const isExceptHub = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_HUB.includes(item.slug);
+      const oldSuffixHub = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_HUB[item.slug];
+      const hubSlugSuffix = isExceptHub ? "" : oldSuffixHub ? `-${oldSuffixHub}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
       const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}${hubSlugSuffix}/`;
       return `
         <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}">
@@ -1335,8 +1339,10 @@ for (const group of groups) {
   const urls = [
     { loc: `${group.siteUrl}/`, lastmod: today, priority: "0.3" },
     ...cases.map((item) => {
-      const isExcept = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_SITEMAP.includes(item.slug);
-      const slugSuffix = (group.urlSlugSuffix && !isExcept) ? `-${group.urlSlugSuffix}` : "";
+      const OLD_URL_SITEMAP = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+      const isExcept = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_SITEMAP.includes(item.slug);
+      const oldSuffixSitemap = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_SITEMAP[item.slug];
+      const slugSuffix = isExcept ? "" : oldSuffixSitemap ? `-${oldSuffixSitemap}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
       return {
         loc: `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(item.slug)}${slugSuffix}/`,
         lastmod: item.updatedAt || item.createdAt || today,

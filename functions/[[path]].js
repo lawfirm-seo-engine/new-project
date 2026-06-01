@@ -3,7 +3,7 @@
 
 const GROUPS = {
   "new-project-9o2.pages.dev": {
-    key: "a", pathPrefix: "prosecute", urlSlugSuffix: "prosecute", bodyClass: "domain-a",
+    key: "a", pathPrefix: "prosecute", urlSlugSuffix: "litigation", bodyClass: "domain-a",
     siteName: "피해금 추적 법률센터", shortName: "형사고소 센터",
     intent: "형사고소 · 법적제재 · 형사합의 · 회수", tone: "긴급 대응",
     ctaTitle: "형사고소 가능성 확인",
@@ -14,7 +14,7 @@ const GROUPS = {
     siteUrl: "https://new-project-9o2.pages.dev",
   },
   "new-project-b.pages.dev": {
-    key: "b", pathPrefix: "civil", urlSlugSuffix: "civil", bodyClass: "domain-b",
+    key: "b", pathPrefix: "civil", urlSlugSuffix: "settlement", bodyClass: "domain-b",
     siteName: "민사 회수 전략실", shortName: "민사 회수",
     intent: "민사소송 · 가압류 · 손해배상 · 부당이득반환", tone: "회수 전략",
     ctaTitle: "민사 회수 경로 검토",
@@ -25,7 +25,7 @@ const GROUPS = {
     siteUrl: "https://new-project-b.pages.dev",
   },
   "new-project-c.pages.dev": {
-    key: "c", pathPrefix: "success", urlSlugSuffix: "success", bodyClass: "domain-c",
+    key: "c", pathPrefix: "success", urlSlugSuffix: "result", bodyClass: "domain-c",
     siteName: "피해 회수 성공사례", shortName: "성공사례",
     intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수", tone: "결과 중심",
     ctaTitle: "유사 성공사례 비교",
@@ -36,7 +36,7 @@ const GROUPS = {
     siteUrl: "https://new-project-c.pages.dev",
   },
   "new-project-d.pages.dev": {
-    key: "d", pathPrefix: "briefing", urlSlugSuffix: "briefing", bodyClass: "domain-d",
+    key: "d", pathPrefix: "briefing", urlSlugSuffix: "review", bodyClass: "domain-d",
     siteName: "피해 사건 정보", shortName: "사건 정보",
     intent: "사건 개요 · 대응 방법 · 정보 요약", tone: "정보 요약",
     ctaTitle: "사건 구조 확인",
@@ -47,7 +47,7 @@ const GROUPS = {
     siteUrl: "https://new-project-d.pages.dev",
   },
   "new-project-e.pages.dev": {
-    key: "e", pathPrefix: "case", urlSlugSuffix: "case", bodyClass: "domain-e",
+    key: "e", pathPrefix: "case", urlSlugSuffix: "issue", bodyClass: "domain-e",
     siteName: "사기피해 통합 허브", shortName: "전체 허브",
     intent: "전체 사건 허브 · 유형별 연결 · 관련 사건", tone: "통합 탐색",
     ctaTitle: "유형별 대응 보기",
@@ -164,23 +164,36 @@ export async function onRequest(context) {
   const urlSlug = decodeURIComponent(parts[1]);
   const suffix = group.urlSlugSuffix;
 
-  // 예외 슬러그: new-project-9o2의 3개 URL은 suffix 없이 그대로 사용
+  // new-project-9o2 전용 예외: suffix 없이 원본 URL 그대로 사용
   const NO_SUFFIX_SLUGS = [
     "soiraeb-sagi-syopingmor",
     "grucompany-sagi-syopingmor",
     "geuruaenkeompeoni-sagi-syopingmor",
   ];
-  const isException = url.host === "new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS.includes(urlSlug);
+  // new-project-9o2 전용 예외: 구suffix URL 그대로 유지 (URL slug → KV slug)
+  const OLD_URL_MAP = {
+    "mediacastlekr-com-sagi-tikesyemae-bueob-prosecute": "mediacastlekr-com-sagi-tikesyemae-bueob",
+  };
+  // new-project 도메인의 구suffix 목록 (리디렉션 시 제거 대상)
+  const NEW_PROJECT_OLD_SUFFIXES = ["prosecute", "civil", "success", "briefing", "case"];
 
-  // suffix가 있는 경우 URL에서 suffix를 제거해 실제 KV 조회 슬러그를 얻음
+  const isNoSuffix = url.host === "new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS.includes(urlSlug);
+  const isOldUrlKeep = url.host === "new-project-9o2.pages.dev" && OLD_URL_MAP[urlSlug];
+
   let slug;
-  if (isException) {
+  if (isNoSuffix) {
     slug = urlSlug;
+  } else if (isOldUrlKeep) {
+    slug = OLD_URL_MAP[urlSlug];
   } else if (suffix && urlSlug.endsWith(`-${suffix}`)) {
     slug = urlSlug.slice(0, -(suffix.length + 1));
-  } else if (suffix && !urlSlug.endsWith(`-${suffix}`)) {
-    // suffix 없는 URL은 suffix 있는 URL로 301 리디렉션
-    const redirectUrl = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(urlSlug)}-${suffix}/`;
+  } else if (suffix) {
+    // 구suffix가 붙어있으면 제거 후 신suffix로 301 리디렉션
+    let baseSlug = urlSlug;
+    for (const old of NEW_PROJECT_OLD_SUFFIXES) {
+      if (urlSlug.endsWith(`-${old}`)) { baseSlug = urlSlug.slice(0, -(old.length + 1)); break; }
+    }
+    const redirectUrl = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(baseSlug)}-${suffix}/`;
     return new Response(null, { status: 301, headers: { Location: redirectUrl } });
   } else {
     slug = urlSlug;
@@ -227,8 +240,10 @@ function renderLanding(caseData, group, origin) {
   const pageTitle = groupPageTitle(rawCaseName, lk);
   const pageH1 = groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
-  const isExceptionSlug = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
-  const urlSuffix = (group.urlSlugSuffix && !isExceptionSlug) ? `-${group.urlSlugSuffix}` : "";
+  const OLD_URL_CANONICAL = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+  const isNoSuffixSlug = url.host === "new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
+  const oldSuffixOverride = url.host === "new-project-9o2.pages.dev" && OLD_URL_CANONICAL[caseData.slug];
+  const urlSuffix = isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.webp`;
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
@@ -452,8 +467,10 @@ function createFallbackLanding(caseData, group, key) {
   const caseName = caseData.caseName || "";
   const base = primaryCaseKeyword(caseName);
   const NO_SUFFIX_SLUGS_FB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
-  const isExcept = group.urlSlugSuffix === "prosecute" && NO_SUFFIX_SLUGS_FB.includes(caseData.slug);
-  const fbUrlSuffix = (group.urlSlugSuffix && !isExcept) ? `-${group.urlSlugSuffix}` : "";
+  const OLD_URL_FB = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+  const isNoSuffixFB = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_FB.includes(caseData.slug);
+  const oldSuffixFB = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_FB[caseData.slug];
+  const fbUrlSuffix = isNoSuffixFB ? "" : oldSuffixFB ? `-${oldSuffixFB}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${fbUrlSuffix}/`;
   const descriptions = {
     a: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 증거 상태와 사건 구조 기준으로 정리합니다.",

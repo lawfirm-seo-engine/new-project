@@ -107,7 +107,7 @@ export async function onRequestPost(context) {
     }
 
     const cases = await loadCases(env);
-    const slug = createSlug(baseCaseName(rawName));
+    const slug = createSlug(slugBase(rawName));
     const category = DEFAULT_CATEGORY;
     const duplicateCheck = findDuplicateRisks(caseName, slug, cases);
     const generated = await createGeneratedData({ caseName, slug, duplicateCheck, env });
@@ -632,6 +632,13 @@ function hangulToRoman(text) {
     }
   }
   return out;
+}
+
+function slugBase(name) {
+  const s = String(name || "").trim();
+  // "사기" 앞 부분만 추출 (예: "mediacastlekr.com 사기 티켓예매" → "mediacastlekr.com")
+  const idx = s.search(/\s*사기/);
+  return idx > 0 ? s.slice(0, idx).trim() : baseCaseName(s);
 }
 
 function createSlug(value) {
