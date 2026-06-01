@@ -1276,20 +1276,8 @@ function groupPageTitle(name, key) {
 }
 
 function groupPageH1(name, key) {
-  const base = stripTrailingFraudWords(seoCaseKeyword(name));
-  const suffixes = {
-    a: "사칭, 투자 피해 대응",
-    b: "사칭, 피해금 회수와 민사 대응",
-    c: "사칭, 피해 사례와 회수 가능성",
-    d: "사칭, 수법과 대응 방법",
-    e: "사칭, 피해 대응 종합 안내",
-    la: "사칭, 금융피해 형사 대응",
-    lb: "사칭, 피해금 회수 전략",
-    lc: "사칭, 실제 회수 사례",
-    ld: "사칭, 금융사기 수법 분석",
-    le: "사칭, 금융피해 통합 안내",
-  };
-  return `${base} ${suffixes[key] || "사칭 피해 대응"}`;
+  // H1 = title without "| 대온 법률사무소" — share suffix map with groupPageTitle
+  return groupPageTitle(name, key);
 }
 
 function seoCaseKeyword(name) {
@@ -1451,9 +1439,9 @@ function createHeroCta() {
   return `<div class="hero-cta">
     <p class="hero-cta-lead">출금 지연, 추가 입금 요구, 대화방 삭제 정황이 있다면 본문을 읽기 전에 현재 자료부터 점검하세요.</p>
     <div>
-      <a href="#consult" class="hero-cta-primary">상담/<br>접수하기</a>
-      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증/<br>대화 캡처 보내기</a>
-      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 문의/<br>02-6952-3695</a>
+      <a href="#consult" class="hero-cta-primary">상담<br>접수하기</a>
+      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증<br>대화 캡처 보내기</a>
+      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 문의<br>02-6952-3695</a>
     </div>
   </div>`;
 }
