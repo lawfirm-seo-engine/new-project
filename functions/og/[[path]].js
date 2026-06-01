@@ -1,6 +1,6 @@
 // OG image edge function
-// GET|HEAD /og/[slug].webp → serves og-template.webp with immutable edge cache
-// - Same template for all slugs (no text overlay)
+// GET|HEAD /og/[slug].png → serves og-template.png with immutable edge cache
+// - Same 1200x630 template for all slugs (no text overlay)
 // - Each slug URL is independently cached at Cloudflare CDN
 // - onRequest handles both GET and HEAD so crawlers (Naver Yeti etc.) get
 //   correct Content-Type on HEAD probes instead of falling through to HTML
@@ -15,11 +15,12 @@ export async function onRequest(context) {
 
   const origin = new URL(request.url).origin;
 
-  // Fetch template from static assets binding (webp first, png fallback)
+  // Fetch template from static assets binding. Prefer PNG for crawler thumbnails
+  // because some search surfaces still omit WebP-only OG images.
   let asset;
   try {
-    asset = await env.ASSETS.fetch(new Request(`${origin}/assets/og-template.webp`));
-    if (!asset.ok) asset = await env.ASSETS.fetch(new Request(`${origin}/assets/og-template.png`));
+    asset = await env.ASSETS.fetch(new Request(`${origin}/assets/og-template.png`));
+    if (!asset.ok) asset = await env.ASSETS.fetch(new Request(`${origin}/assets/og-template.webp`));
   } catch {
     asset = null;
   }
@@ -28,7 +29,7 @@ export async function onRequest(context) {
     return new Response(method === "HEAD" ? null : "Not found", { status: 404 });
   }
 
-  const contentType = asset.headers.get("Content-Type") || "image/webp";
+  const contentType = asset.url?.endsWith(".webp") ? "image/webp" : "image/png";
   const body = await asset.arrayBuffer();
 
   return new Response(method === "HEAD" ? null : body, {

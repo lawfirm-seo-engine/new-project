@@ -21,7 +21,7 @@ if (!latest?.slug) {
 const targets = groups.flatMap((group) => [
   `${group.siteUrl}/`,
   `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(latest.slug)}/`,
-  `${group.siteUrl}/og/${encodeURIComponent(latest.slug)}.webp`,
+  `${group.siteUrl}/og/${encodeURIComponent(latest.slug)}.png`,
   `${group.siteUrl}/assets/og-template.png`,
   `${group.siteUrl}/sitemap-index.xml`,
   `${group.siteUrl}/sitemap.xml`,

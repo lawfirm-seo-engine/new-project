@@ -380,7 +380,7 @@ function createFallbackLanding(caseItem, group) {
     canonical,
     ogTitle: pageTitle,
     ogDescription: description,
-    ogImage: `${group.siteUrl}/og/${slug}.webp`,
+    ogImage: `${group.siteUrl}/og/${slug}.png`,
     h1: pageH1,
     body: [
       caseItem.summary || `${dispName} 피해 구조와 대응 방법을 정리한 안내입니다.`,
@@ -710,7 +710,7 @@ function renderBodyForLanding(landing, group, caseItem) {
 function renderVictimCasesForLanding(landing, group, caseItem) {
   const brand = secondaryCaseKeyword(caseItem.caseName || caseItem.name || "").replace(/\s*피해 대응$/, "") || "담당자";
   const original = Array.isArray(landing.victimCases)
-    ? landing.victimCases.filter(Boolean).map((item, index) => reduceCaseNameText(item, caseItem.caseName || caseItem.name, index === 0))
+    ? landing.victimCases.filter(Boolean).map((item) => reduceCaseNameText(item, caseItem.caseName || caseItem.name, false))
     : [];
   const additions = [
     `직장인 피해자가 카카오톡 오픈채팅방에서 수익 인증 화면을 보고 1차로 320만원을 보낸 뒤, 출금 직전 세금과 보증금 명목으로 추가 780만원을 요구받은 사례`,
@@ -805,6 +805,8 @@ function reduceCaseNameText(value, caseName, keepFirst = false) {
   let text = String(value || "");
   const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
   const primary = primaryCaseKeyword(caseName);
+  const replacements = ["해당 피해", "이 사안", "관련 정황", "피해 흐름", "접수 사례", "문제 상황"];
+  let replacementIndex = 0;
   let used = false;
   names.forEach((name) => {
     if (!name) return;
@@ -812,9 +814,22 @@ function reduceCaseNameText(value, caseName, keepFirst = false) {
       text = text.replace(name, primary);
       used = true;
     }
-    text = text.split(name).join(keepFirst ? "해당 사건" : "이 사건");
+    const replacement = keepFirst ? "해당 피해" : replacements[replacementIndex++ % replacements.length];
+    text = text.split(name).join(replacement);
   });
-  return text.replace(/\s{2,}/g, " ").trim();
+  return cleanupRepeatedWords(text);
+}
+
+function cleanupRepeatedWords(value = "") {
+  return String(value || "")
+    .replace(/이\s*사건\s*사건/g, "이 사안")
+    .replace(/해당\s*피해\s*피해/g, "해당 피해")
+    .replace(/사칭\s*사칭/g, "사칭")
+    .replace(/사기\s*사기/g, "사기")
+    .replace(/피해\s*피해/g, "피해")
+    .replace(/대응\s*대응/g, "대응")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function faqHtml(items = [], caseName = "") {
@@ -999,12 +1014,13 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   if (isHub) {
     links.push(`<meta name="classification" content="${escapeHtml(group.intent)}">`);
     links.push(`<meta property="og:updated_time" content="${today}">`);
-    links.push(`<meta property="og:image:type" content="image/webp">`);
-    links.push(`<meta property="og:image:width" content="1536">`);
-    links.push(`<meta property="og:image:height" content="1024">`);
+    links.push(`<meta property="og:image:type" content="image/png">`);
+    links.push(`<meta property="og:image:width" content="1200">`);
+    links.push(`<meta property="og:image:height" content="630">`);
     links.push(`<meta property="og:image:alt" content="${escapeHtml(group.hubTitle)}">`);
     links.push(`<meta name="twitter:card" content="summary_large_image">`);
-    links.push(`<meta name="twitter:image" content="${group.siteUrl}/assets/og-template.webp">`);
+    links.push(`<meta name="twitter:image" content="${group.siteUrl}/assets/og-template.png">`);
+    links.push(`<meta name="twitter:image:alt" content="${escapeHtml(group.hubTitle)}">`);
   } else {
     const publishedDate = caseItem?.createdAt || today;
     const modifiedDate = caseItem?.updatedAt || publishedDate;
@@ -1383,7 +1399,7 @@ for (const group of groups) {
     canonical: `${group.siteUrl}/`,
     ogTitle: escapeHtml(hubTitle),
     ogDescription: escapeHtml(hubDescription),
-    ogImage: `${group.siteUrl}/assets/og-template.webp`,
+    ogImage: `${group.siteUrl}/assets/og-template.png`,
     headExtra: createHeadExtra({ group, isHub: true }),
     schema: JSON.stringify({
       "@context": "https://schema.org",

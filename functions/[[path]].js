@@ -245,7 +245,7 @@ function renderLanding(caseData, group, origin) {
   const oldSuffixOverride = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_CANONICAL[caseData.slug];
   const urlSuffix = isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
-  const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.webp`;
+  const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.png`;
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = caseData.updatedAt || publishedDate;
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
@@ -256,6 +256,9 @@ function renderLanding(caseData, group, origin) {
   const seoDescription = createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
   const articleTags = createArticleTags(rawCaseName, lk);
 
+  const ogImageType = /\.png(?:$|\?)/i.test(ogImage) ? "image/png" : /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/webp";
+  const ogImageWidth = "1200";
+  const ogImageHeight = "630";
   const headExtra = [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
     `<meta name="NaverBot" content="All">`,
@@ -269,9 +272,10 @@ function renderLanding(caseData, group, origin) {
     `<link rel="preload" as="image" href="/assets/og-template.png">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
     `<meta property="og:image:alt" content="${esc(pageTitle)}">`,
-    `<meta property="og:image:type" content="image/webp">`,
-    `<meta property="og:image:width" content="1536">`,
-    `<meta property="og:image:height" content="1024">`,
+    `<meta property="og:image:type" content="${ogImageType}">`,
+    `<meta property="og:image:width" content="${ogImageWidth}">`,
+    `<meta property="og:image:height" content="${ogImageHeight}">`,
+    `<meta name="twitter:image:alt" content="${esc(pageTitle)}">`,
     `<link rel="image_src" href="${esc(ogImage)}">`,
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${esc(pageTitle)}">`,
@@ -329,8 +333,8 @@ function renderLanding(caseData, group, origin) {
         "@id": `${canonical}#primaryimage`,
         url: ogImage,
         contentUrl: ogImage,
-        width: 1536,
-        height: 864,
+        width: Number(ogImageWidth),
+        height: Number(ogImageHeight),
         caption: pageTitle,
         inLanguage: "ko-KR",
         representativeOfPage: true,
@@ -493,7 +497,7 @@ function createFallbackLanding(caseData, group, key) {
     canonical,
     ogTitle: title,
     ogDescription: description,
-    ogImage: `${group.siteUrl}/og/${caseData.slug}.webp`,
+    ogImage: `${group.siteUrl}/og/${caseData.slug}.png`,
     h1: groupPageH1(caseName, key),
     body: fallbackBody(base, key),
     victimCases: fallbackVictimCases(key),
@@ -606,7 +610,7 @@ function createAeoOverviewSection(caseData, key) {
   const caseName = caseData.caseName || "";
   const base = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
   const lawAeo = {
-    la: { t: `${base} 형사고소 핵심 요약`, b: `${base} 피해가 의심되면 추가 입금을 멈추고 입금증, 수취 계좌, 대화 기록, 출금 거부 화면을 보존해야 합니다. 형사고소는 사기죄 구성요건과 계좌 추적 가능성을 함께 검토하는 절차이며, 상담 접수 전 자료를 시간순으로 정리하면 초기 대응이 빨라집니다.` },
+    la: { t: `${base} 형사고소 핵심 요약`, b: `피해가 의심되면 추가 입금을 멈추고 입금증, 수취 계좌, 대화 기록, 출금 거부 화면을 보존해야 합니다. 형사고소는 사기죄 구성요건과 계좌 추적 가능성을 함께 검토하는 절차이며, 상담 접수 전 자료를 시간순으로 정리하면 초기 대응이 빨라집니다.` },
     lb: { t: `${base} 피해금 회수 핵심 요약`, b: `${base} 피해금 회수는 형사고소와 별도로 가압류, 손해배상, 부당이득반환 청구를 검토해야 합니다. 수취 계좌와 상대방 특정 자료가 남아 있을수록 보전처분 가능성을 빠르게 판단할 수 있습니다.` },
     lc: { t: `${base} 회수 사례 핵심 요약`, b: `${base}와 유사한 사건에서 회수 가능성이 높아지는 조건은 입금 직후 자료 보존, 계좌 단서 확보, 동일 피해자 확인, 지급정지 또는 가압류 검토가 빠르게 이어진 경우입니다.` },
     ld: { t: `${base} 피해 구조 요약`, b: `${base} 사건은 접근 채널, 입금 명목, 출금 거부, 추가 입금 요구를 순서대로 정리해야 합니다. 지금 해야 할 행동은 추가 입금 중단, 증거 보존, 신고 접수입니다.` },
@@ -614,7 +618,7 @@ function createAeoOverviewSection(caseData, key) {
   };
   const cfg = lawAeo[key];
   const title = cfg ? esc(cfg.t) : `${keyword} 핵심 요약`;
-  const body = cfg ? esc(cfg.b) : withSentenceBreaks(createNeutralAeoSummary(caseName));
+  const body = cfg ? esc(reduceCaseNameText(cfg.b, caseName, false)) : withSentenceBreaks(createNeutralAeoSummary(caseName));
   return `<section class="aeo-summary" id="aeo-summary" aria-label="${title}">
   <h2>${title}</h2>
   <blockquote>${body}</blockquote>
@@ -999,13 +1003,13 @@ function renderBodyForLanding(landing, group, caseData) {
 
 function renderVictimCasesForLanding(landing, group, caseData) {
   if (isLawLandingKey(group.key)) {
-    return buildLawVictimCases(landing, group, caseData);
+    return buildLawVictimCases(landing, group, caseData).map((item) => reduceCaseNameText(item, caseData.caseName, false));
   }
 
   const base = primaryCaseKeyword(caseData.caseName || "");
   const brand = secondaryCaseKeyword(caseData.caseName || "").replace(/\s*피해 대응$/, "") || "담당자";
   const original = Array.isArray(landing.victimCases)
-    ? landing.victimCases.filter(Boolean).map((item, index) => reduceCaseNameText(item, caseData.caseName, index === 0))
+    ? landing.victimCases.filter(Boolean).map((item) => reduceCaseNameText(item, caseData.caseName, false))
     : [];
   const additions = fallbackVictimCases(group.key, brand);
   return [...original, ...additions].slice(0, 5);
@@ -1495,6 +1499,8 @@ function reduceCaseNameText(value, caseName, keepFirst = false) {
   let text = toStr(value);
   const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
   const primary = primaryCaseKeyword(caseName);
+  const replacements = ["해당 피해", "이 사안", "관련 정황", "피해 흐름", "접수 사례", "문제 상황"];
+  let replacementIndex = 0;
   let used = false;
   names.forEach((name) => {
     if (!name) return;
@@ -1502,9 +1508,22 @@ function reduceCaseNameText(value, caseName, keepFirst = false) {
       text = text.replace(name, primary);
       used = true;
     }
-    text = text.split(name).join(keepFirst ? "해당 사건" : "이 사건");
+    const replacement = keepFirst ? "해당 피해" : replacements[replacementIndex++ % replacements.length];
+    text = text.split(name).join(replacement);
   });
-  return text.replace(/\s{2,}/g, " ").trim();
+  return cleanupRepeatedWords(text);
+}
+
+function cleanupRepeatedWords(value = "") {
+  return String(value || "")
+    .replace(/이\s*사건\s*사건/g, "이 사안")
+    .replace(/해당\s*피해\s*피해/g, "해당 피해")
+    .replace(/사칭\s*사칭/g, "사칭")
+    .replace(/사기\s*사기/g, "사기")
+    .replace(/피해\s*피해/g, "피해")
+    .replace(/대응\s*대응/g, "대응")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function createHeroCta(caseName = "") {
