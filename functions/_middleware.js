@@ -35,6 +35,9 @@ export async function onRequest(context) {
     url.pathname.startsWith("/api/create-case") ||
     url.pathname.startsWith("/api/generate-draft") ||
     url.pathname.startsWith("/api/update-case") ||
+    url.pathname.startsWith("/api/batch-apply-templates") ||
+    url.pathname.startsWith("/api/regenerate-law-landings") ||
+    url.pathname.startsWith("/api/sync-kv-to-github") ||
     url.pathname.startsWith("/api/admin-settings") ||
     url.pathname.startsWith("/api/delete-case") ||
     url.pathname.startsWith("/api/telegram-test") ||

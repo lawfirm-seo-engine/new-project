@@ -13,7 +13,12 @@
     "deploy:c": "npx wrangler pages deploy dist-c --project-name new-project-c",
     "deploy:d": "npx wrangler pages deploy dist-d --project-name new-project-d",
     "deploy:e": "npx wrangler pages deploy dist-e --project-name new-project-e",
-    "deploy": "npm run deploy:a && npm run deploy:b && npm run deploy:c && npm run deploy:d && npm run deploy:e",
+    "deploy:law-a": "npx wrangler pages deploy dist-law-a --project-name law-a",
+    "deploy:law-b": "npx wrangler pages deploy dist-law-b --project-name law-b",
+    "deploy:law-c": "npx wrangler pages deploy dist-law-c --project-name law-c",
+    "deploy:law-d": "npx wrangler pages deploy dist-law-d --project-name law-d",
+    "deploy:law-e": "npx wrangler pages deploy dist-law-e --project-name law-e",
+    "deploy": "npm run deploy:a && npm run deploy:b && npm run deploy:c && npm run deploy:d && npm run deploy:e && npm run deploy:law-a && npm run deploy:law-b && npm run deploy:law-c && npm run deploy:law-d && npm run deploy:law-e",
     "build:deploy": "npm run generate && npm run deploy"
   },
   "dependencies": {

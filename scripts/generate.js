@@ -511,8 +511,9 @@ function createLandingContent(landing, group, caseItem) {
       ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${escapeHtml(caseItem.memo)}</p></section>`
       : "";
     const _rawCaseName = caseItem.caseName || caseItem.name || "";
-    const _body = renderBodyForLanding(landing, group, caseItem).map((item) => reduceCaseNameText(item, _rawCaseName, false));
-    const _victimCases = renderVictimCasesForLanding(landing, group, caseItem);
+    const _replacementContext = createReplacementContext(_rawCaseName);
+    const _body = renderBodyForLanding(landing, group, caseItem).map((item) => reduceCaseNameText(item, _rawCaseName, false, _replacementContext));
+    const _victimCases = renderVictimCasesForLanding(landing, group, caseItem, _replacementContext);
     const _faq = renderFaqForLanding(landing, group, caseItem);
     const _introBody = _body.slice(0, 3);
     const _methodBody = _body.slice(3, 8);
@@ -679,7 +680,7 @@ function createScamMethodItems(caseName) {
 function renderBodyForLanding(landing, group, caseItem) {
   const compactName = primaryCaseKeyword(caseItem.caseName || caseItem.name || "");
   const original = Array.isArray(landing.body)
-    ? landing.body.filter(Boolean).map((item, index) => reduceCaseNameText(item, caseItem.caseName || caseItem.name, index < 2))
+    ? landing.body.filter(Boolean).map((item) => String(item || ""))
     : [];
   const additions = {
     a: [
@@ -707,10 +708,10 @@ function renderBodyForLanding(landing, group, caseItem) {
   return [...original, ...additions].slice(0, 9);
 }
 
-function renderVictimCasesForLanding(landing, group, caseItem) {
+function renderVictimCasesForLanding(landing, group, caseItem, replacementContext) {
   const brand = secondaryCaseKeyword(caseItem.caseName || caseItem.name || "").replace(/\s*피해 대응$/, "") || "담당자";
   const original = Array.isArray(landing.victimCases)
-    ? landing.victimCases.filter(Boolean).map((item) => reduceCaseNameText(item, caseItem.caseName || caseItem.name, false))
+    ? landing.victimCases.filter(Boolean).map((item) => reduceCaseNameText(item, caseItem.caseName || caseItem.name, false, replacementContext))
     : [];
   const additions = [
     `직장인 피해자가 카카오톡 오픈채팅방에서 수익 인증 화면을 보고 1차로 320만원을 보낸 뒤, 출금 직전 세금과 보증금 명목으로 추가 780만원을 요구받은 사례`,
@@ -801,7 +802,7 @@ function list(items = []) {
   return `<ul>${items.map((item) => `<li>${withSentenceBreaks(item)}</li>`).join("\n")}</ul>`;
 }
 
-function reduceCaseNameText(value, caseName, keepFirst = false) {
+function reduceCaseNameTextLegacy(value, caseName, keepFirst = false) {
   let text = String(value || "");
   const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
   const primary = primaryCaseKeyword(caseName);
@@ -824,6 +825,81 @@ function cleanupRepeatedWords(value = "") {
   return String(value || "")
     .replace(/이\s*사건\s*사건/g, "이 사안")
     .replace(/해당\s*피해\s*피해/g, "해당 피해")
+    .replace(/사칭\s*사칭/g, "사칭")
+    .replace(/사기\s*사기/g, "사기")
+    .replace(/피해\s*피해/g, "피해")
+    .replace(/대응\s*대응/g, "대응")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+const CASE_NAME_REPLACEMENTS = [
+  "이 사건",
+  "이 사안",
+  "해당 피해",
+  "관련 사실",
+  "관련 내용",
+  "관련 정보",
+  "확인된 사실",
+  "문제 상황",
+  "피해 흐름",
+  "접수 사례",
+  "입금 경위",
+  "상담 내용",
+  "확인 자료",
+  "피해 정리",
+  "접수 내용",
+  "대응 자료",
+  "피해 내용",
+  "확인 내용",
+];
+
+function createReplacementContext(seed = "") {
+  const source = String(seed || "");
+  let hash = 2166136261;
+  for (let i = 0; i < source.length; i += 1) {
+    hash ^= source.charCodeAt(i);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return { offset: hash % CASE_NAME_REPLACEMENTS.length, index: 0 };
+}
+
+function nextCaseReplacement(context) {
+  if (!context) return CASE_NAME_REPLACEMENTS[0];
+  const value = CASE_NAME_REPLACEMENTS[(context.offset + context.index) % CASE_NAME_REPLACEMENTS.length];
+  context.index += 1;
+  return value;
+}
+
+function reduceCaseNameText(value, caseName, keepFirst = false, replacementContext = null) {
+  let text = String(value || "");
+  const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
+  const primary = primaryCaseKeyword(caseName);
+  let used = false;
+  names.forEach((name) => {
+    if (!name) return;
+    if (keepFirst && !used && name === primary) {
+      text = text.replace(name, primary);
+      used = true;
+    }
+    text = text.split(name).join(nextCaseReplacement(replacementContext));
+  });
+  return cleanupRepeatedWords(text);
+}
+
+function cleanupRepeatedWordsLegacy(value = "") {
+  return String(value || "")
+    .replace(/이\s*사건\s*사건/g, "이 사안")
+    .replace(/이\s*사안\s*사안/g, "이 사안")
+    .replace(/해당\s*피해\s*피해/g, "해당 피해")
+    .replace(/관련\s*정황\s*정황/g, "관련 사실")
+    .replace(/관련\s*사실\s*사실/g, "관련 사실")
+    .replace(/관련\s*내용\s*내용/g, "관련 내용")
+    .replace(/관련\s*정보\s*정보/g, "관련 정보")
+    .replace(/확인된\s*사실\s*사실/g, "확인된 사실")
+    .replace(/문제\s*상황\s*상황/g, "문제 상황")
+    .replace(/피해\s*흐름\s*흐름/g, "피해 흐름")
+    .replace(/접수\s*사례\s*사례/g, "접수 사례")
     .replace(/사칭\s*사칭/g, "사칭")
     .replace(/사기\s*사기/g, "사기")
     .replace(/피해\s*피해/g, "피해")
@@ -1138,6 +1214,7 @@ function createHubContent(group) {
 (function(){
   var PREFIX=${JSON.stringify(group.pathPrefix)};
   var SUFFIX=${JSON.stringify(suffix)};
+  var URL_SUFFIX=${JSON.stringify(group.urlSlugSuffix || "")};
   var GKEY=${JSON.stringify(group.key)};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function normName(n){var c=String(n||'').trim().replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c+' 사칭':c+' 사칭 사기';}
@@ -1171,7 +1248,7 @@ function createHubContent(group) {
         var cn=esc(normName(item.caseName||''));
         var dt=SUFFIX?cn+' '+SUFFIX:cn;
         var a=document.createElement('a');
-        a.href='/'+PREFIX+'/'+encodeURIComponent(item.slug)+'/';
+        a.href='/'+PREFIX+'/'+encodeURIComponent(item.slug)+(URL_SUFFIX?'-'+URL_SUFFIX:'')+'/';
         a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;
         a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
           +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'

@@ -510,6 +510,7 @@ function createLandingContent(landing, group, caseData) {
     const _contentKey = group.landingKey || group.key;
     const _contentGroup = { ...group, key: _contentKey };
     const _rawCaseName = caseData.caseName || "";
+    const _replacementContext = createReplacementContext(_rawCaseName);
     const _keyword = esc(seoCaseKeyword(_rawCaseName));
     const _slug = esc(caseData.slug);
     const _cn = esc(normalizeCaseName(_rawCaseName));
@@ -518,8 +519,8 @@ function createLandingContent(landing, group, caseData) {
     const _memoSection = caseData.memo
       ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${esc(caseData.memo)}</p></section>`
       : "";
-    const _body = renderBodyForLanding(landing, _contentGroup, caseData).map((item) => reduceCaseNameText(item, _rawCaseName, false));
-    const _victimCases = renderVictimCasesForLanding(landing, _contentGroup, caseData);
+    const _body = renderBodyForLanding(landing, _contentGroup, caseData).map((item) => reduceCaseNameText(item, _rawCaseName, false, _replacementContext));
+    const _victimCases = renderVictimCasesForLanding(landing, _contentGroup, caseData, _replacementContext);
     const _faq = renderFaqForLanding(landing, _contentGroup, caseData);
     const _authoritySections = isLawLandingKey(_contentKey) ? createLawAuthoritySections(_contentKey, caseData) : "";
     const _introBody = _body.slice(0, 3);
@@ -527,9 +528,9 @@ function createLandingContent(landing, group, caseData) {
 
     return [
       createHeroCta(_rawCaseName),
-      `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName, landing)}${paragraphs(_introBody)}</section>`,
-      createAeoOverviewSection(caseData, _contentKey),
-      `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName, landing))}</section>`,
+      `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName, landing, _replacementContext)}${paragraphs(_introBody)}</section>`,
+      createAeoOverviewSection(caseData, _contentKey, _replacementContext),
+      `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName, landing, _replacementContext))}</section>`,
       `<section class="article-block"><h2>${_keyword} 피해 사례</h2>${list(_victimCases)}</section>`,
       `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
       _authoritySections,
@@ -605,7 +606,7 @@ function createHeroTypingBlock(caseName) {
 <script>(function(){var CYCLE=9400;function restart(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.style.animation='none';l2.style.animation='none';void l1.offsetWidth;void l2.offsetWidth;l1.style.animation='';l2.style.animation='';setTimeout(restart,CYCLE);}setTimeout(restart,CYCLE);})();</script>`;
 }
 
-function createAeoOverviewSection(caseData, key) {
+function createAeoOverviewSection(caseData, key, replacementContext) {
   const keyword = esc(seoCaseKeyword(caseData.caseName || ""));
   const caseName = caseData.caseName || "";
   const base = primaryCaseKeyword(caseName) || normalizeCaseName(caseName);
@@ -618,7 +619,7 @@ function createAeoOverviewSection(caseData, key) {
   };
   const cfg = lawAeo[key];
   const title = cfg ? esc(cfg.t) : `${keyword} 핵심 요약`;
-  const body = cfg ? esc(reduceCaseNameText(cfg.b, caseName, false)) : withSentenceBreaks(createNeutralAeoSummary(caseName));
+  const body = cfg ? esc(reduceCaseNameText(cfg.b, caseName, false, replacementContext)) : withSentenceBreaks(createNeutralAeoSummary(caseName));
   return `<section class="aeo-summary" id="aeo-summary" aria-label="${title}">
   <h2>${title}</h2>
   <blockquote>${body}</blockquote>
@@ -631,10 +632,10 @@ function createNeutralAeoSummary(caseName = "") {
   return `${channel}출금 지연, 추가 입금 요구, 허위 수익 인증, 담당자 연락 두절 정황이 있다면 입금 내역과 대화 기록을 먼저 보존해야 합니다. 상담 전에는 계좌 정보, 사이트 주소, 프로필 캡처를 시간 순서로 정리하는 것이 좋습니다.`;
 }
 
-function createConfirmedSignals(caseName, landing) {
+function createConfirmedSignals(caseName, landing, replacementContext) {
   {
     const items = Array.isArray(landing?.scamIntroItems) && landing.scamIntroItems.length > 0
-      ? landing.scamIntroItems.map((item) => reduceCaseNameText(item, caseName, false))
+      ? landing.scamIntroItems.map((item) => reduceCaseNameText(item, caseName, false, replacementContext))
       : [
           "해당 명칭 또는 유사 명칭으로 실제 브랜드처럼 접근",
           "텔레그램·카카오톡·네이버밴드 등에서 허위 수익 인증과 투자 권유 반복",
@@ -660,9 +661,9 @@ function createConfirmedSignals(caseName, landing) {
   return `<div class="confirmed-signals"><h3>확인된 피해 정황</h3>${list(items)}</div>`;
 }
 
-function createScamMethodItems(caseName, landing) {
+function createScamMethodItems(caseName, landing, replacementContext) {
   if (Array.isArray(landing?.scamMethodItems) && landing.scamMethodItems.length > 0) {
-    return landing.scamMethodItems.map((item) => reduceCaseNameText(item, caseName, false));
+    return landing.scamMethodItems.map((item) => reduceCaseNameText(item, caseName, false, replacementContext));
   }
   return [
     "유명인·증권사·투자 리딩방 명칭을 사용해 정상 업체 또는 플랫폼처럼 신뢰를 형성합니다.",
@@ -953,7 +954,7 @@ function renderBodyForLanding(landing, group, caseData) {
 
   const base = primaryCaseKeyword(caseData.caseName || "");
   const original = Array.isArray(landing.body)
-    ? landing.body.filter(Boolean).map((item, index) => reduceCaseNameText(item, caseData.caseName, index < 2))
+    ? landing.body.filter(Boolean).map(toStr)
     : [];
   const additions = {
     a: [
@@ -1001,15 +1002,15 @@ function renderBodyForLanding(landing, group, caseData) {
   return [...original, ...additions].slice(0, 9);
 }
 
-function renderVictimCasesForLanding(landing, group, caseData) {
+function renderVictimCasesForLanding(landing, group, caseData, replacementContext) {
   if (isLawLandingKey(group.key)) {
-    return buildLawVictimCases(landing, group, caseData).map((item) => reduceCaseNameText(item, caseData.caseName, false));
+    return buildLawVictimCases(landing, group, caseData).map((item) => reduceCaseNameText(item, caseData.caseName, false, replacementContext));
   }
 
   const base = primaryCaseKeyword(caseData.caseName || "");
   const brand = secondaryCaseKeyword(caseData.caseName || "").replace(/\s*피해 대응$/, "") || "담당자";
   const original = Array.isArray(landing.victimCases)
-    ? landing.victimCases.filter(Boolean).map((item) => reduceCaseNameText(item, caseData.caseName, false))
+    ? landing.victimCases.filter(Boolean).map((item) => reduceCaseNameText(item, caseData.caseName, false, replacementContext))
     : [];
   const additions = fallbackVictimCases(group.key, brand);
   return [...original, ...additions].slice(0, 5);
@@ -1495,7 +1496,7 @@ function createArticleTags(caseName = "", key = "") {
   return [...new Set([...common, ...(byKey[key] || [])])].slice(0, 8);
 }
 
-function reduceCaseNameText(value, caseName, keepFirst = false) {
+function reduceCaseNameTextLegacy(value, caseName, keepFirst = false) {
   let text = toStr(value);
   const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
   const primary = primaryCaseKeyword(caseName);
@@ -1518,6 +1519,81 @@ function cleanupRepeatedWords(value = "") {
   return String(value || "")
     .replace(/이\s*사건\s*사건/g, "이 사안")
     .replace(/해당\s*피해\s*피해/g, "해당 피해")
+    .replace(/사칭\s*사칭/g, "사칭")
+    .replace(/사기\s*사기/g, "사기")
+    .replace(/피해\s*피해/g, "피해")
+    .replace(/대응\s*대응/g, "대응")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+const CASE_NAME_REPLACEMENTS = [
+  "이 사건",
+  "이 사안",
+  "해당 피해",
+  "관련 사실",
+  "관련 내용",
+  "관련 정보",
+  "확인된 사실",
+  "문제 상황",
+  "피해 흐름",
+  "접수 사례",
+  "입금 경위",
+  "상담 내용",
+  "확인 자료",
+  "피해 정리",
+  "접수 내용",
+  "대응 자료",
+  "피해 내용",
+  "확인 내용",
+];
+
+function createReplacementContext(seed = "") {
+  const source = String(seed || "");
+  let hash = 2166136261;
+  for (let i = 0; i < source.length; i += 1) {
+    hash ^= source.charCodeAt(i);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return { offset: hash % CASE_NAME_REPLACEMENTS.length, index: 0 };
+}
+
+function nextCaseReplacement(context) {
+  if (!context) return CASE_NAME_REPLACEMENTS[0];
+  const value = CASE_NAME_REPLACEMENTS[(context.offset + context.index) % CASE_NAME_REPLACEMENTS.length];
+  context.index += 1;
+  return value;
+}
+
+function reduceCaseNameText(value, caseName, keepFirst = false, replacementContext = null) {
+  let text = toStr(value);
+  const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
+  const primary = primaryCaseKeyword(caseName);
+  let used = false;
+  names.forEach((name) => {
+    if (!name) return;
+    if (keepFirst && !used && name === primary) {
+      text = text.replace(name, primary);
+      used = true;
+    }
+    text = text.split(name).join(nextCaseReplacement(replacementContext));
+  });
+  return cleanupRepeatedWords(text);
+}
+
+function cleanupRepeatedWordsLegacy(value = "") {
+  return String(value || "")
+    .replace(/이\s*사건\s*사건/g, "이 사안")
+    .replace(/이\s*사안\s*사안/g, "이 사안")
+    .replace(/해당\s*피해\s*피해/g, "해당 피해")
+    .replace(/관련\s*정황\s*정황/g, "관련 사실")
+    .replace(/관련\s*사실\s*사실/g, "관련 사실")
+    .replace(/관련\s*내용\s*내용/g, "관련 내용")
+    .replace(/관련\s*정보\s*정보/g, "관련 정보")
+    .replace(/확인된\s*사실\s*사실/g, "확인된 사실")
+    .replace(/문제\s*상황\s*상황/g, "문제 상황")
+    .replace(/피해\s*흐름\s*흐름/g, "피해 흐름")
+    .replace(/접수\s*사례\s*사례/g, "접수 사례")
     .replace(/사칭\s*사칭/g, "사칭")
     .replace(/사기\s*사기/g, "사기")
     .replace(/피해\s*피해/g, "피해")

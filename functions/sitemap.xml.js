@@ -1,16 +1,18 @@
 const GROUP_MAP = {
-  "new-project-9o2.pages.dev": { prefix: "prosecute", siteUrl: "https://new-project-9o2.pages.dev" },
-  "new-project-b.pages.dev": { prefix: "civil", siteUrl: "https://new-project-b.pages.dev" },
-  "new-project-c.pages.dev": { prefix: "success", siteUrl: "https://new-project-c.pages.dev" },
-  "new-project-d.pages.dev": { prefix: "briefing", siteUrl: "https://new-project-d.pages.dev" },
-  "new-project-e.pages.dev": { prefix: "case", siteUrl: "https://new-project-e.pages.dev" },
-  // law-* 도메인
-  "law-a.pages.dev": { prefix: "prosecute", siteUrl: "https://law-a.pages.dev" },
-  "law-b.pages.dev": { prefix: "civil", siteUrl: "https://law-b.pages.dev" },
-  "law-c.pages.dev": { prefix: "success", siteUrl: "https://law-c.pages.dev" },
-  "law-d.pages.dev": { prefix: "briefing", siteUrl: "https://law-d.pages.dev" },
-  "law-e.pages.dev": { prefix: "case", siteUrl: "https://law-e.pages.dev" },
+  "new-project-9o2.pages.dev": { prefix: "prosecute", suffix: "litigation", siteUrl: "https://new-project-9o2.pages.dev" },
+  "new-project-b.pages.dev": { prefix: "civil", suffix: "settlement", siteUrl: "https://new-project-b.pages.dev" },
+  "new-project-c.pages.dev": { prefix: "success", suffix: "result", siteUrl: "https://new-project-c.pages.dev" },
+  "new-project-d.pages.dev": { prefix: "briefing", suffix: "review", siteUrl: "https://new-project-d.pages.dev" },
+  "new-project-e.pages.dev": { prefix: "case", suffix: "issue", siteUrl: "https://new-project-e.pages.dev" },
+  "law-a.pages.dev": { prefix: "prosecute", suffix: "legal-action", siteUrl: "https://law-a.pages.dev" },
+  "law-b.pages.dev": { prefix: "civil", suffix: "recovery", siteUrl: "https://law-b.pages.dev" },
+  "law-c.pages.dev": { prefix: "success", suffix: "solution", siteUrl: "https://law-c.pages.dev" },
+  "law-d.pages.dev": { prefix: "briefing", suffix: "report", siteUrl: "https://law-d.pages.dev" },
+  "law-e.pages.dev": { prefix: "case", suffix: "incident", siteUrl: "https://law-e.pages.dev" },
 };
+
+const NO_SUFFIX_SLUGS = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+const OLD_URL_SUFFIX = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -24,12 +26,11 @@ export async function onRequest(context) {
   const today = new Date().toISOString().slice(0, 10);
   const cases = await loadCases(env);
 
-  const { siteUrl, prefix } = group;
   const entries = [
-    `  <url><loc>${siteUrl}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.3</priority></url>`,
+    `  <url><loc>${group.siteUrl}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.3</priority></url>`,
     ...cases.map((item) => {
       const lastmod = item.updatedAt || item.createdAt || today;
-      return `  <url><loc>${siteUrl}/${prefix}/${encodeURIComponent(item.slug)}/</loc><lastmod>${lastmod}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>`;
+      return `  <url><loc>${buildLandingUrl(group, item.slug)}</loc><lastmod>${lastmod}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>`;
     }),
   ];
 
@@ -44,6 +45,14 @@ ${entries.join("\n")}
       "Cache-Control": "public, max-age=300",
     },
   });
+}
+
+function buildLandingUrl(group, slug = "") {
+  const isOldA = group.siteUrl === "https://new-project-9o2.pages.dev";
+  const noSuffix = isOldA && NO_SUFFIX_SLUGS.includes(slug);
+  const oldSuffix = isOldA && OLD_URL_SUFFIX[slug];
+  const suffix = noSuffix ? "" : oldSuffix ? `-${oldSuffix}` : group.suffix ? `-${group.suffix}` : "";
+  return `${group.siteUrl}/${group.prefix}/${encodeURIComponent(slug)}${suffix}/`;
 }
 
 async function loadCases(env) {

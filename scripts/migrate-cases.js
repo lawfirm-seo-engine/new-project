@@ -10,6 +10,7 @@ const groups = [
     label: "법률형",
     siteUrl: "https://new-project-9o2.pages.dev",
     pathPrefix: "prosecute",
+    urlSlugSuffix: "litigation",
     intent: "형사고소, 법적제재, 형사합의, 피해금 회수",
   },
   {
@@ -17,6 +18,7 @@ const groups = [
     label: "민사형",
     siteUrl: "https://new-project-b.pages.dev",
     pathPrefix: "civil",
+    urlSlugSuffix: "settlement",
     intent: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수",
   },
   {
@@ -24,6 +26,7 @@ const groups = [
     label: "성공사례형",
     siteUrl: "https://new-project-c.pages.dev",
     pathPrefix: "success",
+    urlSlugSuffix: "result",
     intent: "성공사례, 지역, 회수율, 전액 또는 일부 회수 사례",
   },
   {
@@ -31,6 +34,7 @@ const groups = [
     label: "AI브리핑형",
     siteUrl: "https://new-project-d.pages.dev",
     pathPrefix: "briefing",
+    urlSlugSuffix: "review",
     intent: "네이버 AI브리핑용 사건 개요, 대응 방법, 정보성 문서",
   },
   {
@@ -38,6 +42,7 @@ const groups = [
     label: "전체 허브형",
     siteUrl: "https://new-project-e.pages.dev",
     pathPrefix: "case",
+    urlSlugSuffix: "issue",
     intent: "전체 허브, 사건명 리스트, 관련 대응 경로 안내",
   },
 ];
@@ -82,7 +87,7 @@ await fs.writeJson(dataPath, nextCases, { spaces: 2 });
 console.log(`[OK] migrated ${migrated} cases`);
 
 function createLandingData({ caseName, slug, category, summary, group, updatedAt }) {
-  const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
+  const canonical = buildLandingUrl(group, slug);
   const ogImage = `${group.siteUrl}/og/${slug}.png`;
   const title = `${caseName} ${group.label} 대응 안내`;
   const description = `${caseName} 관련 ${group.intent} 검색 의도에 맞춘 피해 대응 정보입니다.`;
@@ -136,6 +141,20 @@ function createLandingData({ caseName, slug, category, summary, group, updatedAt
     faq,
     schema: createSchemaData({ title, description, canonical, caseName, faq, updatedAt }),
   };
+}
+
+function buildLandingUrl(group, slug) {
+  const noSuffixSlugs = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+  const oldUrlSuffix = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+  const isOldA = group.siteUrl === "https://new-project-9o2.pages.dev";
+  const suffix = isOldA && noSuffixSlugs.includes(slug)
+    ? ""
+    : isOldA && oldUrlSuffix[slug]
+      ? `-${oldUrlSuffix[slug]}`
+      : group.urlSlugSuffix
+        ? `-${group.urlSlugSuffix}`
+        : "";
+  return `${group.siteUrl}/${group.pathPrefix}/${slug}${suffix}/`;
 }
 
 function createSchemaData({ title, description, canonical, caseName, faq, updatedAt }) {

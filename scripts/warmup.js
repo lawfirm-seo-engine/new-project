@@ -6,12 +6,20 @@ const cases = await fs.readJson(path.join(root, "data", "cases.json"));
 const latest = cases.at(-1);
 
 const groups = [
-  { siteUrl: "https://new-project-9o2.pages.dev", pathPrefix: "prosecute" },
-  { siteUrl: "https://new-project-b.pages.dev", pathPrefix: "civil" },
-  { siteUrl: "https://new-project-c.pages.dev", pathPrefix: "success" },
-  { siteUrl: "https://new-project-d.pages.dev", pathPrefix: "briefing" },
-  { siteUrl: "https://new-project-e.pages.dev", pathPrefix: "case" },
+  { siteUrl: "https://new-project-9o2.pages.dev", pathPrefix: "prosecute", suffix: "litigation" },
+  { siteUrl: "https://new-project-b.pages.dev", pathPrefix: "civil", suffix: "settlement" },
+  { siteUrl: "https://new-project-c.pages.dev", pathPrefix: "success", suffix: "result" },
+  { siteUrl: "https://new-project-d.pages.dev", pathPrefix: "briefing", suffix: "review" },
+  { siteUrl: "https://new-project-e.pages.dev", pathPrefix: "case", suffix: "issue" },
+  { siteUrl: "https://law-a.pages.dev", pathPrefix: "prosecute", suffix: "legal-action" },
+  { siteUrl: "https://law-b.pages.dev", pathPrefix: "civil", suffix: "recovery" },
+  { siteUrl: "https://law-c.pages.dev", pathPrefix: "success", suffix: "solution" },
+  { siteUrl: "https://law-d.pages.dev", pathPrefix: "briefing", suffix: "report" },
+  { siteUrl: "https://law-e.pages.dev", pathPrefix: "case", suffix: "incident" },
 ];
+
+const noSuffixSlugs = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+const oldUrlSuffix = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
 
 if (!latest?.slug) {
   console.log("[warmup] no case found");
@@ -20,7 +28,7 @@ if (!latest?.slug) {
 
 const targets = groups.flatMap((group) => [
   `${group.siteUrl}/`,
-  `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(latest.slug)}/`,
+  buildLandingUrl(group, latest.slug),
   `${group.siteUrl}/og/${encodeURIComponent(latest.slug)}.png`,
   `${group.siteUrl}/assets/og-template.png`,
   `${group.siteUrl}/sitemap-index.xml`,
@@ -75,4 +83,16 @@ async function warm(url) {
   }
 
   throw new Error(`${lastStatus} ${url}`);
+}
+
+function buildLandingUrl(group, slug) {
+  const isOldA = group.siteUrl === "https://new-project-9o2.pages.dev";
+  const suffix = isOldA && noSuffixSlugs.includes(slug)
+    ? ""
+    : isOldA && oldUrlSuffix[slug]
+      ? `-${oldUrlSuffix[slug]}`
+      : group.suffix
+        ? `-${group.suffix}`
+        : "";
+  return `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(slug)}${suffix}/`;
 }
