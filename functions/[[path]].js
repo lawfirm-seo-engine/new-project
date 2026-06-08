@@ -264,6 +264,9 @@ function renderLanding(caseData, group, origin) {
     `<meta name="NaverBot" content="All">`,
     `<meta name="Yeti" content="All">`,
     `<meta http-equiv="content-language" content="ko">`,
+    `<link rel="icon" type="image/x-icon" href="/assets/favicon.ico">`,
+    `<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">`,
+    `<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">`,
     `<link rel="alternate" hreflang="ko" href="${canonical}">`,
     group.naverVerification ? `<meta name="naver-site-verification" content="${group.naverVerification}">` : "",
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
@@ -1194,7 +1197,7 @@ function pageTemplate(d) {
 <body class="${d.bodyClass}">
   <header class="site-header">
     <a class="brand" href="/" aria-label="대온 법률사무소 홈">
-      <img src="/assets/logo.png" alt="대온 법률사무소">
+      <img src="/assets/logo.png" alt="법무법인 선린">
     </a>
     ${d.headerCall}
   </header>
