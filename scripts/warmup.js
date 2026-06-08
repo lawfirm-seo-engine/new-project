@@ -6,7 +6,7 @@ const cases = await fs.readJson(path.join(root, "data", "cases.json"));
 const latest = cases.at(-1);
 
 const groups = [
-  { siteUrl: "https://new-project-9o2.pages.dev", pathPrefix: "prosecute", suffix: "litigation" },
+  { siteUrl: "https://gnlaw-criminal.co.kr", pathPrefix: "prosecute", suffix: "litigation" },
   { siteUrl: "https://new-project-b.pages.dev", pathPrefix: "civil", suffix: "settlement" },
   { siteUrl: "https://new-project-c.pages.dev", pathPrefix: "success", suffix: "result" },
   { siteUrl: "https://new-project-d.pages.dev", pathPrefix: "briefing", suffix: "review" },
@@ -86,7 +86,7 @@ async function warm(url) {
 }
 
 function buildLandingUrl(group, slug) {
-  const isOldA = group.siteUrl === "https://new-project-9o2.pages.dev";
+  const isOldA = group.siteUrl === "https://gnlaw-criminal.co.kr";
   const suffix = isOldA && noSuffixSlugs.includes(slug)
     ? ""
     : isOldA && oldUrlSuffix[slug]

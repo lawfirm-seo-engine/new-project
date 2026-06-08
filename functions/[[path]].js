@@ -2,7 +2,7 @@
 // Handles: /[pathPrefix]/[slug]/ for each of the 5 groups
 
 const GROUPS = {
-  "new-project-9o2.pages.dev": {
+  "gnlaw-criminal.co.kr": {
     key: "a", pathPrefix: "prosecute", urlSlugSuffix: "litigation", bodyClass: "domain-a",
     siteName: "피해금 추적 법률센터", shortName: "형사고소 센터",
     intent: "형사고소 · 법적제재 · 형사합의 · 회수", tone: "긴급 대응",
@@ -11,7 +11,7 @@ const GROUPS = {
     ctaLabel: "피해 사실 접수", ogType: "article",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
     naverVerification: "bfc9894c3704ecb4fae524d6dbbb1dc61ecb6488",
-    siteUrl: "https://new-project-9o2.pages.dev",
+    siteUrl: "https://gnlaw-criminal.co.kr",
   },
   "new-project-b.pages.dev": {
     key: "b", pathPrefix: "civil", urlSlugSuffix: "settlement", bodyClass: "domain-b",
@@ -121,7 +121,7 @@ const GROUPS = {
 };
 
 const CROSS_LINKS = [
-  { key: "a", label: "형사고소", url: "https://new-project-9o2.pages.dev", prefix: "prosecute" },
+  { key: "a", label: "형사고소", url: "https://gnlaw-criminal.co.kr", prefix: "prosecute" },
   { key: "b", label: "민사소송", url: "https://new-project-b.pages.dev", prefix: "civil" },
   { key: "c", label: "성공사례", url: "https://new-project-c.pages.dev", prefix: "success" },
   { key: "d", label: "사건정보", url: "https://new-project-d.pages.dev", prefix: "briefing" },
@@ -177,8 +177,8 @@ export async function onRequest(context) {
   // new-project 도메인의 구suffix 목록 (리디렉션 시 제거 대상)
   const NEW_PROJECT_OLD_SUFFIXES = ["prosecute", "civil", "success", "briefing", "case"];
 
-  const isNoSuffix = url.host === "new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS.includes(urlSlug);
-  const isOldUrlKeep = url.host === "new-project-9o2.pages.dev" && OLD_URL_MAP[urlSlug];
+  const isNoSuffix = url.host === "gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS.includes(urlSlug);
+  const isOldUrlKeep = url.host === "gnlaw-criminal.co.kr" && OLD_URL_MAP[urlSlug];
 
   let slug;
   if (isNoSuffix) {
@@ -241,8 +241,8 @@ function renderLanding(caseData, group, origin) {
   const pageH1 = groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const OLD_URL_CANONICAL = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-  const isNoSuffixSlug = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
-  const oldSuffixOverride = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_CANONICAL[caseData.slug];
+  const isNoSuffixSlug = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
+  const oldSuffixOverride = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_CANONICAL[caseData.slug];
   const urlSuffix = isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.png`;
@@ -312,7 +312,7 @@ function renderLanding(caseData, group, origin) {
         name: group.siteName,
         url: group.siteUrl,
         inLanguage: "ko-KR",
-        publisher: { "@id": "https://new-project-9o2.pages.dev/#organization" },
+        publisher: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
       },
       {
         "@type": "WebPage",
@@ -323,7 +323,7 @@ function renderLanding(caseData, group, origin) {
         primaryImageOfPage: { "@id": `${canonical}#primaryimage` },
         breadcrumb: { "@id": `${canonical}#breadcrumb` },
         speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", ".aeo-summary", ".article-block > p", "#faq-list"] },
-        author: { "@id": "https://new-project-9o2.pages.dev/#organization" },
+        author: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
         hasPart: CROSS_LINKS.map((l) => ({
           "@type": "SiteNavigationElement",
           name: l.label,
@@ -347,10 +347,10 @@ function renderLanding(caseData, group, origin) {
         headline: pageTitle, description: seoDescription, url: canonical, inLanguage: "ko-KR",
         datePublished: publishedDate, dateModified: modifiedDate,
         author: [
-          { "@id": "https://new-project-9o2.pages.dev/#organization" },
-          { "@id": "https://new-project-9o2.pages.dev/#person-attorney" },
+          { "@id": "https://gnlaw-criminal.co.kr/#organization" },
+          { "@id": "https://gnlaw-criminal.co.kr/#person-attorney" },
         ],
-        publisher: { "@id": "https://new-project-9o2.pages.dev/#organization" },
+        publisher: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
         isPartOf: { "@id": `${canonical}#webpage` },
         image: { "@id": `${canonical}#primaryimage` },
         about: [searchKeyword(rawCaseName), group.intent].filter(Boolean),
@@ -375,7 +375,7 @@ function renderLanding(caseData, group, origin) {
         telephone: "02-6952-3695",
         email: "noleosi@daeonlaw.co.kr",
         areaServed: "KR",
-        parentOrganization: { "@id": "https://new-project-9o2.pages.dev/#organization" },
+        parentOrganization: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
         serviceType: group.intent,
         address: {
           "@type": "PostalAddress",
@@ -475,8 +475,8 @@ function createFallbackLanding(caseData, group, key) {
   const base = primaryCaseKeyword(caseName);
   const NO_SUFFIX_SLUGS_FB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const OLD_URL_FB = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-  const isNoSuffixFB = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_FB.includes(caseData.slug);
-  const oldSuffixFB = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_FB[caseData.slug];
+  const isNoSuffixFB = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_FB.includes(caseData.slug);
+  const oldSuffixFB = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_FB[caseData.slug];
   const fbUrlSuffix = isNoSuffixFB ? "" : oldSuffixFB ? `-${oldSuffixFB}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${fbUrlSuffix}/`;
   const descriptions = {
@@ -1122,7 +1122,7 @@ function createConsultForm(cn, siteName) {
       btn.disabled = true; btn.textContent = '접수 중...';
       msg.textContent = ''; msg.className = 'consult-msg';
       try {
-        var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+        var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: this.cname.value, phone: this.phone.value, amount: this.amount.value, caseName: '${cn}', domain: '${siteName}' })
         });
@@ -1157,7 +1157,7 @@ function createFloatingWidgets(cn, siteName, slug) {
     btn.disabled = true; btn.textContent = '접수 중...';
     msg.textContent = ''; msg.className = 'sticky-msg';
     try {
-      var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+      var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: '${cn}', domain: '${siteName}' })
       });
@@ -1230,14 +1230,14 @@ function pageTemplate(d) {
 
 const ORGANIZATION = {
   "@type": ["Organization", "LegalService"],
-  "@id": "https://new-project-9o2.pages.dev/#organization",
+  "@id": "https://gnlaw-criminal.co.kr/#organization",
   name: "대온 법률사무소",
   legalName: "법률사무소 대온",
   alternateName: "대온 법률사무소",
-  url: "https://new-project-9o2.pages.dev",
+  url: "https://gnlaw-criminal.co.kr",
   telephone: "02-6952-3695",
   email: "noleosi@daeonlaw.co.kr",
-  logo: { "@type": "ImageObject", url: "https://new-project-9o2.pages.dev/assets/logo.png" },
+  logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo.png" },
   address: {
     "@type": "PostalAddress",
     streetAddress: "서초대로 250 스타갤러리브릿지빌딩 802호",
@@ -1265,11 +1265,11 @@ const ORGANIZATION = {
 
 const PERSON_ATTORNEY = {
   "@type": "Person",
-  "@id": "https://new-project-9o2.pages.dev/#person-attorney",
+  "@id": "https://gnlaw-criminal.co.kr/#person-attorney",
   name: "신동우",
   honorificPrefix: "변호사",
   jobTitle: "대표변호사",
-  worksFor: { "@id": "https://new-project-9o2.pages.dev/#organization" },
+  worksFor: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
   knowsAbout: ["금융사기", "사기죄 형사고소", "피해금 회수", "가압류", "손해배상"],
   sameAs: ["https://cafe.naver.com/daeonlawfintech"],
   email: "noleosi@daeonlaw.co.kr",
@@ -1803,7 +1803,7 @@ function formatDate(value) {
 async function fetchCaseFromHubAPI(slug) {
   try {
     const res = await fetch(
-      `https://new-project-9o2.pages.dev/api/get-case?slug=${encodeURIComponent(slug)}`,
+      `https://gnlaw-criminal.co.kr/api/get-case?slug=${encodeURIComponent(slug)}`,
       { headers: { "User-Agent": "static-landing-worker" } }
     );
     if (!res.ok) return null;

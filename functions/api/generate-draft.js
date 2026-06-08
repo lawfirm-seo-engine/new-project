@@ -2,7 +2,7 @@ const GROUPS = [
   {
     key: "a",
     label: "법률형",
-    siteUrl: "https://new-project-9o2.pages.dev",
+    siteUrl: "https://gnlaw-criminal.co.kr",
     pathPrefix: "prosecute",
     suffix: "사기 형사고소 법적 대응",
     intent: "형사고소, 법적제재, 형사합의, 피해금 회수",

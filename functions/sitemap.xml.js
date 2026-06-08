@@ -1,5 +1,5 @@
 const GROUP_MAP = {
-  "new-project-9o2.pages.dev": { prefix: "prosecute", suffix: "litigation", siteUrl: "https://new-project-9o2.pages.dev" },
+  "gnlaw-criminal.co.kr": { prefix: "prosecute", suffix: "litigation", siteUrl: "https://gnlaw-criminal.co.kr" },
   "new-project-b.pages.dev": { prefix: "civil", suffix: "settlement", siteUrl: "https://new-project-b.pages.dev" },
   "new-project-c.pages.dev": { prefix: "success", suffix: "result", siteUrl: "https://new-project-c.pages.dev" },
   "new-project-d.pages.dev": { prefix: "briefing", suffix: "review", siteUrl: "https://new-project-d.pages.dev" },
@@ -48,7 +48,7 @@ ${entries.join("\n")}
 }
 
 function buildLandingUrl(group, slug = "") {
-  const isOldA = group.siteUrl === "https://new-project-9o2.pages.dev";
+  const isOldA = group.siteUrl === "https://gnlaw-criminal.co.kr";
   const noSuffix = isOldA && NO_SUFFIX_SLUGS.includes(slug);
   const oldSuffix = isOldA && OLD_URL_SUFFIX[slug];
   const suffix = noSuffix ? "" : oldSuffix ? `-${oldSuffix}` : group.suffix ? `-${group.suffix}` : "";

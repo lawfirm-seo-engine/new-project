@@ -11,14 +11,14 @@ const today = new Date().toISOString().slice(0, 10);
 
 const ORGANIZATION = {
   "@type": "Organization",
-  "@id": "https://new-project-9o2.pages.dev/#organization",
+  "@id": "https://gnlaw-criminal.co.kr/#organization",
   name: "대온 법률사무소",
-  url: "https://new-project-9o2.pages.dev",
-  logo: { "@type": "ImageObject", url: "https://new-project-9o2.pages.dev/assets/logo.png" },
+  url: "https://gnlaw-criminal.co.kr",
+  logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo.png" },
 };
 
 const crossLinks = [
-  { key: "a", label: "형사고소", url: "https://new-project-9o2.pages.dev", prefix: "prosecute" },
+  { key: "a", label: "형사고소", url: "https://gnlaw-criminal.co.kr", prefix: "prosecute" },
   { key: "b", label: "민사소송", url: "https://new-project-b.pages.dev", prefix: "civil" },
   { key: "c", label: "성공사례", url: "https://new-project-c.pages.dev", prefix: "success" },
   { key: "d", label: "사건정보", url: "https://new-project-d.pages.dev", prefix: "briefing" },
@@ -32,7 +32,7 @@ const groups = [
     key: "a",
     outDir: path.join(root, "dist-a"),
     template: "group-a.html",
-    siteUrl: "https://new-project-9o2.pages.dev",
+    siteUrl: "https://gnlaw-criminal.co.kr",
     pathPrefix: "prosecute",
     urlSlugSuffix: "litigation",
     bodyClass: "domain-a",
@@ -367,8 +367,8 @@ function createFallbackLanding(caseItem, group) {
   const slug = caseItem.slug;
   const NO_SUFFIX_SLUGS_FB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const OLD_URL_FB_GEN = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-  const isExceptFB = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_FB.includes(slug);
-  const oldSuffixFBGen = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_FB_GEN[slug];
+  const isExceptFB = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_FB.includes(slug);
+  const oldSuffixFBGen = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_FB_GEN[slug];
   const fbSlugSuffix = isExceptFB ? "" : oldSuffixFBGen ? `-${oldSuffixFBGen}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}${fbSlugSuffix}/`;
   const description = `${dispName} 관련 ${group.descriptionSuffix}`;
@@ -486,7 +486,7 @@ function createConsultForm(caseItem, group) {
       btn.disabled = true; btn.textContent = '접수 중...';
       msg.textContent = ''; msg.className = 'consult-msg';
       try {
-        var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+        var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: this.cname.value, phone: this.phone.value, amount: this.amount.value, caseName: '${cn}', domain: '${siteName}' })
@@ -781,7 +781,7 @@ function createFloatingWidgets(caseItem, group) {
     btn.disabled = true; btn.textContent = '접수 중...';
     msg.textContent = ''; msg.className = 'sticky-msg';
     try {
-      var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+      var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: '${cn}', domain: '${siteName}' })
@@ -1177,7 +1177,7 @@ function createHubFloatingWidgets(group) {
     btn.disabled = true; btn.textContent = '접수 중...';
     msg.textContent = ''; msg.className = 'sticky-msg';
     try {
-      var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+      var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: ${sn}, domain: ${sn} })
       });
@@ -1205,8 +1205,8 @@ function createHubContent(group) {
       const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
       const NO_SUFFIX_SLUGS_HUB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
       const OLD_URL_HUB = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-      const isExceptHub = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_HUB.includes(item.slug);
-      const oldSuffixHub = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_HUB[item.slug];
+      const isExceptHub = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_HUB.includes(item.slug);
+      const oldSuffixHub = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_HUB[item.slug];
       const hubSlugSuffix = isExceptHub ? "" : oldSuffixHub ? `-${oldSuffixHub}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
       const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}${hubSlugSuffix}/`;
       return `
@@ -1245,7 +1245,7 @@ function createHubContent(group) {
     });
   }
   setupSearch();
-  fetch('https://new-project-9o2.pages.dev/api/get-cases',{cache:'no-cache'})
+  fetch('https://gnlaw-criminal.co.kr/api/get-cases',{cache:'no-cache'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
       if(!d||!d.ok||!Array.isArray(d.cases))return;
@@ -1528,8 +1528,8 @@ for (const group of groups) {
     { loc: `${group.siteUrl}/`, lastmod: today, priority: "0.3" },
     ...cases.map((item) => {
       const OLD_URL_SITEMAP = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-      const isExcept = group.siteUrl === "https://new-project-9o2.pages.dev" && NO_SUFFIX_SLUGS_SITEMAP.includes(item.slug);
-      const oldSuffixSitemap = group.siteUrl === "https://new-project-9o2.pages.dev" && OLD_URL_SITEMAP[item.slug];
+      const isExcept = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_SITEMAP.includes(item.slug);
+      const oldSuffixSitemap = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_SITEMAP[item.slug];
       const slugSuffix = isExcept ? "" : oldSuffixSitemap ? `-${oldSuffixSitemap}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
       return {
         loc: `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(item.slug)}${slugSuffix}/`,

@@ -30,7 +30,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://law-e.pages.dev/assets/og-template.png">
   <meta name="twitter:image:alt" content="금융피해 사건 통합 리스트">
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"금융피해 사건 통합 리스트","url":"https://law-e.pages.dev/","inLanguage":"ko-KR","description":"피해 사건을 형사, 민사, 성공사례, 브리핑 관점으로 통합 연결합니다.","dateModified":"2026-06-08","publisher":{"@type":"Organization","@id":"https://new-project-9o2.pages.dev/#organization","name":"대온 법률사무소","url":"https://new-project-9o2.pages.dev","logo":{"@type":"ImageObject","url":"https://new-project-9o2.pages.dev/assets/logo.png"}}},{"@type":"Organization","@id":"https://new-project-9o2.pages.dev/#organization","name":"대온 법률사무소","url":"https://new-project-9o2.pages.dev","logo":{"@type":"ImageObject","url":"https://new-project-9o2.pages.dev/assets/logo.png"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"금융피해 사건 통합 리스트","url":"https://law-e.pages.dev/","inLanguage":"ko-KR","description":"피해 사건을 형사, 민사, 성공사례, 브리핑 관점으로 통합 연결합니다.","dateModified":"2026-06-08","publisher":{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"대온 법률사무소","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}},{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"대온 법률사무소","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}]}</script>
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body class="domain-e hub-page">
@@ -2528,7 +2528,7 @@
           </span>
           <span class="case-status">사건 진행중</span>
           <span class="case-date">2026-05-29</span>
-          <span class="case-views">2,819</span>
+          <span class="case-views">2,820</span>
         </a>
 
         <a href="/incidents/geuruaenkeompeoni-sagi-syopingmor-incident/" class="case-row" data-title="그루앤컴퍼니 사기 쇼핑몰 사칭" data-slug="geuruaenkeompeoni-sagi-syopingmor">
@@ -2539,7 +2539,7 @@
           </span>
           <span class="case-status">사건 진행중</span>
           <span class="case-date">2026-05-29</span>
-          <span class="case-views">1,916</span>
+          <span class="case-views">1,917</span>
         </a>
 
         <a href="/incidents/gig-investment-sagi-ridingbang-incident/" class="case-row" data-title="Gig Investment 사기 리딩방 사칭" data-slug="gig-investment-sagi-ridingbang">
@@ -3596,7 +3596,7 @@
     });
   }
   setupSearch();
-  fetch('https://new-project-9o2.pages.dev/api/get-cases',{cache:'no-cache'})
+  fetch('https://gnlaw-criminal.co.kr/api/get-cases',{cache:'no-cache'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
       if(!d||!d.ok||!Array.isArray(d.cases))return;
@@ -3679,7 +3679,7 @@
     btn.disabled = true; btn.textContent = '접수 중...';
     msg.textContent = ''; msg.className = 'sticky-msg';
     try {
-      var res = await fetch('https://new-project-9o2.pages.dev/api/submit-consult', {
+      var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: "금융피해 통합 허브", domain: "금융피해 통합 허브" })
       });

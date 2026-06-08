@@ -203,7 +203,7 @@ function buildIndexEntry(c) {
 async function pingIndexNow(slug, key) {
   const NO_SUFFIX = new Set(["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"]);
   const groups = [
-    { host: "new-project-9o2.pages.dev", prefix: "prosecute", suffix: "litigation" },
+    { host: "gnlaw-criminal.co.kr", prefix: "prosecute", suffix: "litigation" },
     { host: "new-project-b.pages.dev", prefix: "civil", suffix: "settlement" },
     { host: "new-project-c.pages.dev", prefix: "success", suffix: "result" },
     { host: "new-project-d.pages.dev", prefix: "briefing", suffix: "review" },
@@ -216,7 +216,7 @@ async function pingIndexNow(slug, key) {
   ];
   await Promise.allSettled(
     groups.map(({ host, prefix, suffix }) => {
-      const isException = host === "new-project-9o2.pages.dev" && NO_SUFFIX.has(slug);
+      const isException = host === "gnlaw-criminal.co.kr" && NO_SUFFIX.has(slug);
       const urlSlug = (suffix && !isException) ? `${slug}-${suffix}` : slug;
       return fetch("https://searchadvisor.naver.com/indexnow", {
         method: "POST",

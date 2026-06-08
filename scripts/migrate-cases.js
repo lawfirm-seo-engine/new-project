@@ -8,7 +8,7 @@ const groups = [
   {
     key: "a",
     label: "법률형",
-    siteUrl: "https://new-project-9o2.pages.dev",
+    siteUrl: "https://gnlaw-criminal.co.kr",
     pathPrefix: "prosecute",
     urlSlugSuffix: "litigation",
     intent: "형사고소, 법적제재, 형사합의, 피해금 회수",
@@ -146,7 +146,7 @@ function createLandingData({ caseName, slug, category, summary, group, updatedAt
 function buildLandingUrl(group, slug) {
   const noSuffixSlugs = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const oldUrlSuffix = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-  const isOldA = group.siteUrl === "https://new-project-9o2.pages.dev";
+  const isOldA = group.siteUrl === "https://gnlaw-criminal.co.kr";
   const suffix = isOldA && noSuffixSlugs.includes(slug)
     ? ""
     : isOldA && oldUrlSuffix[slug]
