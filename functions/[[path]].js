@@ -291,15 +291,15 @@ function renderLanding(caseData, group, origin) {
     `<meta name="date" content="${publishedDate}">`,
     `<meta name="subject" content="${esc(group.intent)}">`,
     `<meta name="citation_title" content="${esc(pageTitle)}">`,
-    `<meta name="citation_author" content="대온 법률사무소">`,
-    `<meta name="citation_publisher" content="대온 법률사무소">`,
+    `<meta name="citation_author" content="법무법인 선린">`,
+    `<meta name="citation_publisher" content="법무법인 선린">`,
     `<meta name="citation_date" content="${publishedDate}">`,
     `<meta property="article:published_time" content="${isoPublished}">`,
     `<meta property="article:modified_time" content="${isoModified}">`,
-    `<meta property="article:author" content="대온 법률사무소">`,
+    `<meta property="article:author" content="법무법인 선린">`,
     `<meta property="article:section" content="${esc(group.intent)}">`,
     ...articleTags.map((tag) => `<meta property="article:tag" content="${esc(tag)}">`),
-    `<meta name="author" content="대온 법률사무소">`,
+    `<meta name="author" content="법무법인 선린">`,
     keyword ? `<meta name="keywords" content="${esc(keyword)}">` : "",
   ].filter(Boolean).join("\n  ");
 
@@ -444,7 +444,7 @@ function renderLanding(caseData, group, origin) {
   );
 
   return pageTemplate({
-    title: esc(`${pageTitle} | 대온 법률사무소`),
+    title: esc(`${pageTitle} | 법무법인 선린`),
     description: esc(seoDescription),
     canonical,
     ogType: group.ogType,
@@ -1196,7 +1196,7 @@ function pageTemplate(d) {
 </head>
 <body class="${d.bodyClass}">
   <header class="site-header">
-    <a class="brand" href="/" aria-label="대온 법률사무소 홈">
+    <a class="brand" href="/" aria-label="법무법인 선린 홈페이지">
       <img src="/assets/logo.png" alt="법무법인 선린">
     </a>
     ${d.headerCall}
@@ -1219,10 +1219,10 @@ function pageTemplate(d) {
   <footer class="site-footer">
     <div class="footer-inner">
       <address class="footer-info">
-        <span>대온 법률사무소&nbsp;&nbsp;대표변호사 : 신동우 ｜ 전화번호 : <a href="tel:0269523695">02-6952-3695</a></span>
-        <span>주소 : 서울 서초구 서초대로 250 스타갤러리브릿지빌딩 802호 ｜ 이메일 : <a href="mailto:noleosi@daeonlaw.co.kr">noleosi@daeonlaw.co.kr</a></span>
+        <span>법무법인 선린 ｜ 사업자등록번호 : 420-87-0032 ｜ 대표변호사 : 김상수</span>
+        <span>서울특별시 서초구 반포대로 108 양원빌딩 4층 ｜ 대표번호 : <a href="tel:16887173">1688-7173</a></span>
       </address>
-      <p class="copyright">COPYRIGHT © 2024 대온 법률사무소 All rights reserved.</p>
+      <p class="copyright">Copyright ⓒ법무법인 선린 All Right Reserved.</p>
     </div>
   </footer>
 </body>
@@ -1234,16 +1234,15 @@ function pageTemplate(d) {
 const ORGANIZATION = {
   "@type": ["Organization", "LegalService"],
   "@id": "https://gnlaw-criminal.co.kr/#organization",
-  name: "대온 법률사무소",
-  legalName: "법률사무소 대온",
-  alternateName: "대온 법률사무소",
+  name: "법무법인 선린",
+  legalName: "법무법인 선린",
+  alternateName: "선린 법무법인",
   url: "https://gnlaw-criminal.co.kr",
-  telephone: "02-6952-3695",
-  email: "noleosi@daeonlaw.co.kr",
+  telephone: "1688-7173",
   logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo.png" },
   address: {
     "@type": "PostalAddress",
-    streetAddress: "서초대로 250 스타갤러리브릿지빌딩 802호",
+    streetAddress: "반포대로 108 양원빌딩 4층",
     addressLocality: "서초구",
     addressRegion: "서울특별시",
     addressCountry: "KR",
@@ -1251,31 +1250,24 @@ const ORGANIZATION = {
   contactPoint: [
     {
       "@type": "ContactPoint",
-      telephone: "02-6952-3695",
-      contactType: "customer service",
-      availableLanguage: "Korean",
-    },
-    {
-      "@type": "ContactPoint",
-      url: "http://pf.kakao.com/_xcypmn/chat",
+      telephone: "1688-7173",
       contactType: "customer service",
       availableLanguage: "Korean",
     },
   ],
-  sameAs: ["https://cafe.naver.com/daeonlawfintech"],
+  sameAs: [],
   knowsAbout: ["금융사기", "사기죄 형사고소", "피해금 회수", "가압류", "손해배상청구", "사기 피해 대응"],
 };
 
 const PERSON_ATTORNEY = {
   "@type": "Person",
   "@id": "https://gnlaw-criminal.co.kr/#person-attorney",
-  name: "신동우",
+  name: "김상수",
   honorificPrefix: "변호사",
   jobTitle: "대표변호사",
   worksFor: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
   knowsAbout: ["금융사기", "사기죄 형사고소", "피해금 회수", "가압류", "손해배상"],
-  sameAs: ["https://cafe.naver.com/daeonlawfintech"],
-  email: "noleosi@daeonlaw.co.kr",
+  sameAs: [],
 };
 
 function esc(v = "") {
@@ -1346,7 +1338,7 @@ function groupPageTitle(name, key) {
 }
 
 function groupPageH1(name, key) {
-  // H1 = title without "| 대온 법률사무소" — share suffix map with groupPageTitle
+  // H1 = title without "| 법무법인 선린" — share suffix map with groupPageTitle
   return groupPageTitle(name, key);
 }
 

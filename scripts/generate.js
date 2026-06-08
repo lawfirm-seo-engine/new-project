@@ -12,7 +12,7 @@ const today = new Date().toISOString().slice(0, 10);
 const ORGANIZATION = {
   "@type": "Organization",
   "@id": "https://gnlaw-criminal.co.kr/#organization",
-  name: "대온 법률사무소",
+  name: "법무법인 선린",
   url: "https://gnlaw-criminal.co.kr",
   logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo.png" },
 };
@@ -44,7 +44,7 @@ const groups = [
     titleSuffix: "형사고소 및 법적 대응",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
     ogSuffix: "형사고소 대응",
-    hubTitle: "대온 법률사무소 사기피해 형사 사건 접수 리스트",
+    hubTitle: "법무법인 선린 사기피해 형사 사건 접수 리스트",
     hubLead: "사기 의심 업체명과 접수 현황을 빠르게 확인하고, 동일 피해자가 모일 수 있도록 사건별 법적 대응 정보를 정리합니다.",
     tone: "긴급 대응",
     ctaTitle: "형사고소 가능성 확인",
@@ -69,7 +69,7 @@ const groups = [
     titleSuffix: "민사소송 및 회수 절차",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
     ogSuffix: "민사 회수 절차",
-    hubTitle: "대온 법률사무소 민사 소송 진행 사건 리스트",
+    hubTitle: "법무법인 선린 민사 소송 진행 사건 리스트",
     hubLead: "채권 보전과 손해배상 청구 관점에서 사건별 회수 가능성, 가압류 필요성, 합의 전략을 정리합니다.",
     tone: "회수 전략",
     ctaTitle: "민사 회수 경로 검토",
@@ -94,7 +94,7 @@ const groups = [
     titleSuffix: "회수 성공사례 분석",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
     ogSuffix: "회수 성공사례",
-    hubTitle: "대온 법률사무소 피해 회수 성공 사건 리스트",
+    hubTitle: "법무법인 선린 피해 회수 성공 사건 리스트",
     hubLead: "유사 사건의 대응 흐름과 회수율을 비교할 수 있도록 성공사례 중심으로 재구성한 사건 목록입니다.",
     tone: "결과 중심",
     ctaTitle: "유사 성공사례 비교",
@@ -119,7 +119,7 @@ const groups = [
     titleSuffix: "사건 정보",
     descriptionSuffix: "사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
     ogSuffix: "사건 정보",
-    hubTitle: "대온 법률사무소 피해 사건 정보 리스트",
+    hubTitle: "법무법인 선린 피해 사건 정보 리스트",
     hubLead: "사건 개요와 피해 패턴을 브리핑 형식으로 정리해 대응 방법을 신속하게 파악합니다.",
     tone: "정보 요약",
     ctaTitle: "사건 구조 확인",
@@ -144,7 +144,7 @@ const groups = [
     titleSuffix: "전체 허브",
     descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
     ogSuffix: "전체 허브",
-    hubTitle: "대온 법률사무소 사기피해 전체 사건 리스트",
+    hubTitle: "법무법인 선린 사기피해 전체 사건 리스트",
     hubLead: "같은 사건을 형사고소, 민사소송, 성공사례, 정보 브리핑 관점으로 연결해 검색 의도별 진입 경로를 제공합니다.",
     tone: "통합 탐색",
     ctaTitle: "유형별 대응 보기",
@@ -171,7 +171,7 @@ const groups = [
     titleSuffix: "형사고소 및 법적 대응",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
     ogSuffix: "형사고소 대응",
-    hubTitle: "금융피해 대응센터 형사 사건 접수 리스트",
+    hubTitle: "법무법인 선린 금융사기 형사 사건 접수 리스트",
     hubLead: "금융사기 피해자가 형사고소 절차를 빠르게 파악할 수 있도록 사건별 법적 대응 정보를 정리합니다.",
     tone: "긴급 대응",
     ctaTitle: "형사고소 가능성 확인",
@@ -197,7 +197,7 @@ const groups = [
     titleSuffix: "민사소송 및 회수 절차",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
     ogSuffix: "민사 회수 절차",
-    hubTitle: "피해금 회수 전략센터 민사 소송 진행 사건 리스트",
+    hubTitle: "법무법인 선린 금융사기 민사 소송 진행 사건 리스트",
     hubLead: "피해금 회수를 위한 민사소송 전략과 가압류 가능성을 사건별로 분석합니다.",
     tone: "회수 전략",
     ctaTitle: "민사 회수 경로 검토",
@@ -223,7 +223,7 @@ const groups = [
     titleSuffix: "회수 성공사례 분석",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
     ogSuffix: "회수 성공사례",
-    hubTitle: "실제 회수 사례 아카이브 피해 회수 성공 사건 리스트",
+    hubTitle: "법무법인 선린 금융사기 피해 회수 성공 사건 리스트",
     hubLead: "실제 피해금 회수에 성공한 사례를 중심으로 대응 흐름과 회수율을 정리합니다.",
     tone: "결과 중심",
     ctaTitle: "유사 성공사례 비교",
@@ -249,7 +249,7 @@ const groups = [
     titleSuffix: "사건 정보",
     descriptionSuffix: "사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
     ogSuffix: "사건 정보",
-    hubTitle: "피해 구조 브리핑 피해 사건 정보 리스트",
+    hubTitle: "법무법인 선린 금융사기 피해 사건 정보 리스트",
     hubLead: "사건 개요와 피해 패턴을 브리핑 형식으로 정리해 피해 구조와 대응 방법을 신속하게 파악합니다.",
     tone: "정보 요약",
     ctaTitle: "사건 구조 확인",
@@ -275,7 +275,7 @@ const groups = [
     titleSuffix: "전체 허브",
     descriptionSuffix: "피해 대응 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
     ogSuffix: "전체 허브",
-    hubTitle: "금융피해 사건 통합 리스트",
+    hubTitle: "법무법인 선린 금융사기 전체 사건 리스트",
     hubLead: "피해 사건을 형사, 민사, 성공사례, 브리핑 관점으로 통합 연결합니다.",
     tone: "통합 탐색",
     ctaTitle: "유형별 대응 보기",
@@ -1105,9 +1105,9 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     const modifiedDate = caseItem?.updatedAt || publishedDate;
     links.push(`<meta property="article:published_time" content="${publishedDate}T00:00:00+09:00">`);
     links.push(`<meta property="article:modified_time" content="${modifiedDate}T00:00:00+09:00">`);
-    links.push(`<meta property="article:author" content="대온 법률사무소">`);
+    links.push(`<meta property="article:author" content="법무법인 선린">`);
     links.push(`<meta property="article:section" content="${escapeHtml(group.intent)}">`);
-    links.push(`<meta name="author" content="대온 법률사무소">`);
+    links.push(`<meta name="author" content="법무법인 선린">`);
     if (keyword) links.push(`<meta name="keywords" content="${escapeHtml(keyword)}">`);
   }
 
