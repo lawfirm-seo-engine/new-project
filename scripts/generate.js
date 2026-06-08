@@ -160,7 +160,7 @@ const groups = [
     outDir: path.join(root, "dist-law-a"),
     template: "group-a.html",
     siteUrl: "https://law-a.pages.dev",
-    pathPrefix: "prosecute",
+    pathPrefix: "criminal",
     urlSlugSuffix: "legal-action",
     bodyClass: "domain-a",
     siteName: "금융피해 대응센터",
@@ -186,7 +186,7 @@ const groups = [
     outDir: path.join(root, "dist-law-b"),
     template: "group-b.html",
     siteUrl: "https://law-b.pages.dev",
-    pathPrefix: "civil",
+    pathPrefix: "litigation",
     urlSlugSuffix: "recovery",
     bodyClass: "domain-b",
     siteName: "피해금 회수 전략센터",
@@ -212,7 +212,7 @@ const groups = [
     outDir: path.join(root, "dist-law-c"),
     template: "group-c.html",
     siteUrl: "https://law-c.pages.dev",
-    pathPrefix: "success",
+    pathPrefix: "results",
     urlSlugSuffix: "solution",
     bodyClass: "domain-c",
     siteName: "실제 회수 사례 아카이브",
@@ -238,7 +238,7 @@ const groups = [
     outDir: path.join(root, "dist-law-d"),
     template: "group-d.html",
     siteUrl: "https://law-d.pages.dev",
-    pathPrefix: "briefing",
+    pathPrefix: "insights",
     urlSlugSuffix: "report",
     bodyClass: "domain-d",
     siteName: "피해 구조 브리핑",
@@ -264,7 +264,7 @@ const groups = [
     outDir: path.join(root, "dist-law-e"),
     template: "group-e.html",
     siteUrl: "https://law-e.pages.dev",
-    pathPrefix: "case",
+    pathPrefix: "incidents",
     urlSlugSuffix: "incident",
     bodyClass: "domain-e",
     siteName: "금융피해 통합 허브",
@@ -449,8 +449,8 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
         "@id": `${canonical}#breadcrumb`,
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "홈", item: siteUrl + "/" },
-          { "@type": "ListItem", position: 2, name: breadcrumbLabel(groupKey), item: siteUrl + "/" },
-          { "@type": "ListItem", position: 3, name: baseCaseName(caseName) || caseName || title, item: canonical },
+          { "@type": "ListItem", position: 2, name: breadcrumbLabel(groupKey), item: canonical.split("/").slice(0, 4).join("/") + "/" },
+          { "@type": "ListItem", position: 3, name: groupPageTitle(caseName, groupKey), item: canonical },
         ],
       },
       {
@@ -1121,14 +1121,29 @@ function themeColor(key) {
   }[key];
 }
 
-function breadcrumbLabel(key) {
-  return { a: "형사고소", b: "민사소송", c: "성공사례", d: "AI브리핑", e: "전체허브" }[key] || "사건";
+function breadcrumbLabel(groupOrKey) {
+  const key = typeof groupOrKey === "string" ? groupOrKey : (groupOrKey.landingKey || groupOrKey.key);
+  return {
+    a: "형사고소",
+    b: "민사소송",
+    c: "성공사례",
+    d: "사건브리핑",
+    e: "사건현황",
+    la: "법적조치",
+    lb: "피해회복",
+    lc: "해결사례",
+    ld: "피해정보",
+    le: "진행현황",
+  }[key] || "사건현황";
 }
 
 function createHtmlBreadcrumb(group, caseItem) {
-  const current = primaryCaseKeyword(caseItem.caseName || caseItem.name || "") || normalizeCaseName(caseItem.caseName || caseItem.name || "");
+  const caseName = caseItem.caseName || caseItem.name || "";
+  const category = breadcrumbLabel(group);
+  const current = groupPageTitle(caseName, group.landingKey || group.key);
   return `<nav class="breadcrumb" aria-label="breadcrumb">
     <a href="${group.siteUrl}/">홈</a>
+    <a href="${group.siteUrl}/${group.pathPrefix}/">${escapeHtml(category)}</a>
     <strong>${escapeHtml(current)}</strong>
   </nav>`;
 }

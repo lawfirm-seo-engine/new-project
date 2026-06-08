@@ -11,11 +11,11 @@ const groups = [
   { siteUrl: "https://new-project-c.pages.dev", pathPrefix: "success", suffix: "result" },
   { siteUrl: "https://new-project-d.pages.dev", pathPrefix: "briefing", suffix: "review" },
   { siteUrl: "https://new-project-e.pages.dev", pathPrefix: "case", suffix: "issue" },
-  { siteUrl: "https://law-a.pages.dev", pathPrefix: "prosecute", suffix: "legal-action" },
-  { siteUrl: "https://law-b.pages.dev", pathPrefix: "civil", suffix: "recovery" },
-  { siteUrl: "https://law-c.pages.dev", pathPrefix: "success", suffix: "solution" },
-  { siteUrl: "https://law-d.pages.dev", pathPrefix: "briefing", suffix: "report" },
-  { siteUrl: "https://law-e.pages.dev", pathPrefix: "case", suffix: "incident" },
+  { siteUrl: "https://law-a.pages.dev", pathPrefix: "criminal", suffix: "legal-action" },
+  { siteUrl: "https://law-b.pages.dev", pathPrefix: "litigation", suffix: "recovery" },
+  { siteUrl: "https://law-c.pages.dev", pathPrefix: "results", suffix: "solution" },
+  { siteUrl: "https://law-d.pages.dev", pathPrefix: "insights", suffix: "report" },
+  { siteUrl: "https://law-e.pages.dev", pathPrefix: "incidents", suffix: "incident" },
 ];
 
 const noSuffixSlugs = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];

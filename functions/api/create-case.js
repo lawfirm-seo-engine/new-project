@@ -208,11 +208,11 @@ async function pingIndexNow(slug, key) {
     { host: "new-project-c.pages.dev", prefix: "success", suffix: "result" },
     { host: "new-project-d.pages.dev", prefix: "briefing", suffix: "review" },
     { host: "new-project-e.pages.dev", prefix: "case", suffix: "issue" },
-    { host: "law-a.pages.dev", prefix: "prosecute", suffix: "legal-action" },
-    { host: "law-b.pages.dev", prefix: "civil", suffix: "recovery" },
-    { host: "law-c.pages.dev", prefix: "success", suffix: "solution" },
-    { host: "law-d.pages.dev", prefix: "briefing", suffix: "report" },
-    { host: "law-e.pages.dev", prefix: "case", suffix: "incident" },
+    { host: "law-a.pages.dev", prefix: "criminal", suffix: "legal-action" },
+    { host: "law-b.pages.dev", prefix: "litigation", suffix: "recovery" },
+    { host: "law-c.pages.dev", prefix: "results", suffix: "solution" },
+    { host: "law-d.pages.dev", prefix: "insights", suffix: "report" },
+    { host: "law-e.pages.dev", prefix: "incidents", suffix: "incident" },
   ];
   await Promise.allSettled(
     groups.map(({ host, prefix, suffix }) => {

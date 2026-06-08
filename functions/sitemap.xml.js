@@ -4,11 +4,11 @@ const GROUP_MAP = {
   "new-project-c.pages.dev": { prefix: "success", suffix: "result", siteUrl: "https://new-project-c.pages.dev" },
   "new-project-d.pages.dev": { prefix: "briefing", suffix: "review", siteUrl: "https://new-project-d.pages.dev" },
   "new-project-e.pages.dev": { prefix: "case", suffix: "issue", siteUrl: "https://new-project-e.pages.dev" },
-  "law-a.pages.dev": { prefix: "prosecute", suffix: "legal-action", siteUrl: "https://law-a.pages.dev" },
-  "law-b.pages.dev": { prefix: "civil", suffix: "recovery", siteUrl: "https://law-b.pages.dev" },
-  "law-c.pages.dev": { prefix: "success", suffix: "solution", siteUrl: "https://law-c.pages.dev" },
-  "law-d.pages.dev": { prefix: "briefing", suffix: "report", siteUrl: "https://law-d.pages.dev" },
-  "law-e.pages.dev": { prefix: "case", suffix: "incident", siteUrl: "https://law-e.pages.dev" },
+  "law-a.pages.dev": { prefix: "criminal", suffix: "legal-action", siteUrl: "https://law-a.pages.dev" },
+  "law-b.pages.dev": { prefix: "litigation", suffix: "recovery", siteUrl: "https://law-b.pages.dev" },
+  "law-c.pages.dev": { prefix: "results", suffix: "solution", siteUrl: "https://law-c.pages.dev" },
+  "law-d.pages.dev": { prefix: "insights", suffix: "report", siteUrl: "https://law-d.pages.dev" },
+  "law-e.pages.dev": { prefix: "incidents", suffix: "incident", siteUrl: "https://law-e.pages.dev" },
 };
 
 const NO_SUFFIX_SLUGS = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];

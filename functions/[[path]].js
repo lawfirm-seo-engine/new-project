@@ -59,7 +59,7 @@ const GROUPS = {
   },
   // ── law-* 도메인 ────────────────────────────────────────────────────────────
   "law-a.pages.dev": {
-    key: "a", pathPrefix: "prosecute", urlSlugSuffix: "legal-action", bodyClass: "domain-a",
+    key: "a", pathPrefix: "criminal", urlSlugSuffix: "legal-action", bodyClass: "domain-a",
     landingKey: "la",
     siteName: "금융피해 대응센터", shortName: "금융피해 대응센터",
     intent: "형사고소 · 법적제재 · 형사합의 · 회수", tone: "긴급 대응",
@@ -71,7 +71,7 @@ const GROUPS = {
     siteUrl: "https://law-a.pages.dev",
   },
   "law-b.pages.dev": {
-    key: "b", pathPrefix: "civil", urlSlugSuffix: "recovery", bodyClass: "domain-b",
+    key: "b", pathPrefix: "litigation", urlSlugSuffix: "recovery", bodyClass: "domain-b",
     landingKey: "lb",
     siteName: "피해금 회수 전략센터", shortName: "피해금 회수 전략센터",
     intent: "민사소송 · 가압류 · 손해배상 · 부당이득반환", tone: "회수 전략",
@@ -83,7 +83,7 @@ const GROUPS = {
     siteUrl: "https://law-b.pages.dev",
   },
   "law-c.pages.dev": {
-    key: "c", pathPrefix: "success", urlSlugSuffix: "solution", bodyClass: "domain-c",
+    key: "c", pathPrefix: "results", urlSlugSuffix: "solution", bodyClass: "domain-c",
     landingKey: "lc",
     siteName: "실제 회수 사례 아카이브", shortName: "실제 회수 사례 아카이브",
     intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수", tone: "결과 중심",
@@ -95,7 +95,7 @@ const GROUPS = {
     siteUrl: "https://law-c.pages.dev",
   },
   "law-d.pages.dev": {
-    key: "d", pathPrefix: "briefing", urlSlugSuffix: "report", bodyClass: "domain-d",
+    key: "d", pathPrefix: "insights", urlSlugSuffix: "report", bodyClass: "domain-d",
     landingKey: "ld",
     siteName: "피해 구조 브리핑", shortName: "피해 구조 브리핑",
     intent: "사건 개요 · 대응 방법 · 정보 요약", tone: "정보 요약",
@@ -107,7 +107,7 @@ const GROUPS = {
     siteUrl: "https://law-d.pages.dev",
   },
   "law-e.pages.dev": {
-    key: "e", pathPrefix: "case", urlSlugSuffix: "incident", bodyClass: "domain-e",
+    key: "e", pathPrefix: "incidents", urlSlugSuffix: "incident", bodyClass: "domain-e",
     landingKey: "le",
     siteName: "금융피해 통합 허브", shortName: "금융피해 통합 허브",
     intent: "전체 사건 허브 · 유형별 연결 · 관련 사건", tone: "통합 탐색",
@@ -301,6 +301,8 @@ function renderLanding(caseData, group, origin) {
   ].filter(Boolean).join("\n  ");
 
   const caseKeywordForSchema = primaryCaseKeyword(rawCaseName) || rawCaseName;
+  const breadcrumbCategory = breadcrumbLabel(group);
+  const breadcrumbPageName = groupPageTitle(rawCaseName, group.landingKey || group.key);
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -360,7 +362,8 @@ function renderLanding(caseData, group, origin) {
         "@id": `${canonical}#breadcrumb`,
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "홈", item: group.siteUrl + "/" },
-          { "@type": "ListItem", position: 2, name: caseKeywordForSchema, item: canonical },
+          { "@type": "ListItem", position: 2, name: breadcrumbCategory, item: `${group.siteUrl}/${group.pathPrefix}/` },
+          { "@type": "ListItem", position: 3, name: breadcrumbPageName, item: canonical },
         ],
       },
       {
@@ -1373,14 +1376,28 @@ function themeColor(key) {
   return { a: "#111827", b: "#173b57", c: "#174333", d: "#25314d", e: "#3b2f52" }[key] || "#111827";
 }
 
-function breadcrumbLabel(key) {
-  return { a: "형사고소", b: "민사소송", c: "성공사례", d: "AI브리핑", e: "전체허브" }[key] || "사건";
+function breadcrumbLabel(groupOrKey) {
+  const key = typeof groupOrKey === "string" ? groupOrKey : (groupOrKey.landingKey || groupOrKey.key);
+  return {
+    a: "형사고소",
+    b: "민사소송",
+    c: "성공사례",
+    d: "사건브리핑",
+    e: "사건현황",
+    la: "법적조치",
+    lb: "피해회복",
+    lc: "해결사례",
+    ld: "피해정보",
+    le: "진행현황",
+  }[key] || "사건현황";
 }
 
 function createHtmlBreadcrumb(group, caseName) {
-  const current = "긴급 대응";
+  const category = breadcrumbLabel(group);
+  const current = groupPageTitle(caseName, group.landingKey || group.key);
   return `<nav class="breadcrumb" aria-label="breadcrumb">
     <a href="${group.siteUrl}/">홈</a>
+    <a href="${group.siteUrl}/${group.pathPrefix}/">${esc(category)}</a>
     <strong>${esc(current)}</strong>
   </nav>`;
 }

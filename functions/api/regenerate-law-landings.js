@@ -5,31 +5,31 @@ const LAW_GROUPS = [
   {
     key: "la",
     siteUrl: "https://law-a.pages.dev",
-    pathPrefix: "prosecute",
+    pathPrefix: "criminal",
     intent: "형사고소, 금융피해 신고, 계좌 추적, 지급정지",
   },
   {
     key: "lb",
     siteUrl: "https://law-b.pages.dev",
-    pathPrefix: "civil",
+    pathPrefix: "litigation",
     intent: "피해금 회수, 민사소송, 가압류, 부당이득반환, 회수 전략",
   },
   {
     key: "lc",
     siteUrl: "https://law-c.pages.dev",
-    pathPrefix: "success",
+    pathPrefix: "results",
     intent: "실제 회수 사례, 아카이브, 대응 흐름, 회수율",
   },
   {
     key: "ld",
     siteUrl: "https://law-d.pages.dev",
-    pathPrefix: "briefing",
+    pathPrefix: "insights",
     intent: "AI 분석, 금융사기 패턴, 즉시 대응, 증거 보존",
   },
   {
     key: "le",
     siteUrl: "https://law-e.pages.dev",
-    pathPrefix: "case",
+    pathPrefix: "incidents",
     intent: "금융사기 허브, 형사고소, 피해금 회수, 사례 아카이브, AI 브리핑",
   },
 ];
