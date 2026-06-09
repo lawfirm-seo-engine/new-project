@@ -58,7 +58,7 @@ const GROUPS = {
     siteUrl: "https://gnlaw-center.co.kr",
   },
   // ── law-* 도메인 ────────────────────────────────────────────────────────────
-  "law-a.pages.dev": {
+  "xn--jj0b0cw1o75qwua31zyfp19e.kr": {
     key: "a", pathPrefix: "criminal", urlSlugSuffix: "legal-action", bodyClass: "domain-a",
     landingKey: "la",
     siteName: "금융피해 대응센터", shortName: "금융피해 대응센터",
@@ -68,9 +68,9 @@ const GROUPS = {
     ctaLabel: "피해 사실 접수", ogType: "article",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
     naverVerification: "f2ddde82410ec6af775d6ea2aa4952bbb56aa1ab",
-    siteUrl: "https://law-a.pages.dev",
+    siteUrl: "https://금융사기대응센터.kr",
   },
-  "law-b.pages.dev": {
+  "xn--jj0b77gmsoyyfbet54ddvg2ma.kr": {
     key: "b", pathPrefix: "litigation", urlSlugSuffix: "recovery", bodyClass: "domain-b",
     landingKey: "lb",
     siteName: "피해금 회수 전략센터", shortName: "피해금 회수 전략센터",
@@ -80,9 +80,9 @@ const GROUPS = {
     ctaLabel: "회수 절차 문의", ogType: "article",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
     naverVerification: "df4104477628408f1b9f971d360d7a9207c8f894",
-    siteUrl: "https://law-b.pages.dev",
+    siteUrl: "https://금융피해대응센터.kr",
   },
-  "law-c.pages.dev": {
+  "xn--2e0bno217bsqa58yp8nd1g2ma.kr": {
     key: "c", pathPrefix: "results", urlSlugSuffix: "solution", bodyClass: "domain-c",
     landingKey: "lc",
     siteName: "실제 회수 사례 아카이브", shortName: "실제 회수 사례 아카이브",
@@ -92,9 +92,9 @@ const GROUPS = {
     ctaLabel: "사례 비교 문의", ogType: "article",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
     naverVerification: "220c61ef5bdb2bae3d4cf69b16c583f743f48a37",
-    siteUrl: "https://law-c.pages.dev",
+    siteUrl: "https://사기피해구제센터.kr",
   },
-  "law-d.pages.dev": {
+  "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr": {
     key: "d", pathPrefix: "insights", urlSlugSuffix: "report", bodyClass: "domain-d",
     landingKey: "ld",
     siteName: "피해 구조 브리핑", shortName: "피해 구조 브리핑",
@@ -104,9 +104,9 @@ const GROUPS = {
     ctaLabel: "정보 확인", ogType: "article",
     descriptionSuffix: "사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
     naverVerification: "d33ae2f29806237bbb7bbdab033a054d7691a6e5",
-    siteUrl: "https://law-d.pages.dev",
+    siteUrl: "https://리딩방피해회수센터.kr",
   },
-  "law-e.pages.dev": {
+  "xn--ok0b84g7tosqai7vyka788co0b.kr": {
     key: "e", pathPrefix: "incidents", urlSlugSuffix: "incident", bodyClass: "domain-e",
     landingKey: "le",
     siteName: "금융피해 통합 허브", shortName: "금융피해 통합 허브",
@@ -116,7 +116,7 @@ const GROUPS = {
     ctaLabel: "관련 정보 확인", ogType: "article",
     descriptionSuffix: "피해 대응 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
     naverVerification: "38944ffeef5410881604cfefef4c3df44de7db93",
-    siteUrl: "https://law-e.pages.dev",
+    siteUrl: "https://투자사기대응센터.kr",
   },
 };
 

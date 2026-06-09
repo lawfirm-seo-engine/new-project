@@ -11,11 +11,11 @@ const groups = [
   { siteUrl: "https://gnlaw-recovery.co.kr", pathPrefix: "success", suffix: "result" },
   { siteUrl: "https://gnlaw-case.co.kr", pathPrefix: "briefing", suffix: "review" },
   { siteUrl: "https://gnlaw-center.co.kr", pathPrefix: "case", suffix: "issue" },
-  { siteUrl: "https://law-a.pages.dev", pathPrefix: "criminal", suffix: "legal-action" },
-  { siteUrl: "https://law-b.pages.dev", pathPrefix: "litigation", suffix: "recovery" },
-  { siteUrl: "https://law-c.pages.dev", pathPrefix: "results", suffix: "solution" },
-  { siteUrl: "https://law-d.pages.dev", pathPrefix: "insights", suffix: "report" },
-  { siteUrl: "https://law-e.pages.dev", pathPrefix: "incidents", suffix: "incident" },
+  { siteUrl: "https://금융사기대응센터.kr", pathPrefix: "criminal", suffix: "legal-action" },
+  { siteUrl: "https://금융피해대응센터.kr", pathPrefix: "litigation", suffix: "recovery" },
+  { siteUrl: "https://사기피해구제센터.kr", pathPrefix: "results", suffix: "solution" },
+  { siteUrl: "https://리딩방피해회수센터.kr", pathPrefix: "insights", suffix: "report" },
+  { siteUrl: "https://투자사기대응센터.kr", pathPrefix: "incidents", suffix: "incident" },
 ];
 
 const noSuffixSlugs = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];

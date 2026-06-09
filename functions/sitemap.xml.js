@@ -4,11 +4,11 @@ const GROUP_MAP = {
   "gnlaw-recovery.co.kr": { prefix: "success", suffix: "result", siteUrl: "https://gnlaw-recovery.co.kr" },
   "gnlaw-case.co.kr": { prefix: "briefing", suffix: "review", siteUrl: "https://gnlaw-case.co.kr" },
   "gnlaw-center.co.kr": { prefix: "case", suffix: "issue", siteUrl: "https://gnlaw-center.co.kr" },
-  "law-a.pages.dev": { prefix: "criminal", suffix: "legal-action", siteUrl: "https://law-a.pages.dev" },
-  "law-b.pages.dev": { prefix: "litigation", suffix: "recovery", siteUrl: "https://law-b.pages.dev" },
-  "law-c.pages.dev": { prefix: "results", suffix: "solution", siteUrl: "https://law-c.pages.dev" },
-  "law-d.pages.dev": { prefix: "insights", suffix: "report", siteUrl: "https://law-d.pages.dev" },
-  "law-e.pages.dev": { prefix: "incidents", suffix: "incident", siteUrl: "https://law-e.pages.dev" },
+  "xn--jj0b0cw1o75qwua31zyfp19e.kr": { prefix: "criminal", suffix: "legal-action", siteUrl: "https://금융사기대응센터.kr" },
+  "xn--jj0b77gmsoyyfbet54ddvg2ma.kr": { prefix: "litigation", suffix: "recovery", siteUrl: "https://금융피해대응센터.kr" },
+  "xn--2e0bno217bsqa58yp8nd1g2ma.kr": { prefix: "results", suffix: "solution", siteUrl: "https://사기피해구제센터.kr" },
+  "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr": { prefix: "insights", suffix: "report", siteUrl: "https://리딩방피해회수센터.kr" },
+  "xn--ok0b84g7tosqai7vyka788co0b.kr": { prefix: "incidents", suffix: "incident", siteUrl: "https://투자사기대응센터.kr" },
 };
 
 const NO_SUFFIX_SLUGS = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];

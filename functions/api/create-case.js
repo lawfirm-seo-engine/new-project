@@ -208,11 +208,11 @@ async function pingIndexNow(slug, key) {
     { host: "gnlaw-recovery.co.kr", prefix: "success", suffix: "result" },
     { host: "gnlaw-case.co.kr", prefix: "briefing", suffix: "review" },
     { host: "gnlaw-center.co.kr", prefix: "case", suffix: "issue" },
-    { host: "law-a.pages.dev", prefix: "criminal", suffix: "legal-action" },
-    { host: "law-b.pages.dev", prefix: "litigation", suffix: "recovery" },
-    { host: "law-c.pages.dev", prefix: "results", suffix: "solution" },
-    { host: "law-d.pages.dev", prefix: "insights", suffix: "report" },
-    { host: "law-e.pages.dev", prefix: "incidents", suffix: "incident" },
+    { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", prefix: "criminal", suffix: "legal-action" },
+    { host: "xn--jj0b77gmsoyyfbet54ddvg2ma.kr", prefix: "litigation", suffix: "recovery" },
+    { host: "xn--2e0bno217bsqa58yp8nd1g2ma.kr", prefix: "results", suffix: "solution" },
+    { host: "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", prefix: "insights", suffix: "report" },
+    { host: "xn--ok0b84g7tosqai7vyka788co0b.kr", prefix: "incidents", suffix: "incident" },
   ];
   await Promise.allSettled(
     groups.map(({ host, prefix, suffix }) => {

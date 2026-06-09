@@ -48,7 +48,7 @@ const GROUPS = [
   {
     key: "la",
     label: "금융피해 대응센터형",
-    siteUrl: "https://law-a.pages.dev",
+    siteUrl: "https://금융사기대응센터.kr",
     pathPrefix: "criminal",
     suffix: "금융피해 형사고소 법적 대응",
     intent: "형사고소, 금융피해 신고, 계좌 추적, 지급정지",
@@ -57,7 +57,7 @@ const GROUPS = [
   {
     key: "lb",
     label: "피해금 회수 전략센터형",
-    siteUrl: "https://law-b.pages.dev",
+    siteUrl: "https://금융피해대응센터.kr",
     pathPrefix: "litigation",
     suffix: "피해금 회수 전략 민사소송",
     intent: "피해금 회수, 민사소송, 가압류, 부당이득반환, 회수 전략",
@@ -66,7 +66,7 @@ const GROUPS = [
   {
     key: "lc",
     label: "실제 회수 사례 아카이브형",
-    siteUrl: "https://law-c.pages.dev",
+    siteUrl: "https://사기피해구제센터.kr",
     pathPrefix: "results",
     suffix: "실제 피해금 회수 사례 아카이브",
     intent: "실제 회수 사례, 아카이브, 대응 흐름, 회수율",
@@ -75,7 +75,7 @@ const GROUPS = [
   {
     key: "ld",
     label: "AI 금융사기 브리핑형",
-    siteUrl: "https://law-d.pages.dev",
+    siteUrl: "https://리딩방피해회수센터.kr",
     pathPrefix: "insights",
     suffix: "AI 금융사기 브리핑 분석",
     intent: "AI 분석, 금융사기 패턴, 즉시 대응, 증거 보존",
@@ -84,7 +84,7 @@ const GROUPS = [
   {
     key: "le",
     label: "금융사기 사건 허브형",
-    siteUrl: "https://law-e.pages.dev",
+    siteUrl: "https://투자사기대응센터.kr",
     pathPrefix: "incidents",
     suffix: "금융사기 피해 사건 통합 허브",
     intent: "금융사기 허브, 형사고소, 피해금 회수, 사례 아카이브, AI 브리핑",
