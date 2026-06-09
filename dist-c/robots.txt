@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://new-project-c.pages.dev/sitemap-index.xml
-Sitemap: https://new-project-c.pages.dev/sitemap.xml
+Sitemap: https://gnlaw-recovery.co.kr/sitemap-index.xml
+Sitemap: https://gnlaw-recovery.co.kr/sitemap.xml

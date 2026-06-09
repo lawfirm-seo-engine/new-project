@@ -19,10 +19,10 @@ const ORGANIZATION = {
 
 const crossLinks = [
   { key: "a", label: "형사고소", url: "https://gnlaw-criminal.co.kr", prefix: "prosecute" },
-  { key: "b", label: "민사소송", url: "https://new-project-b.pages.dev", prefix: "civil" },
-  { key: "c", label: "성공사례", url: "https://new-project-c.pages.dev", prefix: "success" },
-  { key: "d", label: "사건정보", url: "https://new-project-d.pages.dev", prefix: "briefing" },
-  { key: "e", label: "전체허브", url: "https://new-project-e.pages.dev", prefix: "case" },
+  { key: "b", label: "민사소송", url: "https://gnlaw-civil.co.kr", prefix: "civil" },
+  { key: "c", label: "성공사례", url: "https://gnlaw-recovery.co.kr", prefix: "success" },
+  { key: "d", label: "사건정보", url: "https://gnlaw-case.co.kr", prefix: "briefing" },
+  { key: "e", label: "전체허브", url: "https://gnlaw-center.co.kr", prefix: "case" },
 ];
 
 const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
@@ -57,7 +57,7 @@ const groups = [
     key: "b",
     outDir: path.join(root, "dist-b"),
     template: "group-b.html",
-    siteUrl: "https://new-project-b.pages.dev",
+    siteUrl: "https://gnlaw-civil.co.kr",
     pathPrefix: "civil",
     urlSlugSuffix: "settlement",
     bodyClass: "domain-b",
@@ -82,7 +82,7 @@ const groups = [
     key: "c",
     outDir: path.join(root, "dist-c"),
     template: "group-c.html",
-    siteUrl: "https://new-project-c.pages.dev",
+    siteUrl: "https://gnlaw-recovery.co.kr",
     pathPrefix: "success",
     urlSlugSuffix: "result",
     bodyClass: "domain-c",
@@ -107,7 +107,7 @@ const groups = [
     key: "d",
     outDir: path.join(root, "dist-d"),
     template: "group-d.html",
-    siteUrl: "https://new-project-d.pages.dev",
+    siteUrl: "https://gnlaw-case.co.kr",
     pathPrefix: "briefing",
     urlSlugSuffix: "review",
     bodyClass: "domain-d",
@@ -132,7 +132,7 @@ const groups = [
     key: "e",
     outDir: path.join(root, "dist-e"),
     template: "group-e.html",
-    siteUrl: "https://new-project-e.pages.dev",
+    siteUrl: "https://gnlaw-center.co.kr",
     pathPrefix: "case",
     urlSlugSuffix: "issue",
     bodyClass: "domain-e",
@@ -1086,7 +1086,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   ];
 
   if (slug) {
-    links.push(`<link rel="prefetch" href="https://new-project-e.pages.dev/case/${slug}/">`);
+    links.push(`<link rel="prefetch" href="https://gnlaw-center.co.kr/case/${slug}/">`);
     links.push(`<link rel="prefetch" href="${landing.ogImage}" as="image">`);
   }
 

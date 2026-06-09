@@ -1,9 +1,9 @@
 const GROUP_MAP = {
   "gnlaw-criminal.co.kr": { prefix: "prosecute", suffix: "litigation", siteUrl: "https://gnlaw-criminal.co.kr" },
-  "new-project-b.pages.dev": { prefix: "civil", suffix: "settlement", siteUrl: "https://new-project-b.pages.dev" },
-  "new-project-c.pages.dev": { prefix: "success", suffix: "result", siteUrl: "https://new-project-c.pages.dev" },
-  "new-project-d.pages.dev": { prefix: "briefing", suffix: "review", siteUrl: "https://new-project-d.pages.dev" },
-  "new-project-e.pages.dev": { prefix: "case", suffix: "issue", siteUrl: "https://new-project-e.pages.dev" },
+  "gnlaw-civil.co.kr": { prefix: "civil", suffix: "settlement", siteUrl: "https://gnlaw-civil.co.kr" },
+  "gnlaw-recovery.co.kr": { prefix: "success", suffix: "result", siteUrl: "https://gnlaw-recovery.co.kr" },
+  "gnlaw-case.co.kr": { prefix: "briefing", suffix: "review", siteUrl: "https://gnlaw-case.co.kr" },
+  "gnlaw-center.co.kr": { prefix: "case", suffix: "issue", siteUrl: "https://gnlaw-center.co.kr" },
   "law-a.pages.dev": { prefix: "criminal", suffix: "legal-action", siteUrl: "https://law-a.pages.dev" },
   "law-b.pages.dev": { prefix: "litigation", suffix: "recovery", siteUrl: "https://law-b.pages.dev" },
   "law-c.pages.dev": { prefix: "results", suffix: "solution", siteUrl: "https://law-c.pages.dev" },

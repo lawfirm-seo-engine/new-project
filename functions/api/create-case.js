@@ -204,10 +204,10 @@ async function pingIndexNow(slug, key) {
   const NO_SUFFIX = new Set(["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"]);
   const groups = [
     { host: "gnlaw-criminal.co.kr", prefix: "prosecute", suffix: "litigation" },
-    { host: "new-project-b.pages.dev", prefix: "civil", suffix: "settlement" },
-    { host: "new-project-c.pages.dev", prefix: "success", suffix: "result" },
-    { host: "new-project-d.pages.dev", prefix: "briefing", suffix: "review" },
-    { host: "new-project-e.pages.dev", prefix: "case", suffix: "issue" },
+    { host: "gnlaw-civil.co.kr", prefix: "civil", suffix: "settlement" },
+    { host: "gnlaw-recovery.co.kr", prefix: "success", suffix: "result" },
+    { host: "gnlaw-case.co.kr", prefix: "briefing", suffix: "review" },
+    { host: "gnlaw-center.co.kr", prefix: "case", suffix: "issue" },
     { host: "law-a.pages.dev", prefix: "criminal", suffix: "legal-action" },
     { host: "law-b.pages.dev", prefix: "litigation", suffix: "recovery" },
     { host: "law-c.pages.dev", prefix: "results", suffix: "solution" },

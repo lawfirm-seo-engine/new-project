@@ -7,10 +7,10 @@ const latest = cases.at(-1);
 
 const groups = [
   { siteUrl: "https://gnlaw-criminal.co.kr", pathPrefix: "prosecute", suffix: "litigation" },
-  { siteUrl: "https://new-project-b.pages.dev", pathPrefix: "civil", suffix: "settlement" },
-  { siteUrl: "https://new-project-c.pages.dev", pathPrefix: "success", suffix: "result" },
-  { siteUrl: "https://new-project-d.pages.dev", pathPrefix: "briefing", suffix: "review" },
-  { siteUrl: "https://new-project-e.pages.dev", pathPrefix: "case", suffix: "issue" },
+  { siteUrl: "https://gnlaw-civil.co.kr", pathPrefix: "civil", suffix: "settlement" },
+  { siteUrl: "https://gnlaw-recovery.co.kr", pathPrefix: "success", suffix: "result" },
+  { siteUrl: "https://gnlaw-case.co.kr", pathPrefix: "briefing", suffix: "review" },
+  { siteUrl: "https://gnlaw-center.co.kr", pathPrefix: "case", suffix: "issue" },
   { siteUrl: "https://law-a.pages.dev", pathPrefix: "criminal", suffix: "legal-action" },
   { siteUrl: "https://law-b.pages.dev", pathPrefix: "litigation", suffix: "recovery" },
   { siteUrl: "https://law-c.pages.dev", pathPrefix: "results", suffix: "solution" },

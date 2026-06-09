@@ -13,7 +13,7 @@ const GROUPS = {
     naverVerification: "bfc9894c3704ecb4fae524d6dbbb1dc61ecb6488",
     siteUrl: "https://gnlaw-criminal.co.kr",
   },
-  "new-project-b.pages.dev": {
+  "gnlaw-civil.co.kr": {
     key: "b", pathPrefix: "civil", urlSlugSuffix: "settlement", bodyClass: "domain-b",
     siteName: "민사 회수 전략실", shortName: "민사 회수",
     intent: "민사소송 · 가압류 · 손해배상 · 부당이득반환", tone: "회수 전략",
@@ -22,9 +22,9 @@ const GROUPS = {
     ctaLabel: "회수 절차 문의", ogType: "article",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
     naverVerification: "055ad63c2d7af8f9a348cd098a356d22ffbc5d49",
-    siteUrl: "https://new-project-b.pages.dev",
+    siteUrl: "https://gnlaw-civil.co.kr",
   },
-  "new-project-c.pages.dev": {
+  "gnlaw-recovery.co.kr": {
     key: "c", pathPrefix: "success", urlSlugSuffix: "result", bodyClass: "domain-c",
     siteName: "피해 회수 성공사례", shortName: "성공사례",
     intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수", tone: "결과 중심",
@@ -33,9 +33,9 @@ const GROUPS = {
     ctaLabel: "사례 비교 문의", ogType: "article",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
     naverVerification: "75b446d5dc7c0006c1b15c9e51f46f71345e03d8",
-    siteUrl: "https://new-project-c.pages.dev",
+    siteUrl: "https://gnlaw-recovery.co.kr",
   },
-  "new-project-d.pages.dev": {
+  "gnlaw-case.co.kr": {
     key: "d", pathPrefix: "briefing", urlSlugSuffix: "review", bodyClass: "domain-d",
     siteName: "피해 사건 정보", shortName: "사건 정보",
     intent: "사건 개요 · 대응 방법 · 정보 요약", tone: "정보 요약",
@@ -44,9 +44,9 @@ const GROUPS = {
     ctaLabel: "정보 확인", ogType: "article",
     descriptionSuffix: "사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
     naverVerification: "a27aaeb3544f1e30860eed6045a0c50abe6705b5",
-    siteUrl: "https://new-project-d.pages.dev",
+    siteUrl: "https://gnlaw-case.co.kr",
   },
-  "new-project-e.pages.dev": {
+  "gnlaw-center.co.kr": {
     key: "e", pathPrefix: "case", urlSlugSuffix: "issue", bodyClass: "domain-e",
     siteName: "사기피해 통합 허브", shortName: "전체 허브",
     intent: "전체 사건 허브 · 유형별 연결 · 관련 사건", tone: "통합 탐색",
@@ -55,7 +55,7 @@ const GROUPS = {
     ctaLabel: "관련 정보 확인", ogType: "article",
     descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
     naverVerification: "ffa1a3b7c30df21443214e8514e4986358489efe",
-    siteUrl: "https://new-project-e.pages.dev",
+    siteUrl: "https://gnlaw-center.co.kr",
   },
   // ── law-* 도메인 ────────────────────────────────────────────────────────────
   "law-a.pages.dev": {
@@ -122,10 +122,10 @@ const GROUPS = {
 
 const CROSS_LINKS = [
   { key: "a", label: "형사고소", url: "https://gnlaw-criminal.co.kr", prefix: "prosecute" },
-  { key: "b", label: "민사소송", url: "https://new-project-b.pages.dev", prefix: "civil" },
-  { key: "c", label: "성공사례", url: "https://new-project-c.pages.dev", prefix: "success" },
-  { key: "d", label: "사건정보", url: "https://new-project-d.pages.dev", prefix: "briefing" },
-  { key: "e", label: "전체허브", url: "https://new-project-e.pages.dev", prefix: "case" },
+  { key: "b", label: "민사소송", url: "https://gnlaw-civil.co.kr", prefix: "civil" },
+  { key: "c", label: "성공사례", url: "https://gnlaw-recovery.co.kr", prefix: "success" },
+  { key: "d", label: "사건정보", url: "https://gnlaw-case.co.kr", prefix: "briefing" },
+  { key: "e", label: "전체허브", url: "https://gnlaw-center.co.kr", prefix: "case" },
 ];
 
 export async function onRequest(context) {

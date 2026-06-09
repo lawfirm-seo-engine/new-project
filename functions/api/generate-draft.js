@@ -11,7 +11,7 @@ const GROUPS = [
   {
     key: "b",
     label: "민사형",
-    siteUrl: "https://new-project-b.pages.dev",
+    siteUrl: "https://gnlaw-civil.co.kr",
     pathPrefix: "civil",
     suffix: "사기 민사소송 회수 절차",
     intent: "민사소송, 가압류, 손해배상, 부당이득반환, 민사 합의",
@@ -20,7 +20,7 @@ const GROUPS = [
   {
     key: "c",
     label: "성공사례형",
-    siteUrl: "https://new-project-c.pages.dev",
+    siteUrl: "https://gnlaw-recovery.co.kr",
     pathPrefix: "success",
     suffix: "사기 피해금 회수 성공사례",
     intent: "성공사례, 지역, 회수율, 전액 회수, 일부 회수",
@@ -29,7 +29,7 @@ const GROUPS = [
   {
     key: "d",
     label: "AI브리핑형",
-    siteUrl: "https://new-project-d.pages.dev",
+    siteUrl: "https://gnlaw-case.co.kr",
     pathPrefix: "briefing",
     suffix: "사기 사건 AI브리핑",
     intent: "사건 개요, 피해 구조, 대응 방법, 증거 보존, 주의사항",
@@ -38,7 +38,7 @@ const GROUPS = [
   {
     key: "e",
     label: "전체 허브형",
-    siteUrl: "https://new-project-e.pages.dev",
+    siteUrl: "https://gnlaw-center.co.kr",
     pathPrefix: "case",
     suffix: "사기 피해 전체 대응 허브",
     intent: "전체 허브, 사건명 리스트, 관련 사건, 유형별 대응 경로",
