@@ -597,8 +597,7 @@ function createHeroCta(caseName = "") {
     <p class="hero-cta-lead">입금 전 자료를 먼저 확인하세요.</p>
     <div>
       <a href="#consult" class="hero-cta-primary">상담<br>접수하기</a>
-      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증<br>대화 캡처 보내기</a>
-      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 문의<br>02-6952-3695</a>
+      <a href="tel:0263480406" class="hero-cta-secondary">추가 입금 전 문의<br>02-6348-0406</a>
     </div>
   </div>`;
 
@@ -608,8 +607,7 @@ function createHeroCta(caseName = "") {
     <p class="hero-cta-lead">${lead}</p>
     <div>
       <a href="#consult" class="hero-cta-primary">상담<br>접수하기</a>
-      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증<br>대화 캡처 보내기</a>
-      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 문의<br>02-6952-3695</a>
+      <a href="tel:0263480406" class="hero-cta-secondary">추가 입금 전 문의<br>02-6348-0406</a>
     </div>
   </div>`;
 
@@ -617,8 +615,7 @@ function createHeroCta(caseName = "") {
     <p>출금 지연, 추가 입금 요구, 대화방 삭제 정황이 있다면 본문을 읽기 전에 현재 자료부터 점검하세요.</p>
     <div>
       <a href="#consult" class="hero-cta-primary">상담 접수하기</a>
-      <a href="http://pf.kakao.com/_xcypmn/chat" class="hero-cta-secondary" target="_blank" rel="noopener noreferrer">카톡으로 입금증·대화 캡처 보내기</a>
-      <a href="tel:0269523695" class="hero-cta-secondary">추가 입금 전 02-6952-3695 전화문의</a>
+      <a href="tel:0263480406" class="hero-cta-secondary">추가 입금 전 02-6348-0406 전화문의</a>
     </div>
   </div>`;
 }
@@ -760,11 +757,10 @@ function createFloatingWidgets(caseItem, group) {
   const cn = escapeHtml(normalizeCaseName(caseItem.caseName));
   const siteName = escapeHtml(group.siteName);
   return `<div class="floating-contact">
-  <a href="tel:02-6952-3695" class="float-btn phone">전화문의</a>
-  <a href="http://pf.kakao.com/_xcypmn/chat" class="float-btn kakao" target="_blank" rel="noopener noreferrer">카톡으로 캡처 보내기</a>
+  <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
-  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6952-3695</span>
+  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6348-0406</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
@@ -942,7 +938,6 @@ function createEvidenceCheckSection() {
     <li>사이트 주소, 로그인 화면, 출금 제한 안내 저장</li>
     <li>세금·보증금·인증비 등 추가 입금 요구 메시지 보존</li>
   </ul>
-  <a href="http://pf.kakao.com/_xcypmn/chat" target="_blank" rel="noopener noreferrer">카톡으로 자료 점검 요청</a>
 </section>`;
 }
 
@@ -954,7 +949,7 @@ function createInlineCta(text = "비슷한 피해 흐름이 보인다면 추가 
   <p>${escapeHtml(text)}</p>
   <div>
     <a href="#consult">상담 접수</a>
-    <a href="tel:0269523695">전화 상담</a>
+    <a href="tel:0263480406">전화 상담</a>
   </div>
 </aside>`;
 }
@@ -1160,11 +1155,10 @@ const HUB_SUFFIX = { a: "형사고소", b: "민사소송", c: "성공사례", d:
 function createHubFloatingWidgets(group) {
   const sn = JSON.stringify(group.siteName);
   return `<div class="floating-contact">
-  <a href="tel:02-6952-3695" class="float-btn phone">전화문의</a>
-  <a href="http://pf.kakao.com/_xcypmn/chat" class="float-btn kakao" target="_blank" rel="noopener noreferrer">카톡으로 캡처 보내기</a>
+  <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
-  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6952-3695</span>
+  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6348-0406</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
