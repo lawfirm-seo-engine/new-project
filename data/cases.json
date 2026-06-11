@@ -5805,7 +5805,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 5646,
+    "landingViews": 5645,
     "reports": 9,
     "summary": "NEWWORLD 사기 해외선물 HTS 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6609,7 +6609,7 @@
     "createdAt": "2026-06-11",
     "updatedAt": "2026-06-11",
     "thumbnailUrl": "",
-    "landingViews": 1281,
+    "landingViews": 1280,
     "reports": 34,
     "summary": "자누스 헨더슨 사기 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6630,7 +6630,7 @@
     "createdAt": "2026-06-11",
     "updatedAt": "2026-06-11",
     "thumbnailUrl": "",
-    "landingViews": 6005,
+    "landingViews": 6004,
     "reports": 11,
     "summary": "Janus Henderson 사기 투자방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6651,7 +6651,7 @@
     "createdAt": "2026-06-11",
     "updatedAt": "2026-06-11",
     "thumbnailUrl": "",
-    "landingViews": 3102,
+    "landingViews": 3101,
     "reports": 27,
     "summary": "JH ONE 사기 어플 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6659,6 +6659,26 @@
       "ONE",
       "사기",
       "어플",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "jeongsujin",
+    "caseName": "정수진 사기 리딩방",
+    "category": "형사대응",
+    "createdAt": "2026-06-11",
+    "updatedAt": "2026-06-11",
+    "thumbnailUrl": "",
+    "landingViews": 1030,
+    "reports": 20,
+    "summary": "정수진 사기 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "정수진",
+      "사기",
+      "리딩방",
       "사기피해",
       "피해금회수",
       "증거보존"
