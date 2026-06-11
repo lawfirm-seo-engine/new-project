@@ -10,7 +10,7 @@ const GROUPS = {
     ctaText: "입금 내역, 대화 내용, 사이트 주소를 기준으로 고소장 작성과 계좌 추적 방향을 검토합니다.",
     ctaLabel: "피해 사실 접수", ogType: "article",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
-    naverVerification: "bfc9894c3704ecb4fae524d6dbbb1dc61ecb6488",
+    naverVerification: "8ac581a40e5eda3767c63ce7d27c155ccc8ea98f",
     siteUrl: "https://gnlaw-criminal.co.kr",
   },
   "gnlaw-civil.co.kr": {
@@ -21,7 +21,7 @@ const GROUPS = {
     ctaText: "상대방 특정 가능성, 입금 계좌, 계약·약정 자료를 기준으로 보전처분과 본안소송을 함께 봅니다.",
     ctaLabel: "회수 절차 문의", ogType: "article",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
-    naverVerification: "055ad63c2d7af8f9a348cd098a356d22ffbc5d49",
+    naverVerification: "4ebf5db77cc0b879b9f9f6c612d318bfe95026dc",
     siteUrl: "https://gnlaw-civil.co.kr",
   },
   "gnlaw-recovery.co.kr": {
@@ -32,7 +32,7 @@ const GROUPS = {
     ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
     ctaLabel: "사례 비교 문의", ogType: "article",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
-    naverVerification: "75b446d5dc7c0006c1b15c9e51f46f71345e03d8",
+    naverVerification: "c6bcb9fcd45bfd0c4306d625e2484f60f7f96099",
     siteUrl: "https://gnlaw-recovery.co.kr",
   },
   "gnlaw-case.co.kr": {
@@ -43,7 +43,7 @@ const GROUPS = {
     ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
     ctaLabel: "정보 확인", ogType: "article",
     descriptionSuffix: "사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
-    naverVerification: "a27aaeb3544f1e30860eed6045a0c50abe6705b5",
+    naverVerification: "ed1dc8d413475000d33979ea7094c62feda2539c",
     siteUrl: "https://gnlaw-case.co.kr",
   },
   "gnlaw-center.co.kr": {
@@ -54,7 +54,7 @@ const GROUPS = {
     ctaText: "하나의 사건을 법적 대응, 회수 절차, 사례, 정보 요약 관점으로 나누어 확인할 수 있습니다.",
     ctaLabel: "관련 정보 확인", ogType: "article",
     descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
-    naverVerification: "ffa1a3b7c30df21443214e8514e4986358489efe",
+    naverVerification: "11d695d7d711ce5e50abbe85ae49a60242a37e70",
     siteUrl: "https://gnlaw-center.co.kr",
   },
   // ── law-* 도메인 ────────────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ const GROUPS = {
     ctaText: "입금 내역, 대화 내용, 사이트 주소를 기준으로 고소장 작성과 계좌 추적 방향을 검토합니다.",
     ctaLabel: "피해 사실 접수", ogType: "article",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
-    naverVerification: "f2ddde82410ec6af775d6ea2aa4952bbb56aa1ab",
+    naverVerification: "b7340a4493754bfb33fa4f961ed0185300848065",
     siteUrl: "https://금융사기대응센터.kr",
   },
   "xn--jj0b77gmsoyyfbet54ddvg2ma.kr": {
@@ -79,7 +79,7 @@ const GROUPS = {
     ctaText: "상대방 특정 가능성, 입금 계좌, 계약·약정 자료를 기준으로 보전처분과 본안소송을 함께 봅니다.",
     ctaLabel: "회수 절차 문의", ogType: "article",
     descriptionSuffix: "민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.",
-    naverVerification: "df4104477628408f1b9f971d360d7a9207c8f894",
+    naverVerification: "0f58d300335c22953300936a0eba29c7ddcef6f8",
     siteUrl: "https://금융피해대응센터.kr",
   },
   "xn--2e0bno217bsqa58yp8nd1g2ma.kr": {
@@ -91,7 +91,7 @@ const GROUPS = {
     ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
     ctaLabel: "사례 비교 문의", ogType: "article",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
-    naverVerification: "220c61ef5bdb2bae3d4cf69b16c583f743f48a37",
+    naverVerification: "2c5bbb8ba945084619345dacd54228bca059390e",
     siteUrl: "https://사기피해구제센터.kr",
   },
   "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr": {
@@ -103,7 +103,7 @@ const GROUPS = {
     ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
     ctaLabel: "정보 확인", ogType: "article",
     descriptionSuffix: "사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
-    naverVerification: "d33ae2f29806237bbb7bbdab033a054d7691a6e5",
+    naverVerification: "0db0c459d08dff08e7655a88835072c34790fb75",
     siteUrl: "https://리딩방피해회수센터.kr",
   },
   "xn--ok0b84g7tosqai7vyka788co0b.kr": {
@@ -115,7 +115,7 @@ const GROUPS = {
     ctaText: "하나의 사건을 법적 대응, 회수 절차, 사례, 정보 요약 관점으로 나누어 확인할 수 있습니다.",
     ctaLabel: "관련 정보 확인", ogType: "article",
     descriptionSuffix: "피해 대응 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
-    naverVerification: "38944ffeef5410881604cfefef4c3df44de7db93",
+    naverVerification: "7a41010af8629be5dd500005a38019de76d1c226",
     siteUrl: "https://투자사기대응센터.kr",
   },
 };
