@@ -3874,7 +3874,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 3383,
+    "landingViews": 3382,
     "reports": 6,
     "summary": "dabargold.com 사기 투자 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -5971,7 +5971,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 1828,
+    "landingViews": 1827,
     "reports": 20,
     "summary": "옴니채널 사기 상품권 구매대행 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6588,12 +6588,33 @@
     "createdAt": "2026-06-11",
     "updatedAt": "2026-06-11",
     "thumbnailUrl": "",
-    "landingViews": 3171,
+    "landingViews": 3170,
     "reports": 27,
     "summary": "부의 정원 사기 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
       "부의",
       "정원",
+      "사기",
+      "리딩방",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "januseu-hendeoseun",
+    "caseName": "자누스 헨더슨 사기 리딩방",
+    "category": "형사대응",
+    "createdAt": "2026-06-11",
+    "updatedAt": "2026-06-11",
+    "thumbnailUrl": "",
+    "landingViews": 1280,
+    "reports": 34,
+    "summary": "자누스 헨더슨 사기 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "자누스",
+      "헨더슨",
       "사기",
       "리딩방",
       "사기피해",
