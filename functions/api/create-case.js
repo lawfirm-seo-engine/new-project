@@ -215,19 +215,23 @@ async function pingIndexNow(slug, key) {
     { host: "xn--ok0b84g7tosqai7vyka788co0b.kr", prefix: "incidents", suffix: "incident" },
   ];
   await Promise.allSettled(
-    groups.map(({ host, prefix, suffix }) => {
+    groups.flatMap(({ host, prefix, suffix }) => {
       const isException = host === "gnlaw-criminal.co.kr" && NO_SUFFIX.has(slug);
       const urlSlug = (suffix && !isException) ? `${slug}-${suffix}` : slug;
-      return fetch("https://searchadvisor.naver.com/indexnow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({
-          host,
-          key,
-          keyLocation: `https://${host}/${key}.txt`,
-          urlList: [`https://${host}/${prefix}/${encodeURIComponent(urlSlug)}/`],
+      const landingUrl = `https://${host}/${prefix}/${encodeURIComponent(urlSlug)}/`;
+      return [
+        fetch("https://searchadvisor.naver.com/indexnow", {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+          body: JSON.stringify({
+            host,
+            key,
+            keyLocation: `https://${host}/${key}.txt`,
+            urlList: [landingUrl],
+          }),
         }),
-      });
+        fetch(`https://searchadvisor.naver.com/xml/rss?sitemap=${encodeURIComponent(`https://${host}/sitemap.xml`)}`),
+      ];
     })
   );
 }
