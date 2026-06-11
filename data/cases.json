@@ -98,7 +98,7 @@
     "createdAt": "2026-05-21",
     "updatedAt": "2026-05-21",
     "thumbnailUrl": "",
-    "landingViews": 401,
+    "landingViews": 400,
     "reports": 32,
     "summary": "TTPrime 사기 해외선물 리딩방 사칭 사기로 인한 피해 대응을 위해 형사고소 절차부터 민사소송, 성공사례, 사건정보, 전체허브 안내까지 체계적인 법률 대응 정보를 제공합니다.",
     "tags": [
@@ -4320,7 +4320,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 7588,
+    "landingViews": 7587,
     "reports": 12,
     "summary": "VIG파트너스 사기 사모펀드 투자 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -5451,7 +5451,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 2375,
+    "landingViews": 2374,
     "reports": 22,
     "summary": "stifpro 사기 해외선물 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6617,6 +6617,27 @@
       "헨더슨",
       "사기",
       "리딩방",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "janus-henderson",
+    "caseName": "Janus Henderson 사기 투자방",
+    "category": "형사대응",
+    "createdAt": "2026-06-11",
+    "updatedAt": "2026-06-11",
+    "thumbnailUrl": "",
+    "landingViews": 6004,
+    "reports": 11,
+    "summary": "Janus Henderson 사기 투자방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "Janus",
+      "Henderson",
+      "사기",
+      "투자방",
       "사기피해",
       "피해금회수",
       "증거보존"
