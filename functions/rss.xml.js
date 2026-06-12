@@ -1,4 +1,4 @@
-import { buildSitemapXml, groupForHost, loadCases } from "./_seo.js";
+import { RSS_LIMIT, buildRssXml, getRecentCases, groupForHost, loadCases } from "./_seo.js";
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -9,10 +9,11 @@ export async function onRequest(context) {
   }
 
   const cases = await loadCases(env);
+  const rssCases = getRecentCases(cases, 7, RSS_LIMIT);
 
-  return new Response(buildSitemapXml(group, cases), {
+  return new Response(buildRssXml(group, rssCases, { limit: RSS_LIMIT }), {
     headers: {
-      "Content-Type": "application/xml; charset=utf-8",
+      "Content-Type": "application/rss+xml; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate",
     },
   });

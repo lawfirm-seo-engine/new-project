@@ -1,3 +1,5 @@
+import { GROUPS, INDEXNOW_KEY, buildLandingUrl } from "../_seo.js";
+
 const DEFAULT_CATEGORY = "형사대응";
 
 export async function onRequestPost(context) {
@@ -70,7 +72,7 @@ export async function onRequestPost(context) {
         context.waitUntil?.(syncAllCasesToGitHub(env, repoOwner, repoName, branch, token).catch(() => {}));
       }
 
-      const indexNowKey = env.INDEXNOW_KEY || "6f71f78a3dc940b9a3e1025bf8460d3c";
+      const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
       context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
 
       return json({
@@ -146,7 +148,7 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
-    const indexNowKey = env.INDEXNOW_KEY || "6f71f78a3dc940b9a3e1025bf8460d3c";
+    const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
     context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
 
     return json({
@@ -201,39 +203,32 @@ function buildIndexEntry(c) {
 }
 
 async function pingIndexNow(slug, key) {
-  const NO_SUFFIX = new Set(["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"]);
-  const groups = [
-    { host: "gnlaw-criminal.co.kr", prefix: "prosecute", suffix: "litigation" },
-    { host: "gnlaw-civil.co.kr", prefix: "civil", suffix: "settlement" },
-    { host: "gnlaw-recovery.co.kr", prefix: "success", suffix: "result" },
-    { host: "gnlaw-case.co.kr", prefix: "briefing", suffix: "review" },
-    { host: "gnlaw-center.co.kr", prefix: "case", suffix: "issue" },
-    { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", prefix: "criminal", suffix: "legal-action" },
-    { host: "xn--jj0b77gmsoyyfbet54ddvg2ma.kr", prefix: "litigation", suffix: "recovery" },
-    { host: "xn--2e0bno217bsqa58yp8nd1g2ma.kr", prefix: "results", suffix: "solution" },
-    { host: "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", prefix: "insights", suffix: "report" },
-    { host: "xn--ok0b84g7tosqai7vyka788co0b.kr", prefix: "incidents", suffix: "incident" },
-  ];
-  await Promise.allSettled(
-    groups.flatMap(({ host, prefix, suffix }) => {
-      const isException = host === "gnlaw-criminal.co.kr" && NO_SUFFIX.has(slug);
-      const urlSlug = (suffix && !isException) ? `${slug}-${suffix}` : slug;
-      const landingUrl = `https://${host}/${prefix}/${encodeURIComponent(urlSlug)}/`;
-      return [
-        fetch("https://searchadvisor.naver.com/indexnow", {
-          method: "POST",
-          headers: { "Content-Type": "application/json; charset=utf-8" },
-          body: JSON.stringify({
-            host,
-            key,
-            keyLocation: `https://${host}/${key}.txt`,
-            urlList: [landingUrl],
-          }),
+  const results = await Promise.allSettled(
+    GROUPS.map(async (group) => {
+      const host = group.host || new URL(group.siteUrl).host;
+      const urlList = [buildLandingUrl(group, slug), `${group.siteUrl}/`];
+      const response = await fetch("https://searchadvisor.naver.com/indexnow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({
+          host,
+          key,
+          keyLocation: `${group.siteUrl}/${key}.txt`,
+          urlList,
         }),
-        fetch(`https://searchadvisor.naver.com/xml/rss?sitemap=${encodeURIComponent(`https://${host}/sitemap.xml`)}`),
-      ];
+      });
+      const body = await response.text().catch(() => "");
+      return { host, status: response.status, ok: response.ok, body: body.slice(0, 160) };
     })
   );
+
+  console.log("[indexnow]", JSON.stringify(results.map((result) => (
+    result.status === "fulfilled"
+      ? result.value
+      : { ok: false, error: result.reason?.message || String(result.reason) }
+  ))));
+
+  return results;
 }
 
 function hasRequiredLandingData(landings) {
@@ -332,7 +327,7 @@ function randomInt(min, max, seed) {
 }
 
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 function normalizeSpace(value) {

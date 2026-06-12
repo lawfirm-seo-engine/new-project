@@ -1,38 +1,25 @@
 import fs from "fs-extra";
 import path from "path";
+import { GROUPS, INDEXNOW_KEY, buildLandingUrl, sortNewest } from "../functions/_seo.js";
 
 const root = process.cwd();
 const cases = await fs.readJson(path.join(root, "data", "cases.json"));
-const latest = cases.at(-1);
-
-const groups = [
-  { siteUrl: "https://gnlaw-criminal.co.kr", pathPrefix: "prosecute", suffix: "litigation" },
-  { siteUrl: "https://gnlaw-civil.co.kr", pathPrefix: "civil", suffix: "settlement" },
-  { siteUrl: "https://gnlaw-recovery.co.kr", pathPrefix: "success", suffix: "result" },
-  { siteUrl: "https://gnlaw-case.co.kr", pathPrefix: "briefing", suffix: "review" },
-  { siteUrl: "https://gnlaw-center.co.kr", pathPrefix: "case", suffix: "issue" },
-  { siteUrl: "https://금융사기대응센터.kr", pathPrefix: "criminal", suffix: "legal-action" },
-  { siteUrl: "https://금융피해대응센터.kr", pathPrefix: "litigation", suffix: "recovery" },
-  { siteUrl: "https://사기피해구제센터.kr", pathPrefix: "results", suffix: "solution" },
-  { siteUrl: "https://리딩방피해회수센터.kr", pathPrefix: "insights", suffix: "report" },
-  { siteUrl: "https://투자사기대응센터.kr", pathPrefix: "incidents", suffix: "incident" },
-];
-
-const noSuffixSlugs = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
-const oldUrlSuffix = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+const latest = sortNewest(cases)[0];
 
 if (!latest?.slug) {
   console.log("[warmup] no case found");
   process.exit(0);
 }
 
-const targets = groups.flatMap((group) => [
+const targets = GROUPS.flatMap((group) => [
   `${group.siteUrl}/`,
   buildLandingUrl(group, latest.slug),
   `${group.siteUrl}/og/${encodeURIComponent(latest.slug)}.png`,
   `${group.siteUrl}/assets/og-template.png`,
   `${group.siteUrl}/sitemap-index.xml`,
+  `${group.siteUrl}/sitemap-recent.xml`,
   `${group.siteUrl}/sitemap.xml`,
+  `${group.siteUrl}/rss.xml`,
 ]);
 
 const uniqueTargets = [...new Set(targets)];
@@ -46,18 +33,15 @@ for (const result of results) {
   }
 }
 
-const naverPingBase = "https://searchadvisor.naver.com/xml/rss";
-const pingUrls = groups.flatMap((group) => [
-  `${naverPingBase}?sitemap=${encodeURIComponent(`${group.siteUrl}/sitemap-index.xml`)}`,
-  `${naverPingBase}?sitemap=${encodeURIComponent(`${group.siteUrl}/sitemap.xml`)}`,
-]);
+const indexNowResults = await Promise.allSettled(
+  GROUPS.map((group) => pingIndexNow(group, latest.slug)),
+);
 
-const pingResults = await Promise.allSettled(pingUrls.map((url) => warm(url)));
-for (const result of pingResults) {
+for (const result of indexNowResults) {
   if (result.status === "fulfilled") {
-    console.log(`[naver-ping] ${result.value.status} ${result.value.url}`);
+    console.log(`[indexnow] ${result.value.status} ${result.value.host} ${result.value.urls.join(", ")}`);
   } else {
-    console.log(`[naver-ping] failed ${result.reason.message}`);
+    console.log(`[indexnow] failed ${result.reason.message}`);
   }
 }
 
@@ -85,14 +69,24 @@ async function warm(url) {
   throw new Error(`${lastStatus} ${url}`);
 }
 
-function buildLandingUrl(group, slug) {
-  const isOldA = group.siteUrl === "https://gnlaw-criminal.co.kr";
-  const suffix = isOldA && noSuffixSlugs.includes(slug)
-    ? ""
-    : isOldA && oldUrlSuffix[slug]
-      ? `-${oldUrlSuffix[slug]}`
-      : group.suffix
-        ? `-${group.suffix}`
-        : "";
-  return `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(slug)}${suffix}/`;
+async function pingIndexNow(group, slug) {
+  const host = group.host || new URL(group.siteUrl).host;
+  const urls = [buildLandingUrl(group, slug), `${group.siteUrl}/`];
+  const response = await fetch("https://searchadvisor.naver.com/indexnow", {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify({
+      host,
+      key: INDEXNOW_KEY,
+      keyLocation: `${group.siteUrl}/${INDEXNOW_KEY}.txt`,
+      urlList: urls,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`${response.status} ${host} ${detail.slice(0, 160)}`);
+  }
+
+  return { host, status: response.status, urls };
 }

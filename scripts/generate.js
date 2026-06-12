@@ -1,13 +1,20 @@
 import fs from "fs-extra";
 import path from "path";
 import sharp from "sharp";
+import {
+  buildLandingUrl as buildSeoLandingUrl,
+  buildRssXml,
+  buildSitemapIndexXml,
+  buildSitemapXml,
+  getRecentCases,
+} from "../functions/_seo.js";
 
 const root = process.cwd();
 const dataPath = path.join(root, "data", "cases.json");
 const publicDir = path.join(root, "public");
 const templatesDir = path.join(root, "templates");
 
-const today = new Date().toISOString().slice(0, 10);
+const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 const ORGANIZATION = {
   "@type": "Organization",
@@ -702,7 +709,11 @@ function renderBodyForLanding(landing, group, caseItem) {
     ],
   }[group.key] || [];
 
-  return [...original, ...additions].slice(0, 9);
+  return uniqueTextList([
+    ...original,
+    ...scenarioBodyAdditions(caseItem, group, compactName),
+    ...additions,
+  ].map(sanitizeAwkwardText)).slice(0, 9);
 }
 
 function renderVictimCasesForLanding(landing, group, caseItem, replacementContext) {
@@ -711,13 +722,137 @@ function renderVictimCasesForLanding(landing, group, caseItem, replacementContex
     ? landing.victimCases.filter(Boolean).map((item) => reduceCaseNameText(item, caseItem.caseName || caseItem.name, false, replacementContext))
     : [];
   const additions = [
+    ...scenarioVictimCases(caseItem, group, brand),
     `직장인 피해자가 카카오톡 오픈채팅방에서 수익 인증 화면을 보고 1차로 320만원을 보낸 뒤, 출금 직전 세금과 보증금 명목으로 추가 780만원을 요구받은 사례`,
     `자영업자가 유튜브 광고를 통해 가입한 뒤 ${brand} 관계자를 사칭한 담당자에게 안내를 받았고, 출금 신청 당일 계좌와 담당자 계정이 동시에 바뀐 사례`,
     `소액 수익금 18만원을 먼저 지급받아 안심한 뒤 투자금을 키웠으나, 환불 요청 후 피해금 회복팀이라는 계정이 다시 접근해 선입금 수수료를 요구한 2차 피해 사례`,
     `입금증, 계좌번호, 대화 캡처는 남아 있었지만 사이트가 폐쇄되어 상담 접수 단계에서 브라우저 기록과 문자 알림까지 다시 정리한 사례`,
     `여러 피해자가 같은 수취 계좌와 유사 URL을 확인해 형사고소 자료와 민사 가압류 가능성을 함께 검토한 사례`,
   ];
-  return [...original, ...additions].slice(0, 5);
+  return uniqueTextList([...original, ...additions].map(sanitizeAwkwardText)).slice(0, 5);
+}
+
+function scenarioBodyAdditions(caseItem, group, base = "") {
+  const scenario = detectScenario(caseItem);
+  const subject = base || primaryCaseKeyword(caseItem.caseName || caseItem.name || "") || "해당 사건";
+  const commonByScenario = {
+    app: [
+      `${subject} 사건은 앱 설치 파일, 로그인 화면, 지갑 주소, 고객센터 대화가 함께 남아 있는지부터 확인해야 합니다. 앱을 삭제하기 전 화면 캡처와 설치 파일명, 접속 도메인을 따로 보관하면 계정 운영 주체를 추적하는 단서가 됩니다.`,
+      `모바일 앱 기반 피해는 출금 거절 화면만으로 판단하지 말고 권한 요청, APK 전달 경로, 알림 메시지, 입금 계좌 변경 시점을 함께 정리해야 합니다.`,
+    ],
+    exchange: [
+      `${subject} 관련 거래소 화면은 실제 거래소처럼 보여도 입금 계좌, 지갑 주소, 출금 승인 조건이 계속 바뀌는지 확인해야 합니다.`,
+      `코인이나 해외거래소형 사건은 시세 화면보다 자금 이동 경로가 더 중요합니다. 원화 입금 계좌, 전송 지갑, 안내자, 관리자 계정의 연결 관계를 시간순으로 묶어야 합니다.`,
+    ],
+    investment: [
+      `${subject}처럼 투자 리딩방에서 시작된 사건은 추천 종목보다 유도 과정이 핵심입니다. 수익 인증, VIP 전환 안내, 원금 보장 표현, 손실 복구 조건을 순서대로 모아야 합니다.`,
+      `주식·선물·리딩방형 피해는 단순 투자 실패와 구분해야 합니다. 출금 제한, 추가 입금 조건, 담당자 교체, 방 폐쇄가 있었다면 별도 목록으로 정리해야 합니다.`,
+    ],
+    commerce: [
+      `${subject} 관련 쇼핑몰·구매대행형 사건은 주문 화면, 운송장 안내, 환불 조건, 사업자 정보의 일치 여부를 함께 봐야 합니다.`,
+      `전자상거래형 피해는 결제 수단별로 대응 경로가 달라집니다. 계좌이체, 카드, 간편결제 내역을 나누어 보관하고 판매 페이지가 사라지기 전에 캡처해야 합니다.`,
+    ],
+    live: [
+      `${subject} 사건처럼 라이브 방송이나 로맨스 접근에서 시작된 경우에는 감정적 대화보다 금전 요구가 나온 시점이 중요합니다.`,
+      `대화 기반 피해는 상대 프로필, 송금 요청 메시지, 플랫폼 내 결제 화면, 외부 메신저 이동 시점을 함께 보관해야 합니다.`,
+    ],
+  };
+  const domainTail = String(group.key || "").startsWith("l")
+    ? [`${subject} 관련 법적 대응은 신고 접수만으로 끝내지 말고 지급정지, 계좌 추적, 민사 보전 가능성을 함께 검토해야 합니다.`]
+    : [];
+  return [...(commonByScenario[scenario] || []), ...domainTail];
+}
+
+function scenarioVictimCases(caseItem, group, brand = "담당자") {
+  const scenario = detectScenario(caseItem);
+  const prefix = String(group.key || "").startsWith("l") ? "법률 검토 과정에서" : "상담 접수 과정에서";
+  const cases = {
+    app: [
+      `${prefix} 피해자가 전달받은 앱 설치 링크와 로그인 화면을 보관해 입금 계좌 변경 시점과 관리자 안내 메시지를 함께 대조한 사례`,
+      `${brand} 안내자가 앱 오류를 이유로 재인증비를 요구했지만 APK 파일명과 알림 기록을 보존해 2차 입금을 중단한 사례`,
+    ],
+    exchange: [
+      `${prefix} 가짜 거래소의 지갑 주소와 원화 입금 계좌가 반복 사용된 정황을 확인해 동일 조직 가능성을 검토한 사례`,
+      `출금 신청 직후 세금 명목의 추가 입금을 요구받았으나 거래소 화면, 대화, 계좌 정보를 묶어 증거 목록을 만든 사례`,
+    ],
+    investment: [
+      `${prefix} 리딩방 수익 인증 이미지와 VIP 전환 안내가 같은 양식으로 반복된 점을 확인해 기망 정황을 정리한 사례`,
+      `손실 복구 명목으로 추가 입금을 요구받았지만 리딩방 폐쇄 전 대화와 입금증을 보존해 민사·형사 대응을 병행한 사례`,
+    ],
+    commerce: [
+      `${prefix} 쇼핑몰 주문 내역, 환불 안내, 사업자 표시가 서로 맞지 않아 판매 페이지 캡처와 결제 내역을 우선 보존한 사례`,
+      `구매대행 환불을 조건으로 추가 결제를 요구받았으나 결제 수단별 자료를 분리해 지급 정지 가능성을 검토한 사례`,
+    ],
+    live: [
+      `${prefix} 라이브 방송 후 외부 메신저로 이동해 환전비와 계정 해제비를 요구한 대화를 시간순으로 정리한 사례`,
+      `로맨스 접근 이후 반복 송금이 이어져 프로필, 송금 요청 메시지, 계좌 정보를 함께 보관하고 2차 연락을 차단한 사례`,
+    ],
+  };
+  return cases[scenario] || [];
+}
+
+function detectScenario(caseItem = {}) {
+  const text = `${caseItem.slug || ""} ${caseItem.caseName || caseItem.name || ""} ${caseItem.summary || ""}`.toLowerCase();
+  if (/(app|eopeur|apk|mobail|mobile|wallet|jigab)/.test(text)) return "app";
+  if (/(exchange|georaeso|coin|koin|token|staking|seuteiking|wallet|jigab|casino)/.test(text)) return "exchange";
+  if (/(riding|ridingbang|jusig|stock|future|futures|seonmul|ipo|hts|etf|wealth|invest)/.test(text)) return "investment";
+  if (/(shop|shopping|syoping|syopingmor|mall|gumaedaehaeng|bueob|review|ribyu|alba)/.test(text)) return "commerce";
+  if (/(live|romance|romaenseu|dating|date|broadcast|bangsong|hwanjeon|valuna)/.test(text)) return "live";
+  return "general";
+}
+
+function sanitizeAwkwardText(value = "") {
+  return String(value || "")
+    .replace(/관련 사실 관련/g, "해당 사건 관련")
+    .replace(/대응 자료 관련 앱/g, "의심 앱")
+    .replace(/해당 피해 관련 앱/g, "문제 앱")
+    .replace(/담당자 담당자/g, "담당자")
+    .replace(/피해 피해/g, "피해")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function uniqueTextList(items = [], threshold = 0.76) {
+  const result = [];
+  for (const item of items.map(sanitizeAwkwardText).filter(Boolean)) {
+    if (!result.some((existing) => textSimilarity(existing, item) >= threshold)) {
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function textSimilarity(a = "", b = "") {
+  const aSet = tokenSetForText(a);
+  const bSet = tokenSetForText(b);
+  if (!aSet.size || !bSet.size) return 0;
+  let intersection = 0;
+  for (const token of aSet) {
+    if (bSet.has(token)) intersection += 1;
+  }
+  const union = new Set([...aSet, ...bSet]).size || 1;
+  return intersection / union;
+}
+
+function tokenSetForText(value = "") {
+  const normalized = String(value)
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const tokens = normalized.split(/[\s-]+/).filter((token) => token.length >= 2);
+  const grams = [];
+  for (const token of tokens) {
+    if (token.length <= 3) {
+      grams.push(token);
+      continue;
+    }
+    for (let index = 0; index < token.length - 1; index += 1) {
+      grams.push(token.slice(index, index + 2));
+    }
+  }
+  return new Set(grams);
 }
 
 function renderFaqForLanding(landing, group, caseItem) {
@@ -1195,23 +1330,19 @@ function createHubContent(group) {
   const todayCases   = cases.filter((c) => c.createdAt === today).length;
   const todayReports = cases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
   const suffix = HUB_SUFFIX[group.key] || "";
+  const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix);
 
   const rows = sortedCases
     .map((item) => {
       const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
       const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
-      const NO_SUFFIX_SLUGS_HUB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
-      const OLD_URL_HUB = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-      const isExceptHub = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_HUB.includes(item.slug);
-      const oldSuffixHub = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_HUB[item.slug];
-      const hubSlugSuffix = isExceptHub ? "" : oldSuffixHub ? `-${oldSuffixHub}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
-      const url = `/${group.pathPrefix}/${encodeURIComponent(item.slug)}${hubSlugSuffix}/`;
+      const url = buildRelativeLandingPath(group, item.slug);
+      const todayBadge = item.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
       return `
         <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}">
           <span class="case-no">${caseNoMap.get(item.slug) ?? ""}</span>
           <span class="case-title-wrap">
-            <strong class="case-title">${displayTitle}</strong>
-            ${item.createdAt === today ? '<em class="today-badge">TODAY</em>' : ""}
+            <strong class="case-title">${displayTitle}</strong>${todayBadge}
           </span>
           <span class="case-status">${statusLabel(group.key, item.slug)}</span>
           <span class="case-date">${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
@@ -1228,9 +1359,12 @@ function createHubContent(group) {
   var SUFFIX=${JSON.stringify(suffix)};
   var URL_SUFFIX=${JSON.stringify(group.urlSlugSuffix || "")};
   var GKEY=${JSON.stringify(group.key)};
+  var NO_SUFFIX_SLUGS={"soiraeb-sagi-syopingmor":1,"grucompany-sagi-syopingmor":1,"geuruaenkeompeoni-sagi-syopingmor":1};
+  var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function normName(n){var c=String(n||'').trim().replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c+' 사칭':c+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
+  function landingPath(slug){var extra=NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
   function getStatus(slug){if(GKEY==='c'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
   function setupSearch(){
     var inp=document.getElementById('case-search');
@@ -1260,7 +1394,7 @@ function createHubContent(group) {
         var cn=esc(normName(item.caseName||''));
         var dt=SUFFIX?cn+' '+SUFFIX:cn;
         var a=document.createElement('a');
-        a.href='/'+PREFIX+'/'+encodeURIComponent(item.slug)+(URL_SUFFIX?'-'+URL_SUFFIX:'')+'/';
+        a.href=landingPath(item.slug);
         a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;
         a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
           +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
@@ -1301,6 +1435,7 @@ function createHubContent(group) {
         </div>
       </div>
     </section>
+    ${freshSection}
     <div class="case-search-wrap">
       <input id="case-search" type="search" class="case-search" placeholder="사기 업체명 또는 사건명 검색" autocomplete="off">
       <button class="search-btn" type="button">검색</button>
@@ -1314,6 +1449,58 @@ function createHubContent(group) {
       ${rows}
     </section>
     ${dynScript}`;
+}
+
+function buildRelativeLandingPath(group, slug) {
+  const fullUrl = buildSeoLandingUrl(group, slug);
+  const baseUrl = String(group.siteUrl || "").replace(/\/$/, "");
+  return fullUrl.startsWith(baseUrl)
+    ? fullUrl.slice(baseUrl.length) || "/"
+    : `/${group.pathPrefix}/${encodeURIComponent(slug)}/`;
+}
+
+function createFreshLandingSection(group, sortedCases, caseNoMap, suffix) {
+  const todays = sortedCases
+    .filter((item) => item.createdAt === today || item.updatedAt === today)
+    .slice(0, 8);
+  const items = (todays.length ? todays : sortedCases.slice(0, 8)).filter((item) => item?.slug);
+  const label = todays.length ? "오늘 추가/갱신된 랜딩" : "최근 추가 랜딩";
+
+  if (!items.length) return "";
+
+  const links = items.map((item) => {
+    const landing = getLanding(item, group);
+    const cleanName = normalizeCaseName(item.caseName || item.name);
+    const displayTitle = escapeHtml(suffix ? `${cleanName} ${suffix}` : cleanName);
+    const summary = escapeHtml(compactText(landing.description || item.summary || group.hubLead || "").slice(0, 135));
+    const date = escapeHtml(item.updatedAt || item.createdAt || "");
+    return `<a class="fresh-landing-link" href="${buildRelativeLandingPath(group, item.slug)}">
+      <span class="fresh-landing-no">No. ${caseNoMap.get(item.slug) ?? ""}</span>
+      <strong>${displayTitle}</strong>
+      <span>${summary}</span>
+      <em>${date}</em>
+    </a>`;
+  }).join("\n");
+
+  return `<section class="fresh-landing-section" aria-label="${label}">
+    <div class="fresh-landing-head">
+      <p>RECENT LANDINGS</p>
+      <h2>${label}</h2>
+      <span>수집 요청 직후 크롤러가 따라갈 수 있도록 최신 랜딩 링크를 홈에 고정 노출합니다.</span>
+    </div>
+    <div class="fresh-landing-list">
+      ${links}
+    </div>
+  </section>`;
+}
+
+function compactText(value = "") {
+  return String(value)
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function normalizeCaseName(name) {
@@ -1520,60 +1707,23 @@ for (const group of groups) {
   // Static HTML generation for case pages has been removed (KV architecture).
   // The sitemap still lists all case URLs so Naver can discover them.
 
-  const NO_SUFFIX_SLUGS_SITEMAP = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
-  const urls = [
-    { loc: `${group.siteUrl}/`, lastmod: today, priority: "0.3" },
-    ...cases.map((item) => {
-      const OLD_URL_SITEMAP = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
-      const isExcept = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_SITEMAP.includes(item.slug);
-      const oldSuffixSitemap = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_SITEMAP[item.slug];
-      const slugSuffix = isExcept ? "" : oldSuffixSitemap ? `-${oldSuffixSitemap}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
-      return {
-        loc: `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(item.slug)}${slugSuffix}/`,
-        lastmod: item.updatedAt || item.createdAt || today,
-        priority: "0.9",
-      };
-    }),
-  ];
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((item) => `  <url><loc>${item.loc}</loc><lastmod>${item.lastmod}</lastmod><changefreq>daily</changefreq><priority>${item.priority}</priority></url>`).join("\n")}
-</urlset>`;
-
+  const sitemap = buildSitemapXml(group, cases);
   await fs.outputFile(path.join(group.outDir, "sitemap.xml"), sitemap);
 
-  const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap><loc>${group.siteUrl}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>
-</sitemapindex>`;
+  const recentCases = getRecentCases(cases);
+  const recentSitemap = buildSitemapXml(group, recentCases, { includeHome: false, recent: true });
+  await fs.outputFile(path.join(group.outDir, "sitemap-recent.xml"), recentSitemap);
 
+  const sitemapIndex = buildSitemapIndexXml(group, today);
   await fs.outputFile(path.join(group.outDir, "sitemap-index.xml"), sitemapIndex);
 
-  const rss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>${escapeHtml(group.siteName)} - ${escapeHtml(group.label)}</title>
-    <link>${group.siteUrl}/</link>
-    <description>${escapeHtml(group.descriptionSuffix)}</description>
-    ${cases.map((item) => {
-      const landing = getLanding(item, group);
-      const rssTitle = landing.title || groupPageTitle(item.caseName, group.landingKey || group.key);
-      return `
-    <item>
-      <title>${escapeHtml(rssTitle)}</title>
-      <link>${landing.canonical}</link>
-      <description>${escapeHtml(landing.description)}</description>
-      <pubDate>${new Date(`${item.updatedAt || lastmod}T00:00:00+09:00`).toUTCString()}</pubDate>
-    </item>`;
-    }).join("")}
-  </channel>
-</rss>`;
-
+  const rss = buildRssXml(group, getRecentCases(cases, 7, 80), { limit: 80 });
   await fs.outputFile(path.join(group.outDir, "rss.xml"), rss);
 
   await fs.outputFile(path.join(group.outDir, "robots.txt"), `User-agent: *
 Allow: /
 Sitemap: ${group.siteUrl}/sitemap-index.xml
+Sitemap: ${group.siteUrl}/sitemap-recent.xml
 Sitemap: ${group.siteUrl}/sitemap.xml
 `);
 
