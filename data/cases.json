@@ -3772,7 +3772,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 784,
+    "landingViews": 783,
     "reports": 17,
     "summary": "그리티 사기 비상장 주식 공모 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -5119,7 +5119,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 5122,
+    "landingViews": 5121,
     "reports": 5,
     "summary": "컨설턴트 김희주 사칭 사기 단체 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6774,7 +6774,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 6001,
+    "landingViews": 6000,
     "reports": 6,
     "summary": "COCTRADING 사기 지수거래 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6794,7 +6794,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 5349,
+    "landingViews": 5348,
     "reports": 10,
     "summary": "주린스쿨 해외선물 연구소 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -7329,6 +7329,26 @@
       "엔n9",
       "사칭",
       "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "ann9-shop",
+    "caseName": "ann9.shop 사기 쇼핑몰",
+    "category": "형사대응",
+    "createdAt": "2026-06-12",
+    "updatedAt": "2026-06-12",
+    "thumbnailUrl": "",
+    "landingViews": 256,
+    "reports": 24,
+    "summary": "ann9.shop 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "ann9.shop",
+      "사기",
+      "쇼핑몰",
       "사기피해",
       "피해금회수",
       "증거보존"
