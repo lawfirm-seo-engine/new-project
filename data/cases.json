@@ -2729,7 +2729,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 2341,
+    "landingViews": 2340,
     "reports": 8,
     "summary": "베이미르몰 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -7248,6 +7248,26 @@
       "런n8",
       "사칭",
       "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "runn8-shop",
+    "caseName": "runn8.shop 사기 쇼핑몰",
+    "category": "형사대응",
+    "createdAt": "2026-06-12",
+    "updatedAt": "2026-06-12",
+    "thumbnailUrl": "",
+    "landingViews": 7203,
+    "reports": 10,
+    "summary": "runn8.shop 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "runn8.shop",
+      "사기",
+      "쇼핑몰",
       "사기피해",
       "피해금회수",
       "증거보존"
