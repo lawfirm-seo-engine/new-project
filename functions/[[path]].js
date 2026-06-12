@@ -161,6 +161,14 @@ export async function onRequest(context) {
     return next();
   }
 
+  // trailing slash 강제 301
+  if (!pathname.endsWith("/")) {
+    return new Response(null, {
+      status: 301,
+      headers: { Location: `${url.origin}${pathname}/${url.search}` },
+    });
+  }
+
   const urlSlug = decodeURIComponent(parts[1]);
   const suffix = group.urlSlugSuffix;
 
