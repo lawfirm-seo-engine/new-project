@@ -7395,5 +7395,25 @@
       "증거보존"
     ],
     "memo": ""
+  },
+  {
+    "slug": "makinarocks",
+    "caseName": "MakinaRocks 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-12",
+    "updatedAt": "2026-06-12",
+    "thumbnailUrl": "",
+    "landingViews": 1407,
+    "reports": 30,
+    "summary": "MakinaRocks 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "MakinaRocks",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
   }
 ]
