@@ -2951,7 +2951,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 504,
+    "landingViews": 503,
     "reports": 18,
     "summary": "gmtmallshop.com 사기 쇼핑몰 부업 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6219,7 +6219,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 1133,
+    "landingViews": 1132,
     "reports": 28,
     "summary": "mega-investment.net 사기 사이트 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6794,7 +6794,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 5349,
+    "landingViews": 5348,
     "reports": 10,
     "summary": "주린스쿨 해외선물 연구소 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6815,7 +6815,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 1161,
+    "landingViews": 1160,
     "reports": 10,
     "summary": "searchalba.com 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -7403,13 +7403,33 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 1408,
+    "landingViews": 1407,
     "reports": 30,
     "summary": "MakinaRocks 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
       "MakinaRocks",
       "사칭",
       "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "makinaragseu",
+    "caseName": "마키나락스 사기 공모주",
+    "category": "형사대응",
+    "createdAt": "2026-06-12",
+    "updatedAt": "2026-06-12",
+    "thumbnailUrl": "",
+    "landingViews": 6054,
+    "reports": 21,
+    "summary": "마키나락스 사기 공모주 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "마키나락스",
+      "사기",
+      "공모주",
       "사기피해",
       "피해금회수",
       "증거보존"
