@@ -13,6 +13,7 @@ if (!latest?.slug) {
 
 const targets = GROUPS.flatMap((group) => [
   `${group.siteUrl}/`,
+  categoryUrl(group),
   buildLandingUrl(group, latest.slug),
   `${group.siteUrl}/og/${encodeURIComponent(latest.slug)}.png`,
   `${group.siteUrl}/assets/og-template.png`,
@@ -71,7 +72,11 @@ async function warm(url) {
 
 async function pingIndexNow(group, slug) {
   const host = group.host || new URL(group.siteUrl).host;
-  const urls = [buildLandingUrl(group, slug), `${group.siteUrl}/`];
+  const urls = [
+    buildLandingUrl(group, slug),
+    categoryUrl(group),
+    `${group.siteUrl}/`,
+  ];
   const response = await fetch("https://searchadvisor.naver.com/indexnow", {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -89,4 +94,9 @@ async function pingIndexNow(group, slug) {
   }
 
   return { host, status: response.status, urls };
+}
+
+function categoryUrl(group) {
+  const prefix = group.pathPrefix || group.prefix;
+  return `${group.siteUrl}/${prefix}/`;
 }

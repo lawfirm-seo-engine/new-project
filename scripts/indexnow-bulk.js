@@ -1,5 +1,5 @@
 /**
- * Submits all case landing-page URLs across all 10 domains to Naver IndexNow
+ * Submits home, category, and case landing-page URLs across all 10 domains to Naver IndexNow
  * in a single batch request per domain (up to 10,000 URLs each).
  *
  * Run once after a domain migration or whenever pages need bulk re-submission:
@@ -18,7 +18,14 @@ const NAVER_INDEXNOW = "https://searchadvisor.naver.com/indexnow";
 const results = await Promise.allSettled(
   GROUPS.map(async (group) => {
     const host = group.host || new URL(group.siteUrl).host;
-    const urlList = cases.filter((item) => item?.slug).map((item) => buildLandingUrl(group, item.slug));
+    const category = categoryUrl(group);
+    const urlList = [
+      ...new Set([
+        `${group.siteUrl}/`,
+        category,
+        ...cases.filter((item) => item?.slug).map((item) => buildLandingUrl(group, item.slug)),
+      ]),
+    ];
 
     const res = await fetch(NAVER_INDEXNOW, {
       method: "POST",
@@ -44,4 +51,9 @@ for (const result of results) {
   } else {
     console.error(`[ERR] ${result.reason}`);
   }
+}
+
+function categoryUrl(group) {
+  const prefix = group.pathPrefix || group.prefix;
+  return `${group.siteUrl}/${prefix}/`;
 }
