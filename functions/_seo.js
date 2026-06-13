@@ -7,14 +7,14 @@ export const RSS_LIMIT = 80;
 export const GROUPS = [
   { host: "gnlaw-criminal.co.kr", key: "a", landingKey: "a", prefix: "prosecute", suffix: "litigation", label: "형사고소", siteUrl: "https://gnlaw-criminal.co.kr" },
   { host: "gnlaw-civil.co.kr", key: "b", landingKey: "b", prefix: "civil", suffix: "settlement", label: "민사소송", siteUrl: "https://gnlaw-civil.co.kr" },
-  { host: "gnlaw-recovery.co.kr", key: "c", landingKey: "c", prefix: "success", suffix: "result", label: "회수사례", siteUrl: "https://gnlaw-recovery.co.kr" },
-  { host: "gnlaw-case.co.kr", key: "d", landingKey: "d", prefix: "briefing", suffix: "review", label: "사건정보", siteUrl: "https://gnlaw-case.co.kr" },
-  { host: "gnlaw-center.co.kr", key: "e", landingKey: "e", prefix: "case", suffix: "issue", label: "통합허브", siteUrl: "https://gnlaw-center.co.kr" },
-  { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", key: "la", landingKey: "la", prefix: "criminal", suffix: "legal-action", label: "금융피해 형사", siteUrl: "https://xn--jj0b0cw1o75qwua31zyfp19e.kr" },
-  { host: "xn--jj0b77gmsoyyfbet54ddvg2ma.kr", key: "lb", landingKey: "lb", prefix: "litigation", suffix: "recovery", label: "피해금 회수", siteUrl: "https://xn--jj0b77gmsoyyfbet54ddvg2ma.kr" },
-  { host: "xn--2e0bno217bsqa58yp8nd1g2ma.kr", key: "lc", landingKey: "lc", prefix: "results", suffix: "solution", label: "회수 여부", siteUrl: "https://xn--2e0bno217bsqa58yp8nd1g2ma.kr" },
-  { host: "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", key: "ld", landingKey: "ld", prefix: "insights", suffix: "report", label: "피해 구조", siteUrl: "https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr" },
-  { host: "xn--ok0b84g7tosqai7vyka788co0b.kr", key: "le", landingKey: "le", prefix: "incidents", suffix: "incident", label: "투자사기 허브", siteUrl: "https://xn--ok0b84g7tosqai7vyka788co0b.kr" },
+  { host: "gnlaw-recovery.co.kr", key: "c", landingKey: "c", prefix: "success", suffix: "result", label: "성공사례", siteUrl: "https://gnlaw-recovery.co.kr" },
+  { host: "gnlaw-case.co.kr", key: "d", landingKey: "d", prefix: "briefing", suffix: "review", label: "사건브리핑", siteUrl: "https://gnlaw-case.co.kr" },
+  { host: "gnlaw-center.co.kr", key: "e", landingKey: "e", prefix: "case", suffix: "issue", label: "사건현황", siteUrl: "https://gnlaw-center.co.kr" },
+  { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", key: "la", landingKey: "la", prefix: "criminal", suffix: "legal-action", label: "법적조치", siteUrl: "https://xn--jj0b0cw1o75qwua31zyfp19e.kr" },
+  { host: "xn--jj0b77gmsoyyfbet54ddvg2ma.kr", key: "lb", landingKey: "lb", prefix: "litigation", suffix: "recovery", label: "피해회복", siteUrl: "https://xn--jj0b77gmsoyyfbet54ddvg2ma.kr" },
+  { host: "xn--2e0bno217bsqa58yp8nd1g2ma.kr", key: "lc", landingKey: "lc", prefix: "results", suffix: "solution", label: "해결사례", siteUrl: "https://xn--2e0bno217bsqa58yp8nd1g2ma.kr" },
+  { host: "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", key: "ld", landingKey: "ld", prefix: "insights", suffix: "report", label: "피해정보", siteUrl: "https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr" },
+  { host: "xn--ok0b84g7tosqai7vyka788co0b.kr", key: "le", landingKey: "le", prefix: "incidents", suffix: "incident", label: "진행현황", siteUrl: "https://xn--ok0b84g7tosqai7vyka788co0b.kr" },
 ];
 
 export const GROUP_BY_HOST = Object.fromEntries(GROUPS.map((group) => [group.host, group]));
@@ -95,28 +95,84 @@ export function buildRssXml(group, cases = [], options = {}) {
   const base = group.siteUrl || `https://${group.host}`;
   const items = sortNewest(cases).filter((item) => item?.slug).slice(0, options.limit || RSS_LIMIT);
   const now = new Date();
-  const channelTitle = `${group.label || "신규 사건"} 최신 랜딩`;
-  const channelDescription = `${group.label || "신규 사건"} 신규 랜딩페이지와 최신 업데이트`;
+  const channelTitle = `${group.label || "신규 사건"} 최신 목록`;
+  const channelDescription = `${group.label || "신규 사건"} 신규 페이지와 최신 업데이트`;
   const itemXml = items.map((item) => buildRssItem(group, item)).join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">\n  <channel>\n    <title>${escapeXml(channelTitle)}</title>\n    <link>${escapeXml(base)}/</link>\n    <atom:link href="${escapeXml(base)}/rss.xml" rel="self" type="application/rss+xml" />\n    <description>${escapeXml(channelDescription)}</description>\n    <language>ko-KR</language>\n    <lastBuildDate>${now.toUTCString()}</lastBuildDate>\n${itemXml}\n  </channel>\n</rss>`;
 }
 
+const RSS_TITLE_SUFFIXES = {
+  a: "형사고소",
+  b: "민사소송",
+  c: "성공사례",
+  d: "사건브리핑",
+  e: "사건현황",
+  la: "법적조치",
+  lb: "피해회복",
+  lc: "해결사례",
+  ld: "피해정보",
+  le: "진행현황",
+};
+
+function rssFallbackTitle(item = {}, group = {}) {
+  const primary = primaryCaseKeyword(item.caseName || item.name || item.slug);
+  const suffix = RSS_TITLE_SUFFIXES[group.landingKey || group.key] || group.label || "";
+  return `${primary} ${suffix}`.replace(/\s+/g, " ").trim();
+}
+
+function primaryCaseKeyword(name = "") {
+  const clean = baseCaseName(name);
+  const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
+  if (match) return match[1].trim();
+  return clean ? `${clean} 사기` : "";
+}
+
+function baseCaseName(name = "") {
+  return String(name || "")
+    .trim()
+    .replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)$/i, "")
+    .trim();
+}
+
+function normalizeRssText(value = "", item = {}) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const primary = primaryCaseKeyword(item.caseName || item.name || item.slug);
+  const base = baseCaseName(item.caseName || item.name);
+  const variants = [item.caseName, item.name, primary]
+    .map((entry) => String(entry || "").trim())
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
+  if (base && base !== primary && !primary.startsWith(`${base} `)) {
+    variants.push(base);
+  }
+  let normalized = text;
+  variants.forEach((variant) => {
+    normalized = normalized.split(variant).join(primary);
+  });
+  return normalized
+    .replace(/관련 사기 피해 의심 사건으로,\s*입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다\./g, "관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function buildRssItem(group, item) {
   const landing = getLanding(item, group);
   const canonical = landing.canonical || buildLandingUrl(group, item.slug);
-  const title = landing.title || item.caseName || item.slug;
-  const description = landing.description || item.summary || `${item.caseName || item.slug} 관련 신규 랜딩페이지입니다.`;
+  const fallbackTitle = rssFallbackTitle(item, group);
+  const title = landing.title || fallbackTitle;
+  const description = landing.description || normalizeRssText(item.summary, item) || `${primaryCaseKeyword(item.caseName || item.name || item.slug)} 관련 신규 페이지입니다.`;
   const published = item.updatedAt || item.createdAt || kstDate();
-  const content = buildRssContent(item, landing, group, canonical);
+  const content = buildRssContent(item, landing, group, canonical, title, description);
 
   return `    <item>\n      <title>${escapeXml(title)}</title>\n      <link>${escapeXml(canonical)}</link>\n      <guid isPermaLink="true">${escapeXml(canonical)}</guid>\n      <description>${escapeXml(description)}</description>\n      <pubDate>${dateToRfc822(published)}</pubDate>\n      <category>${escapeXml(group.label || "landing")}</category>\n      <content:encoded><![CDATA[${safeCdata(content)}]]></content:encoded>\n    </item>`;
 }
 
-function buildRssContent(item, landing, group, canonical) {
+function buildRssContent(item, landing, group, canonical, title, description) {
   const parts = [
-    `<h1>${escapeXml(landing.h1 || landing.title || item.caseName || item.slug)}</h1>`,
-    `<p>${escapeXml(landing.description || item.summary || "")}</p>`,
+    `<h1>${escapeXml(landing.h1 || landing.title || title || item.slug)}</h1>`,
+    `<p>${escapeXml(landing.description || description || "")}</p>`,
     `<p><a href="${escapeXml(canonical)}">${escapeXml(canonical)}</a></p>`,
   ];
 

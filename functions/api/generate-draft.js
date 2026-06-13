@@ -245,22 +245,27 @@ function createLandingData({ caseName, slug, group, templates = {} }) {
 function improveGeneratedLanding(landing, { caseName, slug, group }) {
   const scenario = detectScenario({ caseName, slug });
   const base = primaryCaseKeyword(caseName) || caseName;
-  const body = uniqueTextList([
+  const body = softenRepeatedContextList(uniqueTextList([
     ...(Array.isArray(landing.body) ? landing.body : []),
     ...scenarioBodyAdditions({ scenario, base, group }),
-  ].map(sanitizeAwkwardText)).slice(0, 9);
+  ].map(sanitizeAwkwardText)).slice(0, 9));
 
-  const victimCases = uniqueTextList([
+  const victimCases = softenRepeatedContextList(uniqueTextList([
     ...(Array.isArray(landing.victimCases) ? landing.victimCases : []),
     ...scenarioVictimCases({ scenario, group }),
-  ].map(sanitizeAwkwardText)).slice(0, 5);
+  ].map(sanitizeAwkwardText)).slice(0, 5));
 
-  const faq = dedupeFaq(Array.isArray(landing.faq) ? landing.faq : []);
+  const faqContext = createContextTermState();
+  const faq = dedupeFaq(Array.isArray(landing.faq) ? landing.faq : []).map((item) => ({
+    ...item,
+    question: softenRepeatedContextTerms(item.question || "", faqContext),
+    answer: softenRepeatedContextTerms(item.answer || "", faqContext),
+  }));
   const scamIntroItems = landing.scamIntroItems
-    ? uniqueTextList(landing.scamIntroItems.map(sanitizeAwkwardText), 0.82).slice(0, 8)
+    ? softenRepeatedContextList(uniqueTextList(landing.scamIntroItems.map(sanitizeAwkwardText), 0.82).slice(0, 8))
     : undefined;
   const scamMethodItems = landing.scamMethodItems
-    ? uniqueTextList(landing.scamMethodItems.map(sanitizeAwkwardText), 0.82).slice(0, 8)
+    ? softenRepeatedContextList(uniqueTextList(landing.scamMethodItems.map(sanitizeAwkwardText), 0.82).slice(0, 8))
     : undefined;
 
   return {
@@ -274,7 +279,7 @@ function improveGeneratedLanding(landing, { caseName, slug, group }) {
 }
 
 function scenarioBodyAdditions({ scenario, base, group }) {
-  const subject = base || "해당 사건";
+  const subject = base || "접수 기록";
   const commonByScenario = {
     app: [
       `${subject} 사건은 앱 설치 파일, 로그인 화면, 지갑 주소, 고객센터 대화가 함께 남아 있는지부터 확인해야 합니다. 앱을 삭제하기 전 화면 캡처와 설치 파일명, 접속 도메인을 따로 보관하면 계정 운영 주체를 추적하는 단서가 됩니다.`,
@@ -342,7 +347,7 @@ function detectScenario({ caseName = "", slug = "" }) {
 
 function sanitizeAwkwardText(value = "") {
   return String(value || "")
-    .replace(/관련 사실 관련/g, "해당 사건 관련")
+    .replace(/관련 사실 관련/g, "관련 자료")
     .replace(/대응 자료 관련 앱/g, "의심 앱")
     .replace(/해당 피해 관련 앱/g, "문제 앱")
     .replace(/담당자 담당자/g, "담당자")
@@ -689,7 +694,8 @@ function explainCategory() {
 }
 
 function createSummary(caseName) {
-  return `${caseName} 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.`;
+  const keyword = primaryCaseKeyword(caseName) || caseName;
+  return `${keyword} 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.`;
 }
 
 function createTags(caseName) {
@@ -723,6 +729,38 @@ function findDuplicateRisks(caseName, slug, cases) {
 
 function escapeRegex(s) {
   return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const CONTEXT_TERM_LIMITS = [
+  { term: "해당 사건", limit: 1, replacements: ["접수 기록", "상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
+  { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "거래 흐름", "검토 대상"] },
+  { term: "해당 플랫폼", limit: 1, replacements: ["문제 사이트", "거래 화면", "접속 페이지", "운영 계정"] },
+  { term: "유사 피해", limit: 1, replacements: ["같은 유형의 사례", "비슷한 접수", "관련 상담 기록"] },
+  { term: "출금 거부", limit: 2, replacements: ["출금 제한", "지급 보류", "환급 지연", "인출 제한"] },
+  { term: "추가 입금 요구", limit: 2, replacements: ["추가 송금 요청", "보증금 안내", "인증비 요청", "추가 비용 안내"] },
+];
+
+function createContextTermState() {
+  return { counts: Object.create(null) };
+}
+
+function softenRepeatedContextTerms(value = "", state = null) {
+  let text = String(value || "");
+  CONTEXT_TERM_LIMITS.forEach(({ term, limit, replacements }) => {
+    let count = state?.counts ? (state.counts[term] || 0) : 0;
+    text = text.replace(new RegExp(escapeRegex(term), "g"), () => {
+      count += 1;
+      if (count <= limit) return term;
+      return replacements[(count - limit - 1) % replacements.length];
+    });
+    if (state?.counts) state.counts[term] = count;
+  });
+  return text;
+}
+
+function softenRepeatedContextList(items = []) {
+  const state = createContextTermState();
+  return items.map((item) => softenRepeatedContextTerms(item, state));
 }
 
 // ─── 템플릿 파일 로딩 ─────────────────────────────────────────────────────────
@@ -774,7 +812,7 @@ function reduceBodyDensity(body, caseName) {
   const kw = primaryCaseKeyword(caseName);
   if (!kw) return body;
   const re = new RegExp(escapeRegex(kw), "g");
-  const subs = ["이 업체", "해당 플랫폼", "위 조직", "이 사기 조직"];
+  const subs = ["문제 업체", "운영 계정", "접근 계정", "거래 화면", "입금 안내자", "관리자 계정", "사이트 운영자", "상담 대상"];
   let n = 0;
   return body.map((p) =>
     p.replace(re, () => (++n <= 1 ? kw : subs[(n - 2) % subs.length])),
@@ -874,20 +912,21 @@ function today() {
 function normalizeCaseName(name) {
   let clean = String(name || "").trim();
   clean = clean.replace(/\s*(?:사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
-  return /사기/.test(clean) ? clean : `${clean} 사칭 사기`;
+  return /사기/.test(clean) ? clean : `${clean} 사기`;
 }
 
 function baseCaseName(name) {
   return String(name || "")
     .trim()
-    .replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "")
+    .replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)$/i, "")
     .trim();
 }
 
 function primaryCaseKeyword(name) {
   const clean = baseCaseName(name);
   const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
-  return (match ? match[1] : clean).trim();
+  if (match) return match[1].trim();
+  return clean ? `${clean} 사기` : "";
 }
 
 function secondaryCaseKeyword(name) {
@@ -905,33 +944,33 @@ function groupPageTitle(name, groupKey) {
   const suffixes = {
     a: "형사고소",
     b: "민사소송",
-    c: "피해금 회수 사례",
-    d: "AI브리핑",
-    e: "피해 진행현황",
-    la: "금융피해 형사고소",
-    lb: "피해금 회수 전략",
-    lc: "실제 회수 사례",
-    ld: "피해 구조 분석",
-    le: "피해 대응 허브",
+    c: "성공사례",
+    d: "사건브리핑",
+    e: "사건현황",
+    la: "법적조치",
+    lb: "피해회복",
+    lc: "해결사례",
+    ld: "피해정보",
+    le: "진행현황",
   };
-  return `${base} ${suffixes[groupKey] || "피해 대응"}${secondary ? ` | ${secondary}` : ""}`;
+  return `${base} ${suffixes[groupKey] || "형사고소"}${secondary ? ` | ${secondary}` : ""}`;
 }
 
 function groupPageH1(name, groupKey) {
   const base = primaryCaseKeyword(name);
   const suffixes = {
-    a: "형사고소 대응",
-    b: "민사소송 대응",
-    c: "피해금 회수 사례",
-    d: "AI브리핑",
-    e: "피해 진행현황",
-    la: "금융피해 형사고소 대응",
-    lb: "피해금 회수 전략",
-    lc: "실제 회수 사례 아카이브",
-    ld: "피해 구조 브리핑",
-    le: "피해 대응 허브",
+    a: "형사고소",
+    b: "민사소송",
+    c: "성공사례",
+    d: "사건브리핑",
+    e: "사건현황",
+    la: "법적조치",
+    lb: "피해회복",
+    lc: "해결사례",
+    ld: "피해정보",
+    le: "진행현황",
   };
-  return `${base} ${suffixes[groupKey] || "피해 대응"}`;
+  return `${base} ${suffixes[groupKey] || "형사고소"}`;
 }
 
 function normalizeSpace(value) {

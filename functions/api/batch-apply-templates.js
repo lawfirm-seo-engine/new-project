@@ -196,7 +196,7 @@ function reduceBodyDensity(body, caseName) {
   const kw = primaryCaseKeyword(caseName);
   if (!kw) return body;
   const re = new RegExp(escapeRegex(kw), "g");
-  const subs = ["이 업체", "해당 플랫폼", "위 조직", "이 사기 조직"];
+  const subs = ["문제 업체", "운영 계정", "접근 계정", "거래 화면", "입금 안내자", "관리자 계정", "사이트 운영자", "상담 대상"];
   let n = 0;
   return body.map((p) =>
     p.replace(re, () => (++n <= 1 ? kw : subs[(n - 2) % subs.length])),
@@ -216,9 +216,10 @@ function reduceFaqDensity(faq, caseName) {
 // ─── 텍스트 헬퍼 ─────────────────────────────────────────────────────────────────
 
 function primaryCaseKeyword(name) {
-  const clean = String(name || "").trim().replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim();
+  const clean = String(name || "").trim().replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)$/i, "").trim();
   const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
-  return (match ? match[1] : clean).trim();
+  if (match) return match[1].trim();
+  return clean ? `${clean} 사기` : "";
 }
 
 function escapeRegex(s) {

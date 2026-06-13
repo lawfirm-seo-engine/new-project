@@ -166,7 +166,14 @@ function createLandingData({ caseName, slug, group }) {
     le: `금융사기 사건 허브에서 형사, 민사, 사례, AI 브리핑을 사건별로 연결하고 대응 경로를 통합합니다.`,
   };
   const description = descByType[group.key] || `${group.intent} 관련 피해 구조와 대응 절차를 정리합니다.`;
-  const faq = makeFaq({ caseName, base, group });
+  const faqContext = createContextTermState();
+  const faq = makeFaq({ caseName, base, group }).map((item) => ({
+    ...item,
+    question: softenRepeatedContextTerms(item.question || "", faqContext),
+    answer: softenRepeatedContextTerms(item.answer || "", faqContext),
+  }));
+  const body = softenRepeatedContextList(makeBody({ caseName, base, group }));
+  const victimCases = softenRepeatedContextList(makeVictimCases({ base, group }));
 
   return {
     title,
@@ -176,8 +183,8 @@ function createLandingData({ caseName, slug, group }) {
     ogDescription: description,
     ogImage: `${group.siteUrl}/og/${slug}.png`,
     h1: groupPageH1(caseName, group.key),
-    body: makeBody({ caseName, base, group }),
-    victimCases: makeVictimCases({ base, group }),
+    body,
+    victimCases,
     suspiciousCompanies: makeSuspiciousCompanies({ caseName }),
     faq,
     schema: createSchemaData({ title, description, canonical, caseName, faq }),
@@ -357,31 +364,32 @@ function groupPageTitle(name, groupKey) {
   const base = primaryCaseKeyword(name);
   const secondary = secondaryCaseKeyword(name);
   const suffixes = {
-    la: "금융피해 형사고소",
-    lb: "피해금 회수 전략",
-    lc: "실제 회수 사례",
-    ld: "AI 금융사기 분석",
-    le: "금융사기 피해 허브",
+    la: "법적조치",
+    lb: "피해회복",
+    lc: "해결사례",
+    ld: "피해정보",
+    le: "진행현황",
   };
-  return `${base} ${suffixes[groupKey] || "피해 대응"}${secondary ? ` | ${secondary}` : ""}`;
+  return `${base} ${suffixes[groupKey] || "법적조치"}${secondary ? ` | ${secondary}` : ""}`;
 }
 
 function groupPageH1(name, groupKey) {
   const base = primaryCaseKeyword(name);
   const suffixes = {
-    la: "금융피해 형사고소 대응",
-    lb: "피해금 회수 전략",
-    lc: "실제 회수 사례 아카이브",
-    ld: "AI 금융사기 브리핑",
-    le: "금융사기 사건 허브",
+    la: "법적조치",
+    lb: "피해회복",
+    lc: "해결사례",
+    ld: "피해정보",
+    le: "진행현황",
   };
-  return `${base} ${suffixes[groupKey] || "피해 대응"}`;
+  return `${base} ${suffixes[groupKey] || "법적조치"}`;
 }
 
 function primaryCaseKeyword(name) {
   const clean = baseCaseName(name);
   const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
-  return (match ? match[1] : clean).trim();
+  if (match) return match[1].trim();
+  return clean ? `${clean} 사기` : "";
 }
 
 function secondaryCaseKeyword(name) {
@@ -394,7 +402,43 @@ function secondaryCaseKeyword(name) {
 }
 
 function baseCaseName(name) {
-  return String(name || "").trim().replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim();
+  return String(name || "").trim().replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)$/i, "").trim();
+}
+
+function escapeRegex(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const CONTEXT_TERM_LIMITS = [
+  { term: "해당 사건", limit: 1, replacements: ["접수 기록", "상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
+  { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "거래 흐름", "검토 대상"] },
+  { term: "해당 플랫폼", limit: 1, replacements: ["문제 사이트", "거래 화면", "접속 페이지", "운영 계정"] },
+  { term: "유사 피해", limit: 1, replacements: ["같은 유형의 사례", "비슷한 접수", "관련 상담 기록"] },
+  { term: "출금 거부", limit: 2, replacements: ["출금 제한", "지급 보류", "환급 지연", "인출 제한"] },
+  { term: "추가 입금 요구", limit: 2, replacements: ["추가 송금 요청", "보증금 안내", "인증비 요청", "추가 비용 안내"] },
+];
+
+function createContextTermState() {
+  return { counts: Object.create(null) };
+}
+
+function softenRepeatedContextTerms(value = "", state = null) {
+  let text = String(value || "");
+  CONTEXT_TERM_LIMITS.forEach(({ term, limit, replacements }) => {
+    let count = state?.counts ? (state.counts[term] || 0) : 0;
+    text = text.replace(new RegExp(escapeRegex(term), "g"), () => {
+      count += 1;
+      if (count <= limit) return term;
+      return replacements[(count - limit - 1) % replacements.length];
+    });
+    if (state?.counts) state.counts[term] = count;
+  });
+  return text;
+}
+
+function softenRepeatedContextList(items = []) {
+  const state = createContextTermState();
+  return items.map((item) => softenRepeatedContextTerms(item, state));
 }
 
 function normalizeSpace(value) {

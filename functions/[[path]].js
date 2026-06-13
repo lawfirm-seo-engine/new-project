@@ -501,7 +501,7 @@ function renderLanding(caseData, group, origin) {
     "최근 접수 흐름과 대응 절차를 기준으로 피해 구조, 증거 보존, 상담 전 확인사항을 정리했습니다."
   );
 
-  return pageTemplate({
+  return softenRepeatedContextTerms(pageTemplate({
     title: esc(`${pageTitle} | 법무법인 선린`),
     description: esc(seoDescription),
     canonical,
@@ -528,7 +528,7 @@ function renderLanding(caseData, group, origin) {
     ctaLabel: esc(group.ctaLabel),
     footerLinks,
     headerCall: "",
-  });
+  }));
 }
 
 function createFallbackLanding(caseData, group, key) {
@@ -1072,7 +1072,7 @@ function renderBodyForLanding(landing, group, caseData) {
 
 function scenarioBodyAdditions(caseData, group, base = "") {
   const scenario = detectScenario(caseData);
-  const subject = base || primaryCaseKeyword(caseData.caseName || "") || "해당 사건";
+  const subject = base || primaryCaseKeyword(caseData.caseName || "") || "접수 기록";
   const commonByScenario = {
     app: [
       `${subject} 사건은 앱 설치 파일, 로그인 화면, 지갑 주소, 고객센터 대화가 함께 남아 있는지부터 확인해야 합니다. 앱을 삭제하기 전 화면 캡처와 설치 파일명, 접속 도메인을 따로 보관하면 계정 운영 주체를 추적하는 단서가 됩니다.`,
@@ -1143,7 +1143,7 @@ function detectScenario(caseData = {}) {
 
 function sanitizeAwkwardText(value = "") {
   return String(value || "")
-    .replace(/관련 사실 관련/g, "해당 사건 관련")
+    .replace(/관련 사실 관련/g, "관련 자료")
     .replace(/대응 자료 관련 앱/g, "의심 앱")
     .replace(/해당 피해 관련 앱/g, "문제 앱")
     .replace(/담당자 담당자/g, "담당자")
@@ -1468,17 +1468,18 @@ function esc(v = "") {
 
 function normalizeCaseName(name) {
   let clean = String(name || "").trim().replace(/\s*(?:사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
-  return /사기/.test(clean) ? `${clean} 사칭` : `${clean} 사칭 사기`;
+  return /사기/.test(clean) ? clean : `${clean} 사기`;
 }
 
 function baseCaseName(name) {
-  return String(name || "").trim().replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim();
+  return String(name || "").trim().replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)$/i, "").trim();
 }
 
 function primaryCaseKeyword(name) {
   const clean = baseCaseName(name);
   const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
-  return (match ? match[1] : clean).trim();
+  if (match) return match[1].trim();
+  return clean ? `${clean} 사기` : "";
 }
 
 function secondaryCaseKeyword(name) {
@@ -1490,43 +1491,21 @@ function secondaryCaseKeyword(name) {
   return /사칭|피해/.test(tail) ? `${tail} 피해 대응` : `${tail} 사칭 피해 대응`;
 }
 
-function stripTrailingFraudWords(base) {
-  // Remove trailing 사칭·사기 to prevent duplication when suffix also starts with these words
-  return base.replace(/\s*(사칭\s*사기|사칭|사기)\s*$/, "").trim() || base;
-}
-
 function groupPageTitle(name, key) {
-  {
-    const base = seoCaseKeyword(name);
-    const suffixes = {
-      a: "피해 형사고소",
-      b: "피해금 회수 민사소송",
-      c: "피해 사례와 회수 가능성",
-      d: "수법 분석과 대응 방법",
-      e: "피해 사건 정보",
-      la: "피해 법적 대응",
-      lb: "피해금 회수 전략",
-      lc: "실제 회수 가능성",
-      ld: "수법 분석 리포트",
-      le: "피해 대응 가이드",
-    };
-    return joinSeoPhrase(base, suffixes[key] || "피해 형사고소");
-  }
-
-  const base = stripTrailingFraudWords(seoCaseKeyword(name));
+  const base = seoCaseKeyword(name);
   const suffixes = {
-    a:  "사칭 피해 형사고소",
-    b:  "사칭 피해 합의·민사소송",
-    c:  "사칭 피해 대응 사례",
-    d:  "사기 수법 분석",
-    e:  "사기 사건 정보",
-    la: "금융사기 법적 대응",
-    lb: "피해금 회수 방법",
-    lc: "금융사기 해결 사례",
-    ld: "금융사기 분석 리포트",
-    le: "금융사기 사건 가이드",
+    a: "형사고소",
+    b: "민사소송",
+    c: "성공사례",
+    d: "사건브리핑",
+    e: "사건현황",
+    la: "법적조치",
+    lb: "피해회복",
+    lc: "해결사례",
+    ld: "피해정보",
+    le: "진행현황",
   };
-  return `${base} ${suffixes[key] || "사칭 피해 형사고소"}`;
+  return joinSeoPhrase(base, suffixes[key] || "형사고소");
 }
 
 function groupPageH1(name, key) {
@@ -1556,7 +1535,7 @@ function searchKeyword(name) {
   const base = primaryCaseKeyword(name);
   const secondary = secondaryCaseKeyword(name).replace(/\s*피해 대응$/, "");
   const secondaryExtra = secondary && !/사칭$/.test(secondary.trim()) ? `${secondary} 사칭` : "";
-  return [base, `${base} 피해`, secondary, secondaryExtra].filter(Boolean).join(", ");
+  return [base, `${base} 형사고소`, `${base} 민사소송`, secondary, secondaryExtra].filter(Boolean).join(", ");
 }
 
 function themeColor(key) {
@@ -1671,8 +1650,8 @@ function createSeoDescription(description = "", caseName = "", key = "") {
     const primary = seoCaseKeyword(caseName);
     const desc = String(description || "").trim();
     const fallback = primary
-      ? `${primary} 피해가 의심된다면 추가 입금을 중단하세요. 텔레그램 리딩방, 허위 수익 인증, 출금 지연, 세금·보증금 요구 정황을 기준으로 대응 방법과 피해금 회수 가능성을 점검합니다.`
-      : "입금 내역, 대화 기록, 사이트 주소를 기준으로 사기 피해 정황과 대응 방법을 정리합니다.";
+      ? `${primary} 관련 상담 자료를 기준으로 송금 경위, 대화 기록, 계좌 단서, 접속 주소를 정리해 형사고소와 회수 가능성을 점검합니다.`
+      : "송금 내역, 대화 기록, 사이트 주소를 기준으로 사기 정황과 대응 방법을 정리합니다.";
     if (!primary) return (desc || fallback).slice(0, 150);
     return (!desc || !desc.toLowerCase().includes(primary.toLowerCase()) ? fallback : desc).slice(0, 150);
   }
@@ -1704,7 +1683,7 @@ function reduceCaseNameTextLegacy(value, caseName, keepFirst = false) {
   let text = toStr(value);
   const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
   const primary = primaryCaseKeyword(caseName);
-  const replacements = ["해당 피해", "이 사안", "관련 정황", "피해 흐름", "접수 사례", "문제 상황"];
+  const replacements = ["접수 기록", "상담 메모", "거래 흐름", "증거 묶음", "계좌 단서", "대화 자료"];
   let replacementIndex = 0;
   let used = false;
   names.forEach((name) => {
@@ -1713,7 +1692,7 @@ function reduceCaseNameTextLegacy(value, caseName, keepFirst = false) {
       text = text.replace(name, primary);
       used = true;
     }
-    const replacement = keepFirst ? "해당 피해" : replacements[replacementIndex++ % replacements.length];
+    const replacement = keepFirst ? "접수 기록" : replacements[replacementIndex++ % replacements.length];
     text = text.split(name).join(replacement);
   });
   return cleanupRepeatedWords(text);
@@ -1732,24 +1711,26 @@ function cleanupRepeatedWords(value = "") {
 }
 
 const CASE_NAME_REPLACEMENTS = [
-  "이 사건",
-  "이 사안",
-  "해당 피해",
-  "관련 사실",
-  "관련 내용",
-  "관련 정보",
-  "확인된 사실",
-  "문제 상황",
-  "피해 흐름",
-  "접수 사례",
-  "입금 경위",
-  "상담 내용",
-  "확인 자료",
-  "피해 정리",
-  "접수 내용",
-  "대응 자료",
-  "피해 내용",
-  "확인 내용",
+  "접수 기록",
+  "상담 메모",
+  "거래 흐름",
+  "증거 묶음",
+  "계좌 단서",
+  "대화 자료",
+  "송금 내역",
+  "화면 기록",
+  "접근 경로",
+  "안내 문구",
+  "담당자 기록",
+  "분석 대상",
+  "검토 자료",
+  "신고 자료",
+  "확인 항목",
+  "보존 자료",
+  "대응 메모",
+  "정리 내용",
+  "사례 기록",
+  "진행 자료",
 ];
 
 function createReplacementContext(seed = "") {
@@ -1783,6 +1764,32 @@ function reduceCaseNameText(value, caseName, keepFirst = false, replacementConte
     text = text.split(name).join(nextCaseReplacement(replacementContext));
   });
   return cleanupRepeatedWords(text);
+}
+
+const CONTEXT_TERM_LIMITS = [
+  { term: "해당 사건", limit: 1, replacements: ["접수 기록", "상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
+  { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "거래 흐름", "검토 대상"] },
+  { term: "해당 플랫폼", limit: 1, replacements: ["문제 사이트", "거래 화면", "접속 페이지", "운영 계정"] },
+  { term: "유사 피해", limit: 1, replacements: ["같은 유형의 사례", "비슷한 접수", "관련 상담 기록"] },
+  { term: "출금 거부", limit: 2, replacements: ["출금 제한", "지급 보류", "환급 지연", "인출 제한"] },
+  { term: "추가 입금 요구", limit: 2, replacements: ["추가 송금 요청", "보증금 안내", "인증비 요청", "추가 비용 안내"] },
+];
+
+function escapeRegExp(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function softenRepeatedContextTerms(value = "") {
+  let text = String(value || "");
+  CONTEXT_TERM_LIMITS.forEach(({ term, limit, replacements }) => {
+    let count = 0;
+    text = text.replace(new RegExp(escapeRegExp(term), "g"), () => {
+      count += 1;
+      if (count <= limit) return term;
+      return replacements[(count - limit - 1) % replacements.length];
+    });
+  });
+  return text;
 }
 
 function cleanupRepeatedWordsLegacy(value = "") {
