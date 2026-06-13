@@ -1372,6 +1372,7 @@ function createHubContent(group) {
   const todayReports = cases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
   const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix);
+  const typeEntrySection = createTypeEntrySection(group);
 
   const rows = sortedCases
     .map((item) => {
@@ -1476,6 +1477,7 @@ function createHubContent(group) {
         </div>
       </div>
     </section>
+    ${typeEntrySection}
     ${freshSection}
     <div class="case-search-wrap">
       <input id="case-search" type="search" class="case-search" placeholder="사기 업체명 또는 사건명 검색" autocomplete="off">
@@ -1490,6 +1492,24 @@ function createHubContent(group) {
       ${rows}
     </section>
     ${dynScript}`;
+}
+
+function createCategoryContent(group) {
+  const caseNoMap = new Map(cases.map((c, i) => [c.slug, i + 1]));
+  const sortedCases = [...cases].reverse();
+  const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
+  return createFreshLandingSection(group, sortedCases, caseNoMap, suffix);
+}
+
+function createTypeEntrySection(group) {
+  const category = breadcrumbLabel(group);
+  return `<section class="type-entry-section" aria-label="${escapeHtml(category)}">
+    <a class="type-entry-link" href="/${group.pathPrefix}/">
+      <span>유형</span>
+      <strong>${escapeHtml(category)}</strong>
+      <em>${FRESH_LIST_LABEL}</em>
+    </a>
+  </section>`;
 }
 
 function buildRelativeLandingPath(group, slug) {
@@ -1749,8 +1769,8 @@ for (const group of groups) {
   await fs.outputFile(path.join(group.outDir, "index.html"), hubHtml);
 
   const category = breadcrumbLabel(group);
-  const categoryTitle = `${group.siteName} ${category} 사건 목록`;
-  const categoryDescription = `${category} 유형의 최신 랜딩과 사건 목록을 정리합니다. ${group.hubLead}`;
+  const categoryTitle = `${group.siteName} ${category} ${FRESH_LIST_LABEL}`;
+  const categoryDescription = `${category} 유형에서 오늘 추가되거나 갱신된 사건만 정리합니다. ${group.hubLead}`;
   const categoryCanonical = `${group.siteUrl}/${group.pathPrefix}/`;
   const categoryHtml = buildPage(template, group, {
     title: escapeHtml(categoryTitle),
@@ -1765,7 +1785,7 @@ for (const group of groups) {
     ogThumbnail: "",
     summary: escapeHtml(categoryDescription),
     breadcrumb: createCategoryBreadcrumb(group),
-    content: createHubContent(group),
+    content: createCategoryContent(group),
     headerCall: "",
     floatingWidgets: createHubFloatingWidgets(group),
     pageKind: "hub-page category-page",
