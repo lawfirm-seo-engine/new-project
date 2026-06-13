@@ -15,6 +15,8 @@ const publicDir = path.join(root, "public");
 const templatesDir = path.join(root, "templates");
 
 const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+const FRESH_LIST_LABEL = "오늘 추가/갱신된 목록";
+const FRESH_LIST_ANCHOR = "fresh-landings";
 
 const ORGANIZATION = {
   "@type": "Organization",
@@ -1503,7 +1505,7 @@ function createFreshLandingSection(group, sortedCases, caseNoMap, suffix) {
     .filter((item) => item.createdAt === today || item.updatedAt === today)
     .slice(0, 8);
   const items = (todays.length ? todays : sortedCases.slice(0, 8)).filter((item) => item?.slug);
-  const label = todays.length ? "오늘 추가/갱신된 목록" : "최근 추가 목록";
+  const label = FRESH_LIST_LABEL;
 
   if (!items.length) return "";
 
@@ -1521,7 +1523,7 @@ function createFreshLandingSection(group, sortedCases, caseNoMap, suffix) {
     </a>`;
   }).join("\n");
 
-  return `<section class="fresh-landing-section" aria-label="${label}">
+  return `<section id="${FRESH_LIST_ANCHOR}" class="fresh-landing-section" aria-label="${label}">
     <div class="fresh-landing-head">
       <p>RECENT LANDINGS</p>
       <h2>${label}</h2>
@@ -1653,6 +1655,43 @@ function createFooterLinks(group) {
     .join("\n");
 }
 
+function createCategoryBreadcrumb(group) {
+  const category = breadcrumbLabel(group);
+  return `<nav class="breadcrumb" aria-label="breadcrumb">
+    <a href="${group.siteUrl}/">홈</a>
+    <strong>${escapeHtml(category)}</strong>
+  </nav>`;
+}
+
+function createCategorySchema(group, title, description, canonical) {
+  const category = breadcrumbLabel(group);
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${canonical}#webpage`,
+        name: title,
+        url: canonical,
+        inLanguage: "ko-KR",
+        description,
+        dateModified: today,
+        breadcrumb: { "@id": `${canonical}#breadcrumb` },
+        publisher: ORGANIZATION,
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${canonical}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "홈", item: `${group.siteUrl}/` },
+          { "@type": "ListItem", position: 2, name: category, item: canonical },
+        ],
+      },
+      ORGANIZATION,
+    ],
+  });
+}
+
 for (const group of groups) {
   const template = await fs.readFile(path.join(templatesDir, group.template), "utf8");
 
@@ -1708,6 +1747,31 @@ for (const group of groups) {
   });
 
   await fs.outputFile(path.join(group.outDir, "index.html"), hubHtml);
+
+  const category = breadcrumbLabel(group);
+  const categoryTitle = `${group.siteName} ${category} 사건 목록`;
+  const categoryDescription = `${category} 유형의 최신 랜딩과 사건 목록을 정리합니다. ${group.hubLead}`;
+  const categoryCanonical = `${group.siteUrl}/${group.pathPrefix}/`;
+  const categoryHtml = buildPage(template, group, {
+    title: escapeHtml(categoryTitle),
+    description: escapeHtml(categoryDescription),
+    canonical: categoryCanonical,
+    ogTitle: escapeHtml(categoryTitle),
+    ogDescription: escapeHtml(categoryDescription),
+    ogImage: `${group.siteUrl}/assets/og-template.png`,
+    headExtra: createHeadExtra({ group, isHub: true }),
+    schema: createCategorySchema(group, categoryTitle, categoryDescription, categoryCanonical),
+    h1: escapeHtml(categoryTitle),
+    ogThumbnail: "",
+    summary: escapeHtml(categoryDescription),
+    breadcrumb: createCategoryBreadcrumb(group),
+    content: createHubContent(group),
+    headerCall: "",
+    floatingWidgets: createHubFloatingWidgets(group),
+    pageKind: "hub-page category-page",
+  });
+
+  await fs.outputFile(path.join(group.outDir, group.pathPrefix, "index.html"), categoryHtml);
 
   // NOTE: Individual case landing pages are now served dynamically by functions/[[path]].js
   // Static HTML generation for case pages has been removed (KV architecture).

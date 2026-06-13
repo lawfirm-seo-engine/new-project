@@ -71,8 +71,13 @@ export function getRecentCases(cases = [], days = RECENT_SITEMAP_DAYS, limit = R
 export function buildSitemapXml(group, cases = [], options = {}) {
   const includeHome = options.includeHome !== false;
   const today = kstDate();
+  const base = group.siteUrl || `https://${group.host}`;
+  const prefix = group.pathPrefix || group.prefix;
   const home = includeHome
-    ? [`  <url><loc>${escapeXml(group.siteUrl || `https://${group.host}`)}/</loc><lastmod>${today}</lastmod><changefreq>hourly</changefreq><priority>0.5</priority></url>`]
+    ? [`  <url><loc>${escapeXml(base)}/</loc><lastmod>${today}</lastmod><changefreq>hourly</changefreq><priority>0.5</priority></url>`]
+    : [];
+  const category = prefix
+    ? [`  <url><loc>${escapeXml(base)}/${escapeXml(prefix)}/</loc><lastmod>${today}</lastmod><changefreq>hourly</changefreq><priority>${options.recent ? "1.0" : "0.8"}</priority></url>`]
     : [];
   const urls = cases
     .filter((item) => item?.slug)
@@ -83,7 +88,7 @@ export function buildSitemapXml(group, cases = [], options = {}) {
       return `  <url><loc>${escapeXml(buildLandingUrl(group, item.slug))}</loc><lastmod>${escapeXml(lastmod)}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
     });
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...home, ...urls].join("\n")}\n</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...home, ...category, ...urls].join("\n")}\n</urlset>`;
 }
 
 export function buildSitemapIndexXml(group, lastmod = kstDate()) {
