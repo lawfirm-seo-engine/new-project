@@ -33,6 +33,9 @@ export async function onRequest(context) {
   if (
     url.pathname.startsWith("/admin") ||
     url.pathname.startsWith("/api/create-case") ||
+    url.pathname.startsWith("/api/create-powerlink") ||
+    url.pathname.startsWith("/api/get-powerlinks") ||
+    url.pathname.startsWith("/api/delete-powerlink") ||
     url.pathname.startsWith("/api/generate-draft") ||
     url.pathname.startsWith("/api/update-case") ||
     url.pathname.startsWith("/api/batch-apply-templates") ||

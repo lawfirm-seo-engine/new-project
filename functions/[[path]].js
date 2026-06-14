@@ -209,6 +209,9 @@ export async function onRequest(context) {
   }
 
   const group = GROUPS[url.host];
+  const powerlinkResponse = await handlePowerlinkRoute({ context, url, pathname });
+  if (powerlinkResponse) return powerlinkResponse;
+
   if (!group) return next();
 
   // /[pathPrefix]/[slug]-[suffix]/ 형태의 랜딩 페이지만 처리
@@ -293,6 +296,308 @@ export async function onRequest(context) {
       "X-Robots-Tag": "index, follow",
     },
   });
+}
+
+// ─── Powerlink Landing Renderer ──────────────────────────────────────────────
+
+async function handlePowerlinkRoute({ context, url, pathname }) {
+  const parts = pathname.replace(/^\/|\/$/g, "").split("/").filter(Boolean);
+  if (parts[0] !== "powerlink") return null;
+
+  if (url.host !== "gnlaw-criminal.co.kr") {
+    return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  }
+
+  if (parts.length !== 2 || !parts[1]) return null;
+
+  if (!pathname.endsWith("/")) {
+    return new Response(null, {
+      status: 301,
+      headers: { Location: `${url.origin}${pathname}/${url.search}` },
+    });
+  }
+
+  const slug = decodeURIComponent(parts[1]);
+  const landing = await loadPowerlinkLanding(context.env, slug);
+  if (!landing) {
+    return new Response("파워링크 랜딩을 찾을 수 없습니다.", {
+      status: 404,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
+
+  const html = renderPowerlinkLanding(landing);
+  const robots = normalizePowerlinkRobots(landing.robots);
+  return new Response(html, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=60, s-maxage=300",
+      "X-Robots-Tag": robots,
+    },
+  });
+}
+
+async function loadPowerlinkLanding(env, slug) {
+  if (env.CASES) {
+    const raw = await env.CASES.get(`powerlink:${slug}`);
+    if (raw) return JSON.parse(raw);
+  }
+
+  return fetchPowerlinkFromGitHub(slug, env);
+}
+
+function renderPowerlinkLanding(landing) {
+  const slug = landing.slug || "";
+  const canonical = `https://gnlaw-criminal.co.kr/powerlink/${encodeURIComponent(slug)}/`;
+  const title = landing.title || landing.h1 || "파워링크 랜딩";
+  const h1 = landing.h1 || title;
+  const description = landing.description || `${title} 관련 신규 사건 진행 내용을 정리했습니다.`;
+  const robots = normalizePowerlinkRobots(landing.robots);
+  const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
+  const modifiedDate = landing.updatedAt || publishedDate;
+  const ogImage = "https://gnlaw-criminal.co.kr/assets/og-template.png";
+  const schema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://gnlaw-criminal.co.kr/#website",
+        name: "피해금 추적 법률센터",
+        url: "https://gnlaw-criminal.co.kr",
+        inLanguage: "ko-KR",
+        publisher: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${canonical}#webpage`,
+        name: title,
+        description,
+        url: canonical,
+        inLanguage: "ko-KR",
+        datePublished: publishedDate,
+        dateModified: modifiedDate,
+        isPartOf: { "@id": "https://gnlaw-criminal.co.kr/#website" },
+        breadcrumb: { "@id": `${canonical}#breadcrumb` },
+        author: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
+      },
+      {
+        "@type": "Article",
+        "@id": `${canonical}#article`,
+        headline: title,
+        description,
+        url: canonical,
+        inLanguage: "ko-KR",
+        datePublished: publishedDate,
+        dateModified: modifiedDate,
+        author: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
+        publisher: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
+        isPartOf: { "@id": `${canonical}#webpage` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${canonical}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "홈", item: "https://gnlaw-criminal.co.kr/" },
+          { "@type": "ListItem", position: 2, name: "파워링크", item: canonical },
+        ],
+      },
+      ORGANIZATION,
+      PERSON_ATTORNEY,
+    ],
+  }, null, 2);
+
+  const headExtra = [
+    `<meta name="robots" content="${esc(robots)}">`,
+    `<meta name="NaverBot" content="All">`,
+    `<meta name="Yeti" content="All">`,
+    `<meta http-equiv="content-language" content="ko">`,
+    `<link rel="icon" type="image/x-icon" href="/assets/favicon.ico">`,
+    `<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">`,
+    `<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">`,
+    `<meta name="naver-site-verification" content="8ac581a40e5eda3767c63ce7d27c155ccc8ea98f">`,
+    `<meta name="theme-color" content="#111827">`,
+    `<meta property="article:published_time" content="${publishedDate}T00:00:00+09:00">`,
+    `<meta property="article:modified_time" content="${modifiedDate}T00:00:00+09:00">`,
+    `<meta property="article:author" content="법무법인 선린">`,
+    `<meta name="author" content="법무법인 선린">`,
+    `<meta name="date" content="${publishedDate}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    `<meta name="twitter:title" content="${esc(title)}">`,
+    `<meta name="twitter:description" content="${esc(description)}">`,
+    `<meta name="twitter:image" content="${ogImage}">`,
+    `<meta property="og:image:alt" content="${esc(title)}">`,
+    `<meta property="og:image:type" content="image/png">`,
+    `<meta property="og:image:width" content="1200">`,
+    `<meta property="og:image:height" content="630">`,
+  ].join("\n  ");
+
+  const content = [
+    `<section class="article-block powerlink-article">${renderManualArticle(landing.body)}</section>`,
+    createPowerlinkConsultForm(landing),
+    createPowerlinkFloatingWidgets(landing),
+  ].join("\n");
+
+  return pageTemplate({
+    title: esc(`${title} | 법무법인 선린`),
+    description: esc(description),
+    canonical,
+    ogType: "article",
+    ogTitle: esc(title),
+    ogDescription: esc(description),
+    ogImage,
+    siteName: "피해금 추적 법률센터",
+    headExtra,
+    schema,
+    bodyClass: "domain-a landing-page powerlink-page",
+    tone: "NAVER POWERLINK",
+    h1: esc(h1),
+    breadcrumb: `<nav class="breadcrumb" aria-label="breadcrumb"><a href="https://gnlaw-criminal.co.kr/">홈</a><strong>${esc(title)}</strong></nav>`,
+    ogThumbnail: "",
+    summary: "",
+    heroTyping: "",
+    receiptBadge: "",
+    heroCta: "",
+    content,
+    intent: "파워링크 랜딩",
+    ctaTitle: esc(landing.ctaTitle || "피해 자료 검토 요청"),
+    ctaText: esc(landing.ctaText || ""),
+    ctaLabel: esc(landing.ctaLabel || "상담 접수"),
+    footerLinks: "",
+    headerCall: "",
+  });
+}
+
+function renderManualArticle(body = "") {
+  const lines = String(body || "").replace(/\r\n/g, "\n").split("\n");
+  const html = [];
+  let paragraph = [];
+  let listItems = [];
+
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+    html.push(`<p>${paragraph.map((line) => esc(line)).join("<br>")}</p>`);
+    paragraph = [];
+  };
+
+  const flushList = () => {
+    if (!listItems.length) return;
+    html.push(`<ul>${listItems.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`);
+    listItems = [];
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    const h2 = line.match(/^##\s+(.+)/);
+    if (h2) {
+      flushParagraph();
+      flushList();
+      html.push(`<h2>${esc(h2[1])}</h2>`);
+      continue;
+    }
+
+    const h3 = line.match(/^###\s+(.+)/);
+    if (h3) {
+      flushParagraph();
+      flushList();
+      html.push(`<h3>${esc(h3[1])}</h3>`);
+      continue;
+    }
+
+    const bullet = line.match(/^[-*]\s+(.+)/);
+    if (bullet) {
+      flushParagraph();
+      listItems.push(bullet[1]);
+      continue;
+    }
+
+    flushList();
+    paragraph.push(line);
+  }
+
+  flushParagraph();
+  flushList();
+
+  return html.length ? html.join("\n") : "<p>원고가 입력되지 않았습니다.</p>";
+}
+
+function createPowerlinkConsultForm(landing) {
+  const caseNameJson = JSON.stringify(landing.title || "파워링크 랜딩");
+  const domainJson = JSON.stringify("파워링크 랜딩");
+  return `<section class="article-block consult-form-section" id="consult">
+  <h2>${esc(landing.ctaTitle || "피해 자료 검토 요청")}</h2>
+  <p>${esc(landing.ctaText || "입금 내역, 대화 캡처, 사이트 주소를 남겨주시면 담당자가 확인 후 연락드립니다.")}</p>
+  <form class="consult-form" id="consultForm">
+    <input type="text" name="cname" placeholder="이름" required autocomplete="name">
+    <input type="tel" name="phone" placeholder="연락처 (010-xxxx-xxxx)" required autocomplete="tel">
+    <input type="text" name="amount" placeholder="대략적인 피해금액" required>
+    <button type="submit">${esc(landing.ctaLabel || "상담 접수")}</button>
+  </form>
+  <p class="consult-msg" id="consultMsg"></p>
+  <script>
+    document.getElementById('consultForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var btn = this.querySelector('button');
+      var msg = document.getElementById('consultMsg');
+      var label = btn.textContent;
+      btn.disabled = true; btn.textContent = '접수 중...';
+      msg.textContent = ''; msg.className = 'consult-msg';
+      try {
+        var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: this.cname.value, phone: this.phone.value, amount: this.amount.value, caseName: ${caseNameJson}, domain: ${domainJson} })
+        });
+        var data = await res.json();
+        if (data.ok) { msg.textContent = '상담 접수가 완료되었습니다. 담당자가 연락드립니다.'; msg.className = 'consult-msg ok'; this.reset(); btn.disabled = false; btn.textContent = label; }
+        else { msg.textContent = data.message || '접수 중 오류가 발생했습니다.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = label; }
+      } catch(err) { msg.textContent = '접수 중 오류가 발생했습니다.'; msg.className = 'consult-msg err'; btn.disabled = false; btn.textContent = label; }
+    });
+  </script>
+</section>`;
+}
+
+function createPowerlinkFloatingWidgets(landing) {
+  const caseNameJson = JSON.stringify(landing.title || "파워링크 랜딩");
+  const domainJson = JSON.stringify("파워링크 랜딩");
+  return `<div class="floating-contact">
+  <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
+</div>
+<div class="sticky-bar" id="stickyBar">
+  <span class="sticky-title">긴급 상담 ｜ 02-6348-0406</span>
+  <form class="sticky-form" id="stickyConsultForm">
+    <input type="text" name="sname" placeholder="이름" required autocomplete="name">
+    <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
+    <input type="text" name="samount" placeholder="대략적인 피해금액" required>
+    <button type="submit">${esc(landing.ctaLabel || "상담 접수")}</button>
+  </form>
+  <span id="stickyMsg" class="sticky-msg"></span>
+</div>
+<script>
+  document.getElementById('stickyConsultForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var btn = this.querySelector('button'); var msg = document.getElementById('stickyMsg'); var label = btn.textContent;
+    btn.disabled = true; btn.textContent = '접수 중...';
+    msg.textContent = ''; msg.className = 'sticky-msg';
+    try {
+      var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: ${caseNameJson}, domain: ${domainJson} })
+      });
+      var data = await res.json();
+      if (data.ok) { msg.textContent = '접수 완료!'; msg.className = 'sticky-msg ok'; this.reset(); btn.disabled = false; btn.textContent = label; }
+      else { msg.textContent = data.message || '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = label; }
+    } catch(err) { msg.textContent = '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = label; }
+  });
+</script>`;
+}
+
+function normalizePowerlinkRobots(value = "") {
+  return String(value).toLowerCase().includes("noindex") ? "noindex, follow" : "index, follow";
 }
 
 // ─── Rendering ────────────────────────────────────────────────────────────────
@@ -2044,6 +2349,49 @@ async function fetchCaseFromGitHub(slug, env) {
     if (!text) return null;
     const cases = JSON.parse(text.trim());
     return cases.find((c) => c.slug === slug) || null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchPowerlinkFromGitHub(slug, env) {
+  try {
+    const owner = env.GITHUB_REPO_OWNER;
+    const repo = env.GITHUB_REPO_NAME;
+    const branch = env.GITHUB_BRANCH || "main";
+    const token = env.GITHUB_TOKEN;
+    if (!owner || !repo || !token) return null;
+
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/data/powerlinks.json?ref=${branch}`;
+    const res = await fetch(apiUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "static-landing-generator",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+      },
+    });
+    if (!res.ok) return null;
+
+    const file = await res.json();
+    let text = "";
+    if (file.content && file.encoding !== "none") {
+      const clean = file.content.replace(/\n/g, "");
+      text = new TextDecoder().decode(Uint8Array.from(atob(clean), (c) => c.charCodeAt(0)));
+    } else if (file.download_url) {
+      const dr = await fetch(file.download_url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "User-Agent": "static-landing-generator",
+        },
+      });
+      if (dr.ok) text = await dr.text();
+    }
+
+    if (!text) return null;
+    const landings = JSON.parse(text.trim());
+    return landings.find((item) => item.slug === slug) || null;
   } catch {
     return null;
   }
