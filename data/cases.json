@@ -1984,7 +1984,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 1796,
+    "landingViews": 1795,
     "reports": 28,
     "summary": "소이랩 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -3422,7 +3422,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 1042,
+    "landingViews": 1041,
     "reports": 15,
     "summary": "mediacastlekr.com 사기 티켓예매 부업 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8033,6 +8033,27 @@
       "피스피스스튜디오",
       "사기",
       "비상장주식",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "geuranikuseujasanunyong",
+    "caseName": "그라니쿠스자산운용 사기 ipo 사칭 리딩방",
+    "category": "형사대응",
+    "createdAt": "2026-06-14",
+    "updatedAt": "2026-06-14",
+    "thumbnailUrl": "",
+    "landingViews": 2119,
+    "reports": 10,
+    "summary": "그라니쿠스자산운용 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "그라니쿠스자산운용",
+      "사기",
+      "ipo",
+      "사칭",
       "사기피해",
       "피해금회수",
       "증거보존"
