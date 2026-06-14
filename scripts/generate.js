@@ -2,6 +2,8 @@ import fs from "fs-extra";
 import path from "path";
 import sharp from "sharp";
 import {
+  RECENT_SITEMAP_DAYS,
+  RSS_LIMIT,
   buildLandingUrl as buildSeoLandingUrl,
   buildRssXml,
   buildSitemapIndexXml,
@@ -1807,7 +1809,7 @@ for (const group of groups) {
   const sitemapIndex = buildSitemapIndexXml(group, today);
   await fs.outputFile(path.join(group.outDir, "sitemap-index.xml"), sitemapIndex);
 
-  const rss = buildRssXml(group, getRecentCases(cases, 7, 80), { limit: 80 });
+  const rss = buildRssXml(group, getRecentCases(cases, RECENT_SITEMAP_DAYS, RSS_LIMIT), { limit: RSS_LIMIT });
   await fs.outputFile(path.join(group.outDir, "rss.xml"), rss);
 
   await fs.outputFile(path.join(group.outDir, "robots.txt"), `User-agent: *

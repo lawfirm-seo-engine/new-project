@@ -1,8 +1,9 @@
 export const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
 
-export const RECENT_SITEMAP_DAYS = 3;
-export const RECENT_SITEMAP_LIMIT = 200;
-export const RSS_LIMIT = 80;
+export const RECENT_SITEMAP_DAYS = 14;
+export const RECENT_SITEMAP_LIMIT = 300;
+export const RSS_LIMIT = 120;
+export const SEO_STABILIZED_AT = "2026-06-14";
 
 export const GROUPS = [
   { host: "gnlaw-criminal.co.kr", key: "a", landingKey: "a", prefix: "prosecute", suffix: "litigation", label: "형사고소", siteUrl: "https://gnlaw-criminal.co.kr" },
@@ -82,7 +83,8 @@ export function buildSitemapXml(group, cases = [], options = {}) {
   const urls = cases
     .filter((item) => item?.slug)
     .map((item) => {
-      const lastmod = item.updatedAt || item.createdAt || today;
+      const sourceLastmod = item.updatedAt || item.createdAt || today;
+      const lastmod = options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
       const priority = options.recent ? "1.0" : "0.9";
       const changefreq = options.recent ? "hourly" : "daily";
       return `  <url><loc>${escapeXml(buildLandingUrl(group, item.slug))}</loc><lastmod>${escapeXml(lastmod)}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
@@ -223,12 +225,19 @@ function cleanTextList(values) {
 export async function loadCases(env, options = {}) {
   const full = Boolean(options.full);
   const maxDetails = options.maxDetails || RSS_LIMIT;
+  const branch = env?.GITHUB_BRANCH || "main";
+  const owner = env?.GITHUB_REPO_OWNER || "lawfirm-seo-engine";
+  const repo = env?.GITHUB_REPO_NAME || "new-project";
+  const token = env?.GITHUB_TOKEN;
 
   if (env?.CASES) {
     const idxRaw = await env.CASES.get("cases:index");
     if (idxRaw) {
       const index = JSON.parse(idxRaw);
-      if (!full) return index;
+      if (!full) {
+        const githubCases = await loadCasesFromGitHub({ owner, repo, branch, token });
+        return githubCases.length > index.length ? githubCases : index;
+      }
       const newest = sortNewest(index).slice(0, maxDetails);
       const details = await Promise.all(newest.map(async (item) => {
         const raw = await env.CASES.get(`case:${item.slug}`);
@@ -238,11 +247,10 @@ export async function loadCases(env, options = {}) {
     }
   }
 
-  const branch = env?.GITHUB_BRANCH || "main";
-  const owner = env?.GITHUB_REPO_OWNER || "lawfirm-seo-engine";
-  const repo = env?.GITHUB_REPO_NAME || "new-project";
-  const token = env?.GITHUB_TOKEN;
+  return loadCasesFromGitHub({ owner, repo, branch, token });
+}
 
+async function loadCasesFromGitHub({ owner, repo, branch, token }) {
   const apiCases = await loadCasesFromGitHubApi({ owner, repo, branch, token });
   if (apiCases.length) return apiCases;
 
@@ -319,6 +327,14 @@ function dateOffset(offsetDays) {
   const date = new Date(Date.now() + 9 * 60 * 60 * 1000);
   date.setUTCDate(date.getUTCDate() + offsetDays);
   return date.toISOString().slice(0, 10);
+}
+
+function maxDate(...values) {
+  const dates = values
+    .map((value) => String(value || "").trim())
+    .filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value))
+    .sort();
+  return dates[dates.length - 1] || kstDate();
 }
 
 function kstDate() {

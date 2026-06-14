@@ -1,4 +1,11 @@
-import { RSS_LIMIT, buildRssXml, getRecentCases, groupForHost, loadCases } from "./_seo.js";
+import {
+  RECENT_SITEMAP_DAYS,
+  RSS_LIMIT,
+  buildRssXml,
+  getRecentCases,
+  groupForHost,
+  loadCases,
+} from "./_seo.js";
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -9,7 +16,7 @@ export async function onRequest(context) {
   }
 
   const cases = await loadCases(env);
-  const rssCases = getRecentCases(cases, 7, RSS_LIMIT);
+  const rssCases = getRecentCases(cases, RECENT_SITEMAP_DAYS, RSS_LIMIT);
 
   return new Response(buildRssXml(group, rssCases, { limit: RSS_LIMIT }), {
     headers: {

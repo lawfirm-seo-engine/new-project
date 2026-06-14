@@ -165,7 +165,7 @@ async function handleSeoXmlRoute({ pathname, url, env }) {
 
   if (pathname === "/rss.xml") {
     const cases = await loadSeoCases(env);
-    const rssCases = getRecentCases(cases, 7, RSS_LIMIT);
+    const rssCases = getRecentCases(cases, RECENT_SITEMAP_DAYS, RSS_LIMIT);
     return xmlResponse(buildRssXml(group, rssCases, { limit: RSS_LIMIT }), "application/rss+xml; charset=utf-8");
   }
 

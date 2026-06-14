@@ -34,16 +34,22 @@ for (const result of results) {
   }
 }
 
-const indexNowResults = await Promise.allSettled(
-  GROUPS.map((group) => pingIndexNow(group, latest.slug)),
-);
+const shouldPingIndexNow = process.env.INDEXNOW === "1" || process.argv.includes("--indexnow");
 
-for (const result of indexNowResults) {
-  if (result.status === "fulfilled") {
-    console.log(`[indexnow] ${result.value.status} ${result.value.host} ${result.value.urls.join(", ")}`);
-  } else {
-    console.log(`[indexnow] failed ${result.reason.message}`);
+if (shouldPingIndexNow) {
+  const indexNowResults = await Promise.allSettled(
+    GROUPS.map((group) => pingIndexNow(group, latest.slug)),
+  );
+
+  for (const result of indexNowResults) {
+    if (result.status === "fulfilled") {
+      console.log(`[indexnow] ${result.value.status} ${result.value.host} ${result.value.urls.join(", ")}`);
+    } else {
+      console.log(`[indexnow] failed ${result.reason.message}`);
+    }
   }
+} else {
+  console.log("[indexnow] skipped; set INDEXNOW=1 or pass --indexnow to submit.");
 }
 
 async function warm(url) {
