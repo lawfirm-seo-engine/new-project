@@ -6976,7 +6976,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 2112,
+    "landingViews": 2111,
     "reports": 10,
     "summary": "로그필름 사기 영화예매 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8732,6 +8732,26 @@
     "tags": [
       "골드프린스",
       "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "goldprince",
+    "caseName": "GoldPrince 사기 금 투자",
+    "category": "형사대응",
+    "createdAt": "2026-06-15",
+    "updatedAt": "2026-06-15",
+    "thumbnailUrl": "",
+    "landingViews": 4035,
+    "reports": 16,
+    "summary": "GoldPrince 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "GoldPrince",
+      "사기",
+      "투자",
       "사기피해",
       "피해금회수",
       "증거보존"
