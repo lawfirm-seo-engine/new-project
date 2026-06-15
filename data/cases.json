@@ -9531,5 +9531,26 @@
       "증거보존"
     ],
     "memo": ""
+  },
+  {
+    "slug": "dxalgo",
+    "caseName": "dxalgo 사기 해외선물 거래소",
+    "category": "형사대응",
+    "createdAt": "2026-06-15",
+    "updatedAt": "2026-06-15",
+    "thumbnailUrl": "",
+    "landingViews": 1848,
+    "reports": 26,
+    "summary": "dxalgo 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "dxalgo",
+      "사기",
+      "해외선물",
+      "거래소",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
   }
 ]
