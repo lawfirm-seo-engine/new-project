@@ -1944,7 +1944,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 1912,
+    "landingViews": 1911,
     "reports": 24,
     "summary": "그루앤컴퍼니 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -1964,7 +1964,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 2816,
+    "landingViews": 2815,
     "reports": 11,
     "summary": "GRUCOMPANY 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -1984,7 +1984,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 1796,
+    "landingViews": 1795,
     "reports": 28,
     "summary": "소이랩 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -3422,7 +3422,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 1043,
+    "landingViews": 1041,
     "reports": 15,
     "summary": "mediacastlekr.com 사기 티켓예매 부업 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6484,7 +6484,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 2702,
+    "landingViews": 2701,
     "reports": 18,
     "summary": "콘페로코인 사기 거래소 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6713,7 +6713,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 948,
+    "landingViews": 947,
     "reports": 16,
     "summary": "DBAXIS 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -7036,7 +7036,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 419,
+    "landingViews": 418,
     "reports": 24,
     "summary": "교보에셋 사기 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8026,7 +8026,7 @@
     "createdAt": "2026-06-14",
     "updatedAt": "2026-06-14",
     "thumbnailUrl": "",
-    "landingViews": 3991,
+    "landingViews": 3990,
     "reports": 5,
     "summary": "피스피스스튜디오 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8310,6 +8310,27 @@
       "요라이즈",
       "사기",
       "ai",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "h112-ggumuigosogdoro",
+    "caseName": "H112 꿈의고속도로 사기 리딩방",
+    "category": "형사대응",
+    "createdAt": "2026-06-15",
+    "updatedAt": "2026-06-15",
+    "thumbnailUrl": "",
+    "landingViews": 556,
+    "reports": 8,
+    "summary": "H112 꿈의고속도로 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "H112",
+      "꿈의고속도로",
+      "사기",
+      "리딩방",
       "사기피해",
       "피해금회수",
       "증거보존"
