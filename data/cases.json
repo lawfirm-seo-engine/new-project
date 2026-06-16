@@ -7076,7 +7076,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 7150,
+    "landingViews": 7149,
     "reports": 27,
     "summary": "이스트 웨스트 뱅코프 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -10419,7 +10419,7 @@
     "createdAt": "2026-06-15",
     "updatedAt": "2026-06-15",
     "thumbnailUrl": "",
-    "landingViews": 6198,
+    "landingViews": 6197,
     "reports": 15,
     "summary": "주식리딩방 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -10776,6 +10776,26 @@
     "summary": "kg62e2.priceasset.pro 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "kg62e2.priceasset.pro",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "sl-lake",
+    "caseName": "SL Lake 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-16",
+    "updatedAt": "2026-06-16",
+    "thumbnailUrl": "",
+    "landingViews": 834,
+    "reports": 15,
+    "summary": "SL Lake 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "SL",
+      "Lake",
       "사기",
       "사기피해",
       "피해금회수",
