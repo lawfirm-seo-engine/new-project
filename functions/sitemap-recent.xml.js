@@ -51,12 +51,14 @@ function dateOffset(offsetDays) {
 
 function buildPowerlinkEntries(powerlinks) {
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const imgLoc = escapeXml(`https://${POWERLINK_HOST}/assets/og-template.png`);
   return powerlinks
     .filter((item) => item?.slug)
     .map((item) => {
       const loc = escapeXml(`https://${POWERLINK_HOST}/powerlink/${encodeURIComponent(item.slug)}/`);
       const lastmod = escapeXml(item.updatedAt || item.createdAt || today);
-      return `  <url><loc>${loc}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>`;
+      const imgTitle = escapeXml(item.title || item.slug);
+      return `  <url><loc>${loc}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority><image:image><image:loc>${imgLoc}</image:loc><image:title>${imgTitle}</image:title></image:image></url>`;
     })
     .join("\n");
 }

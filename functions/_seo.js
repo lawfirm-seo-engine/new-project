@@ -87,10 +87,13 @@ export function buildSitemapXml(group, cases = [], options = {}) {
       const lastmod = options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
       const priority = options.recent ? "1.0" : "0.9";
       const changefreq = options.recent ? "hourly" : "daily";
-      return `  <url><loc>${escapeXml(buildLandingUrl(group, item.slug))}</loc><lastmod>${escapeXml(lastmod)}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
+      const loc = escapeXml(buildLandingUrl(group, item.slug));
+      const imgLoc = escapeXml(`${base}/og/${encodeURIComponent(item.slug)}.png`);
+      const imgTitle = escapeXml(item.caseName || item.slug);
+      return `  <url><loc>${loc}</loc><lastmod>${escapeXml(lastmod)}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority><image:image><image:loc>${imgLoc}</image:loc><image:title>${imgTitle}</image:title></image:image></url>`;
     });
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...home, ...category, ...urls].join("\n")}\n</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${[...home, ...category, ...urls].join("\n")}\n</urlset>`;
 }
 
 export function buildSitemapIndexXml(group, lastmod = kstDate()) {
