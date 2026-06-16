@@ -147,6 +147,11 @@ const SEO_XML_ROUTES = new Set([
   "/rss.xml",
 ]);
 
+const OG_IMAGE_VERSION = "20260616";
+const LOGSCAN_SCRIPT = `<!-- LogScan -->
+<script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
+<!-- End LogScan Code -->`;
+
 async function handleSeoXmlRoute({ pathname, url, env }) {
   if (!SEO_XML_ROUTES.has(pathname)) return null;
 
@@ -464,6 +469,7 @@ function renderPowerlinkLanding(landing) {
     ctaLabel: esc(landing.ctaLabel || "상담 접수"),
     footerLinks: "",
     headerCall: "",
+    bodyScripts: logScanScriptForSite("https://gnlaw-criminal.co.kr"),
   });
 }
 
@@ -600,6 +606,30 @@ function normalizePowerlinkRobots(value = "") {
   return String(value).toLowerCase().includes("noindex") ? "noindex, follow" : "index, follow";
 }
 
+function resolveOgImage(value = "", group = {}, slug = "") {
+  const fallback = `${group.siteUrl}/og/${encodeURIComponent(slug)}.png?v=${OG_IMAGE_VERSION}`;
+  const candidate = String(value || "").trim() || fallback;
+
+  try {
+    const url = new URL(candidate, group.siteUrl);
+    const site = new URL(group.siteUrl);
+    if (url.hostname === site.hostname && url.pathname.startsWith("/og/")) {
+      url.searchParams.set("v", OG_IMAGE_VERSION);
+      return url.toString();
+    }
+  } catch {
+    return candidate;
+  }
+
+  return candidate;
+}
+
+function logScanScriptForSite(siteUrl = "") {
+  return String(siteUrl).replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
+    ? LOGSCAN_SCRIPT
+    : "";
+}
+
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function renderLanding(caseData, group, origin) {
@@ -614,7 +644,7 @@ function renderLanding(caseData, group, origin) {
   const oldSuffixOverride = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_CANONICAL[caseData.slug];
   const urlSuffix = isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
-  const ogImage = caseData.thumbnailUrl || landing.ogImage || `${group.siteUrl}/og/${caseData.slug}.png`;
+  const ogImage = resolveOgImage(caseData.thumbnailUrl || landing.ogImage, group, caseData.slug);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = caseData.updatedAt || publishedDate;
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
@@ -643,12 +673,14 @@ function renderLanding(caseData, group, origin) {
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="preload" as="image" href="/assets/og-template.png">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
+    `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
     `<meta property="og:image:alt" content="${esc(pageTitle)}">`,
     `<meta property="og:image:type" content="${ogImageType}">`,
     `<meta property="og:image:width" content="${ogImageWidth}">`,
     `<meta property="og:image:height" content="${ogImageHeight}">`,
     `<meta name="twitter:image:alt" content="${esc(pageTitle)}">`,
     `<link rel="image_src" href="${esc(ogImage)}">`,
+    `<meta itemprop="image" content="${esc(ogImage)}">`,
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${esc(pageTitle)}">`,
     `<meta name="twitter:description" content="${esc(seoDescription)}">`,
@@ -791,9 +823,7 @@ function renderLanding(caseData, group, origin) {
     ],
   }, null, 2);
 
-  const ogThumbnail = caseData.thumbnailUrl
-    ? `<img src="${esc(caseData.thumbnailUrl)}" alt="${esc(pageTitle)}" class="hero-thumb" loading="lazy">`
-    : "";
+  const ogThumbnail = `<img src="${esc(ogImage)}" alt="${esc(pageTitle)}" class="hero-thumb" width="${ogImageWidth}" height="${ogImageHeight}" loading="eager" fetchpriority="high" decoding="async">`;
 
   const content = createLandingContent(landing, group, caseData);
   const footerLinks = CROSS_LINKS.map((l) => {
@@ -833,6 +863,7 @@ function renderLanding(caseData, group, origin) {
     ctaLabel: esc(group.ctaLabel),
     footerLinks,
     headerCall: "",
+    bodyScripts: logScanScriptForSite(group.siteUrl),
   }));
 }
 
@@ -1722,6 +1753,7 @@ function pageTemplate(d) {
       <p class="copyright">Copyright ⓒ법무법인 선린 All Right Reserved.</p>
     </div>
   </footer>
+  ${d.bodyScripts || ""}
 </body>
 </html>`;
 }

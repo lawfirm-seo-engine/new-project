@@ -19,6 +19,9 @@ const templatesDir = path.join(root, "templates");
 const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 const FRESH_LIST_LABEL = "오늘 추가/갱신된 목록";
 const FRESH_LIST_ANCHOR = "fresh-landings";
+const LOGSCAN_SCRIPT = `<!-- LogScan -->
+<script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
+<!-- End LogScan Code -->`;
 
 const ORGANIZATION = {
   "@type": "Organization",
@@ -1332,6 +1335,7 @@ const HUB_SUFFIX = {
 
 function createHubFloatingWidgets(group) {
   const sn = JSON.stringify(group.siteName);
+  const logScanScript = group.siteUrl === "https://gnlaw-criminal.co.kr" ? `\n${LOGSCAN_SCRIPT}` : "";
   return `<div class="floating-contact">
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
@@ -1361,7 +1365,7 @@ function createHubFloatingWidgets(group) {
       else { msg.textContent = data.message || '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '확인 요청'; }
     } catch(err) { msg.textContent = '오류 발생'; msg.className = 'sticky-msg err'; btn.disabled = false; btn.textContent = '확인 요청'; }
   });
-</script>`;
+</script>${logScanScript}`;
 }
 
 function createHubContent(group) {
@@ -1406,10 +1410,45 @@ function createHubContent(group) {
   var NO_SUFFIX_SLUGS={"soiraeb-sagi-syopingmor":1,"grucompany-sagi-syopingmor":1,"geuruaenkeompeoni-sagi-syopingmor":1};
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
   function normName(n){var c=String(n||'').trim().replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c:c+' 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
   function landingPath(slug){var extra=NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
   function getStatus(slug){if(GKEY==='c'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
+  function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
+  function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
+  function freshLink(item,noMap){
+    var cn=normName(item.caseName||item.name||'');
+    var dt=SUFFIX?cn+' '+SUFFIX:cn;
+    var summary=compact(item.summary||'');
+    var search=[cn,dt,item.slug,summary,item.createdAt,item.updatedAt].filter(Boolean).join(' ');
+    return '<a class="fresh-landing-link" href="'+landingPath(item.slug)+'" data-title="'+attr(cn)+'" data-slug="'+attr(item.slug)+'" data-search="'+attr(search)+'">'
+      +'<span class="fresh-landing-no">No. '+(noMap[item.slug]||'')+'</span>'
+      +'<strong>'+esc(dt)+'</strong>'
+      +'<span>'+esc(summary.slice(0,135))+'</span>'
+      +'<em>'+esc(item.updatedAt||item.createdAt||'')+'</em>'
+      +'</a>';
+  }
+  function updateFreshList(all,noMap){
+    var list=document.querySelector('.fresh-landing-list');
+    if(!list)return;
+    var todayStr=todayKst();
+    var freshDate=todayStr;
+    var todays=all.filter(function(c){return c&&c.slug&&(c.createdAt===freshDate||c.updatedAt===freshDate);});
+    if(!todays.length){
+      freshDate='';
+      all.forEach(function(c){
+        if(c&&c.createdAt&&c.createdAt>freshDate)freshDate=c.createdAt;
+        if(c&&c.updatedAt&&c.updatedAt>freshDate)freshDate=c.updatedAt;
+      });
+      todays=all.filter(function(c){return c&&c.slug&&(c.createdAt===freshDate||c.updatedAt===freshDate);});
+    }
+    if(!todays.length)return;
+    list.innerHTML=todays.map(function(item){return freshLink(item,noMap);}).join('');
+    var count=document.getElementById('freshLandingCount');
+    if(count)count.textContent=(freshDate===todayStr?'':freshDate+' ')+todays.length.toLocaleString('ko-KR')+'건';
+    if(window.setupFreshLandingSearch)window.setupFreshLandingSearch();
+  }
   function setupSearch(){
     var inp=document.getElementById('case-search');
     if(!inp)return;
@@ -1427,6 +1466,7 @@ function createHubContent(group) {
       var orig=d.cases;
       var noMap={};orig.forEach(function(c,i){noMap[c.slug]=i+1;});
       var all=orig.slice().reverse();
+      updateFreshList(all,noMap);
       var existing=new Set([].map.call(document.querySelectorAll('.case-row[data-slug]'),function(el){return el.dataset.slug;}));
       var newItems=all.filter(function(c){return!existing.has(c.slug);});
       if(!newItems.length)return;
@@ -1452,7 +1492,7 @@ function createHubContent(group) {
       var totalReps=all.reduce(function(s,c){return s+(c.reports||0);},0);
       var repEl=document.getElementById('statReports');
       if(repEl)repEl.textContent=totalReps.toLocaleString('ko-KR');
-      var todayStr=new Date().toISOString().slice(0,10);
+      var todayStr=todayKst();
       var todayCnt=all.filter(function(c){return c.createdAt===todayStr;}).length;
       var todayRep=all.filter(function(c){return c.createdAt===todayStr;}).reduce(function(s,c){return s+(c.reports||0);},0);
       var tcEl=document.getElementById('statTodayCount');
@@ -1522,22 +1562,38 @@ function buildRelativeLandingPath(group, slug) {
     : `/${group.pathPrefix}/${encodeURIComponent(slug)}/`;
 }
 
+function latestFreshDate(items = []) {
+  return items.reduce((latest, item) => {
+    const createdAt = String(item?.createdAt || "");
+    const updatedAt = String(item?.updatedAt || "");
+    return [latest, createdAt, updatedAt].filter(Boolean).sort((a, b) => b.localeCompare(a))[0] || latest;
+  }, "");
+}
+
 function createFreshLandingSection(group, sortedCases, caseNoMap, suffix) {
   const todays = sortedCases
-    .filter((item) => item.createdAt === today || item.updatedAt === today)
-    .slice(0, 8);
-  const items = (todays.length ? todays : sortedCases.slice(0, 8)).filter((item) => item?.slug);
+    .filter((item) => item.createdAt === today || item.updatedAt === today);
+  const freshDate = todays.length ? today : latestFreshDate(sortedCases);
+  const freshItems = sortedCases
+    .filter((item) => item.createdAt === freshDate || item.updatedAt === freshDate);
+  const items = (freshItems.length ? freshItems : sortedCases.slice(0, 8)).filter((item) => item?.slug);
   const label = FRESH_LIST_LABEL;
+  const countLabel = freshDate === today
+    ? `${items.length.toLocaleString("ko-KR")}건`
+    : `${freshDate} ${items.length.toLocaleString("ko-KR")}건`;
 
   if (!items.length) return "";
 
   const links = items.map((item) => {
     const landing = getLanding(item, group);
     const cleanName = normalizeCaseName(item.caseName || item.name);
-    const displayTitle = escapeHtml(suffix ? `${cleanName} ${suffix}` : cleanName);
-    const summary = escapeHtml(compactText(landing.description || item.summary || group.hubLead || "").slice(0, 135));
+    const displayTitleRaw = suffix ? `${cleanName} ${suffix}` : cleanName;
+    const displayTitle = escapeHtml(displayTitleRaw);
+    const summaryRaw = compactText(landing.description || item.summary || group.hubLead || "");
+    const summary = escapeHtml(summaryRaw.slice(0, 135));
     const date = escapeHtml(item.updatedAt || item.createdAt || "");
-    return `<a class="fresh-landing-link" href="${buildRelativeLandingPath(group, item.slug)}">
+    const searchText = escapeHtml([cleanName, displayTitleRaw, item.slug, summaryRaw, item.createdAt, item.updatedAt].filter(Boolean).join(" "));
+    return `<a class="fresh-landing-link" href="${buildRelativeLandingPath(group, item.slug)}" data-title="${escapeHtml(cleanName)}" data-slug="${escapeHtml(item.slug)}" data-search="${searchText}">
       <span class="fresh-landing-no">No. ${caseNoMap.get(item.slug) ?? ""}</span>
       <strong>${displayTitle}</strong>
       <span>${summary}</span>
@@ -1549,10 +1605,48 @@ function createFreshLandingSection(group, sortedCases, caseNoMap, suffix) {
     <div class="fresh-landing-head">
       <p>RECENT LANDINGS</p>
       <h2>${label}</h2>
+      <span id="freshLandingCount">${countLabel}</span>
+    </div>
+    <div class="case-search-wrap fresh-search-wrap">
+      <input id="fresh-landing-search" type="search" class="case-search fresh-landing-search" placeholder="사건 검색" autocomplete="off">
+      <button id="fresh-landing-search-btn" class="search-btn" type="button">검색</button>
     </div>
     <div class="fresh-landing-list">
       ${links}
     </div>
+    <p id="fresh-landing-empty" class="fresh-landing-empty" hidden>검색 결과가 없습니다.</p>
+    <script>
+(function(){
+  window.setupFreshLandingSearch=function(){
+    var input=document.getElementById('fresh-landing-search');
+    if(!input)return;
+    var empty=document.getElementById('fresh-landing-empty');
+    var button=document.getElementById('fresh-landing-search-btn');
+    function apply(){
+      var q=input.value.trim().toLowerCase();
+      var visible=0;
+      document.querySelectorAll('.fresh-landing-link').forEach(function(link){
+        var hay=(link.dataset.search||link.textContent||'').toLowerCase();
+        var show=!q||hay.indexOf(q)>=0;
+        link.style.display=show?'grid':'none';
+        if(show)visible++;
+      });
+      if(empty)empty.hidden=visible>0;
+    }
+    if(input.dataset.bound!=='1'){
+      input.dataset.bound='1';
+      input.addEventListener('input',apply);
+    }
+    if(button&&button.dataset.bound!=='1'){
+      button.dataset.bound='1';
+      button.addEventListener('click',apply);
+    }
+    apply();
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',window.setupFreshLandingSearch);
+  else window.setupFreshLandingSearch();
+})();
+</script>
   </section>`;
 }
 
