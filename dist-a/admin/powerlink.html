@@ -61,15 +61,15 @@
       <form id="powerlinkForm">
         <div class="field">
           <label for="title">페이지 제목</label>
-          <input id="title" name="title" type="text" value="6월 14일 신규 사건 진행 리스트" required>
+          <input id="title" name="title" type="text" placeholder="파워링크 랜딩 제목" required>
         </div>
         <div class="field">
           <label for="slug">URL slug</label>
-          <input id="slug" name="slug" type="text" value="2026-06-14-new-case-progress-list" required>
+          <input id="slug" name="slug" type="text" placeholder="제목 입력 시 자동 생성" required>
         </div>
         <div class="field">
           <label for="h1">H1</label>
-          <input id="h1" name="h1" type="text" value="6월 14일 신규 사건 진행 리스트" required>
+          <input id="h1" name="h1" type="text" placeholder="제목 입력 시 자동 생성" required>
         </div>
         <div class="field">
           <label for="robots">검색엔진 설정</label>
@@ -81,6 +81,18 @@
         <div class="field wide">
           <label for="description">메타 설명</label>
           <textarea id="description" name="description" rows="3" placeholder="검색 결과와 공유 미리보기에 사용할 설명"></textarea>
+        </div>
+        <div class="field">
+          <label for="imageAlt">이미지 alt</label>
+          <input id="imageAlt" name="imageAlt" type="text" placeholder="이미지 대체 텍스트">
+        </div>
+        <div class="field">
+          <label for="imageCaption">이미지 caption</label>
+          <input id="imageCaption" name="imageCaption" type="text" placeholder="이미지 캡션">
+        </div>
+        <div class="field wide">
+          <label for="imageDescription">이미지 description</label>
+          <textarea id="imageDescription" name="imageDescription" rows="3" placeholder="이미지 설명"></textarea>
         </div>
         <div class="field wide">
           <label for="body">원고</label>
@@ -115,8 +127,8 @@
 
   <script>
     const API_ORIGIN = location.protocol === "file:" ? "https://gnlaw-criminal.co.kr" : "";
-    const DEFAULT_TITLE = "6월 14일 신규 사건 진행 리스트";
-    const DEFAULT_SLUG = "2026-06-14-new-case-progress-list";
+    const DEFAULT_TITLE = "";
+    const DEFAULT_SLUG = "";
 
     const form = document.getElementById("powerlinkForm");
     const titleEl = document.getElementById("title");
@@ -127,15 +139,20 @@
     const submitButtonEl = document.getElementById("submitButton");
     const listEl = document.getElementById("list");
     let slugTouched = false;
+    let h1Touched = false;
 
     titleEl.addEventListener("input", () => {
       if (!slugTouched) slugEl.value = slugFromTitle(titleEl.value);
-      if (!h1El.value || h1El.value === DEFAULT_TITLE) h1El.value = titleEl.value;
+      if (!h1Touched) h1El.value = titleEl.value;
     });
 
     slugEl.addEventListener("input", () => {
       slugTouched = true;
       slugEl.value = normalizeSlug(slugEl.value);
+    });
+
+    h1El.addEventListener("input", () => {
+      h1Touched = true;
     });
 
     document.getElementById("resetButton").addEventListener("click", resetForm);
@@ -148,7 +165,9 @@
 
       try {
         const payload = Object.fromEntries(new FormData(form).entries());
-        payload.slug = normalizeSlug(payload.slug);
+        payload.title = String(payload.title || "").trim();
+        payload.slug = normalizeSlug(payload.slug || slugFromTitle(payload.title));
+        payload.h1 = String(payload.h1 || payload.title || "").trim();
         const { data } = await fetchJson("/api/create-powerlink", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -215,12 +234,16 @@
         h1El.value = item.h1 || item.title || "";
         slugEl.value = item.slug || "";
         document.getElementById("description").value = item.description || "";
+        document.getElementById("imageAlt").value = item.imageAlt || "";
+        document.getElementById("imageCaption").value = item.imageCaption || "";
+        document.getElementById("imageDescription").value = item.imageDescription || "";
         document.getElementById("body").value = item.body || "";
         document.getElementById("robots").value = item.robots || "index, follow";
         document.getElementById("ctaTitle").value = item.ctaTitle || "피해 자료 검토 요청";
         document.getElementById("ctaText").value = item.ctaText || "입금 내역, 대화 캡처, 사이트 주소를 남겨주시면 담당자가 확인 후 연락드립니다.";
         document.getElementById("ctaLabel").value = item.ctaLabel || "상담 접수";
         slugTouched = true;
+        h1Touched = true;
         setMessage("불러왔습니다. 수정 후 저장하면 갱신됩니다.", "ok");
         savedLinkEl.style.display = "none";
       } catch (error) {
@@ -249,10 +272,14 @@
       titleEl.value = DEFAULT_TITLE;
       h1El.value = DEFAULT_TITLE;
       slugEl.value = DEFAULT_SLUG;
+      document.getElementById("imageAlt").value = "";
+      document.getElementById("imageCaption").value = "";
+      document.getElementById("imageDescription").value = "";
       document.getElementById("ctaTitle").value = "피해 자료 검토 요청";
       document.getElementById("ctaText").value = "입금 내역, 대화 캡처, 사이트 주소를 남겨주시면 담당자가 확인 후 연락드립니다.";
       document.getElementById("ctaLabel").value = "상담 접수";
       slugTouched = false;
+      h1Touched = false;
       savedLinkEl.style.display = "none";
       setMessage("", "");
     }
@@ -277,14 +304,7 @@
     }
 
     function slugFromTitle(title) {
-      const match = String(title || "").match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
-      if (match) {
-        const year = new Date().getFullYear();
-        const month = match[1].padStart(2, "0");
-        const day = match[2].padStart(2, "0");
-        return `${year}-${month}-${day}-new-case-progress-list`;
-      }
-      return normalizeSlug(title) || DEFAULT_SLUG;
+      return normalizeSlug(title);
     }
 
     function normalizeSlug(value) {

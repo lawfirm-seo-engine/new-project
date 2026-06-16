@@ -14,6 +14,9 @@ export async function onRequestPost(context) {
     const slug = normalizeSlug(body.slug || title);
     const h1 = normalizeSpace(body.h1) || title;
     const description = normalizeSpace(body.description).slice(0, 170);
+    const imageAlt = normalizeSpace(body.imageAlt).slice(0, 160);
+    const imageCaption = normalizeSpace(body.imageCaption).slice(0, 220);
+    const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300);
     const articleBody = normalizeBody(body.body);
     const robots = normalizeRobots(body.robots);
     const ctaTitle = normalizeSpace(body.ctaTitle) || "피해 자료 검토 요청";
@@ -31,6 +34,9 @@ export async function onRequestPost(context) {
       title,
       h1,
       description: description || `${title} 관련 신규 사건 진행 내용을 정리했습니다.`,
+      imageAlt,
+      imageCaption,
+      imageDescription,
       body: articleBody,
       robots,
       ctaTitle,
@@ -108,6 +114,9 @@ function buildIndexEntry(item) {
     title: item.title,
     h1: item.h1,
     description: item.description,
+    imageAlt: item.imageAlt,
+    imageCaption: item.imageCaption,
+    imageDescription: item.imageDescription,
     robots: item.robots,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,

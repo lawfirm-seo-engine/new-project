@@ -361,6 +361,18 @@ function renderPowerlinkLanding(landing) {
   const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = landing.updatedAt || publishedDate;
   const ogImage = "https://gnlaw-criminal.co.kr/assets/og-template.png";
+  const imageAlt = landing.imageAlt || title;
+  const imageCaption = landing.imageCaption || imageAlt;
+  const imageDescription = landing.imageDescription || description;
+  const imageObject = {
+    "@type": "ImageObject",
+    url: ogImage,
+    width: 1200,
+    height: 630,
+    name: imageAlt,
+    caption: imageCaption,
+    description: imageDescription,
+  };
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -381,6 +393,8 @@ function renderPowerlinkLanding(landing) {
         inLanguage: "ko-KR",
         datePublished: publishedDate,
         dateModified: modifiedDate,
+        thumbnailUrl: ogImage,
+        primaryImageOfPage: imageObject,
         isPartOf: { "@id": "https://gnlaw-criminal.co.kr/#website" },
         breadcrumb: { "@id": `${canonical}#breadcrumb` },
         author: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
@@ -394,6 +408,7 @@ function renderPowerlinkLanding(landing) {
         inLanguage: "ko-KR",
         datePublished: publishedDate,
         dateModified: modifiedDate,
+        image: imageObject,
         author: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
         publisher: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
         isPartOf: { "@id": `${canonical}#webpage` },
@@ -430,10 +445,14 @@ function renderPowerlinkLanding(landing) {
     `<meta name="twitter:title" content="${esc(title)}">`,
     `<meta name="twitter:description" content="${esc(description)}">`,
     `<meta name="twitter:image" content="${ogImage}">`,
-    `<meta property="og:image:alt" content="${esc(title)}">`,
+    `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
+    `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:type" content="image/png">`,
     `<meta property="og:image:width" content="1200">`,
     `<meta property="og:image:height" content="630">`,
+    `<meta name="image:alt" content="${esc(imageAlt)}">`,
+    `<meta name="image:caption" content="${esc(imageCaption)}">`,
+    `<meta name="image:description" content="${esc(imageDescription)}">`,
   ].join("\n  ");
 
   const content = [
