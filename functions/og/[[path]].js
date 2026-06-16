@@ -1,6 +1,6 @@
 // OG image edge function
 // GET|HEAD /og/[slug].png → serves og-template.png with immutable edge cache
-// - Same 1200x630 template for all slugs (no text overlay)
+// - Same 1254x1254 template for all slugs (no text overlay)
 // - Each slug URL is independently cached at Cloudflare CDN
 // - onRequest handles both GET and HEAD so crawlers (Naver Yeti etc.) get
 //   correct Content-Type on HEAD probes instead of falling through to HTML

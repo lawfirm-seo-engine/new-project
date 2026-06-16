@@ -367,8 +367,8 @@ function renderPowerlinkLanding(landing) {
   const imageObject = {
     "@type": "ImageObject",
     url: ogImage,
-    width: 1200,
-    height: 630,
+    width: 1254,
+    height: 1254,
     name: imageAlt,
     caption: imageCaption,
     description: imageDescription,
@@ -450,8 +450,8 @@ function renderPowerlinkLanding(landing) {
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:type" content="image/png">`,
-    `<meta property="og:image:width" content="1200">`,
-    `<meta property="og:image:height" content="630">`,
+    `<meta property="og:image:width" content="1254">`,
+    `<meta property="og:image:height" content="1254">`,
     `<link rel="image_src" href="${ogImage}">`,
     `<meta itemprop="image" content="${ogImage}">`,
     `<meta name="image:alt" content="${esc(imageAlt)}">`,
@@ -679,8 +679,8 @@ function renderLanding(caseData, group, origin) {
   const articleTags = createArticleTags(rawCaseName, lk);
 
   const ogImageType = /\.png(?:$|\?)/i.test(ogImage) ? "image/png" : /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/webp";
-  const ogImageWidth = "1200";
-  const ogImageHeight = "630";
+  const ogImageWidth = "1254";
+  const ogImageHeight = "1254";
   const headExtra = [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
     `<meta name="NaverBot" content="All">`,

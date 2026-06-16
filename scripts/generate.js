@@ -1259,8 +1259,8 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     links.push(`<meta name="classification" content="${escapeHtml(group.intent)}">`);
     links.push(`<meta property="og:updated_time" content="${today}">`);
     links.push(`<meta property="og:image:type" content="image/png">`);
-    links.push(`<meta property="og:image:width" content="1200">`);
-    links.push(`<meta property="og:image:height" content="630">`);
+    links.push(`<meta property="og:image:width" content="1254">`);
+    links.push(`<meta property="og:image:height" content="1254">`);
     links.push(`<meta property="og:image:alt" content="${escapeHtml(group.hubTitle)}">`);
     links.push(`<meta name="twitter:card" content="summary_large_image">`);
     links.push(`<meta name="twitter:image" content="${group.siteUrl}/assets/og-template.png">`);
