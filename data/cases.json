@@ -1984,7 +1984,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 1796,
+    "landingViews": 1795,
     "reports": 28,
     "summary": "소이랩 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -2467,7 +2467,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 1032,
+    "landingViews": 1031,
     "reports": 8,
     "summary": "강가영비서 사기 SKTBAST 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11765,7 +11765,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 3798,
+    "landingViews": 3796,
     "reports": 14,
     "summary": "homeandhomemarkets 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11784,7 +11784,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 5457,
+    "landingViews": 5455,
     "reports": 23,
     "summary": "200% 통합 수익 프로그램 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11805,7 +11805,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 2824,
+    "landingViews": 2822,
     "reports": 34,
     "summary": "투자 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11824,7 +11824,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 4755,
+    "landingViews": 4753,
     "reports": 24,
     "summary": "팀미션 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11843,7 +11843,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 3038,
+    "landingViews": 3036,
     "reports": 28,
     "summary": "부업 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11862,7 +11862,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 3194,
+    "landingViews": 3191,
     "reports": 21,
     "summary": "쇼핑몰 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11881,7 +11881,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 6071,
+    "landingViews": 6069,
     "reports": 27,
     "summary": "신종 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11900,7 +11900,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 4674,
+    "landingViews": 4672,
     "reports": 27,
     "summary": "로맨스 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11919,13 +11919,32 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 7671,
+    "landingViews": 7669,
     "reports": 9,
     "summary": "마켓메이커 퀀트 트레이딩 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "마켓메이커",
       "퀀트",
       "트레이딩",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "gtyjcf-com",
+    "caseName": "gtyjcf.com 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-16",
+    "updatedAt": "2026-06-16",
+    "thumbnailUrl": "",
+    "landingViews": 6271,
+    "reports": 33,
+    "summary": "gtyjcf.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "gtyjcf.com",
       "사기",
       "사기피해",
       "피해금회수",
