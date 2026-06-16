@@ -823,7 +823,7 @@ function renderLanding(caseData, group, origin) {
     ],
   }, null, 2);
 
-  const ogThumbnail = `<img src="${esc(ogImage)}" alt="${esc(pageTitle)}" class="hero-thumb" width="${ogImageWidth}" height="${ogImageHeight}" loading="eager" fetchpriority="high" decoding="async">`;
+  const ogThumbnail = "";
 
   const content = createLandingContent(landing, group, caseData);
   const footerLinks = CROSS_LINKS.map((l) => {
