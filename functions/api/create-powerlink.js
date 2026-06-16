@@ -1,6 +1,8 @@
 // Admin API: create or update one Naver Powerlink landing page.
 // Storage is intentionally separate from normal case landings.
 
+import { INDEXNOW_KEY as DEFAULT_INDEXNOW_KEY } from "../_seo.js";
+
 const GITHUB_FILE_PATH = "data/powerlinks.json";
 const SITE_URL = "https://gnlaw-criminal.co.kr";
 const DEFAULT_ROBOTS = "index, follow";
@@ -53,6 +55,9 @@ export async function onRequestPost(context) {
       await env.CASES.put("powerlink:index", JSON.stringify(idx));
       context.waitUntil?.(syncPowerlinksToGitHub(env).catch(() => {}));
 
+      const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
+      context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
+
       return json({
         ok: true,
         message: existing ? "파워링크 랜딩이 갱신되었습니다." : "파워링크 랜딩이 생성되었습니다.",
@@ -65,6 +70,9 @@ export async function onRequestPost(context) {
     const all = await loadPowerlinksFromGitHub(env);
     upsertFull(all, item);
     await savePowerlinksToGitHub(env, all, existing ? `Update powerlink landing ${slug}` : `Add powerlink landing ${slug}`);
+
+    const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
+    context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
 
     return json({
       ok: true,
@@ -255,6 +263,19 @@ function encodeBase64(value) {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary);
+}
+
+async function pingIndexNow(slug, key) {
+  const host = new URL(SITE_URL).hostname;
+  const urlList = [
+    `${SITE_URL}/powerlink/${encodeURIComponent(slug)}/`,
+    `${SITE_URL}/`,
+  ];
+  await fetch("https://searchadvisor.naver.com/indexnow", {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify({ host, key, keyLocation: `${SITE_URL}/${key}.txt`, urlList }),
+  });
 }
 
 function json(data, status = 200) {

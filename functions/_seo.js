@@ -222,6 +222,35 @@ function cleanTextList(values) {
     : [];
 }
 
+export async function loadPowerlinks(env) {
+  const branch = env?.GITHUB_BRANCH || "main";
+  const owner = env?.GITHUB_REPO_OWNER || "lawfirm-seo-engine";
+  const repo = env?.GITHUB_REPO_NAME || "new-project";
+
+  if (env?.CASES) {
+    const raw = await env.CASES.get("powerlink:index");
+    if (raw) {
+      try { return JSON.parse(raw); } catch { /* fall through */ }
+    }
+  }
+
+  return loadPowerlinksFromRawGitHub({ owner, repo, branch });
+}
+
+async function loadPowerlinksFromRawGitHub({ owner, repo, branch }) {
+  if (!owner || !repo) return [];
+  try {
+    const res = await fetch(
+      `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/data/powerlinks.json`,
+      { headers: { "User-Agent": "static-landing-generator-seo" } },
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
 export async function loadCases(env, options = {}) {
   const full = Boolean(options.full);
   const maxDetails = options.maxDetails || RSS_LIMIT;
