@@ -11940,7 +11940,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 6273,
+    "landingViews": 6271,
     "reports": 33,
     "summary": "gtyjcf.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11959,7 +11959,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 6813,
+    "landingViews": 6811,
     "reports": 5,
     "summary": "오뉴보크마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11978,7 +11978,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 7753,
+    "landingViews": 7751,
     "reports": 11,
     "summary": "onyuvoguemarket.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11997,7 +11997,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 5283,
+    "landingViews": 5281,
     "reports": 8,
     "summary": "블루링마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -12016,11 +12016,30 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 926,
+    "landingViews": 925,
     "reports": 7,
     "summary": "bluringmarket.shop 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "bluringmarket.shop",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "eseuibisyab",
+    "caseName": "에스이비샵 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-16",
+    "updatedAt": "2026-06-16",
+    "thumbnailUrl": "",
+    "landingViews": 7118,
+    "reports": 17,
+    "summary": "에스이비샵 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "에스이비샵",
       "사기",
       "사기피해",
       "피해금회수",
