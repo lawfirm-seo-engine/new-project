@@ -19,6 +19,7 @@ const templatesDir = path.join(root, "templates");
 const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 const FRESH_LIST_LABEL = "오늘 추가/갱신된 목록";
 const FRESH_LIST_ANCHOR = "fresh-landings";
+const HOME_FRESH_LIST_LIMIT = 10;
 const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
 <!-- End LogScan Code -->`;
@@ -1377,7 +1378,7 @@ function createHubContent(group) {
   const todayCases   = cases.filter((c) => c.createdAt === today).length;
   const todayReports = cases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
-  const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix);
+  const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { maxItems: HOME_FRESH_LIST_LIMIT });
   const typeEntrySection = createTypeEntrySection(group);
 
   const rows = sortedCases
@@ -1432,6 +1433,7 @@ function createHubContent(group) {
   function updateFreshList(all,noMap){
     var list=document.querySelector('.fresh-landing-list');
     if(!list)return;
+    var limit=${HOME_FRESH_LIST_LIMIT};
     var todayStr=todayKst();
     var freshDate=todayStr;
     var todays=all.filter(function(c){return c&&c.slug&&(c.createdAt===freshDate||c.updatedAt===freshDate);});
@@ -1444,9 +1446,10 @@ function createHubContent(group) {
       todays=all.filter(function(c){return c&&c.slug&&(c.createdAt===freshDate||c.updatedAt===freshDate);});
     }
     if(!todays.length)return;
-    list.innerHTML=todays.map(function(item){return freshLink(item,noMap);}).join('');
+    var visible=todays.slice(0,limit);
+    list.innerHTML=visible.map(function(item){return freshLink(item,noMap);}).join('');
     var count=document.getElementById('freshLandingCount');
-    if(count)count.textContent=(freshDate===todayStr?'':freshDate+' ')+todays.length.toLocaleString('ko-KR')+'건';
+    if(count)count.textContent=(freshDate===todayStr?'':freshDate+' ')+visible.length.toLocaleString('ko-KR')+'건';
     if(window.setupFreshLandingSearch)window.setupFreshLandingSearch();
   }
   function setupSearch(){
@@ -1570,13 +1573,15 @@ function latestFreshDate(items = []) {
   }, "");
 }
 
-function createFreshLandingSection(group, sortedCases, caseNoMap, suffix) {
+function createFreshLandingSection(group, sortedCases, caseNoMap, suffix, options = {}) {
   const todays = sortedCases
     .filter((item) => item.createdAt === today || item.updatedAt === today);
   const freshDate = todays.length ? today : latestFreshDate(sortedCases);
   const freshItems = sortedCases
     .filter((item) => item.createdAt === freshDate || item.updatedAt === freshDate);
-  const items = (freshItems.length ? freshItems : sortedCases.slice(0, 8)).filter((item) => item?.slug);
+  const allItems = (freshItems.length ? freshItems : sortedCases.slice(0, 8)).filter((item) => item?.slug);
+  const maxItems = Number(options.maxItems) > 0 ? Number(options.maxItems) : 0;
+  const items = maxItems ? allItems.slice(0, maxItems) : allItems;
   const label = FRESH_LIST_LABEL;
   const countLabel = freshDate === today
     ? `${items.length.toLocaleString("ko-KR")}건`
