@@ -147,7 +147,7 @@ const SEO_XML_ROUTES = new Set([
   "/rss.xml",
 ]);
 
-const OG_IMAGE_VERSION = "20260616";
+const OG_IMAGE_VERSION = "20260618";
 const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
 <!-- End LogScan Code -->`;
@@ -360,7 +360,7 @@ function renderPowerlinkLanding(landing) {
   const robots = normalizePowerlinkRobots(landing.robots);
   const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = landing.updatedAt || publishedDate;
-  const ogImage = "https://gnlaw-criminal.co.kr/assets/og-template.png";
+  const ogImage = `https://gnlaw-criminal.co.kr/og/powerlink-${encodeURIComponent(slug || "landing")}.png?v=${OG_IMAGE_VERSION}`;
   const imageAlt = landing.imageAlt || title;
   const imageCaption = landing.imageCaption || imageAlt;
   const imageDescription = landing.imageDescription || description;

@@ -1,4 +1,4 @@
-import { buildSitemapXml, escapeXml, groupForHost, loadCases, loadPowerlinks } from "./_seo.js";
+import { OG_IMAGE_VERSION, buildSitemapXml, escapeXml, groupForHost, loadCases, loadPowerlinks } from "./_seo.js";
 
 const POWERLINK_HOST = "gnlaw-criminal.co.kr";
 
@@ -31,12 +31,12 @@ export async function onRequest(context) {
 
 function buildPowerlinkEntries(powerlinks) {
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const imgLoc = escapeXml(`https://${POWERLINK_HOST}/assets/og-template.png`);
   return powerlinks
     .filter((item) => item?.slug)
     .map((item) => {
       const loc = escapeXml(`https://${POWERLINK_HOST}/powerlink/${encodeURIComponent(item.slug)}/`);
       const lastmod = escapeXml(item.updatedAt || item.createdAt || today);
+      const imgLoc = escapeXml(`https://${POWERLINK_HOST}/og/powerlink-${encodeURIComponent(item.slug)}.png?v=${OG_IMAGE_VERSION}`);
       const imgTitle = escapeXml(item.title || item.slug);
       return `  <url><loc>${loc}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>${imgLoc}</image:loc><image:title>${imgTitle}</image:title></image:image></url>`;
     })

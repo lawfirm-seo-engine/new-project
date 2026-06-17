@@ -4,6 +4,7 @@ export const RECENT_SITEMAP_DAYS = 14;
 export const RECENT_SITEMAP_LIMIT = 300;
 export const RSS_LIMIT = 120;
 export const SEO_STABILIZED_AT = "2026-06-14";
+export const OG_IMAGE_VERSION = "20260618";
 
 export const GROUPS = [
   { host: "gnlaw-criminal.co.kr", key: "a", landingKey: "a", prefix: "prosecute", suffix: "litigation", label: "형사고소", siteUrl: "https://gnlaw-criminal.co.kr" },
@@ -88,7 +89,7 @@ export function buildSitemapXml(group, cases = [], options = {}) {
       const priority = options.recent ? "1.0" : "0.9";
       const changefreq = options.recent ? "hourly" : "daily";
       const loc = escapeXml(buildLandingUrl(group, item.slug));
-      const imgLoc = escapeXml(`${base}/og/${encodeURIComponent(item.slug)}.png`);
+      const imgLoc = escapeXml(`${base}/og/${encodeURIComponent(item.slug)}.png?v=${OG_IMAGE_VERSION}`);
       const imgTitle = escapeXml(item.caseName || item.slug);
       return `  <url><loc>${loc}</loc><lastmod>${escapeXml(lastmod)}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority><image:image><image:loc>${imgLoc}</image:loc><image:title>${imgTitle}</image:title></image:image></url>`;
     });
