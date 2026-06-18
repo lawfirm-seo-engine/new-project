@@ -13488,7 +13488,7 @@
     "createdAt": "2026-06-18",
     "updatedAt": "2026-06-18",
     "thumbnailUrl": "",
-    "landingViews": 6801,
+    "landingViews": 6800,
     "reports": 17,
     "summary": "InvexaPro Market Radar 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13509,7 +13509,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 6779,
+    "landingViews": 6777,
     "reports": 26,
     "summary": "D.B.C 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13528,7 +13528,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 1560,
+    "landingViews": 1558,
     "reports": 25,
     "summary": "BYBTC 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13547,7 +13547,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 6816,
+    "landingViews": 6814,
     "reports": 10,
     "summary": "바이비트코인 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13566,7 +13566,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 6451,
+    "landingViews": 6449,
     "reports": 28,
     "summary": "bitbybtc.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13585,7 +13585,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 443,
+    "landingViews": 441,
     "reports": 6,
     "summary": "Bullishplan 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13604,7 +13604,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 7351,
+    "landingViews": 7349,
     "reports": 7,
     "summary": "BoxTK 4.5 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13624,12 +13624,33 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 200,
+    "landingViews": 197,
     "reports": 13,
     "summary": "APSESX 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "APSESX",
       "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "81digital-ex",
+    "caseName": "81Digital-EX 사기 어플",
+    "category": "형사대응",
+    "createdAt": "2026-06-19",
+    "updatedAt": "2026-06-19",
+    "thumbnailUrl": "",
+    "landingViews": 3267,
+    "reports": 32,
+    "summary": "81Digital-EX 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "81Digital",
+      "EX",
+      "사기",
+      "어플",
       "사기피해",
       "피해금회수",
       "증거보존"
