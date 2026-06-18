@@ -147,7 +147,7 @@ const SEO_XML_ROUTES = new Set([
   "/rss.xml",
 ]);
 
-const OG_IMAGE_VERSION = "20260618";
+const OG_IMAGE_VERSION = "20260618u1";
 const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
 <!-- End LogScan Code -->`;

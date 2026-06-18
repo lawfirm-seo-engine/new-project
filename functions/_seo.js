@@ -4,7 +4,7 @@ export const RECENT_SITEMAP_DAYS = 14;
 export const RECENT_SITEMAP_LIMIT = 300;
 export const RSS_LIMIT = 120;
 export const SEO_STABILIZED_AT = "2026-06-14";
-export const OG_IMAGE_VERSION = "20260618";
+export const OG_IMAGE_VERSION = "20260618u1";
 
 export const GROUPS = [
   { host: "gnlaw-criminal.co.kr", key: "a", landingKey: "a", prefix: "prosecute", suffix: "litigation", label: "형사고소", siteUrl: "https://gnlaw-criminal.co.kr" },
