@@ -14465,5 +14465,26 @@
       "증거보존"
     ],
     "memo": ""
+  },
+  {
+    "slug": "tmeofo",
+    "caseName": "TMEOFO 사기 ETF 데이트레이딩",
+    "category": "형사대응",
+    "createdAt": "2026-06-19",
+    "updatedAt": "2026-06-19",
+    "thumbnailUrl": "",
+    "landingViews": 1715,
+    "reports": 33,
+    "summary": "TMEOFO 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "TMEOFO",
+      "사기",
+      "ETF",
+      "데이트레이딩",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
   }
 ]
