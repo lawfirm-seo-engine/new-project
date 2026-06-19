@@ -331,7 +331,10 @@
       return esc(value).replace(/"/g, "&quot;");
     }
 
-    loadList();
+    loadList().then(() => {
+      const editSlug = new URLSearchParams(location.search).get("edit");
+      if (editSlug) loadLanding(editSlug);
+    });
   </script>
 </body>
 </html>

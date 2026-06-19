@@ -8,27 +8,60 @@
   <style>
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#172033}
-    .wrap{max-width:1100px;margin:0 auto;padding:32px 20px}
+    .wrap{max-width:1200px;margin:0 auto;padding:32px 20px 60px}
     h1{margin:0 0 6px;font-size:24px}
+    h2{margin:0;font-size:17px;color:#263244}
     .top-nav{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;height:40px;padding:0 18px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none}
+    .btn{display:inline-flex;align-items:center;height:38px;padding:0 16px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none}
     .btn.sec{background:#263244}
+    .btn.sm{height:30px;padding:0 10px;font-size:12px}
     .btn.danger{background:#c0392b}
-    table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.06)}
-    th,td{padding:13px 16px;text-align:left;font-size:14px;border-bottom:1px solid #e8edf4}
+    /* today box */
+    .today-box{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:18px 22px;margin-bottom:26px}
+    .today-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .today-head h2{color:#1f4fd8}
+    .today-head .count{font-size:13px;color:#8a96a8;font-weight:400}
+    .today-grid{display:flex;flex-wrap:wrap;gap:8px}
+    .t-item{padding:9px 13px;border-radius:7px;background:#f0f4ff;border:1px solid #c8d8f8;font-size:13px;min-width:200px;max-width:280px}
+    .t-item strong{display:block;font-size:13px;font-weight:700;margin:3px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .t-item a{color:#1f4fd8;font-weight:600;font-size:12px;text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .t-item a:hover{text-decoration:underline}
+    .type-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:800}
+    .tc{background:#e8f0fe;color:#1f4fd8}
+    .tp{background:#fef3e8;color:#b35d0b}
+    /* section */
+    .section{margin-bottom:32px}
+    .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+    .sec-head .meta{font-size:13px;color:#8a96a8;font-weight:400;margin-left:8px}
+    .search-row{display:flex;gap:8px;margin-bottom:10px}
+    .search-row input{flex:1;border:1px solid #cfd8e6;border-radius:7px;padding:9px 13px;font:inherit;font-size:14px}
+    /* cases table */
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+    th,td{padding:12px 15px;text-align:left;font-size:13px;border-bottom:1px solid #e8edf4}
     th{background:#f0f4fa;font-weight:800;color:#4b5a70}
     tr:last-child td{border-bottom:0}
     tr:hover td{background:#f8faff}
-    .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:800;background:#e8f0fe;color:#1f4fd8}
-    .act a{margin-right:8px;color:#1f4fd8;font-weight:700;text-decoration:none;font-size:13px}
-    .loading{text-align:center;padding:40px;color:#8a96a8}
-    .meta{color:#8a96a8;font-size:13px;margin:0 0 20px}
+    tr.hidden{display:none}
+    .act a{margin-right:6px;color:#1f4fd8;font-weight:700;text-decoration:none;font-size:12px}
+    .loading{text-align:center;padding:36px;color:#8a96a8}
+    /* powerlinks table */
+    .pl-table{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+    .pl-row{display:flex;gap:12px;align-items:center;padding:11px 15px;border-bottom:1px solid #e8edf4;font-size:13px}
+    .pl-row:last-child{border-bottom:0}
+    .pl-row:hover{background:#f8faff}
+    .pl-row.hidden{display:none}
+    .pl-num{min-width:30px;color:#8a96a8}
+    .pl-name{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pl-slug{max-width:220px;color:#6b7a90;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pl-date{min-width:88px;color:#8a96a8;font-size:12px;text-align:right}
+    .pl-acts a{margin-left:8px;color:#1f4fd8;font-weight:700;text-decoration:none;font-size:12px}
+    .pl-acts a.del{color:#c0392b}
+    .empty-row{padding:32px;text-align:center;color:#8a96a8;font-size:13px}
   </style>
 </head>
 <body>
 <div class="wrap">
   <h1>관리자 대시보드</h1>
-  <p class="meta" id="caseCount">사건 로딩 중...</p>
   <div class="top-nav">
     <a class="btn" href="/admin/create.html">+ 새 사건 생성</a>
     <a class="btn" href="/admin/powerlink.html">+ 파워링크 랜딩 생성</a>
@@ -37,86 +70,208 @@
     <a class="btn sec" href="/admin/settings.html">텔레그램 설정</a>
     <a class="btn sec" href="/admin/logout">로그아웃</a>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>No.</th><th>사건명</th><th>등록일</th><th>수정일</th><th>관리</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"><tr><td colspan="5" class="loading">로딩 중...</td></tr></tbody>
-  </table>
+
+  <!-- 오늘 추가/갱신 -->
+  <div class="today-box">
+    <div class="today-head">
+      <h2>오늘 추가/갱신된 목록</h2>
+      <span class="count" id="todayCount"></span>
+    </div>
+    <div class="today-grid" id="todayGrid"><span style="color:#8a96a8;font-size:13px">로딩 중...</span></div>
+  </div>
+
+  <!-- 사건 목록 -->
+  <div class="section">
+    <div class="sec-head">
+      <h2>사건 목록<span class="meta" id="caseCount"></span></h2>
+    </div>
+    <div class="search-row">
+      <input id="caseSearch" type="text" placeholder="사건명 또는 슬러그 검색..." oninput="filterCases()">
+    </div>
+    <table>
+      <thead>
+        <tr><th>No.</th><th>사건명</th><th>등록일</th><th>수정일</th><th>관리</th></tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="5" class="loading">로딩 중...</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- 파워링크 목록 -->
+  <div class="section">
+    <div class="sec-head">
+      <h2>파워링크 랜딩 목록<span class="meta" id="plCount"></span></h2>
+      <a class="btn" href="/admin/powerlink.html">+ 파워링크 생성</a>
+    </div>
+    <div class="search-row">
+      <input id="plSearch" type="text" placeholder="제목 또는 슬러그 검색..." oninput="filterPowerlinks()">
+    </div>
+    <div class="pl-table" id="plTable"><div class="loading">로딩 중...</div></div>
+  </div>
 </div>
+
 <script>
   const DOMAINS = [
     { label:'A',  url:'https://gnlaw-criminal.co.kr', prefix:'prosecute' },
     { label:'B',  url:'https://gnlaw-civil.co.kr',   prefix:'civil' },
-    { label:'C',  url:'https://gnlaw-recovery.co.kr',   prefix:'success' },
-    { label:'D',  url:'https://gnlaw-case.co.kr',   prefix:'briefing' },
+    { label:'C',  url:'https://gnlaw-recovery.co.kr', prefix:'success' },
+    { label:'D',  url:'https://gnlaw-case.co.kr',     prefix:'briefing' },
     { label:'E',  url:'https://gnlaw-center.co.kr',   prefix:'case' },
-    { label:'lA', url:'https://금융사기대응센터.kr',           prefix:'prosecute' },
-    { label:'lB', url:'https://금융피해대응센터.kr',           prefix:'civil' },
-    { label:'lC', url:'https://사기피해구제센터.kr',           prefix:'success' },
-    { label:'lD', url:'https://리딩방피해회수센터.kr',           prefix:'briefing' },
-    { label:'lE', url:'https://투자사기대응센터.kr',           prefix:'case' },
+    { label:'lA', url:'https://금융사기대응센터.kr',         prefix:'prosecute' },
+    { label:'lB', url:'https://금융피해대응센터.kr',         prefix:'civil' },
+    { label:'lC', url:'https://사기피해구제센터.kr',         prefix:'success' },
+    { label:'lD', url:'https://리딩방피해회수센터.kr',         prefix:'briefing' },
+    { label:'lE', url:'https://투자사기대응센터.kr',         prefix:'case' },
   ];
 
-  fetch('/api/get-cases')
-    .then(r => r.json())
-    .then(data => {
-      if (!data.ok) { document.getElementById('tbody').innerHTML = `<tr><td colspan="5" style="color:#c0392b">불러오기 실패: ${data.message || '알 수 없는 오류'}</td></tr>`; return; }
-      const cases = data.cases;
-      document.getElementById('caseCount').textContent = `총 ${cases.length}건`;
-      const sorted = [...cases].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
-      document.getElementById('caseCount').textContent = `총 ${sorted.length}건`;
-      document.getElementById('tbody').innerHTML = sorted.map((c, i) => `
-        <tr id="row-${esc(c.slug)}">
-          <td>${sorted.length - i}</td>
-          <td><strong>${esc(c.caseName)}</strong>${c.memo ? ' <span style="color:#8a96a8;font-size:12px">📝</span>' : ''}</td>
-          <td>${esc(c.createdAt||'-')}</td>
-          <td>${esc(c.updatedAt||'-')}</td>
-          <td class="act">
-            <a href="/admin/edit.html?slug=${encodeURIComponent(c.slug)}">편집</a>
-            <a href="#" onclick="setThumbnail('${esc(c.slug)}');return false;">썸네일</a>
-            ${DOMAINS.map(d=>`<a href="${d.url}/${d.prefix}/${encodeURIComponent(c.slug)}/" target="_blank">${d.label}</a>`).join('')}
-            <button class="btn danger" style="padding:0 10px;height:30px;font-size:12px" onclick="deleteCase('${esc(c.slug)}','${esc(c.caseName)}')">삭제</button>
-          </td>
-        </tr>`).join('');
-    })
-    .catch(() => { document.getElementById('tbody').innerHTML = '<tr><td colspan="5">로딩 오류</td></tr>'; });
+  const PL_SITE = 'https://gnlaw-criminal.co.kr';
+  let allCases = [];
+  let allPowerlinks = [];
+  const today = new Date(Date.now() + 9*60*60*1000).toISOString().slice(0,10);
 
+  Promise.all([
+    fetch('/api/get-cases').then(r => r.json()).catch(() => ({ ok: false })),
+    fetch('/api/get-powerlinks').then(r => r.json()).catch(() => ({ ok: false })),
+  ]).then(([cd, pd]) => {
+    allCases = cd.ok
+      ? [...cd.cases].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''))
+      : [];
+    allPowerlinks = pd.ok
+      ? [...(pd.landings||[])].sort((a,b) => (b.updatedAt||b.createdAt||'').localeCompare(a.updatedAt||a.createdAt||''))
+      : [];
+    renderCases(allCases);
+    renderPowerlinks(allPowerlinks);
+    renderToday();
+  });
+
+  /* ---- Today ---- */
+  function renderToday() {
+    const tc = allCases.filter(c => (c.updatedAt||c.createdAt||'').startsWith(today));
+    const tp = allPowerlinks.filter(p => (p.updatedAt||p.createdAt||'').startsWith(today));
+    const items = [
+      ...tc.map(c => ({ type:'c', name: c.caseName, slug: c.slug, date: c.updatedAt||c.createdAt })),
+      ...tp.map(p => ({ type:'p', name: p.title,    slug: p.slug, date: p.updatedAt||p.createdAt })),
+    ].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+    const grid = document.getElementById('todayGrid');
+    document.getElementById('todayCount').textContent = items.length ? `총 ${items.length}건` : '';
+    if (!items.length) {
+      grid.innerHTML = '<span style="color:#8a96a8;font-size:13px">오늘 추가/갱신된 항목이 없습니다.</span>';
+      return;
+    }
+    grid.innerHTML = items.map(it => {
+      const isPl = it.type === 'p';
+      const url = isPl
+        ? `${PL_SITE}/powerlink/${encodeURIComponent(it.slug)}/`
+        : `${PL_SITE}/prosecute/${encodeURIComponent(it.slug)}/`;
+      const editUrl = isPl
+        ? `/admin/powerlink.html?edit=${encodeURIComponent(it.slug)}`
+        : `/admin/edit.html?slug=${encodeURIComponent(it.slug)}`;
+      return `<div class="t-item">
+        <span class="type-badge ${isPl?'tp':'tc'}">${isPl?'파워링크':'사건'}</span>
+        <strong title="${esc(it.name)}">${esc(it.name)}</strong>
+        <a href="${url}" target="_blank">${esc(it.slug)}</a>
+        <a href="${editUrl}" style="margin-top:4px;color:#263244">✎ 편집</a>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---- Cases ---- */
+  function renderCases(cases) {
+    document.getElementById('caseCount').textContent = `총 ${allCases.length}건${cases.length < allCases.length ? ' (필터: '+cases.length+'건)' : ''}`;
+    if (!cases.length) {
+      document.getElementById('tbody').innerHTML = '<tr><td colspan="5" class="loading">검색 결과 없음</td></tr>';
+      return;
+    }
+    document.getElementById('tbody').innerHTML = cases.map((c, i) => `
+      <tr id="row-${esc(c.slug)}">
+        <td>${allCases.length - allCases.indexOf(c)}</td>
+        <td><strong>${esc(c.caseName)}</strong>${c.memo?' <span style="color:#8a96a8;font-size:11px">📝</span>':''}<br><span style="color:#8a96a8;font-size:11px">${esc(c.slug)}</span></td>
+        <td>${esc(c.createdAt||'-')}</td>
+        <td>${esc(c.updatedAt||'-')}</td>
+        <td class="act">
+          <a href="/admin/edit.html?slug=${encodeURIComponent(c.slug)}">편집</a>
+          <a href="#" onclick="setThumbnail('${esc(c.slug)}');return false;">썸네일</a>
+          ${DOMAINS.map(d=>`<a href="${d.url}/${d.prefix}/${encodeURIComponent(c.slug)}/" target="_blank">${d.label}</a>`).join('')}
+          <button class="btn danger sm" onclick="deleteCase('${esc(c.slug)}','${esc(c.caseName)}')">삭제</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function filterCases() {
+    const q = document.getElementById('caseSearch').value.trim().toLowerCase();
+    renderCases(q
+      ? allCases.filter(c => (c.caseName||'').toLowerCase().includes(q) || (c.slug||'').toLowerCase().includes(q))
+      : allCases
+    );
+  }
+
+  /* ---- Powerlinks ---- */
+  function renderPowerlinks(items) {
+    document.getElementById('plCount').textContent = `총 ${allPowerlinks.length}건${items.length < allPowerlinks.length ? ' (필터: '+items.length+'건)' : ''}`;
+    const el = document.getElementById('plTable');
+    if (!items.length) {
+      el.innerHTML = '<div class="empty-row">검색 결과 없음</div>';
+      return;
+    }
+    el.innerHTML = items.map((p, i) => `
+      <div class="pl-row" id="plrow-${esc(p.slug)}">
+        <span class="pl-num">${allPowerlinks.length - allPowerlinks.indexOf(p)}</span>
+        <span class="pl-name" title="${esc(p.title)}">${esc(p.title)}</span>
+        <span class="pl-slug" title="${esc(p.slug)}">${esc(p.slug)}</span>
+        <span class="pl-date">${esc(p.updatedAt||p.createdAt||'-')}</span>
+        <span class="pl-acts">
+          <a href="/admin/powerlink.html?edit=${encodeURIComponent(p.slug)}">편집</a>
+          <a href="${PL_SITE}/powerlink/${encodeURIComponent(p.slug)}/" target="_blank">보기</a>
+          <a href="#" class="del" onclick="deletePl('${esc(p.slug)}','${esc(p.title)}');return false;">삭제</a>
+        </span>
+      </div>`).join('');
+  }
+
+  function filterPowerlinks() {
+    const q = document.getElementById('plSearch').value.trim().toLowerCase();
+    renderPowerlinks(q
+      ? allPowerlinks.filter(p => (p.title||'').toLowerCase().includes(q) || (p.slug||'').toLowerCase().includes(q))
+      : allPowerlinks
+    );
+  }
+
+  /* ---- Actions ---- */
   async function deleteCase(slug, name) {
     if (!confirm(`"${name}" 사건을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
     try {
-      const res = await fetch('/api/delete-case', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug }),
-      });
+      const res = await fetch('/api/delete-case', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug}) });
       const data = await res.json();
       if (data.ok) {
-        const row = document.getElementById('row-' + slug);
-        if (row) row.remove();
+        allCases = allCases.filter(c => c.slug !== slug);
+        filterCases();
+        renderToday();
         alert(`"${name}" 사건이 삭제되었습니다.`);
-      } else {
-        alert('삭제 실패: ' + (data.message || '알 수 없는 오류'));
-      }
-    } catch (e) {
-      alert('오류: ' + e.message);
-    }
+      } else { alert('삭제 실패: ' + (data.message||'알 수 없는 오류')); }
+    } catch (e) { alert('오류: ' + e.message); }
+  }
+
+  async function deletePl(slug, name) {
+    if (!confirm(`"${name}" 파워링크 랜딩을 삭제하시겠습니까?`)) return;
+    try {
+      const res = await fetch('/api/delete-powerlink', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug}) });
+      const data = await res.json();
+      if (data.ok) {
+        allPowerlinks = allPowerlinks.filter(p => p.slug !== slug);
+        filterPowerlinks();
+        renderToday();
+        alert(`"${name}" 파워링크 랜딩이 삭제되었습니다.`);
+      } else { alert('삭제 실패: ' + (data.message||'알 수 없는 오류')); }
+    } catch (e) { alert('오류: ' + e.message); }
   }
 
   async function setThumbnail(slug) {
     const url = prompt('썸네일 이미지 URL을 입력하세요 (비워두면 삭제):');
     if (url === null) return;
     try {
-      const res = await fetch('/api/update-case', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, action: 'update-thumbnail', value: url.trim() }),
-      });
+      const res = await fetch('/api/update-case', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug, action:'update-thumbnail', value:url.trim()}) });
       const data = await res.json();
       if (data.ok) alert('썸네일이 저장되었습니다. 다음 빌드에 반영됩니다.');
-      else alert('저장 실패: ' + (data.message || ''));
+      else alert('저장 실패: ' + (data.message||''));
     } catch (e) { alert('오류: ' + e.message); }
   }
 
@@ -125,18 +280,12 @@
     const btn = document.querySelector('[onclick="syncKvToGithub()"]');
     btn.disabled = true; btn.textContent = '동기화 중...';
     try {
-      const res = await fetch('/api/sync-kv-to-github', { method: 'POST' });
+      const res = await fetch('/api/sync-kv-to-github', { method:'POST' });
       const data = await res.json();
-      if (data.ok) {
-        alert(`✅ ${data.message}\n\n총 ${data.total}개 케이스 동기화 완료.\n(인덱스만으로 복원된 케이스: ${data.fromIndexOnly}개)\n\n로컬에서 git pull 하세요.`);
-      } else {
-        alert('❌ 동기화 실패: ' + (data.message || '알 수 없는 오류'));
-      }
-    } catch (e) {
-      alert('오류: ' + e.message);
-    } finally {
-      btn.disabled = false; btn.textContent = 'KV→GitHub 동기화';
-    }
+      if (data.ok) alert(`✅ ${data.message}\n\n총 ${data.total}개 케이스 동기화 완료.\n(인덱스만으로 복원된 케이스: ${data.fromIndexOnly}개)\n\n로컬에서 git pull 하세요.`);
+      else alert('❌ 동기화 실패: ' + (data.message||'알 수 없는 오류'));
+    } catch (e) { alert('오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = 'KV→GitHub 동기화'; }
   }
 
   async function batchApplyTemplates() {
@@ -144,19 +293,16 @@
     const btn = document.querySelector('button.btn.sec[onclick="batchApplyTemplates()"]');
     btn.disabled = true; btn.textContent = '처리 중...';
     try {
-      const res = await fetch('/api/batch-apply-templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const res = await fetch('/api/batch-apply-templates', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
       const data = await res.json();
-      if (data.ok) {
-        alert('완료!\n전체: ' + data.total + '건\nKV 업데이트: ' + data.updatedKV + '건\nGitHub 업데이트: ' + data.githubUpdated + '건' + (data.errors?.length ? '\n오류: ' + data.errors.length + '건' : ''));
-      } else {
-        alert('실패: ' + (data.message || '알 수 없는 오류'));
-      }
+      if (data.ok) alert('완료!\n전체: ' + data.total + '건\nKV 업데이트: ' + data.updatedKV + '건\nGitHub 업데이트: ' + data.githubUpdated + '건' + (data.errors?.length?'\n오류: '+data.errors.length+'건':''));
+      else alert('실패: ' + (data.message||'알 수 없는 오류'));
     } catch (e) { alert('오류: ' + e.message); }
     finally { btn.disabled = false; btn.textContent = '템플릿 일괄 적용'; }
   }
 
   function esc(str) {
-    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#039;');
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#039;').replace(/"/g,'&quot;');
   }
 </script>
 </body>
