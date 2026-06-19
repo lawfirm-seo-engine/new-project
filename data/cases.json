@@ -6876,7 +6876,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 6649,
+    "landingViews": 6648,
     "reports": 5,
     "summary": "신품마켓 사기 쇼핑몰 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -12296,7 +12296,7 @@
     "createdAt": "2026-06-17",
     "updatedAt": "2026-06-17",
     "thumbnailUrl": "",
-    "landingViews": 1574,
+    "landingViews": 1573,
     "reports": 26,
     "summary": "JEN컴퍼니 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14830,7 +14830,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 3198,
+    "landingViews": 3197,
     "reports": 5,
     "summary": "lapionn 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14851,7 +14851,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 1693,
+    "landingViews": 1692,
     "reports": 16,
     "summary": "생활창고 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14870,7 +14870,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 3437,
+    "landingViews": 3436,
     "reports": 19,
     "summary": "YO보자 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14889,7 +14889,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 6133,
+    "landingViews": 6131,
     "reports": 18,
     "summary": "yoboza.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14908,7 +14908,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 7872,
+    "landingViews": 7870,
     "reports": 7,
     "summary": "네코라이브 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14927,7 +14927,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 1797,
+    "landingViews": 1795,
     "reports": 20,
     "summary": "nakolive-tv.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14947,7 +14947,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 3766,
+    "landingViews": 3763,
     "reports": 33,
     "summary": "aramgroupinvest.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14966,12 +14966,31 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 2486,
+    "landingViews": 2482,
     "reports": 24,
     "summary": "life-storage.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "life",
       "storage.com",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "ororamakes",
+    "caseName": "오로라마켓 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-19",
+    "updatedAt": "2026-06-19",
+    "thumbnailUrl": "",
+    "landingViews": 3235,
+    "reports": 13,
+    "summary": "오로라마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "오로라마켓",
       "사기",
       "사기피해",
       "피해금회수",
