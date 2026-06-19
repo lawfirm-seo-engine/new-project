@@ -220,7 +220,6 @@ export async function onRequest(context) {
     pathname.startsWith("/assets/") ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/og/") ||
-    pathname.startsWith("/og-overlay/") ||
     pathname.startsWith("/admin/") ||
     pathname === "/sitemap.xml" ||
     pathname === "/sitemap-index.xml" ||
