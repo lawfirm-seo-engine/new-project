@@ -653,34 +653,6 @@ function normalizePowerlinkRobots(value = "") {
   return String(value).toLowerCase().includes("noindex") ? "noindex, follow" : "index, follow";
 }
 
-function resolveOgImage(value = "", group = {}, slug = "") {
-  const fallback = caseOgImageUrl(slug || "landing", group.siteUrl);
-  const candidate = String(value || "").trim();
-  if (!candidate) return fallback;
-
-  try {
-    const url = new URL(candidate, group.siteUrl);
-    const pathname = url.pathname.toLowerCase();
-    if (
-      pathname.startsWith("/og/") ||
-      pathname.endsWith("/assets/og-template.png") ||
-      pathname.endsWith("/assets/og-template.webp")
-    ) {
-      return fallback;
-    }
-    if (
-      url.hostname === "gnlaw-criminal.co.kr" &&
-      pathname.startsWith("/assets/og-generated/")
-    ) {
-      return fallback;
-    }
-  } catch {
-    return fallback;
-  }
-
-  return candidate;
-}
-
 function logScanScriptForSite(siteUrl = "") {
   return String(siteUrl).replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
     ? LOGSCAN_SCRIPT
@@ -701,7 +673,7 @@ function renderLanding(caseData, group, origin) {
   const oldSuffixOverride = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_CANONICAL[caseData.slug];
   const urlSuffix = isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
-  const ogImage = resolveOgImage(caseData.thumbnailUrl || landing.ogImage, group, caseData.slug);
+  const ogImage = caseOgImageUrl(caseData.slug || "landing", group.siteUrl);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = caseData.updatedAt || publishedDate;
   const isoPublished = `${publishedDate}T00:00:00+09:00`;

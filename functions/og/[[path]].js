@@ -1,6 +1,10 @@
 import { OG_IMAGE_HEIGHT, OG_IMAGE_VERSION, OG_IMAGE_WIDTH, caseOgImageUrl, powerlinkOgImageUrl } from "../_seo.js";
 
 const EDGE_CACHE_SECONDS = 60 * 60 * 24 * 7;
+const OVERLAY_WIDTH = 1078;
+const OVERLAY_HEIGHT = 250;
+const OVERLAY_LEFT = 88;
+const OVERLAY_BOTTOM = 94;
 
 export async function onRequest(context) {
   const { request } = context;
@@ -24,7 +28,7 @@ export async function onRequest(context) {
   }
 
   const overlaySlug = isPowerlink ? `powerlink-${slug || "landing"}` : (slug || "landing");
-  const overlayUrl = `${url.origin}/og-overlay/${encodeURIComponent(overlaySlug)}.svg?v=${OG_IMAGE_VERSION}`;
+  const overlayUrl = `${url.origin}/og-overlay/${encodeURIComponent(overlaySlug)}.png?v=${OG_IMAGE_VERSION}`;
   const templateUrl = `${url.origin}/assets/og-template.png?og=${encodeURIComponent(overlaySlug)}&v=${OG_IMAGE_VERSION}`;
 
   const imageResponse = await fetch(templateUrl, {
@@ -40,9 +44,11 @@ export async function onRequest(context) {
         draw: [
           {
             url: overlayUrl,
-            width: OG_IMAGE_WIDTH,
-            height: OG_IMAGE_HEIGHT,
+            width: OVERLAY_WIDTH,
+            height: OVERLAY_HEIGHT,
             fit: "cover",
+            left: OVERLAY_LEFT,
+            bottom: OVERLAY_BOTTOM,
             opacity: 1,
           },
         ],

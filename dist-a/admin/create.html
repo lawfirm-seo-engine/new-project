@@ -285,6 +285,18 @@
       { label: "lE 사건허브",  url: "https://투자사기대응센터.kr",           prefix: "case" },
     ];
 
+    const OG_IMAGE_VERSION = "20260619u3";
+    [
+      ["https://xn--jj0b0cw1o75qwua31zyfp19e.kr", "criminal"],
+      ["https://xn--jj0b77gmsoyyfbet54ddvg2ma.kr", "litigation"],
+      ["https://xn--2e0bno217bsqa58yp8nd1g2ma.kr", "results"],
+      ["https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", "insights"],
+      ["https://xn--ok0b84g7tosqai7vyka788co0b.kr", "incidents"],
+    ].forEach(function(row, index) {
+      LANDING_GROUPS[index + 5].url = row[0];
+      LANDING_GROUPS[index + 5].prefix = row[1];
+    });
+
     const caseNameEl = document.getElementById("caseName");
     const slugEl = document.getElementById("slug");
     const categoryEl = document.getElementById("category");
@@ -425,7 +437,7 @@
       // 랜딩페이지 prefetch: 각 도메인 랜딩 URL 1회 호출 → Worker SSR + CDN 캐시
       const encoded = encodeURIComponent(slug);
       for (const g of LANDING_GROUPS) {
-        fetch(`${g.url}/og/${encoded}.webp`, { method: "GET", mode: "no-cors", cache: "no-store" }).catch(function(){});
+        fetch(`${g.url}/og/${encoded}.webp?v=${OG_IMAGE_VERSION}`, { method: "GET", mode: "no-cors", cache: "no-store" }).catch(function(){});
         fetch(`${g.url}/${g.prefix}/${encoded}/`, { method: "GET", mode: "no-cors", cache: "no-store" }).catch(function(){});
       }
     }
