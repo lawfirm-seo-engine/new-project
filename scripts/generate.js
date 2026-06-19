@@ -8,6 +8,7 @@ import {
   buildRssXml,
   buildSitemapIndexXml,
   buildSitemapXml,
+  caseOgImageUrl,
   getRecentCases,
 } from "../functions/_seo.js";
 
@@ -301,6 +302,20 @@ const groups = [
   },
 ];
 
+const canonicalLawSiteUrlByLandingKey = {
+  la: "https://xn--jj0b0cw1o75qwua31zyfp19e.kr",
+  lb: "https://xn--jj0b77gmsoyyfbet54ddvg2ma.kr",
+  lc: "https://xn--2e0bno217bsqa58yp8nd1g2ma.kr",
+  ld: "https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr",
+  le: "https://xn--ok0b84g7tosqai7vyka788co0b.kr",
+};
+
+for (const group of groups) {
+  if (canonicalLawSiteUrlByLandingKey[group.landingKey]) {
+    group.siteUrl = canonicalLawSiteUrlByLandingKey[group.landingKey];
+  }
+}
+
 const cases = await fs.readJson(dataPath);
 
 function escapeHtml(value = "") {
@@ -395,7 +410,7 @@ function createFallbackLanding(caseItem, group) {
     canonical,
     ogTitle: pageTitle,
     ogDescription: description,
-    ogImage: `${group.siteUrl}/og/${slug}.png`,
+    ogImage: caseOgImageUrl(slug || "landing", group.siteUrl),
     h1: pageH1,
     body: [
       caseItem.summary || `${dispName} 피해 구조와 대응 방법을 정리한 안내입니다.`,

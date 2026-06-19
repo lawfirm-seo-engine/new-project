@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://금융사기대응센터.kr/sitemap-index.xml
-Sitemap: https://금융사기대응센터.kr/sitemap-recent.xml
-Sitemap: https://금융사기대응센터.kr/sitemap.xml
+Sitemap: https://xn--jj0b0cw1o75qwua31zyfp19e.kr/sitemap-index.xml
+Sitemap: https://xn--jj0b0cw1o75qwua31zyfp19e.kr/sitemap-recent.xml
+Sitemap: https://xn--jj0b0cw1o75qwua31zyfp19e.kr/sitemap.xml

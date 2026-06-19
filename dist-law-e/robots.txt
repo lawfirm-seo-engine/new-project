@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://투자사기대응센터.kr/sitemap-index.xml
-Sitemap: https://투자사기대응센터.kr/sitemap-recent.xml
-Sitemap: https://투자사기대응센터.kr/sitemap.xml
+Sitemap: https://xn--ok0b84g7tosqai7vyka788co0b.kr/sitemap-index.xml
+Sitemap: https://xn--ok0b84g7tosqai7vyka788co0b.kr/sitemap-recent.xml
+Sitemap: https://xn--ok0b84g7tosqai7vyka788co0b.kr/sitemap.xml

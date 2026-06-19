@@ -1,7 +1,7 @@
 // Admin API: create or update one Naver Powerlink landing page.
 // Storage is intentionally separate from normal case landings.
 
-import { INDEXNOW_KEY as DEFAULT_INDEXNOW_KEY } from "../_seo.js";
+import { INDEXNOW_KEY as DEFAULT_INDEXNOW_KEY, powerlinkOgImageUrl } from "../_seo.js";
 
 const GITHUB_FILE_PATH = "data/powerlinks.json";
 const SITE_URL = "https://gnlaw-criminal.co.kr";
@@ -57,6 +57,7 @@ export async function onRequestPost(context) {
 
       const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
       context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
+      context.waitUntil?.(warmPowerlinkCache(slug).catch(() => {}));
 
       return json({
         ok: true,
@@ -73,6 +74,7 @@ export async function onRequestPost(context) {
 
     const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
     context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
+    context.waitUntil?.(warmPowerlinkCache(slug).catch(() => {}));
 
     return json({
       ok: true,
@@ -221,6 +223,13 @@ function normalizeSpace(value = "") {
 
 function today() {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+async function warmPowerlinkCache(slug) {
+  await Promise.allSettled([
+    fetch(powerlinkOgImageUrl(slug), { method: "GET" }),
+    fetch(`${SITE_URL}/powerlink/${encodeURIComponent(slug)}/`, { method: "GET" }),
+  ]);
 }
 
 function githubEnv(env) {

@@ -2,15 +2,20 @@
 // Handles: /[pathPrefix]/[slug]/ for each of the 5 groups
 
 import {
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_VERSION,
+  OG_IMAGE_WIDTH,
   RSS_LIMIT,
   RECENT_SITEMAP_DAYS,
   RECENT_SITEMAP_LIMIT,
   buildRssXml,
   buildSitemapIndexXml,
   buildSitemapXml,
+  caseOgImageUrl,
   getRecentCases,
   groupForHost as getSeoGroupForHost,
   loadCases as loadSeoCases,
+  powerlinkOgImageUrl,
 } from "./_seo.js";
 
 const GROUPS = {
@@ -132,6 +137,23 @@ const GROUPS = {
   },
 };
 
+const CANONICAL_SITE_URL_BY_HOST = {
+  "gnlaw-criminal.co.kr": "https://gnlaw-criminal.co.kr",
+  "gnlaw-civil.co.kr": "https://gnlaw-civil.co.kr",
+  "gnlaw-recovery.co.kr": "https://gnlaw-recovery.co.kr",
+  "gnlaw-case.co.kr": "https://gnlaw-case.co.kr",
+  "gnlaw-center.co.kr": "https://gnlaw-center.co.kr",
+  "xn--jj0b0cw1o75qwua31zyfp19e.kr": "https://xn--jj0b0cw1o75qwua31zyfp19e.kr",
+  "xn--jj0b77gmsoyyfbet54ddvg2ma.kr": "https://xn--jj0b77gmsoyyfbet54ddvg2ma.kr",
+  "xn--2e0bno217bsqa58yp8nd1g2ma.kr": "https://xn--2e0bno217bsqa58yp8nd1g2ma.kr",
+  "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr": "https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr",
+  "xn--ok0b84g7tosqai7vyka788co0b.kr": "https://xn--ok0b84g7tosqai7vyka788co0b.kr",
+};
+
+for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
+  if (GROUPS[host]) GROUPS[host].siteUrl = siteUrl;
+}
+
 const CROSS_LINKS = [
   { key: "a", label: "형사고소", url: "https://gnlaw-criminal.co.kr", prefix: "prosecute" },
   { key: "b", label: "민사소송", url: "https://gnlaw-civil.co.kr", prefix: "civil" },
@@ -147,7 +169,6 @@ const SEO_XML_ROUTES = new Set([
   "/rss.xml",
 ]);
 
-const OG_IMAGE_VERSION = "20260618u1";
 const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
 <!-- End LogScan Code -->`;
@@ -199,6 +220,7 @@ export async function onRequest(context) {
     pathname.startsWith("/assets/") ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/og/") ||
+    pathname.startsWith("/og-overlay/") ||
     pathname.startsWith("/admin/") ||
     pathname === "/sitemap.xml" ||
     pathname === "/sitemap-index.xml" ||
@@ -207,6 +229,8 @@ export async function onRequest(context) {
     pathname.endsWith(".txt") ||
     pathname.endsWith(".xml") ||
     pathname.endsWith(".png") ||
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".webp") ||
     pathname.endsWith(".ico") ||
     pathname.endsWith(".webmanifest")
   ) {
@@ -360,15 +384,15 @@ function renderPowerlinkLanding(landing) {
   const robots = normalizePowerlinkRobots(landing.robots);
   const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = landing.updatedAt || publishedDate;
-  const ogImage = `https://gnlaw-criminal.co.kr/og/powerlink-${encodeURIComponent(slug || "landing")}.png?v=${OG_IMAGE_VERSION}`;
+  const ogImage = powerlinkOgImageUrl(slug || "landing");
   const imageAlt = landing.imageAlt || title;
   const imageCaption = landing.imageCaption || imageAlt;
   const imageDescription = landing.imageDescription || description;
   const imageObject = {
     "@type": "ImageObject",
     url: ogImage,
-    width: 1254,
-    height: 1254,
+    width: OG_IMAGE_WIDTH,
+    height: OG_IMAGE_HEIGHT,
     name: imageAlt,
     caption: imageCaption,
     description: imageDescription,
@@ -449,9 +473,9 @@ function renderPowerlinkLanding(landing) {
     `<meta property="og:image:secure_url" content="${ogImage}">`,
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
-    `<meta property="og:image:type" content="image/png">`,
-    `<meta property="og:image:width" content="1254">`,
-    `<meta property="og:image:height" content="1254">`,
+    `<meta property="og:image:type" content="image/webp">`,
+    `<meta property="og:image:width" content="${OG_IMAGE_WIDTH}">`,
+    `<meta property="og:image:height" content="${OG_IMAGE_HEIGHT}">`,
     `<link rel="image_src" href="${ogImage}">`,
     `<meta itemprop="image" content="${ogImage}">`,
     `<meta name="image:alt" content="${esc(imageAlt)}">`,
@@ -630,18 +654,28 @@ function normalizePowerlinkRobots(value = "") {
 }
 
 function resolveOgImage(value = "", group = {}, slug = "") {
-  const fallback = `${group.siteUrl}/og/${encodeURIComponent(slug)}.png?v=${OG_IMAGE_VERSION}`;
-  const candidate = String(value || "").trim() || fallback;
+  const fallback = caseOgImageUrl(slug || "landing", group.siteUrl);
+  const candidate = String(value || "").trim();
+  if (!candidate) return fallback;
 
   try {
     const url = new URL(candidate, group.siteUrl);
-    const site = new URL(group.siteUrl);
-    if (url.hostname === site.hostname && url.pathname.startsWith("/og/")) {
-      url.searchParams.set("v", OG_IMAGE_VERSION);
-      return url.toString();
+    const pathname = url.pathname.toLowerCase();
+    if (
+      pathname.startsWith("/og/") ||
+      pathname.endsWith("/assets/og-template.png") ||
+      pathname.endsWith("/assets/og-template.webp")
+    ) {
+      return fallback;
+    }
+    if (
+      url.hostname === "gnlaw-criminal.co.kr" &&
+      pathname.startsWith("/assets/og-generated/")
+    ) {
+      return fallback;
     }
   } catch {
-    return candidate;
+    return fallback;
   }
 
   return candidate;
@@ -679,8 +713,8 @@ function renderLanding(caseData, group, origin) {
   const articleTags = createArticleTags(rawCaseName, lk);
 
   const ogImageType = /\.png(?:$|\?)/i.test(ogImage) ? "image/png" : /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/webp";
-  const ogImageWidth = "1254";
-  const ogImageHeight = "1254";
+  const ogImageWidth = String(OG_IMAGE_WIDTH);
+  const ogImageHeight = String(OG_IMAGE_HEIGHT);
   const headExtra = [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
     `<meta name="NaverBot" content="All">`,
@@ -920,7 +954,7 @@ function createFallbackLanding(caseData, group, key) {
     canonical,
     ogTitle: title,
     ogDescription: description,
-    ogImage: `${group.siteUrl}/og/${caseData.slug}.png`,
+    ogImage: caseOgImageUrl(caseData.slug || "landing", group.siteUrl),
     h1: groupPageH1(caseName, key),
     body: fallbackBody(base, key),
     victimCases: fallbackVictimCases(key),

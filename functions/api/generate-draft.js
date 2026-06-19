@@ -1,3 +1,5 @@
+import { caseOgImageUrl } from "../_seo.js";
+
 const GROUPS = [
   {
     key: "a",
@@ -221,7 +223,7 @@ function createLandingData({ caseName, slug, group, templates = {} }) {
     canonical,
     ogTitle: title,
     ogDescription: description,
-    ogImage: `${group.siteUrl}/og/${slug}.png`,
+    ogImage: caseOgImageUrl(slug || "landing", group.siteUrl),
     h1: groupPageH1(caseName, group.key),
     body,
     victimCases,

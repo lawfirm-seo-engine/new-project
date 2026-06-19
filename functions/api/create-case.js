@@ -1,4 +1,4 @@
-import { GROUPS, INDEXNOW_KEY, buildLandingUrl } from "../_seo.js";
+import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl } from "../_seo.js";
 
 const DEFAULT_CATEGORY = "형사대응";
 
@@ -74,6 +74,7 @@ export async function onRequestPost(context) {
 
       const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
       context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
+      context.waitUntil?.(warmLandingCaches(slug).catch(() => {}));
 
       return json({
         ok: true,
@@ -150,6 +151,7 @@ export async function onRequestPost(context) {
 
     const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
     context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
+    context.waitUntil?.(warmLandingCaches(slug).catch(() => {}));
 
     return json({
       ok: true,
@@ -200,6 +202,15 @@ function buildIndexEntry(c) {
     thumbnailUrl: c.thumbnailUrl || "", landingViews: c.landingViews || 0,
     reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
   };
+}
+
+async function warmLandingCaches(slug) {
+  await Promise.allSettled(
+    GROUPS.flatMap((group) => [
+      fetch(caseOgImageUrl(slug, group.siteUrl), { method: "GET" }),
+      fetch(buildLandingUrl(group, slug), { method: "GET" }),
+    ]),
+  );
 }
 
 async function pingIndexNow(slug, key) {

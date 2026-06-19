@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
-import { GROUPS, INDEXNOW_KEY, buildLandingUrl, sortNewest } from "../functions/_seo.js";
+import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl, sortNewest } from "../functions/_seo.js";
 
 const root = process.cwd();
 const cases = await fs.readJson(path.join(root, "data", "cases.json"));
@@ -15,7 +15,7 @@ const targets = GROUPS.flatMap((group) => [
   `${group.siteUrl}/`,
   categoryUrl(group),
   buildLandingUrl(group, latest.slug),
-  `${group.siteUrl}/og/${encodeURIComponent(latest.slug)}.png`,
+  caseOgImageUrl(latest.slug, group.siteUrl),
   `${group.siteUrl}/assets/og-template.png`,
   `${group.siteUrl}/sitemap-index.xml`,
   `${group.siteUrl}/sitemap-recent.xml`,

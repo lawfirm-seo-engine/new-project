@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://리딩방피해회수센터.kr/sitemap-index.xml
-Sitemap: https://리딩방피해회수센터.kr/sitemap-recent.xml
-Sitemap: https://리딩방피해회수센터.kr/sitemap.xml
+Sitemap: https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr/sitemap-index.xml
+Sitemap: https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr/sitemap-recent.xml
+Sitemap: https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr/sitemap.xml

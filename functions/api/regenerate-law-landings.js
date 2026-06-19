@@ -1,6 +1,8 @@
 // Batch endpoint: adds la~le manuscripts to all existing cases in KV + GitHub
 // POST /api/regenerate-law-landings  — no request body required
 
+import { caseOgImageUrl } from "../_seo.js";
+
 const LAW_GROUPS = [
   {
     key: "la",
@@ -181,7 +183,7 @@ function createLandingData({ caseName, slug, group }) {
     canonical,
     ogTitle: title,
     ogDescription: description,
-    ogImage: `${group.siteUrl}/og/${slug}.png`,
+    ogImage: caseOgImageUrl(slug || "landing", group.siteUrl),
     h1: groupPageH1(caseName, group.key),
     body,
     victimCases,

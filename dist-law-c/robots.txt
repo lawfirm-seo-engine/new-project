@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://사기피해구제센터.kr/sitemap-index.xml
-Sitemap: https://사기피해구제센터.kr/sitemap-recent.xml
-Sitemap: https://사기피해구제센터.kr/sitemap.xml
+Sitemap: https://xn--2e0bno217bsqa58yp8nd1g2ma.kr/sitemap-index.xml
+Sitemap: https://xn--2e0bno217bsqa58yp8nd1g2ma.kr/sitemap-recent.xml
+Sitemap: https://xn--2e0bno217bsqa58yp8nd1g2ma.kr/sitemap.xml
