@@ -473,7 +473,7 @@ function renderPowerlinkLanding(landing) {
     `<meta property="og:image:secure_url" content="${ogImage}">`,
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
-    `<meta property="og:image:type" content="image/webp">`,
+    `<meta property="og:image:type" content="image/png">`,
     `<meta property="og:image:width" content="${OG_IMAGE_WIDTH}">`,
     `<meta property="og:image:height" content="${OG_IMAGE_HEIGHT}">`,
     `<link rel="image_src" href="${ogImage}">`,
@@ -684,7 +684,7 @@ function renderLanding(caseData, group, origin) {
   const seoDescription = createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
   const articleTags = createArticleTags(rawCaseName, lk);
 
-  const ogImageType = /\.png(?:$|\?)/i.test(ogImage) ? "image/png" : /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/webp";
+  const ogImageType = /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/png";
   const ogImageWidth = String(OG_IMAGE_WIDTH);
   const ogImageHeight = String(OG_IMAGE_HEIGHT);
   const headExtra = [
