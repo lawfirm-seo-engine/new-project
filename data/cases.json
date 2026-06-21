@@ -13248,7 +13248,7 @@
     "createdAt": "2026-06-18",
     "updatedAt": "2026-06-18",
     "thumbnailUrl": "",
-    "landingViews": 7587,
+    "landingViews": 7586,
     "reports": 16,
     "summary": "YS EXCHANGE 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -15641,6 +15641,25 @@
     "summary": "ZetnloX 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "ZetnloX",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "pumearth",
+    "caseName": "Pumearth 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-21",
+    "updatedAt": "2026-06-21",
+    "thumbnailUrl": "",
+    "landingViews": 5569,
+    "reports": 23,
+    "summary": "Pumearth 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "Pumearth",
       "사기",
       "사기피해",
       "피해금회수",
