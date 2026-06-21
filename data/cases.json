@@ -17659,5 +17659,24 @@
       "증거보존"
     ],
     "memo": ""
+  },
+  {
+    "slug": "zenithoption",
+    "caseName": "ZenithOption 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-21",
+    "updatedAt": "2026-06-21",
+    "thumbnailUrl": "",
+    "landingViews": 6949,
+    "reports": 8,
+    "summary": "ZenithOption 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "ZenithOption",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
   }
 ]
