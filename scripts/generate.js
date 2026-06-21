@@ -317,6 +317,8 @@ for (const group of groups) {
 }
 
 const cases = await fs.readJson(dataPath);
+const powerlinksDataPath = path.join(root, "data", "powerlinks.json");
+const powerlinks = await fs.readJson(powerlinksDataPath).catch(() => []);
 
 function escapeHtml(value = "") {
   return String(value)
@@ -1393,7 +1395,7 @@ function createHubContent(group) {
   const todayCases   = cases.filter((c) => c.createdAt === today).length;
   const todayReports = cases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
-  const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { maxItems: HOME_FRESH_LIST_LIMIT });
+  const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { maxItems: HOME_FRESH_LIST_LIMIT, powerlinks: group.key === "a" ? powerlinks : [] });
   const typeEntrySection = createTypeEntrySection(group);
 
   const rows = sortedCases
@@ -1445,7 +1447,20 @@ function createHubContent(group) {
       +'<em>'+esc(item.updatedAt||item.createdAt||'')+'</em>'
       +'</a>';
   }
-  function updateFreshList(all,noMap){
+  function plFreshLink(item){
+    var t=esc(item.title||item.slug||'');
+    var desc=esc((item.description||'').slice(0,135));
+    var date=esc(item.updatedAt||item.createdAt||'');
+    var url='/powerlink/'+encodeURIComponent(item.slug)+'/';
+    var search=attr([item.title,item.h1,item.slug,item.description,'파워링크'].filter(Boolean).join(' '));
+    return '<a class="fresh-landing-link" href="'+url+'" data-title="'+attr(item.title||'')+'" data-slug="'+attr(item.slug)+'" data-search="'+search+'">'
+      +'<span class="fresh-landing-no">파워링크</span>'
+      +'<strong>'+t+'</strong>'
+      +'<span>'+desc+'</span>'
+      +'<em>'+date+'</em>'
+      +'</a>';
+  }
+  function updateFreshList(all,noMap,pls){
     var list=document.querySelector('.fresh-landing-list');
     if(!list)return;
     var limit=${HOME_FRESH_LIST_LIMIT};
@@ -1460,11 +1475,13 @@ function createHubContent(group) {
       });
       todays=all.filter(function(c){return c&&c.slug&&(c.createdAt===freshDate||c.updatedAt===freshDate);});
     }
-    if(!todays.length)return;
-    var visible=todays.slice(0,limit);
-    list.innerHTML=visible.map(function(item){return freshLink(item,noMap);}).join('');
+    var todaysPL=(pls||[]).filter(function(p){return p&&p.slug&&(p.createdAt===freshDate||p.updatedAt===freshDate);});
+    var combined=todays.concat(todaysPL.map(function(p){return Object.assign({},p,{_pl:true});}));
+    if(!combined.length)return;
+    var visible=combined.slice(0,limit);
+    list.innerHTML=visible.map(function(item){return item._pl?plFreshLink(item):freshLink(item,noMap);}).join('');
     var count=document.getElementById('freshLandingCount');
-    if(count)count.textContent=(freshDate===todayStr?'':freshDate+' ')+visible.length.toLocaleString('ko-KR')+'건';
+    if(count)count.textContent=(freshDate===todayStr?'':freshDate+' ')+combined.length.toLocaleString('ko-KR')+'건';
     if(window.setupFreshLandingSearch)window.setupFreshLandingSearch();
   }
   function setupSearch(){
@@ -1477,14 +1494,18 @@ function createHubContent(group) {
     });
   }
   setupSearch();
-  fetch('https://gnlaw-criminal.co.kr/api/get-cases',{cache:'no-cache'})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(d){
+  var _BASE='https://gnlaw-criminal.co.kr';
+  Promise.all([
+    fetch(_BASE+'/api/get-cases',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch(_BASE+'/api/get-powerlinks',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(results){
+    var d=results[0],pd=results[1];
       if(!d||!d.ok||!Array.isArray(d.cases))return;
       var orig=d.cases;
       var noMap={};orig.forEach(function(c,i){noMap[c.slug]=i+1;});
       var all=orig.slice().reverse();
-      updateFreshList(all,noMap);
+      var pls=(pd&&pd.ok&&Array.isArray(pd.landings))?pd.landings:[];
+      updateFreshList(all,noMap,pls);
       var existing=new Set([].map.call(document.querySelectorAll('.case-row[data-slug]'),function(el){return el.dataset.slug;}));
       var newItems=all.filter(function(c){return!existing.has(c.slug);});
       if(!newItems.length)return;
@@ -1558,7 +1579,7 @@ function createCategoryContent(group) {
   const caseNoMap = new Map(cases.map((c, i) => [c.slug, i + 1]));
   const sortedCases = [...cases].reverse();
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
-  return createFreshLandingSection(group, sortedCases, caseNoMap, suffix);
+  return createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { powerlinks: group.key === "a" ? powerlinks : [] });
 }
 
 function createTypeEntrySection(group) {
@@ -1589,12 +1610,20 @@ function latestFreshDate(items = []) {
 }
 
 function createFreshLandingSection(group, sortedCases, caseNoMap, suffix, options = {}) {
+  const extraPowerlinks = (options.powerlinks || []).filter((p) => p?.slug);
   const todays = sortedCases
     .filter((item) => item.createdAt === today || item.updatedAt === today);
-  const freshDate = todays.length ? today : latestFreshDate(sortedCases);
+  const hasTodayPL = extraPowerlinks.some((p) => p.createdAt === today || p.updatedAt === today);
+  const freshDate = (todays.length || hasTodayPL) ? today : latestFreshDate(sortedCases);
   const freshItems = sortedCases
     .filter((item) => item.createdAt === freshDate || item.updatedAt === freshDate);
-  const allItems = (freshItems.length ? freshItems : sortedCases.slice(0, 8)).filter((item) => item?.slug);
+  const freshPL = extraPowerlinks
+    .filter((p) => p.createdAt === freshDate || p.updatedAt === freshDate);
+  const allCaseItems = (freshItems.length ? freshItems : sortedCases.slice(0, 8)).filter((item) => item?.slug);
+  const allItems = [
+    ...allCaseItems.map((c) => ({ type: "case", data: c })),
+    ...freshPL.map((p) => ({ type: "pl", data: p })),
+  ];
   const maxItems = Number(options.maxItems) > 0 ? Number(options.maxItems) : 0;
   const items = maxItems ? allItems.slice(0, maxItems) : allItems;
   const label = FRESH_LIST_LABEL;
@@ -1604,7 +1633,22 @@ function createFreshLandingSection(group, sortedCases, caseNoMap, suffix, option
 
   if (!items.length) return "";
 
-  const links = items.map((item) => {
+  const links = items.map((entry) => {
+    if (entry.type === "pl") {
+      const pl = entry.data;
+      const title = escapeHtml(pl.title || pl.h1 || pl.slug);
+      const desc = escapeHtml((pl.description || "").slice(0, 135));
+      const date = escapeHtml(pl.updatedAt || pl.createdAt || "");
+      const url = `/powerlink/${encodeURIComponent(pl.slug)}/`;
+      const searchText = escapeHtml([pl.title, pl.h1, pl.slug, pl.description, "파워링크"].filter(Boolean).join(" "));
+      return `<a class="fresh-landing-link" href="${url}" data-title="${escapeHtml(pl.title || pl.slug)}" data-slug="${escapeHtml(pl.slug)}" data-search="${searchText}">
+      <span class="fresh-landing-no">파워링크</span>
+      <strong>${title}</strong>
+      <span>${desc}</span>
+      <em>${date}</em>
+    </a>`;
+    }
+    const item = entry.data;
     const landing = getLanding(item, group);
     const cleanName = normalizeCaseName(item.caseName || item.name);
     const displayTitleRaw = suffix ? `${cleanName} ${suffix}` : cleanName;
