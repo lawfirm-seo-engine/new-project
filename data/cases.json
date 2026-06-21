@@ -1514,7 +1514,7 @@
     "createdAt": "2026-05-28",
     "updatedAt": "2026-05-28",
     "thumbnailUrl": "",
-    "landingViews": 1757,
+    "landingViews": 1756,
     "reports": 32,
     "summary": "kresim 사기 이심 판매 부업 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -5992,7 +5992,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 5732,
+    "landingViews": 5731,
     "reports": 20,
     "summary": "searchalba.com 사기 구매대행 사이트 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6034,7 +6034,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 4714,
+    "landingViews": 4713,
     "reports": 12,
     "summary": "플레오렌탈 사기 렌탈 투자 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -9821,7 +9821,7 @@
     "createdAt": "2026-06-15",
     "updatedAt": "2026-06-15",
     "thumbnailUrl": "",
-    "landingViews": 5246,
+    "landingViews": 5245,
     "reports": 34,
     "summary": "유준하 멘토 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -14256,7 +14256,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 4748,
+    "landingViews": 4747,
     "reports": 24,
     "summary": "k-fanta.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -15272,7 +15272,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 6481,
+    "landingViews": 6480,
     "reports": 29,
     "summary": "트렌듀어 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -15348,7 +15348,7 @@
     "createdAt": "2026-06-20",
     "updatedAt": "2026-06-20",
     "thumbnailUrl": "",
-    "landingViews": 6120,
+    "landingViews": 6118,
     "reports": 17,
     "summary": "무이마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -16075,7 +16075,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 6487,
+    "landingViews": 6486,
     "reports": 31,
     "summary": "KReSIM 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -16901,6 +16901,25 @@
     "summary": "yohosc.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "yohosc.com",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "officeworks",
+    "caseName": "Officeworks 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-21",
+    "updatedAt": "2026-06-21",
+    "thumbnailUrl": "",
+    "landingViews": 3723,
+    "reports": 6,
+    "summary": "Officeworks 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "Officeworks",
       "사기",
       "사기피해",
       "피해금회수",
