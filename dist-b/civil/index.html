@@ -62,14 +62,16 @@
     <div class="fresh-landing-head">
       <p>RECENT LANDINGS</p>
       <h2>오늘 추가/갱신된 목록</h2>
-      <span id="freshLandingCount">70건</span>
-    </div>
-    <div class="case-search-wrap fresh-search-wrap">
-      <input id="fresh-landing-search" type="search" class="case-search fresh-landing-search" placeholder="사건 검색" autocomplete="off">
-      <button id="fresh-landing-search-btn" class="search-btn" type="button">검색</button>
+      <span id="freshLandingCount">71건</span>
     </div>
     <div class="fresh-landing-list">
-      <a class="fresh-landing-link" href="/civil/priceassetpro-settlement/" data-title="priceassetpro 사기" data-slug="priceassetpro" data-search="priceassetpro 사기 priceassetpro 사기 민사소송 priceassetpro priceassetpro 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다. 2026-06-21 2026-06-21">
+      <a class="fresh-landing-link" href="/civil/kicheonmakes-settlement/" data-title="키천마켓 사기" data-slug="kicheonmakes" data-search="키천마켓 사기 키천마켓 사기 민사소송 kicheonmakes 키천마켓 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다. 2026-06-21 2026-06-21">
+      <span class="fresh-landing-no">No. 841</span>
+      <strong>키천마켓 사기 민사소송</strong>
+      <span>키천마켓 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.</span>
+      <em>2026-06-21</em>
+    </a>
+<a class="fresh-landing-link" href="/civil/priceassetpro-settlement/" data-title="priceassetpro 사기" data-slug="priceassetpro" data-search="priceassetpro 사기 priceassetpro 사기 민사소송 priceassetpro priceassetpro 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다. 2026-06-21 2026-06-21">
       <span class="fresh-landing-no">No. 840</span>
       <strong>priceassetpro 사기 민사소송</strong>
       <span>priceassetpro 사기 관련 민사소송, 가압류, 손해배상, 부당이득반환, 판결 및 민사 합의 회수 절차를 안내합니다.</span>
@@ -490,39 +492,6 @@
       <em>2026-06-21</em>
     </a>
     </div>
-    <p id="fresh-landing-empty" class="fresh-landing-empty" hidden>검색 결과가 없습니다.</p>
-    <script>
-(function(){
-  window.setupFreshLandingSearch=function(){
-    var input=document.getElementById('fresh-landing-search');
-    if(!input)return;
-    var empty=document.getElementById('fresh-landing-empty');
-    var button=document.getElementById('fresh-landing-search-btn');
-    function apply(){
-      var q=input.value.trim().toLowerCase();
-      var visible=0;
-      document.querySelectorAll('.fresh-landing-link').forEach(function(link){
-        var hay=(link.dataset.search||link.textContent||'').toLowerCase();
-        var show=!q||hay.indexOf(q)>=0;
-        link.style.display=show?'grid':'none';
-        if(show)visible++;
-      });
-      if(empty)empty.hidden=visible>0;
-    }
-    if(input.dataset.bound!=='1'){
-      input.dataset.bound='1';
-      input.addEventListener('input',apply);
-    }
-    if(button&&button.dataset.bound!=='1'){
-      button.dataset.bound='1';
-      button.addEventListener('click',apply);
-    }
-    apply();
-  };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',window.setupFreshLandingSearch);
-  else window.setupFreshLandingSearch();
-})();
-</script>
   </section>
     </div>
 

@@ -1482,7 +1482,6 @@ function createHubContent(group) {
     list.innerHTML=visible.map(function(item){return item._pl?plFreshLink(item):freshLink(item,noMap);}).join('');
     var count=document.getElementById('freshLandingCount');
     if(count)count.textContent=(freshDate===todayStr?'':freshDate+' ')+combined.length.toLocaleString('ko-KR')+'건';
-    if(window.setupFreshLandingSearch)window.setupFreshLandingSearch();
   }
   function setupSearch(){
     var inp=document.getElementById('case-search');
@@ -1671,46 +1670,9 @@ function createFreshLandingSection(group, sortedCases, caseNoMap, suffix, option
       <h2>${label}</h2>
       <span id="freshLandingCount">${countLabel}</span>
     </div>
-    <div class="case-search-wrap fresh-search-wrap">
-      <input id="fresh-landing-search" type="search" class="case-search fresh-landing-search" placeholder="사건 검색" autocomplete="off">
-      <button id="fresh-landing-search-btn" class="search-btn" type="button">검색</button>
-    </div>
     <div class="fresh-landing-list">
       ${links}
     </div>
-    <p id="fresh-landing-empty" class="fresh-landing-empty" hidden>검색 결과가 없습니다.</p>
-    <script>
-(function(){
-  window.setupFreshLandingSearch=function(){
-    var input=document.getElementById('fresh-landing-search');
-    if(!input)return;
-    var empty=document.getElementById('fresh-landing-empty');
-    var button=document.getElementById('fresh-landing-search-btn');
-    function apply(){
-      var q=input.value.trim().toLowerCase();
-      var visible=0;
-      document.querySelectorAll('.fresh-landing-link').forEach(function(link){
-        var hay=(link.dataset.search||link.textContent||'').toLowerCase();
-        var show=!q||hay.indexOf(q)>=0;
-        link.style.display=show?'grid':'none';
-        if(show)visible++;
-      });
-      if(empty)empty.hidden=visible>0;
-    }
-    if(input.dataset.bound!=='1'){
-      input.dataset.bound='1';
-      input.addEventListener('input',apply);
-    }
-    if(button&&button.dataset.bound!=='1'){
-      button.dataset.bound='1';
-      button.addEventListener('click',apply);
-    }
-    apply();
-  };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',window.setupFreshLandingSearch);
-  else window.setupFreshLandingSearch();
-})();
-</script>
   </section>`;
 }
 

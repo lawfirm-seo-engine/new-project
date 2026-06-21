@@ -62,14 +62,16 @@
     <div class="fresh-landing-head">
       <p>RECENT LANDINGS</p>
       <h2>오늘 추가/갱신된 목록</h2>
-      <span id="freshLandingCount">70건</span>
-    </div>
-    <div class="case-search-wrap fresh-search-wrap">
-      <input id="fresh-landing-search" type="search" class="case-search fresh-landing-search" placeholder="사건 검색" autocomplete="off">
-      <button id="fresh-landing-search-btn" class="search-btn" type="button">검색</button>
+      <span id="freshLandingCount">72건</span>
     </div>
     <div class="fresh-landing-list">
-      <a class="fresh-landing-link" href="/prosecute/priceassetpro-litigation/" data-title="priceassetpro 사기" data-slug="priceassetpro" data-search="priceassetpro 사기 priceassetpro 사기 형사고소 priceassetpro priceassetpro 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다. 2026-06-21 2026-06-21">
+      <a class="fresh-landing-link" href="/prosecute/kicheonmakes-litigation/" data-title="키천마켓 사기" data-slug="kicheonmakes" data-search="키천마켓 사기 키천마켓 사기 형사고소 kicheonmakes 키천마켓 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다. 2026-06-21 2026-06-21">
+      <span class="fresh-landing-no">No. 841</span>
+      <strong>키천마켓 사기 형사고소</strong>
+      <span>키천마켓 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.</span>
+      <em>2026-06-21</em>
+    </a>
+<a class="fresh-landing-link" href="/prosecute/priceassetpro-litigation/" data-title="priceassetpro 사기" data-slug="priceassetpro" data-search="priceassetpro 사기 priceassetpro 사기 형사고소 priceassetpro priceassetpro 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다. 2026-06-21 2026-06-21">
       <span class="fresh-landing-no">No. 840</span>
       <strong>priceassetpro 사기 형사고소</strong>
       <span>priceassetpro 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.</span>
@@ -489,40 +491,13 @@
       <span>gateio 사기 관련 형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.</span>
       <em>2026-06-21</em>
     </a>
+<a class="fresh-landing-link" href="/powerlink/6%EC%9B%94-21%EC%9D%BC-%EC%8B%A0%EA%B7%9C-%EC%82%AC%EA%B1%B4-%EC%A7%84%ED%96%89-%EB%A6%AC%EC%8A%A4%ED%8A%B8/" data-title="6월 21일 신규 사건 진행 리스트" data-slug="6월-21일-신규-사건-진행-리스트" data-search="6월 21일 신규 사건 진행 리스트 6월 21일 신규 사건 진행 리스트 6월-21일-신규-사건-진행-리스트 Gateio, Trust Wallet, QBB라이브, KReSIM, 품어스, 리비드몰, Bellpotter, FANTA, 쇼핑스타, StarShop, 가짜쇼핑몰, 부업사기, 코인사기, 투자사기, 출금거부 피해 대응 및 법률상담 안내. 파워링크">
+      <span class="fresh-landing-no">파워링크</span>
+      <strong>6월 21일 신규 사건 진행 리스트</strong>
+      <span>Gateio, Trust Wallet, QBB라이브, KReSIM, 품어스, 리비드몰, Bellpotter, FANTA, 쇼핑스타, StarShop, 가짜쇼핑몰, 부업사기, 코인사기, 투자사기, 출금거부 피해 대응 및 법률상담 안내.</span>
+      <em>2026-06-21</em>
+    </a>
     </div>
-    <p id="fresh-landing-empty" class="fresh-landing-empty" hidden>검색 결과가 없습니다.</p>
-    <script>
-(function(){
-  window.setupFreshLandingSearch=function(){
-    var input=document.getElementById('fresh-landing-search');
-    if(!input)return;
-    var empty=document.getElementById('fresh-landing-empty');
-    var button=document.getElementById('fresh-landing-search-btn');
-    function apply(){
-      var q=input.value.trim().toLowerCase();
-      var visible=0;
-      document.querySelectorAll('.fresh-landing-link').forEach(function(link){
-        var hay=(link.dataset.search||link.textContent||'').toLowerCase();
-        var show=!q||hay.indexOf(q)>=0;
-        link.style.display=show?'grid':'none';
-        if(show)visible++;
-      });
-      if(empty)empty.hidden=visible>0;
-    }
-    if(input.dataset.bound!=='1'){
-      input.dataset.bound='1';
-      input.addEventListener('input',apply);
-    }
-    if(button&&button.dataset.bound!=='1'){
-      button.dataset.bound='1';
-      button.addEventListener('click',apply);
-    }
-    apply();
-  };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',window.setupFreshLandingSearch);
-  else window.setupFreshLandingSearch();
-})();
-</script>
   </section>
     </div>
 

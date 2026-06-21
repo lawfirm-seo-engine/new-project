@@ -16,16 +16,6 @@
     .btn.sec{background:#263244}
     .btn.sm{height:28px;padding:0 10px;font-size:12px}
     .btn.danger{background:#c0392b}
-    /* today box */
-    .today-box{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:18px 22px;margin-bottom:26px}
-    .today-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-    .today-head h2{color:#1f4fd8}
-    .today-head .count{font-size:13px;color:#8a96a8;font-weight:400}
-    .today-grid{display:flex;flex-wrap:wrap;gap:8px}
-    .t-item{padding:9px 13px;border-radius:7px;background:#f0f4ff;border:1px solid #c8d8f8;font-size:13px;min-width:190px;max-width:270px}
-    .t-item strong{display:block;font-size:13px;font-weight:700;margin:3px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .t-item a{color:#1f4fd8;font-weight:600;font-size:12px;text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .t-item a:hover{text-decoration:underline}
     .type-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:800}
     .tc{background:#e8f0fe;color:#1f4fd8}
     .tp{background:#fef3e8;color:#b35d0b}
@@ -61,15 +51,6 @@
     <a class="btn sec" href="/admin/logout">로그아웃</a>
   </div>
 
-  <!-- 오늘 추가/갱신 -->
-  <div class="today-box">
-    <div class="today-head">
-      <h2>오늘 추가/갱신된 목록</h2>
-      <span class="count" id="todayCount"></span>
-    </div>
-    <div class="today-grid" id="todayGrid"><span style="color:#8a96a8;font-size:13px">로딩 중...</span></div>
-  </div>
-
   <!-- 통합 목록 (사건 + 파워링크) -->
   <div class="section">
     <div class="sec-head">
@@ -103,7 +84,6 @@
 
   const PL_SITE = 'https://gnlaw-criminal.co.kr';
   let allEntries = [];
-  const today = new Date(Date.now() + 9*60*60*1000).toISOString().slice(0,10);
 
   Promise.all([
     fetch('/api/get-cases').then(r => r.json()).catch(() => ({ ok: false })),
@@ -132,34 +112,7 @@
     ].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '') || (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 
     renderEntries(allEntries);
-    renderToday();
   });
-
-  /* ---- Today section ---- */
-  function renderToday() {
-    const items = allEntries.filter(e => (e.updatedAt || e.createdAt || '').startsWith(today));
-    const el = document.getElementById('todayGrid');
-    document.getElementById('todayCount').textContent = items.length ? `총 ${items.length}건` : '';
-    if (!items.length) {
-      el.innerHTML = '<span style="color:#8a96a8;font-size:13px">오늘 추가/갱신된 항목이 없습니다.</span>';
-      return;
-    }
-    el.innerHTML = items.map(it => {
-      const isPl = it.type === 'pl';
-      const viewUrl = isPl
-        ? `${PL_SITE}/powerlink/${encodeURIComponent(it.slug)}/`
-        : `${PL_SITE}/prosecute/${encodeURIComponent(it.slug)}-litigation/`;
-      const editUrl = isPl
-        ? `/admin/powerlink.html?edit=${encodeURIComponent(it.slug)}`
-        : `/admin/edit.html?slug=${encodeURIComponent(it.slug)}`;
-      return `<div class="t-item">
-        <span class="type-badge ${isPl?'tp':'tc'}">${isPl?'파워링크':'사건'}</span>
-        <strong title="${esc(it.name)}">${esc(it.name)}</strong>
-        <a href="${viewUrl}" target="_blank">${esc(it.slug)}</a>
-        <a href="${editUrl}">✎ 편집</a>
-      </div>`;
-    }).join('');
-  }
 
   /* ---- Unified table ---- */
   function renderEntries(entries) {
@@ -228,7 +181,7 @@
       const data = await res.json();
       if (data.ok) {
         allEntries = allEntries.filter(e => !(e.type === 'case' && e.slug === slug));
-        filterEntries(); renderToday();
+        filterEntries();
         alert(`"${name}" 사건이 삭제되었습니다.`);
       } else { alert('삭제 실패: ' + (data.message || '알 수 없는 오류')); }
     } catch (e) { alert('오류: ' + e.message); }
@@ -241,7 +194,7 @@
       const data = await res.json();
       if (data.ok) {
         allEntries = allEntries.filter(e => !(e.type === 'pl' && e.slug === slug));
-        filterEntries(); renderToday();
+        filterEntries();
         alert(`"${name}" 파워링크 랜딩이 삭제되었습니다.`);
       } else { alert('삭제 실패: ' + (data.message || '알 수 없는 오류')); }
     } catch (e) { alert('오류: ' + e.message); }
