@@ -16163,5 +16163,24 @@
       "증거보존"
     ],
     "memo": ""
+  },
+  {
+    "slug": "haeoejiggusyopingmor",
+    "caseName": "해외직구쇼핑몰 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-21",
+    "updatedAt": "2026-06-21",
+    "thumbnailUrl": "",
+    "landingViews": 3750,
+    "reports": 12,
+    "summary": "해외직구쇼핑몰 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "해외직구쇼핑몰",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
   }
 ]
