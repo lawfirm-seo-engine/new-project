@@ -617,6 +617,7 @@ function createPowerlinkFloatingWidgets(landing) {
   const caseNameJson = JSON.stringify(landing.title || "파워링크 랜딩");
   const domainJson = JSON.stringify("파워링크 랜딩");
   return `<div class="floating-contact">
+  <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
@@ -1707,6 +1708,7 @@ function createConsultForm(cn, siteName) {
 
 function createFloatingWidgets(cn, siteName, slug) {
   return `<div class="floating-contact">
+  <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
