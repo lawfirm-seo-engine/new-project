@@ -1183,7 +1183,7 @@
     "createdAt": "2026-05-28",
     "updatedAt": "2026-05-28",
     "thumbnailUrl": "",
-    "landingViews": 3352,
+    "landingViews": 3351,
     "reports": 28,
     "summary": "기프투데이 사칭 사기 부업 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -19848,7 +19848,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 3288,
+    "landingViews": 3287,
     "reports": 5,
     "summary": "qusol.top 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -19982,7 +19982,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 3260,
+    "landingViews": 3259,
     "reports": 25,
     "summary": "모디앤고마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20025,6 +20025,27 @@
     "summary": "쓰담마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "쓰담마켓",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "800-jabonhwagdae-peurojegteu",
+    "caseName": "800% 자본확대 프로젝트 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-22",
+    "updatedAt": "2026-06-22",
+    "thumbnailUrl": "",
+    "landingViews": 7145,
+    "reports": 30,
+    "summary": "800% 자본확대 프로젝트 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "800%",
+      "자본확대",
+      "프로젝트",
       "사기",
       "사기피해",
       "피해금회수",
