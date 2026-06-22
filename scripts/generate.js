@@ -1884,6 +1884,122 @@ function createCategorySchema(group, title, description, canonical) {
   });
 }
 
+function createPrivacyPolicyContent() {
+  return `<article class="article-block privacy-policy-content">
+  <p class="policy-date">시행일: 2024년 1월 1일 &nbsp;|&nbsp; 최종 수정일: ${today}</p>
+  <p>법무법인 선린(이하 "법인")은 개인정보 보호법 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 다음과 같이 개인정보처리방침을 수립·공개합니다.</p>
+
+  <h3>제1조 개인정보의 수집 및 이용 목적</h3>
+  <p>법인은 다음의 목적을 위해 개인정보를 처리합니다. 처리하는 개인정보는 다음 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우에는 개인정보 보호법 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행합니다.</p>
+  <ul>
+    <li><strong>법률 상담 서비스 제공</strong>: 피해 사건 접수, 상담 진행, 사건 처리 결과 안내</li>
+    <li><strong>고객 관리</strong>: 본인 확인, 상담 이력 관리, 민원 처리</li>
+    <li><strong>서비스 개선</strong>: 서비스 이용 통계 분석, 맞춤형 서비스 제공</li>
+    <li><strong>법적 의무 이행</strong>: 관련 법령에 따른 의무 준수</li>
+  </ul>
+
+  <h3>제2조 수집하는 개인정보의 항목</h3>
+  <table>
+    <thead>
+      <tr><th>수집 방법</th><th>수집 항목</th><th>보유 기간</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>전화 상담</td>
+        <td>성명, 연락처, 피해 내용</td>
+        <td>상담 종료 후 3년</td>
+      </tr>
+      <tr>
+        <td>카카오톡 상담</td>
+        <td>카카오 계정 정보, 상담 내용</td>
+        <td>상담 종료 후 3년</td>
+      </tr>
+      <tr>
+        <td>홈페이지 문의</td>
+        <td>성명, 연락처, 이메일(선택), 문의 내용</td>
+        <td>문의 처리 완료 후 3년</td>
+      </tr>
+      <tr>
+        <td>자동 수집</td>
+        <td>IP주소, 쿠키, 방문 일시, 서비스 이용 기록</td>
+        <td>1년</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>제3조 개인정보의 보유 및 이용 기간</h3>
+  <p>법인은 법령에 따른 개인정보 보유·이용 기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용 기간 내에서 개인정보를 처리·보유합니다.</p>
+  <ul>
+    <li>상담 및 사건 처리 관련 정보: 사건 종결 후 <strong>5년</strong> (상사소멸시효 기준)</li>
+    <li>계약 또는 청약 철회 등에 관한 기록: <strong>5년</strong> (전자상거래법)</li>
+    <li>소비자의 불만 또는 분쟁 처리에 관한 기록: <strong>3년</strong> (전자상거래법)</li>
+    <li>전자금융 거래에 관한 기록: <strong>5년</strong> (전자금융거래법)</li>
+  </ul>
+
+  <h3>제4조 개인정보의 제3자 제공</h3>
+  <p>법인은 정보주체의 개인정보를 제1조에서 명시한 범위 내에서만 처리하며, 정보주체의 동의, 법률의 특별한 규정 등 개인정보 보호법 제17조에 해당하는 경우에만 제3자에게 제공합니다. 현재 법인은 정보주체의 개인정보를 제3자에게 제공하지 않으며, 수사기관의 적법한 요청·법원의 영장 등 법령에 근거한 경우는 예외로 합니다.</p>
+
+  <h3>제5조 개인정보처리의 위탁</h3>
+  <table>
+    <thead>
+      <tr><th>수탁업체</th><th>위탁 업무</th><th>위탁 기간</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Cloudflare, Inc.</td>
+        <td>웹 호스팅 및 CDN 서비스</td>
+        <td>서비스 이용 계약 기간</td>
+      </tr>
+      <tr>
+        <td>카카오 주식회사</td>
+        <td>카카오톡 채널 상담 서비스</td>
+        <td>서비스 이용 계약 기간</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>제6조 정보주체의 권리·의무 및 행사 방법</h3>
+  <p>정보주체는 법인에 대해 언제든지 개인정보 열람, 정정, 삭제, 처리 정지 요구를 할 수 있습니다. 권리 행사는 서면·전화·카카오톡 채널을 통해 하실 수 있으며 법인은 지체 없이 조치합니다.</p>
+
+  <h3>제7조 개인정보의 파기</h3>
+  <p>법인은 보유 기간이 경과하거나 처리 목적이 달성된 개인정보를 지체 없이 파기합니다.</p>
+  <ul>
+    <li><strong>전자적 파일</strong>: 복원 불가 방법으로 영구 삭제</li>
+    <li><strong>종이 문서</strong>: 분쇄 또는 소각</li>
+  </ul>
+
+  <h3>제8조 개인정보의 안전성 확보 조치</h3>
+  <ul>
+    <li><strong>관리적 조치</strong>: 내부관리계획 수립·시행, 정기적 직원 교육</li>
+    <li><strong>기술적 조치</strong>: 접근 통제, 접속 기록 보관, 보안 프로그램 설치</li>
+    <li><strong>물리적 조치</strong>: 전산실 및 자료 보관실 접근 통제</li>
+  </ul>
+
+  <h3>제9조 쿠키(Cookie) 운영</h3>
+  <p>법인은 서비스 이용 패턴 분석 및 서비스 개선을 위해 쿠키를 사용합니다. 이용자는 웹 브라우저 설정을 통해 쿠키 저장을 거부할 수 있으나, 이 경우 일부 서비스 이용이 제한될 수 있습니다.</p>
+
+  <h3>제10조 개인정보 보호책임자</h3>
+  <div class="policy-box">
+    <ul>
+      <li><strong>성명</strong>: 김상수 (대표변호사)</li>
+      <li><strong>소속</strong>: 법무법인 선린</li>
+      <li><strong>전화</strong>: <a href="tel:0263480406">02-6348-0406</a></li>
+      <li><strong>주소</strong>: 서울특별시 서초구 반포대로 108 양원빌딩 4층</li>
+    </ul>
+    <p>개인정보 보호 관련 문의·불만·피해구제는 위 연락처로 문의하시기 바랍니다. 또한 개인정보 침해 관련 신고는 아래 기관에 문의하실 수 있습니다.</p>
+    <ul>
+      <li>개인정보 침해신고센터 (privacy.kisa.or.kr / 국번없이 118)</li>
+      <li>대검찰청 사이버범죄수사단 (www.spo.go.kr / 02-3480-3573)</li>
+      <li>경찰청 사이버안전국 (cyberbureau.police.go.kr / 국번없이 182)</li>
+    </ul>
+  </div>
+
+  <h3>제11조 개인정보처리방침의 변경</h3>
+  <p>이 개인정보처리방침은 시행일로부터 적용되며, 변경 사항이 있는 경우 시행 7일 전부터 홈페이지 공지를 통해 안내합니다.</p>
+  <p class="policy-date"><strong>시행일: ${today}</strong></p>
+</article>`;
+}
+
 for (const group of groups) {
   const template = await fs.readFile(path.join(templatesDir, group.template), "utf8");
 
@@ -1990,6 +2106,37 @@ Sitemap: ${group.siteUrl}/sitemap.xml
 `);
 
   await fs.outputFile(path.join(group.outDir, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
+
+  const privacyTitle = `개인정보처리방침 | ${group.siteName}`;
+  const privacyDesc = "법무법인 선린의 개인정보 수집·이용·보호에 관한 방침입니다.";
+  const privacyCanonical = `${group.siteUrl}/privacy-policy/`;
+  const privacyHtml = buildPage(template, group, {
+    title: escapeHtml(privacyTitle),
+    description: escapeHtml(privacyDesc),
+    canonical: privacyCanonical,
+    ogTitle: escapeHtml(privacyTitle),
+    ogDescription: escapeHtml(privacyDesc),
+    ogImage: `${group.siteUrl}/assets/og-template.png`,
+    headExtra: "",
+    schema: JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "WebPage", name: privacyTitle, url: privacyCanonical, inLanguage: "ko-KR", description: privacyDesc, dateModified: today, publisher: ORGANIZATION },
+        ORGANIZATION,
+      ],
+    }),
+    h1: "개인정보처리방침",
+    ogThumbnail: "",
+    summary: escapeHtml(privacyDesc),
+    breadcrumb: "",
+    content: createPrivacyPolicyContent(),
+    headerCall: "",
+    floatingWidgets: createHubFloatingWidgets(group),
+    pageKind: "privacy-policy-page hub-page",
+    tone: "개인정보 보호",
+    receiptBadge: "",
+  });
+  await fs.outputFile(path.join(group.outDir, "privacy-policy", "index.html"), privacyHtml);
 
   console.log(`[OK] generated ${cases.length} pages in dist-${group.key}/`);
 }
