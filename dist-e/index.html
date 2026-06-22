@@ -164,7 +164,7 @@
           </span>
           <span class="case-status">사건 진행중</span>
           <span class="case-date">2026-06-22</span>
-          <span class="case-views">7,537</span>
+          <span class="case-views">7,538</span>
         </a>
 
         <a href="/case/kuponseutori-issue/" class="case-row" data-title="쿠폰스토리 사기" data-slug="kuponseutori">
@@ -1524,7 +1524,7 @@
           </span>
           <span class="case-status">사건 진행중</span>
           <span class="case-date">2026-06-21</span>
-          <span class="case-views">7,778</span>
+          <span class="case-views">7,780</span>
         </a>
 
         <a href="/case/infimarkets-shop-issue/" class="case-row" data-title="infimarkets.shop 사기" data-slug="infimarkets-shop">
@@ -5814,7 +5814,7 @@
           </span>
           <span class="case-status">사건 진행중</span>
           <span class="case-date">2026-06-15</span>
-          <span class="case-views">718</span>
+          <span class="case-views">719</span>
         </a>
 
         <a href="/case/goldprince-issue/" class="case-row" data-title="GoldPrince 사기 금 투자" data-slug="goldprince">
@@ -10114,6 +10114,7 @@
   var SUFFIX="사건현황";
   var URL_SUFFIX="issue";
   var GKEY="e";
+  var ADD_PL=0;
   var NO_SUFFIX_SLUGS={"soiraeb-sagi-syopingmor":1,"grucompany-sagi-syopingmor":1,"geuruaenkeompeoni-sagi-syopingmor":1};
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -10214,7 +10215,7 @@
           hdr.insertAdjacentElement('afterend',a);
         }
       }
-      if(GKEY==='a'&&pls.length){
+      if(ADD_PL&&pls.length){
         var plExisting=new Set([].map.call(document.querySelectorAll('.case-row[data-type="pl"]'),function(el){return el.dataset.slug;}));
         var newPLs=pls.filter(function(p){return p&&p.slug&&!plExisting.has(p.slug);});
         var wrap=document.querySelector('.case-table-wrap');

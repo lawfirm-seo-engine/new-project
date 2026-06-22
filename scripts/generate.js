@@ -1419,7 +1419,7 @@ function createHubContent(group) {
     })
     .join("\n");
 
-  const plRows = group.key === "a" ? powerlinks.filter((p) => p?.slug).map((pl) => {
+  const plRows = (group.key === "a" && !group.landingKey) ? powerlinks.filter((p) => p?.slug).map((pl) => {
     const title = escapeHtml(pl.title || pl.h1 || pl.slug);
     const url = `/powerlink/${encodeURIComponent(pl.slug)}/`;
     const todayBadge = pl.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
@@ -1443,6 +1443,7 @@ function createHubContent(group) {
   var SUFFIX=${JSON.stringify(suffix)};
   var URL_SUFFIX=${JSON.stringify(group.urlSlugSuffix || "")};
   var GKEY=${JSON.stringify(group.key)};
+  var ADD_PL=${(group.key === "a" && !group.landingKey) ? 1 : 0};
   var NO_SUFFIX_SLUGS={"soiraeb-sagi-syopingmor":1,"grucompany-sagi-syopingmor":1,"geuruaenkeompeoni-sagi-syopingmor":1};
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1543,7 +1544,7 @@ function createHubContent(group) {
           hdr.insertAdjacentElement('afterend',a);
         }
       }
-      if(GKEY==='a'&&pls.length){
+      if(ADD_PL&&pls.length){
         var plExisting=new Set([].map.call(document.querySelectorAll('.case-row[data-type="pl"]'),function(el){return el.dataset.slug;}));
         var newPLs=pls.filter(function(p){return p&&p.slug&&!plExisting.has(p.slug);});
         var wrap=document.querySelector('.case-table-wrap');
