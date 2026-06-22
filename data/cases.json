@@ -1861,7 +1861,7 @@
     "createdAt": "2026-05-28",
     "updatedAt": "2026-05-28",
     "thumbnailUrl": "",
-    "landingViews": 3269,
+    "landingViews": 3268,
     "reports": 9,
     "summary": "VIBAS 사기 팀미션 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8222,7 +8222,7 @@
     "createdAt": "2026-06-14",
     "updatedAt": "2026-06-14",
     "thumbnailUrl": "",
-    "landingViews": 3990,
+    "landingViews": 3989,
     "reports": 16,
     "summary": "엘리트프라임프로젝트 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8765,7 +8765,7 @@
     "createdAt": "2026-06-15",
     "updatedAt": "2026-06-15",
     "thumbnailUrl": "",
-    "landingViews": 719,
+    "landingViews": 718,
     "reports": 28,
     "summary": "오에프투자자문 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -10438,7 +10438,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 5355,
+    "landingViews": 5354,
     "reports": 6,
     "summary": "AI Network 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -11805,7 +11805,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 2823,
+    "landingViews": 2822,
     "reports": 34,
     "summary": "투자 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -12596,7 +12596,7 @@
     "createdAt": "2026-06-18",
     "updatedAt": "2026-06-18",
     "thumbnailUrl": "",
-    "landingViews": 7943,
+    "landingViews": 7942,
     "reports": 33,
     "summary": "agtmarket.net 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -16075,7 +16075,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 6500,
+    "landingViews": 6499,
     "reports": 31,
     "summary": "KReSIM 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -17106,7 +17106,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 5794,
+    "landingViews": 5793,
     "reports": 25,
     "summary": "베나티아스토어 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -17182,7 +17182,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 7780,
+    "landingViews": 7778,
     "reports": 26,
     "summary": "인터라프 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -19135,7 +19135,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 1743,
+    "landingViews": 1742,
     "reports": 4,
     "summary": "빅톰티비 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -19807,7 +19807,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 7539,
+    "landingViews": 7536,
     "reports": 20,
     "summary": "home.5liv3g.top 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -19815,6 +19815,26 @@
       "사기",
       "esim",
       "부업",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "altos",
+    "caseName": "ALTOS 사기 한국투자증권",
+    "category": "형사대응",
+    "createdAt": "2026-06-22",
+    "updatedAt": "2026-06-22",
+    "thumbnailUrl": "",
+    "landingViews": 4978,
+    "reports": 32,
+    "summary": "ALTOS 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "ALTOS",
+      "사기",
+      "한국투자증권",
       "사기피해",
       "피해금회수",
       "증거보존"
