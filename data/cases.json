@@ -18963,7 +18963,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 6991,
+    "landingViews": 6990,
     "reports": 5,
     "summary": "zunevir 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -18982,7 +18982,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 6238,
+    "landingViews": 6237,
     "reports": 32,
     "summary": "A19포트폴리오 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -19001,7 +19001,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 2282,
+    "landingViews": 2281,
     "reports": 27,
     "summary": "atspro 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -19020,11 +19020,30 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 4477,
+    "landingViews": 4475,
     "reports": 6,
     "summary": "오피스웍스 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "오피스웍스",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "realmy-shop",
+    "caseName": "realmy.shop 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-22",
+    "updatedAt": "2026-06-22",
+    "thumbnailUrl": "",
+    "landingViews": 6337,
+    "reports": 34,
+    "summary": "realmy.shop 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "realmy.shop",
       "사기",
       "사기피해",
       "피해금회수",
