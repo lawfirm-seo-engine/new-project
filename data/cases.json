@@ -15693,7 +15693,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 4066,
+    "landingViews": 4065,
     "reports": 8,
     "summary": "Trust Wallet 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -16075,7 +16075,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 6487,
+    "landingViews": 6486,
     "reports": 31,
     "summary": "KReSIM 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -16133,7 +16133,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 909,
+    "landingViews": 908,
     "reports": 27,
     "summary": "모찌TV 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -18043,6 +18043,25 @@
     "summary": "cherryroomlive 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "cherryroomlive",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "aiseutahordingseu-saching",
+    "caseName": "아이스타홀딩스 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-22",
+    "updatedAt": "2026-06-22",
+    "thumbnailUrl": "",
+    "landingViews": 7597,
+    "reports": 16,
+    "summary": "아이스타홀딩스 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "아이스타홀딩스",
       "사기",
       "사기피해",
       "피해금회수",
