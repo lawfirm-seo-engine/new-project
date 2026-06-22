@@ -683,6 +683,18 @@ button{
   font-weight:900;
 }
 
+.pl-badge{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:4px;
+  background:#FEE500;
+  color:#3A1D1D;
+  font-size:11px;
+  font-style:normal;
+  font-weight:900;
+  white-space:nowrap;
+}
+
 .case-status{
   width:max-content;
   padding:6px 9px;

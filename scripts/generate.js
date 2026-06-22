@@ -1419,6 +1419,22 @@ function createHubContent(group) {
     })
     .join("\n");
 
+  const plRows = group.key === "a" ? powerlinks.filter((p) => p?.slug).map((pl) => {
+    const title = escapeHtml(pl.title || pl.h1 || pl.slug);
+    const url = `/powerlink/${encodeURIComponent(pl.slug)}/`;
+    const todayBadge = pl.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
+    return `
+        <a href="${url}" class="case-row pl-row" data-title="${title}" data-slug="${escapeHtml(pl.slug)}" data-type="pl">
+          <span class="case-no"><em class="pl-badge">파워링크</em></span>
+          <span class="case-title-wrap">
+            <strong class="case-title">${title}</strong>${todayBadge}
+          </span>
+          <span class="case-status">파워링크</span>
+          <span class="case-date">${escapeHtml(pl.updatedAt || pl.createdAt || "")}</span>
+          <span class="case-views">${(pl.landingViews || 0).toLocaleString("ko-KR")}</span>
+        </a>`;
+  }).join("\n") : "";
+
   // Inline dynamic-loader — fetches /api/get-cases and prepends any cases not already in the DOM.
   // Uses IIFE + vanilla JS only, no frameworks.
   const dynScript = `<script>
@@ -1507,25 +1523,44 @@ function createHubContent(group) {
       var all=orig.slice().reverse();
       var pls=(pd&&pd.ok&&Array.isArray(pd.landings))?pd.landings:[];
       updateFreshList(all,noMap,pls);
-      var existing=new Set([].map.call(document.querySelectorAll('.case-row[data-slug]'),function(el){return el.dataset.slug;}));
+      var existing=new Set([].map.call(document.querySelectorAll('.case-row[data-slug]:not([data-type="pl"])'),function(el){return el.dataset.slug;}));
       var newItems=all.filter(function(c){return!existing.has(c.slug);});
-      if(!newItems.length)return;
       var total=orig.length;
       var hdr=document.querySelector('.case-table-header');
-      if(!hdr)return;
-      for(var i=newItems.length-1;i>=0;i--){
-        var item=newItems[i];
-        var cn=esc(normName(item.caseName||''));
-        var dt=SUFFIX?cn+' '+SUFFIX:cn;
-        var a=document.createElement('a');
-        a.href=landingPath(item.slug);
-        a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;
-        a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
-          +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
-          +'<span class="case-status">'+esc(getStatus(item.slug))+'</span>'
-          +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'
-          +'<span class="case-views">'+((item.landingViews||0).toLocaleString('ko-KR'))+'</span>';
-        hdr.insertAdjacentElement('afterend',a);
+      if(hdr&&newItems.length){
+        for(var i=newItems.length-1;i>=0;i--){
+          var item=newItems[i];
+          var cn=esc(normName(item.caseName||''));
+          var dt=SUFFIX?cn+' '+SUFFIX:cn;
+          var a=document.createElement('a');
+          a.href=landingPath(item.slug);
+          a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;
+          a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
+            +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
+            +'<span class="case-status">'+esc(getStatus(item.slug))+'</span>'
+            +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'
+            +'<span class="case-views">'+((item.landingViews||0).toLocaleString('ko-KR'))+'</span>';
+          hdr.insertAdjacentElement('afterend',a);
+        }
+      }
+      if(GKEY==='a'&&pls.length){
+        var plExisting=new Set([].map.call(document.querySelectorAll('.case-row[data-type="pl"]'),function(el){return el.dataset.slug;}));
+        var newPLs=pls.filter(function(p){return p&&p.slug&&!plExisting.has(p.slug);});
+        var wrap=document.querySelector('.case-table-wrap');
+        if(wrap&&newPLs.length){
+          newPLs.forEach(function(pl){
+            var t=esc(pl.title||pl.h1||pl.slug||'');
+            var b=document.createElement('a');
+            b.href='/powerlink/'+encodeURIComponent(pl.slug)+'/';
+            b.className='case-row pl-row';b.dataset.title=t;b.dataset.slug=pl.slug;b.dataset.type='pl';
+            b.innerHTML='<span class="case-no"><em class="pl-badge">파워링크</em></span>'
+              +'<span class="case-title-wrap"><strong class="case-title">'+t+'</strong><em class="today-badge">NEW</em></span>'
+              +'<span class="case-status">파워링크</span>'
+              +'<span class="case-date">'+esc(pl.updatedAt||pl.createdAt||'')+'</span>'
+              +'<span class="case-views">'+((pl.landingViews||0).toLocaleString('ko-KR'))+'</span>';
+            wrap.appendChild(b);
+          });
+        }
       }
       var statEl=document.getElementById('statTotal');
       if(statEl)statEl.textContent=total.toLocaleString('ko-KR');
@@ -1572,6 +1607,7 @@ function createHubContent(group) {
       </div>
       <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
       ${rows}
+      ${plRows}
     </section>
     ${dynScript}`;
 }
