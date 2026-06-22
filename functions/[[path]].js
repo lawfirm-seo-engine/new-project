@@ -964,6 +964,7 @@ function createLandingContent(landing, group, caseData) {
       _authoritySections,
       `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
       createLiveReceiptStatus(caseData),
+      renderComments(caseData),
       _memoSection,
       createConsultForm(_cn, _siteName),
       createFloatingWidgets(_cn, _siteName, _slug),
@@ -1009,6 +1010,15 @@ ${authoritySections}
   const floatingWidgets = createFloatingWidgets(cn, siteName, slug);
 
   return [faqSection, liveStatus, createInlineCta("실시간 접수와 비슷한 정황이 있다면 추가 입금 전에 현재 자료부터 점검해 보세요."), memoSection, consultForm, floatingWidgets, trackScript].filter(Boolean).join("\n");
+}
+
+function renderComments(caseData) {
+  const comments = Array.isArray(caseData.comments) ? caseData.comments : [];
+  if (!comments.length) return "";
+  const items = comments.map((c) =>
+    `<li class="comment-item"><p>${esc(c.text || "")}</p><time>${esc(c.createdAt || "")}</time></li>`
+  ).join("\n");
+  return `<section class="article-block comment-section"><h2>댓글</h2><ul class="comment-list">${items}</ul></section>`;
 }
 
 function createHeroTypingBlock(caseName) {
