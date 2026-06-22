@@ -1400,31 +1400,19 @@ function createHubContent(group) {
   const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { maxItems: HOME_FRESH_LIST_LIMIT, powerlinks: group.key === "a" ? powerlinks : [] });
   const typeEntrySection = createTypeEntrySection(group);
 
-  const rows = sortedCases
-    .map((item) => {
-      const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
-      const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
-      const url = buildRelativeLandingPath(group, item.slug);
-      const todayBadge = item.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
-      return `
-        <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}">
-          <span class="case-no">${caseNoMap.get(item.slug) ?? ""}</span>
-          <span class="case-title-wrap">
-            <strong class="case-title">${displayTitle}</strong>${todayBadge}
-          </span>
-          <span class="case-status">${statusLabel(group.key, item.slug)}</span>
-          <span class="case-date">${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
-          <span class="case-views">${(item.landingViews || 0).toLocaleString("ko-KR")}</span>
-        </a>`;
-    })
-    .join("\n");
+  const showPL = group.key === "a" && !group.landingKey;
+  const caseEntries = sortedCases.map((c) => ({ type: "case", data: c, date: c.updatedAt || c.createdAt || "" }));
+  const plEntries = showPL ? powerlinks.filter((p) => p?.slug).map((p) => ({ type: "pl", data: p, date: p.updatedAt || p.createdAt || "" })) : [];
+  const mergedEntries = [...caseEntries, ...plEntries].sort((a, b) => b.date.localeCompare(a.date));
 
-  const plRows = (group.key === "a" && !group.landingKey) ? powerlinks.filter((p) => p?.slug).map((pl) => {
-    const title = escapeHtml(pl.title || pl.h1 || pl.slug);
-    const url = `/powerlink/${encodeURIComponent(pl.slug)}/`;
-    const todayBadge = pl.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
-    return `
-        <a href="${url}" class="case-row pl-row" data-title="${title}" data-slug="${escapeHtml(pl.slug)}" data-type="pl">
+  const rows = mergedEntries.map((entry) => {
+    if (entry.type === "pl") {
+      const pl = entry.data;
+      const title = escapeHtml(pl.title || pl.h1 || pl.slug);
+      const url = `/powerlink/${encodeURIComponent(pl.slug)}/`;
+      const todayBadge = pl.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
+      return `
+        <a href="${url}" class="case-row pl-row" data-title="${title}" data-slug="${escapeHtml(pl.slug)}" data-type="pl" data-date="${escapeHtml(entry.date)}">
           <span class="case-no"><em class="pl-badge">파워링크</em></span>
           <span class="case-title-wrap">
             <strong class="case-title">${title}</strong>${todayBadge}
@@ -1433,7 +1421,23 @@ function createHubContent(group) {
           <span class="case-date">${escapeHtml(pl.updatedAt || pl.createdAt || "")}</span>
           <span class="case-views">${(pl.landingViews || 0).toLocaleString("ko-KR")}</span>
         </a>`;
-  }).join("\n") : "";
+    }
+    const item = entry.data;
+    const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
+    const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
+    const url = buildRelativeLandingPath(group, item.slug);
+    const todayBadge = item.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
+    return `
+        <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}" data-date="${escapeHtml(entry.date)}">
+          <span class="case-no">${caseNoMap.get(item.slug) ?? ""}</span>
+          <span class="case-title-wrap">
+            <strong class="case-title">${displayTitle}</strong>${todayBadge}
+          </span>
+          <span class="case-status">${statusLabel(group.key, item.slug)}</span>
+          <span class="case-date">${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
+          <span class="case-views">${(item.landingViews || 0).toLocaleString("ko-KR")}</span>
+        </a>`;
+  }).join("\n");
 
   // Inline dynamic-loader — fetches /api/get-cases and prepends any cases not already in the DOM.
   // Uses IIFE + vanilla JS only, no frameworks.
@@ -1527,41 +1531,49 @@ function createHubContent(group) {
       var existing=new Set([].map.call(document.querySelectorAll('.case-row[data-slug]:not([data-type="pl"])'),function(el){return el.dataset.slug;}));
       var newItems=all.filter(function(c){return!existing.has(c.slug);});
       var total=orig.length;
-      var hdr=document.querySelector('.case-table-header');
-      if(hdr&&newItems.length){
-        for(var i=newItems.length-1;i>=0;i--){
-          var item=newItems[i];
-          var cn=esc(normName(item.caseName||''));
-          var dt=SUFFIX?cn+' '+SUFFIX:cn;
-          var a=document.createElement('a');
-          a.href=landingPath(item.slug);
-          a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;
-          a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
-            +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
-            +'<span class="case-status">'+esc(getStatus(item.slug))+'</span>'
-            +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'
-            +'<span class="case-views">'+((item.landingViews||0).toLocaleString('ko-KR'))+'</span>';
-          hdr.insertAdjacentElement('afterend',a);
+      var plExisting=ADD_PL?new Set([].map.call(document.querySelectorAll('.case-row[data-type="pl"]'),function(el){return el.dataset.slug;})):new Set();
+      var newPLs=ADD_PL?pls.filter(function(p){return p&&p.slug&&!plExisting.has(p.slug);}):[];
+      var newAll=[].concat(
+        newItems.map(function(c){return{_type:'case',_date:c.updatedAt||c.createdAt||'',data:c};}),
+        newPLs.map(function(p){return{_type:'pl',_date:p.updatedAt||p.createdAt||'',data:p};})
+      ).sort(function(a,b){return b._date.localeCompare(a._date);});
+      function insertSorted(wrap,el,date){
+        var rows=[].slice.call(wrap.querySelectorAll('.case-row'));
+        for(var j=0;j<rows.length;j++){
+          if((rows[j].dataset.date||'')<date){wrap.insertBefore(el,rows[j]);return;}
         }
+        wrap.appendChild(el);
       }
-      if(ADD_PL&&pls.length){
-        var plExisting=new Set([].map.call(document.querySelectorAll('.case-row[data-type="pl"]'),function(el){return el.dataset.slug;}));
-        var newPLs=pls.filter(function(p){return p&&p.slug&&!plExisting.has(p.slug);});
-        var wrap=document.querySelector('.case-table-wrap');
-        if(wrap&&newPLs.length){
-          newPLs.forEach(function(pl){
+      var wrap=document.querySelector('.case-table-wrap');
+      if(wrap&&newAll.length){
+        newAll.forEach(function(entry){
+          if(entry._type==='pl'){
+            var pl=entry.data;
             var t=esc(pl.title||pl.h1||pl.slug||'');
             var b=document.createElement('a');
             b.href='/powerlink/'+encodeURIComponent(pl.slug)+'/';
-            b.className='case-row pl-row';b.dataset.title=t;b.dataset.slug=pl.slug;b.dataset.type='pl';
+            b.className='case-row pl-row';b.dataset.title=t;b.dataset.slug=pl.slug;b.dataset.type='pl';b.dataset.date=entry._date;
             b.innerHTML='<span class="case-no"><em class="pl-badge">파워링크</em></span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+t+'</strong><em class="today-badge">NEW</em></span>'
               +'<span class="case-status">파워링크</span>'
               +'<span class="case-date">'+esc(pl.updatedAt||pl.createdAt||'')+'</span>'
               +'<span class="case-views">'+((pl.landingViews||0).toLocaleString('ko-KR'))+'</span>';
-            wrap.appendChild(b);
-          });
-        }
+            insertSorted(wrap,b,entry._date);
+          } else {
+            var item=entry.data;
+            var cn=esc(normName(item.caseName||''));
+            var dt=SUFFIX?cn+' '+SUFFIX:cn;
+            var a=document.createElement('a');
+            a.href=landingPath(item.slug);
+            a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;a.dataset.date=entry._date;
+            a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
+              +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
+              +'<span class="case-status">'+esc(getStatus(item.slug))+'</span>'
+              +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'
+              +'<span class="case-views">'+((item.landingViews||0).toLocaleString('ko-KR'))+'</span>';
+            insertSorted(wrap,a,entry._date);
+          }
+        });
       }
       var statEl=document.getElementById('statTotal');
       if(statEl)statEl.textContent=total.toLocaleString('ko-KR');
@@ -1608,7 +1620,6 @@ function createHubContent(group) {
       </div>
       <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
       ${rows}
-      ${plRows}
     </section>
     ${dynScript}`;
 }
