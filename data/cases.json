@@ -6936,7 +6936,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 7538,
+    "landingViews": 7537,
     "reports": 14,
     "summary": "로그필름웍스 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20021,7 +20021,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 3912,
+    "landingViews": 3911,
     "reports": 11,
     "summary": "쓰담마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20742,6 +20742,45 @@
     "tags": [
       "와이에스",
       "익스체인지",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "h42-hanhwatujajeunggwon-saching",
+    "caseName": "H42 한화투자증권 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-23",
+    "updatedAt": "2026-06-23",
+    "thumbnailUrl": "",
+    "landingViews": 2003,
+    "reports": 16,
+    "summary": "H42 한화투자증권 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "H42",
+      "한화투자증권",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "kmexnasia",
+    "caseName": "Kmexnasia 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-23",
+    "updatedAt": "2026-06-23",
+    "thumbnailUrl": "",
+    "landingViews": 6962,
+    "reports": 6,
+    "summary": "Kmexnasia 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "Kmexnasia",
       "사기",
       "사기피해",
       "피해금회수",
