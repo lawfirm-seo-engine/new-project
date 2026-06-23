@@ -17049,7 +17049,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 2549,
+    "landingViews": 2548,
     "reports": 8,
     "summary": "micmarket.shop 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20318,6 +20318,25 @@
     "summary": "다복라이프 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "다복라이프",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "home-ebknrz-com",
+    "caseName": "home.ebknrz.com 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-23",
+    "updatedAt": "2026-06-23",
+    "thumbnailUrl": "",
+    "landingViews": 2016,
+    "reports": 17,
+    "summary": "home.ebknrz.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "home.ebknrz.com",
       "사기",
       "사기피해",
       "피해금회수",
