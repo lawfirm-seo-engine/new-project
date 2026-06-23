@@ -1619,7 +1619,7 @@
     "createdAt": "2026-05-28",
     "updatedAt": "2026-05-28",
     "thumbnailUrl": "",
-    "landingViews": 671,
+    "landingViews": 669,
     "reports": 4,
     "summary": "핫라이브tv 사기 방송 환전 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -9403,7 +9403,7 @@
     "createdAt": "2026-06-15",
     "updatedAt": "2026-06-15",
     "thumbnailUrl": "",
-    "landingViews": 2641,
+    "landingViews": 2640,
     "reports": 30,
     "summary": "퍼블릭재테크 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -15196,7 +15196,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 479,
+    "landingViews": 478,
     "reports": 19,
     "summary": "카테마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -22558,7 +22558,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 4479,
+    "landingViews": 4478,
     "reports": 24,
     "summary": "연희교육정보방 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -22596,7 +22596,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 2402,
+    "landingViews": 2401,
     "reports": 33,
     "summary": "Rioravion 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -22615,7 +22615,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 5532,
+    "landingViews": 5531,
     "reports": 11,
     "summary": "고브로필름 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -22634,11 +22634,49 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 6345,
+    "landingViews": 6344,
     "reports": 30,
     "summary": "GOLDILBONG 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "GOLDILBONG",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "thewatchhut",
+    "caseName": "THEWATCHHUT 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 4514,
+    "reports": 11,
+    "summary": "THEWATCHHUT 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "THEWATCHHUT",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "erisideunmor-saching",
+    "caseName": "에리시든몰 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 4517,
+    "reports": 22,
+    "summary": "에리시든몰 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "에리시든몰",
       "사기",
       "사기피해",
       "피해금회수",
