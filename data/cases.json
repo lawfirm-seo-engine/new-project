@@ -17184,7 +17184,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 7779,
+    "landingViews": 7778,
     "reports": 26,
     "summary": "인터라프 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -21642,7 +21642,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 6215,
+    "landingViews": 6214,
     "reports": 14,
     "summary": "kractive.live 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -22463,6 +22463,26 @@
     "summary": "fibrain.top 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "fibrain.top",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "ihyerim-aeneorriseuteu-saching",
+    "caseName": "이혜림 애널리스트 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-23",
+    "updatedAt": "2026-06-23",
+    "thumbnailUrl": "",
+    "landingViews": 4733,
+    "reports": 16,
+    "summary": "이혜림 애널리스트 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "이혜림",
+      "애널리스트",
       "사기",
       "사기피해",
       "피해금회수",
