@@ -2,8 +2,13 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    const { slug } = await request.json();
+    const body = await request.json();
+    const { slug, type } = body;
     if (!slug) return json({ ok: false }, 400);
+
+    if (type === "powerlink") {
+      return trackPowerlinkView(slug, env);
+    }
 
     const { repoOwner, repoName, branch, token } = githubEnv(env);
     if (!token || !repoOwner || !repoName) return json({ ok: false });
@@ -38,6 +43,57 @@ export async function onRequestPost(context) {
   } catch (error) {
     return json({ ok: false, message: error.message });
   }
+}
+
+async function trackPowerlinkView(slug, env) {
+  const { repoOwner, repoName, branch, token } = githubEnv(env);
+  if (!token || !repoOwner || !repoName) return json({ ok: false });
+
+  const filePath = "data/powerlinks.json";
+  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
+  const res = await fetch(apiUrl, { headers: githubHeaders(token) });
+  if (!res.ok) return json({ ok: false });
+
+  const file = await res.json();
+  const list = JSON.parse(decodeBase64(file.content));
+  const idx = list.findIndex((p) => p.slug === slug);
+  if (idx === -1) return json({ ok: false });
+
+  list[idx].landingViews = (list[idx].landingViews || 0) + 1;
+  const newViews = list[idx].landingViews;
+
+  const updateRes = await fetch(
+    `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+    {
+      method: "PUT",
+      headers: githubHeaders(token),
+      body: JSON.stringify({
+        message: `Track view: ${slug}`,
+        content: encodeBase64(JSON.stringify(list, null, 2)),
+        sha: file.sha,
+        branch,
+      }),
+    }
+  );
+
+  if (updateRes.ok && env.CASES) {
+    const raw = await env.CASES.get(`powerlink:${slug}`);
+    if (raw) {
+      const item = JSON.parse(raw);
+      item.landingViews = newViews;
+      await env.CASES.put(`powerlink:${slug}`, JSON.stringify(item));
+
+      const idxRaw = await env.CASES.get("powerlink:index");
+      if (idxRaw) {
+        const indexArr = JSON.parse(idxRaw);
+        const pos = indexArr.findIndex((e) => e.slug === slug);
+        if (pos !== -1) indexArr[pos].landingViews = newViews;
+        await env.CASES.put("powerlink:index", JSON.stringify(indexArr));
+      }
+    }
+  }
+
+  return json({ ok: updateRes.ok, views: newViews });
 }
 
 export async function onRequestOptions() {

@@ -54,6 +54,7 @@ function buildIndexEntry(item) {
     robots: item.robots,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
+    landingViews: item.landingViews || 0,
     url: `${SITE_URL}/powerlink/${encodeURIComponent(item.slug)}/`,
   };
 }

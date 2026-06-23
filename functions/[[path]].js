@@ -483,10 +483,13 @@ function renderPowerlinkLanding(landing) {
     `<meta name="image:description" content="${esc(imageDescription)}">`,
   ].join("\n  ");
 
+  const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${esc(slug)}',type:'powerlink'})}).catch(function(){});})();</script>`;
+
   const content = [
     `<section class="article-block powerlink-article">${renderManualArticle(landing.body)}</section>`,
     createPowerlinkConsultForm(landing),
     createPowerlinkFloatingWidgets(landing),
+    trackScript,
   ].join("\n");
 
   return pageTemplate({
