@@ -14118,7 +14118,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 7726,
+    "landingViews": 7725,
     "reports": 23,
     "summary": "서재원 트레이더 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -18020,7 +18020,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 3908,
+    "landingViews": 3904,
     "reports": 6,
     "summary": "체리룸라이브 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20179,7 +20179,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 1637,
+    "landingViews": 1635,
     "reports": 7,
     "summary": "홀리라이브티비 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20678,7 +20678,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 4410,
+    "landingViews": 4405,
     "reports": 15,
     "summary": "넷클랙스 테크놀러지 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20698,7 +20698,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 2599,
+    "landingViews": 2596,
     "reports": 8,
     "summary": "MBK증권 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20717,7 +20717,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 841,
+    "landingViews": 839,
     "reports": 27,
     "summary": "허브인베스트먼트 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20736,7 +20736,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 6849,
+    "landingViews": 6847,
     "reports": 30,
     "summary": "와이에스 익스체인지 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20781,6 +20781,26 @@
     "summary": "Kmexnasia 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "Kmexnasia",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "beurrogdir-ipo",
+    "caseName": "블록딜 IPO 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-23",
+    "updatedAt": "2026-06-23",
+    "thumbnailUrl": "",
+    "landingViews": 6654,
+    "reports": 32,
+    "summary": "블록딜 IPO 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "블록딜",
+      "IPO",
       "사기",
       "사기피해",
       "피해금회수",
