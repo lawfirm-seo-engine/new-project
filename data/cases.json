@@ -13028,7 +13028,7 @@
     "createdAt": "2026-06-18",
     "updatedAt": "2026-06-18",
     "thumbnailUrl": "",
-    "landingViews": 2929,
+    "landingViews": 2928,
     "reports": 30,
     "summary": "루비콘코리아 베스트쥬얼리 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -22130,6 +22130,25 @@
     "tags": [
       "복권",
       "정보",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "seonggongsangseungpateuneo",
+    "caseName": "성공상승파트너 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-23",
+    "updatedAt": "2026-06-23",
+    "thumbnailUrl": "",
+    "landingViews": 3937,
+    "reports": 29,
+    "summary": "성공상승파트너 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "성공상승파트너",
       "사기",
       "사기피해",
       "피해금회수",
