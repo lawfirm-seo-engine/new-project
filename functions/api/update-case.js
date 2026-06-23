@@ -33,6 +33,12 @@ export async function onRequestPost(context) {
       cases[idx].landings[groupKey][field] = value;
       cases[idx].updatedAt = now;
 
+    } else if (action === "rename") {
+      const newName = String(value || "").trim();
+      if (!newName) return json({ ok: false, message: "새 사건명 필수" }, 400);
+      cases[idx].caseName = newName;
+      cases[idx].updatedAt = now;
+
     } else if (action === "update-memo") {
       cases[idx].memo = String(value || "").trim();
 
