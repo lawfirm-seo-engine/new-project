@@ -11843,7 +11843,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 3037,
+    "landingViews": 3036,
     "reports": 28,
     "summary": "부업 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -20987,7 +20987,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 7736,
+    "landingViews": 7735,
     "reports": 22,
     "summary": "KR이심 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -21668,6 +21668,25 @@
       "액티브",
       "사기",
       "방송환전",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "modaaurres",
+    "caseName": "모다아울렛 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-23",
+    "updatedAt": "2026-06-23",
+    "thumbnailUrl": "",
+    "landingViews": 4486,
+    "reports": 22,
+    "summary": "모다아울렛 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "모다아울렛",
+      "사기",
       "사기피해",
       "피해금회수",
       "증거보존"
