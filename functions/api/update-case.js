@@ -39,6 +39,9 @@ export async function onRequestPost(context) {
       cases[idx].caseName = newName;
       cases[idx].updatedAt = now;
 
+    } else if (action === "set-noindex") {
+      cases[idx].noindex = value === true || value === "true" || value === 1;
+
     } else if (action === "update-memo") {
       cases[idx].memo = String(value || "").trim();
 
@@ -107,6 +110,7 @@ function buildIndexEntry(c) {
     createdAt: c.createdAt || "", updatedAt: c.updatedAt || "",
     thumbnailUrl: c.thumbnailUrl || "", landingViews: c.landingViews || 0,
     reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
+    noindex: c.noindex || false,
   };
 }
 

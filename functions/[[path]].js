@@ -316,12 +316,13 @@ export async function onRequest(context) {
     return new Response("사건을 찾을 수 없습니다.", { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
   const html = renderLanding(caseData, group, url.origin);
+  const robotsTag = caseData.noindex ? "noindex, nofollow" : "index, follow";
 
   return new Response(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=3600, s-maxage=86400",
-      "X-Robots-Tag": "index, follow",
+      "X-Robots-Tag": robotsTag,
     },
   });
 }
@@ -687,8 +688,11 @@ function renderLanding(caseData, group, origin) {
   const ogImageType = /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/png";
   const ogImageWidth = String(OG_IMAGE_WIDTH);
   const ogImageHeight = String(OG_IMAGE_HEIGHT);
+  const robotsMeta = caseData.noindex
+    ? `noindex, nofollow`
+    : `index, follow, max-image-preview:large, max-snippet:-1`;
   const headExtra = [
-    `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
+    `<meta name="robots" content="${robotsMeta}">`,
     `<meta name="NaverBot" content="All">`,
     `<meta name="Yeti" content="All">`,
     `<meta http-equiv="content-language" content="ko">`,

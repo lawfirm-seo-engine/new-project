@@ -37,6 +37,7 @@
     .name-cell strong{display:block}
     .name-cell .slug{color:#8a96a8;font-size:11px}
     .loading{text-align:center;padding:36px;color:#8a96a8}
+    .noindex-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;background:#fde8e8;color:#c0392b;margin-left:4px;vertical-align:middle}
   </style>
 </head>
 <body>
@@ -101,6 +102,7 @@
         createdAt: c.createdAt || '',
         updatedAt: c.updatedAt || '',
         memo: c.memo || false,
+        noindex: c.noindex || false,
       })),
       ...pls.map(p => ({
         type: 'pl',
@@ -132,7 +134,8 @@
       const typeBadge = isPl
         ? '<span class="type-badge tp">파워링크</span>'
         : '<span class="type-badge tc">사건</span>';
-      const nameCell = `<div class="name-cell"><strong>${esc(e.name)}</strong><span class="slug">${esc(e.slug)}</span></div>`;
+      const noindexBadge = (!isPl && e.noindex) ? '<span class="noindex-badge">NOINDEX</span>' : '';
+      const nameCell = `<div class="name-cell"><strong>${esc(e.name)}${noindexBadge}</strong><span class="slug">${esc(e.slug)}</span></div>`;
 
       let actions;
       if (isPl) {
@@ -142,10 +145,13 @@
           <a href="#" class="del" onclick="deletePl('${esc(e.slug)}','${esc(e.name)}');return false;">삭제</a>`;
       } else {
         const domainLinks = DOMAINS.map(d => `<a href="${d.url}/${d.prefix}/${encodeURIComponent(e.slug)}-${domainSuffix(d.label)}/" target="_blank">${d.label}</a>`).join('');
+        const niLabel = e.noindex ? 'noindex 해제' : 'noindex';
+        const niStyle = e.noindex ? 'background:#8a96a8' : 'background:#c0392b';
         actions = `
           <a href="/admin/edit.html?slug=${encodeURIComponent(e.slug)}">편집</a>
           <a href="#" onclick="setThumbnail('${esc(e.slug)}');return false;">썸네일</a>
           ${domainLinks}
+          <button class="btn sm" style="${niStyle};color:#fff" onclick="toggleNoindex('${esc(e.slug)}',${e.noindex})">${niLabel}</button>
           <button class="btn danger sm" onclick="deleteCase('${esc(e.slug)}','${esc(e.name)}')">삭제</button>`;
       }
 
@@ -235,6 +241,21 @@
       else alert('실패: ' + (data.message || '알 수 없는 오류'));
     } catch (e) { alert('오류: ' + e.message); }
     finally { btn.disabled = false; btn.textContent = '템플릿 일괄 적용'; }
+  }
+
+  async function toggleNoindex(slug, currentValue) {
+    const newValue = !currentValue;
+    const label = newValue ? 'noindex로 설정' : 'noindex 해제';
+    if (!confirm(`"${slug}" 사건을 ${label}하시겠습니까?`)) return;
+    try {
+      const res = await fetch('/api/update-case', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug, action:'set-noindex', value:newValue}) });
+      const data = await res.json();
+      if (data.ok) {
+        const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
+        if (entry) entry.noindex = newValue;
+        filterEntries();
+      } else { alert('실패: ' + (data.message || '')); }
+    } catch (e) { alert('오류: ' + e.message); }
   }
 
   function esc(str) {
