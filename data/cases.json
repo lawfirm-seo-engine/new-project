@@ -1306,7 +1306,7 @@
     "createdAt": "2026-05-28",
     "updatedAt": "2026-05-28",
     "thumbnailUrl": "",
-    "landingViews": 7713,
+    "landingViews": 7712,
     "reports": 33,
     "summary": "펀커피 사기 배당형 투자 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6713,7 +6713,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 948,
+    "landingViews": 947,
     "reports": 16,
     "summary": "DBAXIS 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8046,7 +8046,7 @@
     "createdAt": "2026-06-14",
     "updatedAt": "2026-06-14",
     "thumbnailUrl": "",
-    "landingViews": 2120,
+    "landingViews": 2119,
     "reports": 10,
     "summary": "그라니쿠스자산운용 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8765,7 +8765,7 @@
     "createdAt": "2026-06-15",
     "updatedAt": "2026-06-15",
     "thumbnailUrl": "",
-    "landingViews": 719,
+    "landingViews": 718,
     "reports": 28,
     "summary": "오에프투자자문 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -17453,7 +17453,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 5270,
+    "landingViews": 5267,
     "reports": 22,
     "summary": "MTZ-MAX 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -18097,7 +18097,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 2607,
+    "landingViews": 2606,
     "reports": 15,
     "summary": "라이브방송 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -22340,7 +22340,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 3877,
+    "landingViews": 3876,
     "reports": 34,
     "summary": "아너스티 강언구 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -23726,7 +23726,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 2458,
+    "landingViews": 2456,
     "reports": 15,
     "summary": "이케이뷰티 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -23765,7 +23765,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 4790,
+    "landingViews": 4788,
     "reports": 12,
     "summary": "PipHigh 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -23784,7 +23784,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 1500,
+    "landingViews": 1498,
     "reports": 6,
     "summary": "Dios Derivative 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -23809,6 +23809,26 @@
     "summary": "서울경제TV 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "서울경제TV",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false
+  },
+  {
+    "slug": "munhyeonjin",
+    "caseName": "문현진 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 3751,
+    "reports": 15,
+    "summary": "문현진 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "문현진",
       "사기",
       "사기피해",
       "피해금회수",
