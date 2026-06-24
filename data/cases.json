@@ -5909,7 +5909,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 610,
+    "landingViews": 609,
     "reports": 14,
     "summary": "gfkrwww.v210stock.xyz 사기 사이트 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -8765,7 +8765,7 @@
     "createdAt": "2026-06-15",
     "updatedAt": "2026-06-15",
     "thumbnailUrl": "",
-    "landingViews": 719,
+    "landingViews": 718,
     "reports": 28,
     "summary": "오에프투자자문 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -18021,7 +18021,7 @@
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
-    "landingViews": 3905,
+    "landingViews": 3904,
     "reports": 6,
     "summary": "체리룸라이브 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -21740,7 +21740,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 7967,
+    "landingViews": 7966,
     "reports": 12,
     "summary": "루인스토어 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -23804,7 +23804,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 5835,
+    "landingViews": 5834,
     "reports": 8,
     "summary": "서울경제TV 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -23829,6 +23829,26 @@
     "summary": "문현진 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "문현진",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "prime-partners",
+    "caseName": "Prime Partners 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 4918,
+    "reports": 7,
+    "summary": "Prime Partners 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "Prime",
+      "Partners",
       "사기",
       "사기피해",
       "피해금회수",
