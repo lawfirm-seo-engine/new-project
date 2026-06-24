@@ -1306,7 +1306,7 @@
     "createdAt": "2026-05-28",
     "updatedAt": "2026-05-28",
     "thumbnailUrl": "",
-    "landingViews": 7713,
+    "landingViews": 7712,
     "reports": 33,
     "summary": "펀커피 사기 배당형 투자 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -26044,6 +26044,27 @@
     "summary": "다크몽샵 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "다크몽샵",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "ban79-shop",
+    "caseName": "ban79.shop 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 5126,
+    "reports": 11,
+    "summary": "ban79.shop 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "ban79.shop",
       "사기",
       "사기피해",
       "피해금회수",
