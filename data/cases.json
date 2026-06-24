@@ -25571,7 +25571,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 2245,
+    "landingViews": 2244,
     "reports": 15,
     "summary": "tem-mon.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -25635,7 +25635,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 1357,
+    "landingViews": 1356,
     "reports": 13,
     "summary": "딥브롬마켓 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -25741,7 +25741,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 4683,
+    "landingViews": 4682,
     "reports": 6,
     "summary": "김태호 교수 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -25806,7 +25806,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 3002,
+    "landingViews": 3001,
     "reports": 17,
     "summary": "베베부 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -25934,7 +25934,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 7855,
+    "landingViews": 7854,
     "reports": 21,
     "summary": "mkzonggozt.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -26850,6 +26850,69 @@
     "summary": "defiex.vip 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "defiex.vip",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "web3",
+    "caseName": "WEB3 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 5776,
+    "reports": 14,
+    "summary": "WEB3 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "WEB3",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "bigtorimidieo",
+    "caseName": "빅토리미디어 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 2001,
+    "reports": 19,
+    "summary": "빅토리미디어 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "빅토리미디어",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "eugenesdf-com",
+    "caseName": "eugenesdf.com 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 1666,
+    "reports": 16,
+    "summary": "eugenesdf.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "eugenesdf.com",
       "사기",
       "사기피해",
       "피해금회수",
