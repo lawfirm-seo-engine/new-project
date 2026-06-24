@@ -25913,7 +25913,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 7821,
+    "landingViews": 7820,
     "reports": 7,
     "summary": "빈노트몰숍 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -25976,7 +25976,7 @@
     "createdAt": "2026-06-24",
     "updatedAt": "2026-06-24",
     "thumbnailUrl": "",
-    "landingViews": 1711,
+    "landingViews": 1710,
     "reports": 25,
     "summary": "tmrsshop.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -26935,6 +26935,28 @@
     "tags": [
       "xrp",
       "seoul1.com",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "bigwaves-ipo-com",
+    "caseName": "bigwaves-ipo.com 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 3804,
+    "reports": 13,
+    "summary": "bigwaves-ipo.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "bigwaves",
+      "ipo.com",
       "사기",
       "사기피해",
       "피해금회수",
