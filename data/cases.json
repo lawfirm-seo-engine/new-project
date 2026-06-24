@@ -8222,7 +8222,7 @@
     "createdAt": "2026-06-14",
     "updatedAt": "2026-06-14",
     "thumbnailUrl": "",
-    "landingViews": 3990,
+    "landingViews": 3989,
     "reports": 16,
     "summary": "엘리트프라임프로젝트 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13428,7 +13428,7 @@
     "createdAt": "2026-06-18",
     "updatedAt": "2026-06-18",
     "thumbnailUrl": "",
-    "landingViews": 4395,
+    "landingViews": 4394,
     "reports": 33,
     "summary": "Strsxpro 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -15714,7 +15714,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 4224,
+    "landingViews": 4223,
     "reports": 30,
     "summary": "QBB라이브방송 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -21856,7 +21856,7 @@
     "createdAt": "2026-06-23",
     "updatedAt": "2026-06-23",
     "thumbnailUrl": "",
-    "landingViews": 7101,
+    "landingViews": 7099,
     "reports": 11,
     "summary": "리움원 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -23672,6 +23672,26 @@
     "tags": [
       "머니메이트",
       "VIP정보방",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
+  },
+  {
+    "slug": "choedongugui-jusigyeonguso",
+    "caseName": "최동욱의 주식연구소 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 7603,
+    "reports": 30,
+    "summary": "최동욱의 주식연구소 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "최동욱의",
+      "주식연구소",
       "사기",
       "사기피해",
       "피해금회수",
