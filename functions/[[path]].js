@@ -315,6 +315,10 @@ export async function onRequest(context) {
   if (!caseData) {
     return new Response("사건을 찾을 수 없습니다.", { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
+  if (!isCaseAllowedForGroup(caseData, group)) {
+    return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  }
+
   const html = renderLanding(caseData, group, url.origin);
   const robotsTag = caseData.noindex ? "noindex, nofollow" : "index, follow";
 
@@ -665,12 +669,19 @@ function logScanScriptForSite(siteUrl = "") {
 
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
+function isCaseAllowedForGroup(caseData = {}, group = {}) {
+  const targets = Array.isArray(caseData.targetGroups) ? caseData.targetGroups.filter(Boolean) : [];
+  if (!targets.length) return true;
+  return targets.includes(group.landingKey || group.key);
+}
+
 function renderLanding(caseData, group, origin) {
   const lk = group.landingKey ?? group.key;
   const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
   const rawCaseName = caseData.caseName || "";
-  const pageTitle = groupPageTitle(rawCaseName, lk);
-  const pageH1 = groupPageH1(rawCaseName, lk);
+  const useManualRecoveryText = caseData.createdBy === "recovery-manual" && lk === "c";
+  const pageTitle = useManualRecoveryText ? (landing.title || groupPageTitle(rawCaseName, lk)) : groupPageTitle(rawCaseName, lk);
+  const pageH1 = useManualRecoveryText ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk)) : groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const OLD_URL_CANONICAL = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
   const isNoSuffixSlug = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);

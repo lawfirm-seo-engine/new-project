@@ -10,6 +10,7 @@ import {
   buildSitemapXml,
   caseOgImageUrl,
   getRecentCases,
+  isCaseAllowedForGroup,
 } from "../functions/_seo.js";
 
 const root = process.cwd();
@@ -1389,13 +1390,14 @@ function createHubFloatingWidgets(group) {
 }
 
 function createHubContent(group) {
+  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group));
   // caseNoMap: slug → 1-based insertion order (position in original cases.json array)
-  const caseNoMap = new Map(cases.map((c, i) => [c.slug, i + 1]));
+  const caseNoMap = new Map(groupCases.map((c, i) => [c.slug, i + 1]));
   // Sort by insertion order descending: newest-added first (No.324 → No.1)
-  const sortedCases = [...cases].reverse();
-  const totalReports = cases.reduce((sum, c) => sum + (c.reports || 0), 0);
-  const todayCases   = cases.filter((c) => c.createdAt === today).length;
-  const todayReports = cases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
+  const sortedCases = [...groupCases].reverse();
+  const totalReports = groupCases.reduce((sum, c) => sum + (c.reports || 0), 0);
+  const todayCases   = groupCases.filter((c) => c.createdAt === today).length;
+  const todayReports = groupCases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
   const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { maxItems: HOME_FRESH_LIST_LIMIT, powerlinks: group.key === "a" ? powerlinks : [] });
   const typeEntrySection = createTypeEntrySection(group);
@@ -1447,6 +1449,7 @@ function createHubContent(group) {
   var SUFFIX=${JSON.stringify(suffix)};
   var URL_SUFFIX=${JSON.stringify(group.urlSlugSuffix || "")};
   var GKEY=${JSON.stringify(group.key)};
+  var TARGET_KEY=${JSON.stringify(group.landingKey || group.key)};
   var ADD_PL=${(group.key === "a" && !group.landingKey) ? 1 : 0};
   var NO_SUFFIX_SLUGS={"soiraeb-sagi-syopingmor":1,"grucompany-sagi-syopingmor":1,"geuruaenkeompeoni-sagi-syopingmor":1};
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
@@ -1458,6 +1461,7 @@ function createHubContent(group) {
   function getStatus(slug){if(GKEY==='c'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
+  function allowed(c){var t=Array.isArray(c&&c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
   function freshLink(item,noMap){
     var cn=normName(item.caseName||item.name||'');
     var dt=SUFFIX?cn+' '+SUFFIX:cn;
@@ -1523,7 +1527,7 @@ function createHubContent(group) {
   ]).then(function(results){
     var d=results[0],pd=results[1];
       if(!d||!d.ok||!Array.isArray(d.cases))return;
-      var orig=d.cases;
+      var orig=d.cases.filter(allowed);
       var noMap={};orig.forEach(function(c,i){noMap[c.slug]=i+1;});
       var all=orig.slice().reverse();
       var pls=(pd&&pd.ok&&Array.isArray(pd.landings))?pd.landings:[];
@@ -1597,7 +1601,7 @@ function createHubContent(group) {
       <div class="hub-stats">
         <div>
           <span>등록 사건</span>
-          <strong id="statTotal">${cases.length.toLocaleString("ko-KR")}</strong>
+          <strong id="statTotal">${groupCases.length.toLocaleString("ko-KR")}</strong>
           <em class="stat-today" id="statTodayCount">오늘 추가 +${todayCases}</em>
         </div>
         <div>
@@ -1625,8 +1629,9 @@ function createHubContent(group) {
 }
 
 function createCategoryContent(group) {
-  const caseNoMap = new Map(cases.map((c, i) => [c.slug, i + 1]));
-  const sortedCases = [...cases].reverse();
+  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group));
+  const caseNoMap = new Map(groupCases.map((c, i) => [c.slug, i + 1]));
+  const sortedCases = [...groupCases].reverse();
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
   return createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { powerlinks: group.key === "a" ? powerlinks : [] });
 }
@@ -2087,17 +2092,18 @@ for (const group of groups) {
   // Static HTML generation for case pages has been removed (KV architecture).
   // The sitemap still lists all case URLs so Naver can discover them.
 
-  const sitemap = buildSitemapXml(group, cases);
+  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group));
+  const sitemap = buildSitemapXml(group, groupCases);
   await fs.outputFile(path.join(group.outDir, "sitemap.xml"), sitemap);
 
-  const recentCases = getRecentCases(cases);
+  const recentCases = getRecentCases(groupCases);
   const recentSitemap = buildSitemapXml(group, recentCases, { includeHome: false, recent: true });
   await fs.outputFile(path.join(group.outDir, "sitemap-recent.xml"), recentSitemap);
 
   const sitemapIndex = buildSitemapIndexXml(group, today);
   await fs.outputFile(path.join(group.outDir, "sitemap-index.xml"), sitemapIndex);
 
-  const rss = buildRssXml(group, getRecentCases(cases, RECENT_SITEMAP_DAYS, RSS_LIMIT), { limit: RSS_LIMIT });
+  const rss = buildRssXml(group, getRecentCases(groupCases, RECENT_SITEMAP_DAYS, RSS_LIMIT), { limit: RSS_LIMIT });
   await fs.outputFile(path.join(group.outDir, "rss.xml"), rss);
 
   await fs.outputFile(path.join(group.outDir, "robots.txt"), `User-agent: *
@@ -2140,7 +2146,7 @@ Sitemap: ${group.siteUrl}/sitemap.xml
   });
   await fs.outputFile(path.join(group.outDir, "privacy-policy", "index.html"), privacyHtml);
 
-  console.log(`[OK] generated ${cases.length} pages in dist-${group.key}/`);
+  console.log(`[OK] generated ${groupCases.length} pages in dist-${group.key}/`);
 }
 
 console.log("[OK] generated all group landing pages");

@@ -65,6 +65,12 @@ export function getLanding(item = {}, group = {}) {
   return item.landings?.[landingKey] || item.landings?.[group.key] || {};
 }
 
+export function isCaseAllowedForGroup(item = {}, group = {}) {
+  const targets = Array.isArray(item.targetGroups) ? item.targetGroups.filter(Boolean) : [];
+  if (!targets.length) return true;
+  return targets.includes(group.landingKey || group.key);
+}
+
 export function sortNewest(cases = []) {
   return [...cases].sort((a, b) => {
     const bd = b.updatedAt || b.createdAt || "";
@@ -92,7 +98,7 @@ export function buildSitemapXml(group, cases = [], options = {}) {
     ? [`  <url><loc>${escapeXml(base)}/${escapeXml(prefix)}/</loc><lastmod>${today}</lastmod><changefreq>hourly</changefreq><priority>${options.recent ? "1.0" : "0.8"}</priority></url>`]
     : [];
   const urls = cases
-    .filter((item) => item?.slug)
+    .filter((item) => item?.slug && isCaseAllowedForGroup(item, group))
     .map((item) => {
       const sourceLastmod = item.updatedAt || item.createdAt || today;
       const lastmod = options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
@@ -114,7 +120,7 @@ export function buildSitemapIndexXml(group, lastmod = kstDate()) {
 
 export function buildRssXml(group, cases = [], options = {}) {
   const base = group.siteUrl || `https://${group.host}`;
-  const items = sortNewest(cases).filter((item) => item?.slug).slice(0, options.limit || RSS_LIMIT);
+  const items = sortNewest(cases).filter((item) => item?.slug && isCaseAllowedForGroup(item, group)).slice(0, options.limit || RSS_LIMIT);
   const now = new Date();
   const channelTitle = `${group.label || "신규 사건"} 최신 목록`;
   const channelDescription = `${group.label || "신규 사건"} 신규 페이지와 최신 업데이트`;

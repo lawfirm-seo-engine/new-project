@@ -201,6 +201,7 @@ function buildIndexEntry(c) {
     createdAt: c.createdAt || "", updatedAt: c.updatedAt || "",
     thumbnailUrl: c.thumbnailUrl || "", landingViews: c.landingViews || 0,
     reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
+    targetGroups: c.targetGroups || [], createdBy: c.createdBy || "",
   };
 }
 
