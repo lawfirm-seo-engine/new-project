@@ -3463,7 +3463,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 158,
+    "landingViews": 157,
     "reports": 26,
     "summary": "EWBCPRO 사기 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -26023,6 +26023,27 @@
     "summary": "dukmongshop.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "dukmongshop.com",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "dakeumongsyab",
+    "caseName": "다크몽샵 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 1612,
+    "reports": 12,
+    "summary": "다크몽샵 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "다크몽샵",
       "사기",
       "사기피해",
       "피해금회수",
