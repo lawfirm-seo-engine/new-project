@@ -25409,5 +25409,24 @@
       "증거보존"
     ],
     "memo": ""
+  },
+  {
+    "slug": "lacp",
+    "caseName": "LACP 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-06-24",
+    "thumbnailUrl": "",
+    "landingViews": 4485,
+    "reports": 29,
+    "summary": "LACP 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "LACP",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": ""
   }
 ]
