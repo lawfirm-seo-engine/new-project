@@ -707,7 +707,6 @@ function renderLanding(caseData, group, origin) {
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${esc(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
-    `<link rel="preload" as="image" href="/assets/og-template.png">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
     `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
     `<meta property="og:image:alt" content="${esc(pageTitle)}">`,
