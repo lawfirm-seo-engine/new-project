@@ -33,6 +33,11 @@ export async function onRequestPost(context) {
       cases[idx].landings[groupKey][field] = value;
       cases[idx].updatedAt = now;
 
+    } else if (action === "save-landings") {
+      if (!value || typeof value !== "object") return json({ ok: false, message: "landings 객체 필수" }, 400);
+      cases[idx].landings = value;
+      cases[idx].updatedAt = now;
+
     } else if (action === "rename") {
       const newName = String(value || "").trim();
       if (!newName) return json({ ok: false, message: "새 사건명 필수" }, 400);
@@ -85,9 +90,20 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
-    // KV 업데이트
+    // KV 업데이트 — rename 시 기존 KV의 landings 보존
     if (env.CASES) {
-      await env.CASES.put(`case:${slug}`, JSON.stringify(cases[idx]));
+      let kvEntry = cases[idx];
+      if (action === "rename" || action === "set-noindex" || action === "update-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
+        const existing = await env.CASES.get(`case:${slug}`);
+        if (existing) {
+          const existingParsed = JSON.parse(existing);
+          kvEntry = { ...existingParsed, ...cases[idx] };
+          if (existingParsed.landings && !cases[idx].landings) {
+            kvEntry.landings = existingParsed.landings;
+          }
+        }
+      }
+      await env.CASES.put(`case:${slug}`, JSON.stringify(kvEntry));
       const idxRaw = await env.CASES.get("cases:index");
       if (idxRaw) {
         const indexArr = JSON.parse(idxRaw);
