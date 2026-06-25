@@ -8026,7 +8026,7 @@
     "createdAt": "2026-06-14",
     "updatedAt": "2026-06-14",
     "thumbnailUrl": "",
-    "landingViews": 3991,
+    "landingViews": 3990,
     "reports": 5,
     "summary": "피스피스스튜디오 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -15005,7 +15005,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 6498,
+    "landingViews": 6497,
     "reports": 32,
     "summary": "aurora-market.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -28331,27 +28331,6 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": ""
-  },
-  {
-    "slug": "종로보이스피싱변호사",
-    "caseName": "종로보이스피싱변호사",
-    "category": "리커버리 랜딩",
-    "createdAt": "2026-06-25",
-    "updatedAt": "2026-06-25",
-    "thumbnailUrl": "",
-    "landingViews": 0,
-    "reports": 0,
-    "summary": "종로보이스피싱 피해를 입으셨다면 종로보이스피싱변호사의 조력을 통한 초기 대응이 중요합니다. 지급정지, 계좌추적, 가압류, 손해배상청구 등 피해 회복을 위한 대응 방향을 검토하고 사건별 맞춤 전략을 안내해 드립니다.",
-    "tags": [
-      "리커버리",
-      "성공사례"
-    ],
-    "memo": "",
-    "noindex": false,
-    "targetGroups": [
-      "c"
-    ],
-    "createdBy": "recovery-manual"
   },
   {
     "slug": "the-winehouse-com",
