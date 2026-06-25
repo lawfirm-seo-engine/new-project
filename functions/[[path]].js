@@ -871,7 +871,9 @@ function renderLanding(caseData, group, origin) {
 
   const ogThumbnail = "";
 
-  const content = createLandingContent(landing, group, caseData);
+  const content = caseData.createdBy === "recovery-manual"
+    ? createRecoveryManualContent(landing, group, caseData)
+    : createLandingContent(landing, group, caseData);
   const footerLinks = CROSS_LINKS.map((l) => {
     const active = l.key === group.key ? "is-active" : "";
     return `<a class="${active}" href="${l.url}/">${esc(l.label)}</a>`;
@@ -949,6 +951,26 @@ function createFallbackLanding(caseData, group, key) {
     victimCases: fallbackVictimCases(key),
     faq: fallbackFaq(caseName, base, key),
   };
+}
+
+function createRecoveryManualContent(landing, group, caseData) {
+  const cn = esc(normalizeCaseName(caseData.caseName));
+  const siteName = esc(group.siteName);
+  const slug = esc(caseData.slug);
+  const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
+  const bodyHtml = Array.isArray(landing.body)
+    ? landing.body.map((p) => `<p>${esc(p)}</p>`).join("\n")
+    : renderManualArticle(String(landing.body || ""));
+  const memoSection = caseData.memo
+    ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${esc(caseData.memo)}</p></section>`
+    : "";
+  return [
+    `<section class="article-block">${bodyHtml}</section>`,
+    memoSection,
+    createConsultForm(cn, siteName),
+    createFloatingWidgets(cn, siteName, slug),
+    trackScript,
+  ].filter(Boolean).join("\n");
 }
 
 function createLandingContent(landing, group, caseData) {
