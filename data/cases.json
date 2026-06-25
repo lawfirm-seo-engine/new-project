@@ -17203,7 +17203,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 7812,
+    "landingViews": 7811,
     "reports": 34,
     "summary": "interrap.shop 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -28516,6 +28516,28 @@
     "tags": [
       "강하린",
       "매니저",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "gblks-fx",
+    "caseName": "GBLKS FX 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-25",
+    "updatedAt": "2026-06-25",
+    "thumbnailUrl": "",
+    "landingViews": 4537,
+    "reports": 10,
+    "summary": "GBLKS FX 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "GBLKS",
+      "FX",
       "사기",
       "사기피해",
       "피해금회수",
