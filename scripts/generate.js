@@ -118,7 +118,7 @@ const groups = [
     ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
     ctaLabel: "사례 비교 문의",
     tableTitle: "성공사례 진행 현황",
-    naverVerification: "c6bcb9fcd45bfd0c4306d625e2484f60f7f96099",
+    naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"],
   },
   {
     key: "d",
@@ -1263,7 +1263,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     `<link rel="icon" type="image/x-icon" href="/assets/favicon.ico">`,
     `<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">`,
     `<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">`,
-    ...(group.naverVerification ? [`<meta name="naver-site-verification" content="${group.naverVerification}">`] : []),
+    ...(group.naverVerification ? (Array.isArray(group.naverVerification) ? group.naverVerification : [group.naverVerification]).map((v) => `<meta name="naver-site-verification" content="${v}">`) : []),
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,

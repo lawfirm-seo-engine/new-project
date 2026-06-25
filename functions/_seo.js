@@ -19,7 +19,7 @@ export function powerlinkOgImageUrl(slug = "landing") {
 export const GROUPS = [
   { host: "gnlaw-criminal.co.kr", key: "a", landingKey: "a", prefix: "prosecute", suffix: "litigation", label: "형사고소", siteUrl: "https://gnlaw-criminal.co.kr" },
   { host: "gnlaw-civil.co.kr", key: "b", landingKey: "b", prefix: "civil", suffix: "settlement", label: "민사소송", siteUrl: "https://gnlaw-civil.co.kr" },
-  { host: "gnlaw-recovery.co.kr", key: "c", landingKey: "c", prefix: "success", suffix: "result", label: "성공사례", siteUrl: "https://gnlaw-recovery.co.kr" },
+  { host: "gnlaw-recovery.co.kr", key: "c", landingKey: "c", prefix: "success", suffix: "result", label: "성공사례", siteUrl: "https://gnlaw-recovery.co.kr", naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"] },
   { host: "gnlaw-case.co.kr", key: "d", landingKey: "d", prefix: "briefing", suffix: "review", label: "사건브리핑", siteUrl: "https://gnlaw-case.co.kr" },
   { host: "gnlaw-center.co.kr", key: "e", landingKey: "e", prefix: "case", suffix: "issue", label: "사건현황", siteUrl: "https://gnlaw-center.co.kr" },
   { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", key: "la", landingKey: "la", prefix: "criminal", suffix: "legal-action", label: "법적조치", siteUrl: "https://xn--jj0b0cw1o75qwua31zyfp19e.kr" },

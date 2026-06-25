@@ -49,7 +49,7 @@ const GROUPS = {
     ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
     ctaLabel: "사례 비교 문의", ogType: "article",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
-    naverVerification: "c6bcb9fcd45bfd0c4306d625e2484f60f7f96099",
+    naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"],
     siteUrl: "https://gnlaw-recovery.co.kr",
   },
   "gnlaw-case.co.kr": {
@@ -714,7 +714,7 @@ function renderLanding(caseData, group, origin) {
     `<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">`,
     `<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">`,
     `<link rel="alternate" hreflang="ko" href="${canonical}">`,
-    group.naverVerification ? `<meta name="naver-site-verification" content="${group.naverVerification}">` : "",
+    ...(group.naverVerification ? (Array.isArray(group.naverVerification) ? group.naverVerification : [group.naverVerification]).map((v) => `<meta name="naver-site-verification" content="${v}">`) : []),
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${esc(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
