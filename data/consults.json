@@ -286,5 +286,14 @@
     "caseName": "ZentloX 사기",
     "domain": "피해 사건 정보",
     "createdAt": "2026. 6. 24. 오후 4:59:04"
+  },
+  {
+    "id": 1782427258025,
+    "name": "허은실",
+    "phone": "01020478588",
+    "amount": "20000000",
+    "caseName": "aurumgoldex.com 사기",
+    "domain": "피해금 추적 법률센터",
+    "createdAt": "2026. 6. 26. 오전 7:40:57"
   }
 ]
