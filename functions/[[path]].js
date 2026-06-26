@@ -1897,7 +1897,8 @@ function primaryCaseKeyword(name) {
   const clean = baseCaseName(name);
   const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
   if (match) return match[1].trim();
-  return clean ? `${clean} 사기` : "";
+  const suffix = /사칭/.test(String(name || "")) ? "사칭 사기" : "사기";
+  return clean ? `${clean} ${suffix}` : "";
 }
 
 function secondaryCaseKeyword(name) {
@@ -1953,7 +1954,8 @@ function searchKeyword(name) {
   const base = primaryCaseKeyword(name);
   const secondary = secondaryCaseKeyword(name).replace(/\s*피해 대응$/, "");
   const secondaryExtra = secondary && !/사칭$/.test(secondary.trim()) ? `${secondary} 사칭` : "";
-  return [base, `${base} 형사고소`, `${base} 민사소송`, secondary, secondaryExtra].filter(Boolean).join(", ");
+  const sagiVariant = /사칭/.test(String(name || "")) ? `${baseCaseName(name)} 사기` : "";
+  return [base, `${base} 형사고소`, `${base} 민사소송`, sagiVariant, secondary, secondaryExtra].filter(Boolean).join(", ");
 }
 
 function themeColor(key) {

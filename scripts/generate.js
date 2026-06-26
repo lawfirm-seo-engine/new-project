@@ -1758,7 +1758,8 @@ function primaryCaseKeyword(name) {
   const clean = baseCaseName(name);
   const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
   if (match) return match[1].trim();
-  return clean ? `${clean} 사기` : "";
+  const suffix = /사칭/.test(String(name || "")) ? "사칭 사기" : "사기";
+  return clean ? `${clean} ${suffix}` : "";
 }
 
 function secondaryCaseKeyword(name) {
