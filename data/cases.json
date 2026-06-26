@@ -138,7 +138,7 @@
     "createdAt": "2026-05-21",
     "updatedAt": "2026-05-21",
     "thumbnailUrl": "",
-    "landingViews": 1114,
+    "landingViews": 1113,
     "reports": 4,
     "summary": "DBAXIS 사기 증권사 사칭 리딩방 사칭 사건에 대한 형사고소 절차, 민사소송 대응 방법, 실제 성공 사례, 사건 정보, 종합 안내를 제공합니다. 피해자들은 경찰 고소부터 손해배상 청구, 증거 확보까지 단계별 전략을 이해하고 실질적 대응을 준비할 수 있습니다.",
     "tags": [
@@ -11260,7 +11260,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 3045,
+    "landingViews": 3044,
     "reports": 9,
     "summary": "Trade by Art 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29137,7 +29137,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 3437,
+    "landingViews": 3435,
     "reports": 9,
     "summary": "EPIPHANY 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29159,7 +29159,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 5297,
+    "landingViews": 5295,
     "reports": 16,
     "summary": "bydoxe 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29181,7 +29181,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 3592,
+    "landingViews": 3590,
     "reports": 19,
     "summary": "바이독스 거래소 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29204,7 +29204,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 3373,
+    "landingViews": 3371,
     "reports": 20,
     "summary": "Velocity Clearing 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29227,7 +29227,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 1851,
+    "landingViews": 1849,
     "reports": 19,
     "summary": "이클립스 프로젝트 2기 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29250,7 +29250,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 2448,
+    "landingViews": 2446,
     "reports": 12,
     "summary": "패턴 연구소 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29273,7 +29273,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 699,
+    "landingViews": 697,
     "reports": 11,
     "summary": "U28 학습 실행 모임 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29281,6 +29281,28 @@
       "학습",
       "실행",
       "모임",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "berrositikeurrieoring",
+    "caseName": "벨로시티클리어링 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "thumbnailUrl": "",
+    "landingViews": 2320,
+    "reports": 30,
+    "summary": "벨로시티클리어링 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "벨로시티클리어링",
+      "사칭",
+      "사기",
       "사기피해",
       "피해금회수",
       "증거보존"
