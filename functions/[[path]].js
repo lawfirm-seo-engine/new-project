@@ -1886,8 +1886,7 @@ function normalizeCaseName(name) {
   const str = String(name || "").trim();
   if (/사기$/.test(str)) return str;
   const clean = str.replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
-  const suffix = /사칭/.test(str) ? "사칭 사기" : "사기";
-  return /사기/.test(clean) ? clean : `${clean} ${suffix}`;
+  return /사기/.test(clean) ? clean : `${clean} 사칭 사기`;
 }
 
 function baseCaseName(name) {
@@ -1898,8 +1897,7 @@ function primaryCaseKeyword(name) {
   const clean = baseCaseName(name);
   const match = clean.match(/^(.+?사기)(?:\s+.+)?$/i);
   if (match) return match[1].trim();
-  const suffix = /사칭/.test(String(name || "")) ? "사칭 사기" : "사기";
-  return clean ? `${clean} ${suffix}` : "";
+  return clean ? `${clean} 사기` : "";
 }
 
 function secondaryCaseKeyword(name) {
