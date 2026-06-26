@@ -1,6 +1,6 @@
 import { OG_IMAGE_VERSION, caseOgImageUrl, powerlinkOgImageUrl } from "../_seo.js";
 
-const EDGE_CACHE_SECONDS = 60 * 60 * 24 * 7;
+const REDIRECT_CACHE_SECONDS = 60 * 60 * 24 * 7;
 
 export async function onRequest(context) {
   const { request } = context;
@@ -23,47 +23,14 @@ export async function onRequest(context) {
     return Response.redirect(destination, 302);
   }
 
-  const headers = imageHeaders(rawSlug || "landing");
-  if (method === "HEAD") return new Response(null, { status: 200, headers });
-
-  const template = await fetch(`${url.origin}/assets/og-template.png?v=${OG_IMAGE_VERSION}`, {
-    cf: {
-      cacheEverything: true,
-      cacheTtl: EDGE_CACHE_SECONDS,
+  const destination = `${url.origin}/assets/og-template.png`;
+  return new Response(null, {
+    status: 301,
+    headers: {
+      "Location": destination,
+      "Cache-Control": `public, max-age=${REDIRECT_CACHE_SECONDS}, s-maxage=${REDIRECT_CACHE_SECONDS}`,
+      "CDN-Cache-Control": `public, max-age=${REDIRECT_CACHE_SECONDS}`,
+      "Access-Control-Allow-Origin": "*",
     },
   });
-
-  if (!template.ok) {
-    return new Response("OG template fetch failed", {
-      status: template.status || 502,
-      headers: {
-        "Cache-Control": "no-store",
-        "Content-Type": "text/plain; charset=utf-8",
-        "X-Robots-Tag": "noindex",
-      },
-    });
-  }
-
-  return new Response(template.body, { status: 200, headers });
-}
-
-function imageHeaders(slug = "landing") {
-  return {
-    "Content-Type": "image/png",
-    "Cache-Control": `public, max-age=${EDGE_CACHE_SECONDS}, s-maxage=${EDGE_CACHE_SECONDS}, immutable`,
-    "CDN-Cache-Control": `public, max-age=${EDGE_CACHE_SECONDS}`,
-    "Cloudflare-CDN-Cache-Control": `public, max-age=${EDGE_CACHE_SECONDS}`,
-    "X-Content-Type-Options": "nosniff",
-    "Access-Control-Allow-Origin": "*",
-    "ETag": `"og-template-${simpleHash(`${slug}-${OG_IMAGE_VERSION}`)}"`,
-  };
-}
-
-function simpleHash(value = "") {
-  let hash = 2166136261;
-  for (const char of String(value || "")) {
-    hash ^= char.charCodeAt(0);
-    hash = Math.imul(hash, 16777619);
-  }
-  return (hash >>> 0).toString(36);
 }

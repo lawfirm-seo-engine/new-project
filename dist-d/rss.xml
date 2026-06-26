@@ -6,7 +6,18 @@
     <atom:link href="https://gnlaw-case.co.kr/rss.xml" rel="self" type="application/rss+xml" />
     <description>정보형 신규 페이지와 최신 업데이트</description>
     <language>ko-KR</language>
-    <lastBuildDate>Fri, 26 Jun 2026 15:28:14 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 26 Jun 2026 15:51:40 GMT</lastBuildDate>
+    <item>
+      <title>루노코브마켓 사칭 사기 사건브리핑</title>
+      <link>https://gnlaw-case.co.kr/briefing/runokobeumakes-review/</link>
+      <guid isPermaLink="true">https://gnlaw-case.co.kr/briefing/runokobeumakes-review/</guid>
+      <description>루노코브마켓 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.</description>
+      <pubDate>Fri, 26 Jun 2026 15:00:00 GMT</pubDate>
+      <category>정보형</category>
+      <content:encoded><![CDATA[<h1>루노코브마켓 사칭 사기 사건브리핑</h1>
+<p>루노코브마켓 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.</p>
+<p><a href="https://gnlaw-case.co.kr/briefing/runokobeumakes-review/">https://gnlaw-case.co.kr/briefing/runokobeumakes-review/</a></p>]]></content:encoded>
+    </item>
     <item>
       <title>주식회사 이열 사칭 사기 사건브리핑</title>
       <link>https://gnlaw-case.co.kr/briefing/jusighoesa-iyeor-review/</link>
@@ -1315,17 +1326,6 @@
       <content:encoded><![CDATA[<h1>zencoopaa 사기 사건브리핑</h1>
 <p>zencoopaa 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.</p>
 <p><a href="https://gnlaw-case.co.kr/briefing/zencoopaa-review/">https://gnlaw-case.co.kr/briefing/zencoopaa-review/</a></p>]]></content:encoded>
-    </item>
-    <item>
-      <title>fulaca 사기 사건브리핑</title>
-      <link>https://gnlaw-case.co.kr/briefing/fulaca-review/</link>
-      <guid isPermaLink="true">https://gnlaw-case.co.kr/briefing/fulaca-review/</guid>
-      <description>fulaca 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.</description>
-      <pubDate>Tue, 23 Jun 2026 15:00:00 GMT</pubDate>
-      <category>정보형</category>
-      <content:encoded><![CDATA[<h1>fulaca 사기 사건브리핑</h1>
-<p>fulaca 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.</p>
-<p><a href="https://gnlaw-case.co.kr/briefing/fulaca-review/">https://gnlaw-case.co.kr/briefing/fulaca-review/</a></p>]]></content:encoded>
     </item>
   </channel>
 </rss>
