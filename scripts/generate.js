@@ -1455,7 +1455,7 @@ function createHubContent(group) {
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-  function normName(n){var c=String(n||'').trim().replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c:c+' 사기';}
+  function normName(n){var s=String(n||'').trim();if(/사기$/.test(s))return s;var c=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c:c+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
   function landingPath(slug){var extra=NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
   function getStatus(slug){if(GKEY==='c'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
