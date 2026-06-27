@@ -3525,7 +3525,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 2453,
+    "landingViews": 2452,
     "reports": 17,
     "summary": "아람투자그룹 사기 금 채굴 투자 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -6996,7 +6996,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 5179,
+    "landingViews": 5178,
     "reports": 14,
     "summary": "chenjimarket.shop 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -13859,7 +13859,7 @@
     "createdAt": "2026-06-19",
     "updatedAt": "2026-06-19",
     "thumbnailUrl": "",
-    "landingViews": 3049,
+    "landingViews": 3048,
     "reports": 13,
     "summary": "2026년 행복 노후 플랜 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -15714,7 +15714,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 4224,
+    "landingViews": 4223,
     "reports": 30,
     "summary": "QBB라이브방송 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29384,7 +29384,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 3552,
+    "landingViews": 3549,
     "reports": 4,
     "summary": "ya-noljaticket.com 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -29407,12 +29407,35 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 6838,
+    "landingViews": 6835,
     "reports": 27,
     "summary": "바람의 방향 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "바람의",
       "방향",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "hansanghui-timjang",
+    "caseName": "한상희 팀장 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "thumbnailUrl": "",
+    "landingViews": 3803,
+    "reports": 19,
+    "summary": "한상희 팀장 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "한상희",
+      "팀장",
       "사칭",
       "사기",
       "사기피해",
