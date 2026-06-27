@@ -73,8 +73,12 @@ export async function onRequestPost(context) {
       }
 
       const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
-      context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
-      context.waitUntil?.(warmLandingCaches(slug).catch(() => {}));
+      // warmLandingCaches 완료 후 pingIndexNow — Naver가 크롤할 때 og:image가 CDN에 캐시된 상태 보장
+      context.waitUntil?.(
+        warmLandingCaches(slug)
+          .catch(() => {})
+          .then(() => pingIndexNow(slug, indexNowKey).catch(() => {})),
+      );
 
       return json({
         ok: true,
@@ -150,8 +154,12 @@ export async function onRequestPost(context) {
     }
 
     const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
-    context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
-    context.waitUntil?.(warmLandingCaches(slug).catch(() => {}));
+    // warmLandingCaches 완료 후 pingIndexNow — Naver가 크롤할 때 og:image가 CDN에 캐시된 상태 보장
+    context.waitUntil?.(
+      warmLandingCaches(slug)
+        .catch(() => {})
+        .then(() => pingIndexNow(slug, indexNowKey).catch(() => {})),
+    );
 
     return json({
       ok: true,
