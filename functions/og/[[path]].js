@@ -1,19 +1,20 @@
+// CF Workers requires WASM to be statically imported (bundled at deploy time).
+// Dynamic fetch+instantiate is blocked: "Wasm code generation disallowed by embedder"
+import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
 import { OG_IMAGE_VERSION } from "../_seo.js";
 
-// Pretendard OTF (supports Korean) — cached in Worker isolate memory
 const FONT_KV_KEY = "og:font:pretendard-v1";
 const FONT_CDN_URL =
   "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Regular.otf";
 const IMG_CACHE_TTL = 60 * 60 * 24 * 60; // 60 days
 
-let wasmInitPromise = null;
+// Isolate-level singletons
+let initPromise = null;
 let fontBuffer = null;
 
 async function getFont(env) {
   if (fontBuffer) return fontBuffer;
-
-  // Try KV cache first
   try {
     const kv = await env.CASES.get(FONT_KV_KEY, { type: "arrayBuffer" });
     if (kv && kv.byteLength > 100_000) {
@@ -21,39 +22,26 @@ async function getFont(env) {
       return fontBuffer;
     }
   } catch (_) {}
-
-  // Download from CDN (once per environment)
   const resp = await fetch(FONT_CDN_URL);
   if (!resp.ok) throw new Error(`Font CDN ${resp.status}`);
   const buf = await resp.arrayBuffer();
   fontBuffer = new Uint8Array(buf);
-
-  // Store in KV — fire-and-forget
+  // Cache in KV — fire-and-forget
   env.CASES.put(FONT_KV_KEY, buf).catch(() => {});
-
   return fontBuffer;
 }
 
-async function ensureWasm(env, origin) {
-  if (wasmInitPromise) return wasmInitPromise;
-
-  wasmInitPromise = (async () => {
-    const [wasmBuf, font] = await Promise.all([
-      fetch(`${origin}/assets/og-resvg.wasm`).then((r) => {
-        if (!r.ok) throw new Error(`WASM fetch ${r.status}`);
-        return r.arrayBuffer();
-      }),
-      getFont(env),
-    ]);
-    await initWasm(wasmBuf);
-    fontBuffer = font instanceof Uint8Array ? font : new Uint8Array(font);
+function ensureInit(env) {
+  if (initPromise) return initPromise;
+  initPromise = (async () => {
+    // resvgWasm is a WebAssembly.Module pre-compiled by wrangler at deploy time
+    await initWasm(resvgWasm);
+    await getFont(env);
   })().catch((err) => {
-    // Allow retry on next request if init failed
-    wasmInitPromise = null;
+    initPromise = null; // allow retry
     throw err;
   });
-
-  return wasmInitPromise;
+  return initPromise;
 }
 
 function normCaseName(raw) {
@@ -124,16 +112,18 @@ export async function onRequest(context) {
 
   const url = new URL(request.url);
   const rawName = decodeURIComponent(url.pathname.split("/").pop() || "");
+  const isDebug = url.searchParams.get("debug") === "1";
 
-  // Accept .png and .webp; redirect anything else
   const isPng = /\.png$/i.test(rawName);
   const isWebp = /\.webp$/i.test(rawName);
   if (!isPng && !isWebp) {
     const base = rawName.replace(/\.[^.]*$/, "");
-    return Response.redirect(`${url.origin}/og/${encodeURIComponent(base)}.png?v=${OG_IMAGE_VERSION}`, 302);
+    return Response.redirect(
+      `${url.origin}/og/${encodeURIComponent(base)}.png?v=${OG_IMAGE_VERSION}`,
+      302,
+    );
   }
 
-  // Normalise slug
   const rawSlug = rawName.replace(/\.(png|webp)$/i, "").slice(0, 180);
   const isPowerlink = rawSlug.startsWith("powerlink-");
   const slug = isPowerlink ? rawSlug.slice("powerlink-".length) : rawSlug;
@@ -147,7 +137,10 @@ export async function onRequest(context) {
   try {
     const cached = await env.CASES.get(cacheKey, { type: "arrayBuffer" });
     if (cached && cached.byteLength > 1000) {
-      return new Response(cached, { status: 200, headers: { ...CACHE_HEADERS, "X-Cache": "HIT" } });
+      return new Response(cached, {
+        status: 200,
+        headers: { ...CACHE_HEADERS, "X-Cache": "HIT" },
+      });
     }
   } catch (_) {}
 
@@ -163,7 +156,7 @@ export async function onRequest(context) {
 
   // Generate image
   try {
-    await ensureWasm(env, url.origin);
+    await ensureInit(env);
 
     const svg = buildSvg(caseName);
     const resvg = new Resvg(svg, {
@@ -176,17 +169,25 @@ export async function onRequest(context) {
     const rendered = resvg.render();
     const png = rendered.asPng();
 
-    // Cache in KV (fire-and-forget)
     if (context.waitUntil) {
       context.waitUntil(
         env.CASES.put(cacheKey, png.buffer, { expirationTtl: IMG_CACHE_TTL }).catch(() => {}),
       );
     }
 
-    return new Response(png, { status: 200, headers: { ...CACHE_HEADERS, "X-Cache": "MISS" } });
+    return new Response(png, {
+      status: 200,
+      headers: { ...CACHE_HEADERS, "X-Cache": "MISS" },
+    });
   } catch (err) {
-    // Graceful fallback — serve template image
-    console.error("[og] generation failed:", err?.message);
+    const msg = err?.stack || err?.message || String(err);
+    console.error("[og] generation failed:", msg);
+    if (isDebug) {
+      return new Response(`ERROR: ${msg}\ncaseName=${caseName}\nslug=${slug}`, {
+        status: 500,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
+    }
     return Response.redirect(`${url.origin}/assets/og-template.webp`, 302);
   }
 }
