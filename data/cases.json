@@ -29762,5 +29762,28 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": ""
+  },
+  {
+    "slug": "ripeur-seuteiking-bosang",
+    "caseName": "리플 스테이킹 보상 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-28",
+    "updatedAt": "2026-06-28",
+    "thumbnailUrl": "",
+    "landingViews": 3277,
+    "reports": 22,
+    "summary": "리플 스테이킹 보상 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "리플",
+      "스테이킹",
+      "보상",
+      "사칭",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
   }
 ]
