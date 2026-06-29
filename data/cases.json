@@ -15714,7 +15714,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 4224,
+    "landingViews": 4223,
     "reports": 30,
     "summary": "QBB라이브방송 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -17108,7 +17108,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 5794,
+    "landingViews": 5793,
     "reports": 25,
     "summary": "베나티아스토어 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -30866,7 +30866,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 4494,
+    "landingViews": 4493,
     "reports": 31,
     "summary": "렌스티비 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31093,6 +31093,29 @@
     "tags": [
       "ValM",
       "Pro",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "btse-token",
+    "caseName": "BTSE TOKEN 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 1147,
+    "reports": 15,
+    "summary": "BTSE TOKEN 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "BTSE",
+      "TOKEN",
       "사칭",
       "사기",
       "사기피해",
