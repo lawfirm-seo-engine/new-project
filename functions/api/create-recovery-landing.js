@@ -60,7 +60,7 @@ export async function onRequestPost(context) {
       createdAt: existing?.createdAt || now,
       updatedAt: now,
       thumbnailUrl: existing?.thumbnailUrl || "",
-      landingViews: Number.isInteger(existing?.landingViews) ? existing.landingViews : 0,
+      landingViews: Number.isInteger(existing?.landingViews) ? existing.landingViews : randomInt(140, 8000, slug),
       reports: Number.isInteger(existing?.reports) ? existing.reports : 0,
       summary,
       tags: normalizeTags(body.tags),
@@ -288,6 +288,14 @@ function normalizeTags(value) {
 
 function normalizeSpace(value = "") {
   return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function randomInt(min, max, seed) {
+  let hash = 0;
+  for (const char of seed) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  }
+  return min + (hash % (max - min + 1));
 }
 
 function today() {
