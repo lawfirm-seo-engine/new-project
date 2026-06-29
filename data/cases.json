@@ -31087,7 +31087,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 6383,
+    "landingViews": 6382,
     "reports": 18,
     "summary": "ValM Pro 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31155,7 +31155,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 4970,
+    "landingViews": 4969,
     "reports": 32,
     "summary": "트리온 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31177,7 +31177,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 4750,
+    "landingViews": 4749,
     "reports": 18,
     "summary": "Bltampro 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31289,7 +31289,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 6683,
+    "landingViews": 6682,
     "reports": 22,
     "summary": "ACE ETF 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31378,7 +31378,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 6868,
+    "landingViews": 6867,
     "reports": 12,
     "summary": "XMGPROGO 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31668,7 +31668,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 5022,
+    "landingViews": 5021,
     "reports": 26,
     "summary": "UniBest 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31959,7 +31959,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 2990,
+    "landingViews": 2989,
     "reports": 22,
     "summary": "제리샵 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32113,7 +32113,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 4652,
+    "landingViews": 4651,
     "reports": 32,
     "summary": "CHUM코인 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32469,7 +32469,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 7799,
+    "landingViews": 7798,
     "reports": 24,
     "summary": "TURNKEY 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32514,7 +32514,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 3236,
+    "landingViews": 3235,
     "reports": 25,
     "summary": "SUN'S 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32607,6 +32607,50 @@
     "summary": "silvoren 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "silvoren",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "jaehayeohaengsa",
+    "caseName": "재하여행사 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 716,
+    "reports": 32,
+    "summary": "재하여행사 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "재하여행사",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "thimpish",
+    "caseName": "thimpish 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 3730,
+    "reports": 23,
+    "summary": "thimpish 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "thimpish",
       "사칭",
       "사기",
       "사기피해",
