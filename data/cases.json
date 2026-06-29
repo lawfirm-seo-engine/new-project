@@ -31469,7 +31469,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 314,
+    "landingViews": 313,
     "reports": 23,
     "summary": "AP 인베스트 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31690,7 +31690,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 3730,
+    "landingViews": 3729,
     "reports": 15,
     "summary": "김창민 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32740,6 +32740,28 @@
     "summary": "LONELYSTA 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "LONELYSTA",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "brinsole",
+    "caseName": "brinsole 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 6906,
+    "reports": 24,
+    "summary": "brinsole 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "brinsole",
       "사칭",
       "사기",
       "사기피해",
