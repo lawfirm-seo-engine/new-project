@@ -29159,7 +29159,7 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "thumbnailUrl": "",
-    "landingViews": 5296,
+    "landingViews": 5295,
     "reports": 16,
     "summary": "bydoxe 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -30426,6 +30426,28 @@
     "tags": [
       "에스와이",
       "알파",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "maeirjusigjeongbonanum",
+    "caseName": "매일주식정보나눔 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 5330,
+    "reports": 24,
+    "summary": "매일주식정보나눔 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "매일주식정보나눔",
       "사칭",
       "사기",
       "사기피해",
