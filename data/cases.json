@@ -2105,7 +2105,7 @@
     "createdAt": "2026-05-29",
     "updatedAt": "2026-05-29",
     "thumbnailUrl": "",
-    "landingViews": 6278,
+    "landingViews": 6277,
     "reports": 6,
     "summary": "pluinmarket.shop 사기 사이트 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -7056,7 +7056,7 @@
     "createdAt": "2026-06-12",
     "updatedAt": "2026-06-12",
     "thumbnailUrl": "",
-    "landingViews": 5504,
+    "landingViews": 5503,
     "reports": 10,
     "summary": "염승환투자클럽 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -10810,7 +10810,7 @@
     "createdAt": "2026-06-16",
     "updatedAt": "2026-06-16",
     "thumbnailUrl": "",
-    "landingViews": 1627,
+    "landingViews": 1626,
     "reports": 10,
     "summary": "실버레이크 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32096,6 +32096,28 @@
     "summary": "지오미그룹 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "지오미그룹",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "chumkoin",
+    "caseName": "CHUM코인 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 4651,
+    "reports": 32,
+    "summary": "CHUM코인 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "CHUM코인",
       "사칭",
       "사기",
       "사기피해",
