@@ -9106,7 +9106,7 @@
     "createdAt": "2026-06-15",
     "updatedAt": "2026-06-15",
     "thumbnailUrl": "",
-    "landingViews": 6203,
+    "landingViews": 6202,
     "reports": 34,
     "summary": "지수투자의본질 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -15714,7 +15714,7 @@
     "createdAt": "2026-06-21",
     "updatedAt": "2026-06-21",
     "thumbnailUrl": "",
-    "landingViews": 4224,
+    "landingViews": 4223,
     "reports": 30,
     "summary": "QBB라이브방송 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -27336,7 +27336,7 @@
     "createdAt": "2026-06-25",
     "updatedAt": "2026-06-25",
     "thumbnailUrl": "",
-    "landingViews": 997,
+    "landingViews": 996,
     "reports": 21,
     "summary": "kzrexa.com 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31267,7 +31267,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 6993,
+    "landingViews": 6992,
     "reports": 24,
     "summary": "BX리더스클럽프로젝트 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31312,7 +31312,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 7711,
+    "landingViews": 7710,
     "reports": 16,
     "summary": "박두환의실전투자교실 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31757,7 +31757,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 2286,
+    "landingViews": 2285,
     "reports": 9,
     "summary": "홍콩 항셍 지수 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31915,7 +31915,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 1573,
+    "landingViews": 1572,
     "reports": 4,
     "summary": "로그인베스트먼트 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32158,7 +32158,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 267,
+    "landingViews": 266,
     "reports": 8,
     "summary": "지아이지인베스트먼트 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32313,7 +32313,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 4465,
+    "landingViews": 4464,
     "reports": 7,
     "summary": "Trend Hundter EA 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -33026,6 +33026,28 @@
     "summary": "smiledragon 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "smiledragon",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "altovmaxipo",
+    "caseName": "ALTOVMAXIPO 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 2001,
+    "reports": 29,
+    "summary": "ALTOVMAXIPO 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "ALTOVMAXIPO",
       "사칭",
       "사기",
       "사기피해",
