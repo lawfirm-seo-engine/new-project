@@ -30998,7 +30998,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 6459,
+    "landingViews": 6458,
     "reports": 18,
     "summary": "부영스라이브 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -31245,7 +31245,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 5593,
+    "landingViews": 5592,
     "reports": 32,
     "summary": "bitstampkorea.com 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32135,7 +32135,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 3453,
+    "landingViews": 3452,
     "reports": 24,
     "summary": "엘뱅크 거래소 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32358,7 +32358,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 6977,
+    "landingViews": 6976,
     "reports": 33,
     "summary": "dreamersw.com 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32447,7 +32447,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 3319,
+    "landingViews": 3318,
     "reports": 4,
     "summary": "필우커머스 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32491,7 +32491,7 @@
     "createdAt": "2026-06-29",
     "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
-    "landingViews": 2845,
+    "landingViews": 2844,
     "reports": 27,
     "summary": "Winsome Store 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -32916,6 +32916,50 @@
     "summary": "오늘의이야기밴드T6 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "오늘의이야기밴드T6",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "indegseubeurisji",
+    "caseName": "인덱스브릿지 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 3188,
+    "reports": 17,
+    "summary": "인덱스브릿지 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "인덱스브릿지",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "jaepaegseu",
+    "caseName": "재파엑스 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-06-29",
+    "thumbnailUrl": "",
+    "landingViews": 2372,
+    "reports": 29,
+    "summary": "재파엑스 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "재파엑스",
       "사칭",
       "사기",
       "사기피해",
