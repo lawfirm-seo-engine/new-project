@@ -698,6 +698,9 @@ function renderLanding(caseData, group, origin) {
   const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
   const seoDescription = createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
   const articleTags = createArticleTags(rawCaseName, lk);
+  const imageAlt = landing.imageAlt || pageTitle;
+  const imageCaption = landing.imageCaption || imageAlt;
+  const imageDescription = landing.imageDescription || seoDescription;
 
   const ogImageType = /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/png";
   const ogImageWidth = String(OG_IMAGE_WIDTH);
@@ -720,13 +723,16 @@ function renderLanding(caseData, group, origin) {
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
     `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
-    `<meta property="og:image:alt" content="${esc(pageTitle)}">`,
+    `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:type" content="${ogImageType}">`,
     `<meta property="og:image:width" content="${ogImageWidth}">`,
     `<meta property="og:image:height" content="${ogImageHeight}">`,
-    `<meta name="twitter:image:alt" content="${esc(pageTitle)}">`,
+    `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
     `<link rel="image_src" href="${esc(ogImage)}">`,
     `<meta itemprop="image" content="${esc(ogImage)}">`,
+    landing.imageAlt ? `<meta name="image:alt" content="${esc(imageAlt)}">` : "",
+    landing.imageCaption ? `<meta name="image:caption" content="${esc(imageCaption)}">` : "",
+    landing.imageDescription ? `<meta name="image:description" content="${esc(imageDescription)}">` : "",
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${esc(pageTitle)}">`,
     `<meta name="twitter:description" content="${esc(seoDescription)}">`,
@@ -787,7 +793,8 @@ function renderLanding(caseData, group, origin) {
         contentUrl: ogImage,
         width: Number(ogImageWidth),
         height: Number(ogImageHeight),
-        caption: pageTitle,
+        caption: imageCaption,
+        ...(landing.imageDescription ? { description: imageDescription } : {}),
         inLanguage: "ko-KR",
         representativeOfPage: true,
       },

@@ -23,6 +23,9 @@ export async function onRequestPost(context) {
     const articleBody = normalizeBody(body.body);
     const summary = normalizeSpace(body.summary || body.description).slice(0, 180)
       || `${title} 관련 회복 사례와 대응 흐름을 정리했습니다.`;
+    const imageAlt = normalizeSpace(body.imageAlt).slice(0, 160);
+    const imageCaption = normalizeSpace(body.imageCaption).slice(0, 220);
+    const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300);
 
     if (!title || !slug || !articleBody) {
       return json({ ok: false, message: "제목, URL slug, 원고는 필수입니다." }, 400);
@@ -45,6 +48,9 @@ export async function onRequestPost(context) {
       ogDescription: summary,
       ogImage: caseOgImageUrl(slug, RECOVERY_SITE_URL),
       h1,
+      ...(imageAlt ? { imageAlt } : {}),
+      ...(imageCaption ? { imageCaption } : {}),
+      ...(imageDescription ? { imageDescription } : {}),
       body: bodyToParagraphs(articleBody),
       victimCases: [],
       suspiciousCompanies: [],
