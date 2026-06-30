@@ -1,5 +1,5 @@
-// CF Workers requires WASM to be statically imported (bundled at deploy time).
-// Dynamic fetch+instantiate is blocked: "Wasm code generation disallowed by embedder"
+// Dynamic OG image renderer.
+// Uses the shared PNG template and renders the landing title inside the lower plaque.
 import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
 import { OG_IMAGE_VERSION } from "../_seo.js";
@@ -8,10 +8,13 @@ const FONT_KV_KEY = "og:font:pretendard-v1";
 const FONT_CDN_URL =
   "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Regular.otf";
 const IMG_CACHE_TTL = 60 * 60 * 24 * 60; // 60 days
+const TEMPLATE_PATH = "/assets/og-template.png";
+const TEMPLATE_WIDTH = 1254;
+const TEMPLATE_HEIGHT = 1254;
 
-// Isolate-level singletons
 let initPromise = null;
 let fontBuffer = null;
+let templateDataUri = null;
 
 async function getFont(env) {
   if (fontBuffer) return fontBuffer;
@@ -22,76 +25,125 @@ async function getFont(env) {
       return fontBuffer;
     }
   } catch (_) {}
-  const resp = await fetch(FONT_CDN_URL);
-  if (!resp.ok) throw new Error(`Font CDN ${resp.status}`);
-  const buf = await resp.arrayBuffer();
-  fontBuffer = new Uint8Array(buf);
-  // Cache in KV — fire-and-forget
-  env.CASES.put(FONT_KV_KEY, buf).catch(() => {});
+
+  const response = await fetch(FONT_CDN_URL);
+  if (!response.ok) throw new Error(`Font CDN ${response.status}`);
+  const buffer = await response.arrayBuffer();
+  fontBuffer = new Uint8Array(buffer);
+  env.CASES.put(FONT_KV_KEY, buffer).catch(() => {});
   return fontBuffer;
 }
 
 function ensureInit(env) {
   if (initPromise) return initPromise;
   initPromise = (async () => {
-    // resvgWasm is a WebAssembly.Module pre-compiled by wrangler at deploy time
     await initWasm(resvgWasm);
     await getFont(env);
-  })().catch((err) => {
-    initPromise = null; // allow retry
-    throw err;
+  })().catch((error) => {
+    initPromise = null;
+    throw error;
   });
   return initPromise;
 }
 
-function normCaseName(raw) {
-  const s = String(raw || "").trim();
-  if (/사기$/.test(s)) return s;
-  const c = s.replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
-  return /사기/.test(c) ? c : c + " 사칭 사기";
+async function getTemplateDataUri(origin) {
+  if (templateDataUri) return templateDataUri;
+  const response = await fetch(`${origin}${TEMPLATE_PATH}`, {
+    headers: { "Cache-Control": "no-cache" },
+  });
+  if (!response.ok) throw new Error(`OG template ${response.status}`);
+  const buffer = await response.arrayBuffer();
+  templateDataUri = `data:image/png;base64,${arrayBufferToBase64(buffer)}`;
+  return templateDataUri;
 }
 
-function escSvg(s) {
-  return String(s)
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+function cleanTitle(raw) {
+  return String(raw || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 48);
+}
+
+function humanizeSlug(slug) {
+  return cleanTitle(String(slug || "").replace(/[-_]+/g, " "));
+}
+
+function escSvg(value) {
+  return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
 
-function buildSvg(caseName) {
-  const MAX = 13;
-  let l1 = escSvg(caseName);
-  let l2 = "";
-  if (caseName.length > MAX) {
-    const mid = Math.ceil(caseName.length / 2);
-    l1 = escSvg(caseName.slice(0, mid));
-    l2 = escSvg(caseName.slice(mid));
-  }
-  const fs = l2 ? 72 : 80;
-  const y1 = l2 ? 510 : 570;
-  const y2 = y1 + fs + 16;
+function textUnits(value) {
+  return [...String(value || "")].reduce((sum, char) => {
+    if (/\s/.test(char)) return sum + 0.35;
+    if (/[A-Za-z0-9]/.test(char)) return sum + 0.58;
+    if (/[\uac00-\ud7a3]/.test(char)) return sum + 0.95;
+    return sum + 0.8;
+  }, 0);
+}
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254">
+function splitTitle(title) {
+  const clean = cleanTitle(title);
+  if (!clean) return ["법무법인 선린"];
+  if (textUnits(clean) <= 13.2) return [clean];
+
+  const chars = [...clean];
+  const total = textUnits(clean);
+  let best = Math.ceil(chars.length / 2);
+  let bestScore = Infinity;
+
+  for (let i = 4; i < chars.length - 3; i += 1) {
+    const left = chars.slice(0, i).join("");
+    const right = chars.slice(i).join("");
+    const score = Math.abs(textUnits(left) - total / 2) + Math.abs(textUnits(right) - total / 2);
+    if (score < bestScore) {
+      best = i;
+      bestScore = score;
+    }
+  }
+
+  return [chars.slice(0, best).join(""), chars.slice(best).join("")];
+}
+
+function buildSvg(title, templateHref) {
+  const lines = splitTitle(title);
+  const maxUnits = Math.max(...lines.map(textUnits), 1);
+  const fontSize = lines.length > 1
+    ? Math.min(82, Math.max(58, Math.floor(930 / maxUnits)))
+    : Math.min(108, Math.max(72, Math.floor(1005 / maxUnits)));
+  const lineGap = Math.round(fontSize * 0.18);
+  const lineHeight = fontSize + lineGap;
+  const centerY = 1127;
+  const firstY = centerY - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
+  const strokeWidth = Math.max(2, Math.round(fontSize * 0.035));
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" viewBox="0 0 ${TEMPLATE_WIDTH} ${TEMPLATE_HEIGHT}">
 <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="0.2" y2="1">
-    <stop offset="0%" stop-color="#0a1744"/>
-    <stop offset="100%" stop-color="#16237e"/>
+  <linearGradient id="goldText" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#fff0b3"/>
+    <stop offset="45%" stop-color="#f7c75f"/>
+    <stop offset="100%" stop-color="#b8791d"/>
   </linearGradient>
+  <filter id="textShadow" x="-20%" y="-40%" width="140%" height="180%">
+    <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000000" flood-opacity="0.85"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="1.6" flood-color="#fff3c2" flood-opacity="0.45"/>
+  </filter>
 </defs>
-<rect width="1254" height="1254" fill="url(#bg)"/>
-<rect x="0" y="0" width="10" height="1254" fill="#3949ab"/>
-<rect x="1244" y="0" width="10" height="1254" fill="#3949ab"/>
-<rect x="90" y="140" width="1074" height="3" fill="#3949ab" opacity="0.5"/>
-<rect x="90" y="1114" width="1074" height="3" fill="#3949ab" opacity="0.5"/>
-<text x="627" y="310" font-family="Pretendard,sans-serif" font-size="46" fill="#7986cb" text-anchor="middle">법무법인 선린</text>
-<text x="627" y="400" font-family="Pretendard,sans-serif" font-size="30" fill="#3d4db7" text-anchor="middle">피해금 추적 법률센터</text>
-<text x="627" y="${y1}" font-family="Pretendard,sans-serif" font-size="${fs}" fill="#ffffff" text-anchor="middle" font-weight="bold">${l1}</text>
-${l2 ? `<text x="627" y="${y2}" font-family="Pretendard,sans-serif" font-size="${fs}" fill="#ffffff" text-anchor="middle" font-weight="bold">${l2}</text>` : ""}
-<text x="627" y="760" font-family="Pretendard,sans-serif" font-size="34" fill="#5c6bc0" text-anchor="middle">피해금 추적 · 형사고소 · 민사소송</text>
-<rect x="320" y="860" width="614" height="2" fill="#3f51b5" opacity="0.4"/>
-<text x="627" y="960" font-family="Pretendard,sans-serif" font-size="50" fill="#e8eaf6" text-anchor="middle">02-6348-0406</text>
-<text x="627" y="1050" font-family="Pretendard,sans-serif" font-size="28" fill="#3d4db7" text-anchor="middle">gnlaw-criminal.co.kr</text>
+<image href="${templateHref}" x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" preserveAspectRatio="xMidYMid slice"/>
+${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="900" letter-spacing="0" fill="url(#goldText)" stroke="#3a2106" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
 </svg>`;
 }
 
@@ -129,11 +181,10 @@ export async function onRequest(context) {
   const slug = isPowerlink ? rawSlug.slice("powerlink-".length) : rawSlug;
 
   if (!slug || slug === "landing") {
-    return Response.redirect(`${url.origin}/assets/og-template.webp`, 302);
+    return Response.redirect(`${url.origin}${TEMPLATE_PATH}`, 302);
   }
 
-  // KV cache lookup
-  const cacheKey = `og:img:v${OG_IMAGE_VERSION}:${slug}`;
+  const cacheKey = `og:img:v${OG_IMAGE_VERSION}:${rawSlug}`;
   try {
     const cached = await env.CASES.get(cacheKey, { type: "arrayBuffer" });
     if (cached && cached.byteLength > 1000) {
@@ -144,21 +195,29 @@ export async function onRequest(context) {
     }
   } catch (_) {}
 
-  // Resolve case name
-  let caseName = slug;
+  let title = humanizeSlug(slug);
   try {
-    const raw = await env.CASES.get(`case:${slug}`);
+    const raw = isPowerlink
+      ? await env.CASES.get(`powerlink:${slug}`)
+      : await env.CASES.get(`case:${slug}`);
     if (raw) {
-      const d = JSON.parse(raw);
-      caseName = normCaseName(d.caseName || d.name || slug);
+      const data = JSON.parse(raw);
+      title = cleanTitle(
+        data.ogText ||
+        data.title ||
+        data.h1 ||
+        data.caseName ||
+        data.name ||
+        title,
+      );
     }
   } catch (_) {}
 
-  // Generate image
   try {
     await ensureInit(env);
 
-    const svg = buildSvg(caseName);
+    const templateHref = await getTemplateDataUri(url.origin);
+    const svg = buildSvg(title, templateHref);
     const resvg = new Resvg(svg, {
       font: {
         fontBuffers: [fontBuffer],
@@ -166,8 +225,7 @@ export async function onRequest(context) {
         loadSystemFonts: false,
       },
     });
-    const rendered = resvg.render();
-    const png = rendered.asPng();
+    const png = resvg.render().asPng();
 
     if (context.waitUntil) {
       context.waitUntil(
@@ -179,15 +237,15 @@ export async function onRequest(context) {
       status: 200,
       headers: { ...CACHE_HEADERS, "X-Cache": "MISS" },
     });
-  } catch (err) {
-    const msg = err?.stack || err?.message || String(err);
-    console.error("[og] generation failed:", msg);
+  } catch (error) {
+    const message = error?.stack || error?.message || String(error);
+    console.error("[og] generation failed:", message);
     if (isDebug) {
-      return new Response(`ERROR: ${msg}\ncaseName=${caseName}\nslug=${slug}`, {
+      return new Response(`ERROR: ${message}\ntitle=${title}\nslug=${slug}`, {
         status: 500,
         headers: { "Content-Type": "text/plain; charset=utf-8" },
       });
     }
-    return Response.redirect(`${url.origin}/assets/og-template.webp`, 302);
+    return Response.redirect(`${url.origin}${TEMPLATE_PATH}`, 302);
   }
 }
