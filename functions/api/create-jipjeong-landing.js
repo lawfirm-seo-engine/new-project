@@ -95,7 +95,8 @@ export async function onRequestPost(context) {
     const imageCaption = normalizeSpace(body.imageCaption).slice(0, 220);
     const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300);
 
-    const summary = substituteEntityStr(TEMPLATE_SUMMARY, TEMPLATE_ENTITY, newEntity);
+    const autoSummary = substituteEntityStr(TEMPLATE_SUMMARY, TEMPLATE_ENTITY, newEntity);
+    const summary = normalizeSpace(body.summary).slice(0, 180) || autoSummary;
 
     const existing = await loadExisting(env, slug);
     if (existing && !isJipjeongManual(existing)) {

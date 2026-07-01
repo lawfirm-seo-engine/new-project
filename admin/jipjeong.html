@@ -54,6 +54,10 @@
         <input id="slug" name="slug" type="text" placeholder="제목 입력 시 자동 생성" required>
       </div>
       <div class="field wide">
+        <label for="summary">메타 설명 <span class="hint">비워두면 자동 생성</span></label>
+        <textarea id="summary" name="summary" rows="3" placeholder="검색 결과와 공유 미리보기에 사용할 설명 (최대 180자)"></textarea>
+      </div>
+      <div class="field wide">
         <label for="imageAlt">이미지 Alt <span class="hint">비워두면 제목 사용</span></label>
         <input id="imageAlt" name="imageAlt" type="text" placeholder="og:image 대체 텍스트">
       </div>
@@ -142,6 +146,7 @@
         const payload = {
           title: String(titleEl.value || "").trim(),
           slug: normalizeSlug(slugEl.value || titleEl.value),
+          summary: String(document.getElementById("summary").value || "").trim(),
           imageAlt: String(document.getElementById("imageAlt").value || "").trim(),
           imageCaption: String(document.getElementById("imageCaption").value || "").trim(),
           imageDescription: String(document.getElementById("imageDescription").value || "").trim(),
