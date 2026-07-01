@@ -129,14 +129,7 @@ export async function onRequestPost(context) {
     const newRegion = extractRegion(title);
     const newAction = extractAction(title, newBank);
 
-    // KV에서 기존 지급정지 랜딩 참조 시도
-    let generatedBody;
-    if (env.CASES) {
-      const ref = await findJipjeongReferenceFromKv(env, newBank, newRegion, newAction);
-      generatedBody = ref || buildFromTemplate(newBank, newRegion, newAction);
-    } else {
-      generatedBody = buildFromTemplate(newBank, newRegion, newAction);
-    }
+    const generatedBody = buildFromTemplate(newBank, newRegion, newAction);
 
     if (isPreview) {
       return json({ ok: true, body: generatedBody, bank: newBank, region: newRegion, action: newAction });
