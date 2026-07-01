@@ -685,7 +685,7 @@ function renderLanding(caseData, group, origin) {
   const lk = group.landingKey ?? group.key;
   const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
   const rawCaseName = caseData.caseName || "";
-  const useManualRecoveryText = caseData.createdBy === "recovery-manual" && lk === "c";
+  const useManualRecoveryText = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual") && lk === "c";
   const pageTitle = useManualRecoveryText ? (landing.title || groupPageTitle(rawCaseName, lk)) : groupPageTitle(rawCaseName, lk);
   const pageH1 = useManualRecoveryText ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk)) : groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
@@ -884,7 +884,7 @@ function renderLanding(caseData, group, origin) {
 
   const ogThumbnail = "";
 
-  const content = caseData.createdBy === "recovery-manual"
+  const content = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual")
     ? createRecoveryManualContent(landing, group, caseData)
     : createLandingContent(landing, group, caseData);
   const footerLinks = CROSS_LINKS.map((l) => {
@@ -966,13 +966,36 @@ function createFallbackLanding(caseData, group, key) {
   };
 }
 
+function renderManualBodyArray(items) {
+  const parts = [];
+  let listBuf = [];
+  function flushList() {
+    if (!listBuf.length) return;
+    parts.push(`<ul>${listBuf.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>`);
+    listBuf = [];
+  }
+  for (const raw of items) {
+    const p = String(raw || "").trim();
+    if (!p) continue;
+    const h2 = p.match(/^##\s+(.+)/);
+    const h3 = p.match(/^###\s+(.+)/);
+    const li = p.match(/^[✔☐]\s+(.+)/);
+    if (h2) { flushList(); parts.push(`<h2>${esc(h2[1])}</h2>`); }
+    else if (h3) { flushList(); parts.push(`<h3>${esc(h3[1])}</h3>`); }
+    else if (li) { listBuf.push(li[1]); }
+    else { flushList(); parts.push(`<p>${esc(p)}</p>`); }
+  }
+  flushList();
+  return parts.join("\n");
+}
+
 function createRecoveryManualContent(landing, group, caseData) {
   const cn = esc(normalizeCaseName(caseData.caseName));
   const siteName = esc(group.siteName);
   const slug = esc(caseData.slug);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
   const bodyHtml = Array.isArray(landing.body)
-    ? landing.body.map((p) => `<p>${esc(p)}</p>`).join("\n")
+    ? renderManualBodyArray(landing.body)
     : renderManualArticle(String(landing.body || ""));
   const memoSection = caseData.memo
     ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${esc(caseData.memo)}</p></section>`

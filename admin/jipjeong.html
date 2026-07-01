@@ -72,6 +72,7 @@
 
       <div id="previewBox" class="preview-box">
         <h3>자동 생성 원고 미리보기 <span style="font-size:11px;color:#8a96a8">(기존 지급정지 페이지 참조)</span></h3>
+        <p id="extractedInfo" style="font-size:12px;color:#5a6a80;margin:0 0 8px;line-height:1.6"></p>
         <pre id="previewText"></pre>
       </div>
 
@@ -124,6 +125,8 @@
         const data = await res.json();
         if (!data.ok) { setMessage(data.message || "원고 추출 실패", "err"); return; }
         generatedBody = data.body;
+        document.getElementById("extractedInfo").textContent =
+          `인식된 은행명: ${data.bank || "—"}  /  지역명: ${data.region || "—"}  /  행위키워드: ${data.action || "—"}`;
         previewTextEl.textContent = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
         previewBoxEl.style.display = "block";
         submitButtonEl.disabled = false;
