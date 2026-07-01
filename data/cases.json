@@ -29172,7 +29172,8 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "noindex": true
   },
   {
     "slug": "baidogseu-georaeso",
