@@ -1114,21 +1114,13 @@ function createHeroTypingBlock(caseName) {
     const question = keyword ? `${keyword} 피해가 의심되나요?` : "사기 피해가 의심되나요?";
     return `<div class="hero-typing">
   <p class="hero-typing-q"><strong>${question}</strong></p>
-  <p class="hero-typing-s">추가 입금을 요구받고 있다면 즉시 중단하세요.</p>
-  <p class="hero-typing-l1">출금 지연, 세금·보증금 요구, 환전 제한은 금융사기에서 반복적으로 나타나는 대표적인 패턴입니다.</p>
-  <p class="hero-typing-l2">금융피해 대응센터 상담을 통해 현재 상황에 맞는 대응 절차를 확인해 보시기 바랍니다.</p>
-</div>
-<script>(function(){var CYCLE=9400;function restart(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.style.animation='none';l2.style.animation='none';void l1.offsetWidth;void l2.offsetWidth;l1.style.animation='';l2.style.animation='';setTimeout(restart,CYCLE);}setTimeout(restart,CYCLE);})();</script>`;
+</div>`;
   }
 
   const keyword = esc(seoCaseKeyword(caseName));
   return `<div class="hero-typing">
   <p class="hero-typing-q"><strong>${keyword} 사칭 피해가 의심되나요?</strong></p>
-  <p class="hero-typing-s">추가 입금을 요구받고 있다면 즉시 중단하세요.</p>
-  <p class="hero-typing-l1">출금 지연, 세금·보증금 요구, 환전 제한은 금융사기에서 반복적으로 나타나는 대표적인 패턴입니다.</p>
-  <p class="hero-typing-l2">금융피해 대응센터 상담을 통해 현재 상황에 맞는 대응 절차를 확인해 보시기 바랍니다.</p>
-</div>
-<script>(function(){var CYCLE=9400;function restart(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.style.animation='none';l2.style.animation='none';void l1.offsetWidth;void l2.offsetWidth;l1.style.animation='';l2.style.animation='';setTimeout(restart,CYCLE);}setTimeout(restart,CYCLE);})();</script>`;
+</div>`;
 }
 
 function createAeoOverviewSection(caseData, key, replacementContext) {
