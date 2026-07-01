@@ -1435,7 +1435,7 @@ function createHubContent(group) {
           <span class="case-title-wrap">
             <strong class="case-title">${displayTitle}</strong>${todayBadge}
           </span>
-          <span class="case-status">${statusLabel(group.key, item.slug)}</span>
+          <span class="case-status">${item.createdBy === "recovery-manual" ? "사건 접수 중" : statusLabel(group.landingKey || group.key, item.slug)}</span>
           <span class="case-date">${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
           <span class="case-views">${(item.landingViews || 0).toLocaleString("ko-KR")}</span>
         </a>`;
@@ -1458,7 +1458,7 @@ function createHubContent(group) {
   function normName(n){var s=String(n||'').trim();if(/사기$/.test(s))return s;var c=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c:c+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
   function landingPath(slug){var extra=NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
-  function getStatus(slug){if(GKEY==='c'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
+  function getStatus(slug,createdBy){if(createdBy==='recovery-manual'){return'사건 접수 중';}if(TARGET_KEY==='c'||TARGET_KEY==='lc'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
   function allowed(c){var t=Array.isArray(c&&c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
@@ -1572,7 +1572,7 @@ function createHubContent(group) {
             a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;a.dataset.date=entry._date;
             a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
-              +'<span class="case-status">'+esc(getStatus(item.slug))+'</span>'
+              +'<span class="case-status">'+esc(getStatus(item.slug,item.createdBy))+'</span>'
               +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'
               +'<span class="case-views">'+((item.landingViews||0).toLocaleString('ko-KR'))+'</span>';
             insertSorted(wrap,a,entry._date);
@@ -1818,7 +1818,7 @@ function searchKeyword(name) {
 }
 
 function statusLabel(key, seed = key) {
-  if (key === "c") {
+  if (key === "c" || key === "lc") {
     return seededInt(`${seed}-success-full`, 1, 100) <= 25
       ? "전액 회수"
       : `${seededInt(`${seed}-success-rate`, 48, 97)}% 회수`;

@@ -215,7 +215,7 @@ function buildIndexEntry(c) {
 
 async function warmLandingCaches(slug) {
   await Promise.allSettled(
-    GROUPS.flatMap((group) => [
+    GROUPS.filter((g) => g.host !== "gnlaw-recovery.co.kr").flatMap((group) => [
       fetch(caseOgImageUrl(slug, group.siteUrl), { method: "GET" }),
       fetch(buildLandingUrl(group, slug), { method: "GET" }),
     ]),
@@ -224,7 +224,7 @@ async function warmLandingCaches(slug) {
 
 async function pingIndexNow(slug, key) {
   const results = await Promise.allSettled(
-    GROUPS.map(async (group) => {
+    GROUPS.filter((g) => g.host !== "gnlaw-recovery.co.kr").map(async (group) => {
       const host = group.host || new URL(group.siteUrl).host;
       const urlList = [buildLandingUrl(group, slug), `${group.siteUrl}/`];
       const response = await fetch("https://searchadvisor.naver.com/indexnow", {

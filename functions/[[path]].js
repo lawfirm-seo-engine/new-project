@@ -670,6 +670,10 @@ function logScanScriptForSite(siteUrl = "") {
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function isCaseAllowedForGroup(caseData = {}, group = {}) {
+  // gnlaw-recovery.co.kr는 recovery-manual 전용 — 일반 사건 접근 차단
+  if (group.siteUrl === "https://gnlaw-recovery.co.kr" && caseData.createdBy !== "recovery-manual") {
+    return false;
+  }
   const targets = Array.isArray(caseData.targetGroups) ? caseData.targetGroups.filter(Boolean) : [];
   if (!targets.length) return true;
   return targets.includes(group.landingKey || group.key);
