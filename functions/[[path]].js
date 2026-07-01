@@ -914,7 +914,7 @@ function renderLanding(caseData, group, origin) {
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName),
     ogThumbnail,
     summary: pageSummary,
-    heroTyping: createHeroTypingBlock(rawCaseName),
+    heroTyping: useManualRecoveryText ? "" : createHeroTypingBlock(rawCaseName),
     receiptBadge: createReceiptBadge(caseData),
     heroCta: "",
     content,
@@ -967,11 +967,11 @@ function createFallbackLanding(caseData, group, key) {
 }
 
 const MANUAL_BODY_STYLE = `<style>
-.manual-body{counter-reset:mp}
-.manual-body>p{counter-increment:mp;padding-left:2em;position:relative}
-.manual-body>p::before{content:counter(mp)".";position:absolute;left:0;font-weight:700;color:#8a96a8;font-size:.88em;top:.15em;min-width:1.6em}
-.manual-body>h2{margin-top:1.6em;padding-top:.8em;border-top:1px solid #e8edf4;font-size:1.05em}
+.manual-body{counter-reset:ms}
+.manual-body>h2{counter-increment:ms;margin-top:1.6em;padding-top:.8em;border-top:1px solid #e8edf4;font-size:1.05em}
+.manual-body>h2::before{content:counter(ms)". ";color:#8a96a8;font-weight:700;font-size:.9em}
 .manual-body>h3{margin-top:.9em;font-size:.97em;color:#263244}
+.manual-body>p{margin:.5em 0;line-height:1.8}
 .manual-body>ul{padding-left:1.4em}
 .manual-body>ul li{margin:.25em 0}
 </style>`;
