@@ -966,6 +966,16 @@ function createFallbackLanding(caseData, group, key) {
   };
 }
 
+const MANUAL_BODY_STYLE = `<style>
+.manual-body{counter-reset:mp}
+.manual-body>p{counter-increment:mp;padding-left:2em;position:relative}
+.manual-body>p::before{content:counter(mp)".";position:absolute;left:0;font-weight:700;color:#8a96a8;font-size:.88em;top:.15em;min-width:1.6em}
+.manual-body>h2{margin-top:1.6em;padding-top:.8em;border-top:1px solid #e8edf4;font-size:1.05em}
+.manual-body>h3{margin-top:.9em;font-size:.97em;color:#263244}
+.manual-body>ul{padding-left:1.4em}
+.manual-body>ul li{margin:.25em 0}
+</style>`;
+
 function renderManualBodyArray(items) {
   const parts = [];
   let listBuf = [];
@@ -1001,7 +1011,8 @@ function createRecoveryManualContent(landing, group, caseData) {
     ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${esc(caseData.memo)}</p></section>`
     : "";
   return [
-    `<section class="article-block">${bodyHtml}</section>`,
+    MANUAL_BODY_STYLE,
+    `<section class="article-block manual-body">${bodyHtml}</section>`,
     memoSection,
     createConsultForm(cn, siteName),
     createFloatingWidgets(cn, siteName, slug),
