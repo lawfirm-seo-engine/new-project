@@ -184,7 +184,7 @@
     "ctaLabel": "상담 접수",
     "createdAt": "2026-06-28",
     "updatedAt": "2026-06-28",
-    "landingViews": 5
+    "landingViews": 8
   },
   {
     "slug": "6월25일-신규사건-진행리스트",
@@ -388,7 +388,7 @@
     "ctaLabel": "상담 접수",
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
-    "landingViews": 1
+    "landingViews": 2
   },
   {
     "slug": "지급정지-민사소송-어떻게-하나요",
@@ -455,7 +455,7 @@
     "ctaLabel": "상담 접수",
     "createdAt": "2026-06-22",
     "updatedAt": "2026-06-22",
-    "landingViews": 24
+    "landingViews": 25
   },
   {
     "slug": "6월-22일-신규-사건-진행-리스트-2",
@@ -504,7 +504,8 @@
     "ctaText": "입금 내역, 대화 캡처, 사이트 주소를 남겨주시면 담당자가 확인 후 연락드립니다.",
     "ctaLabel": "상담 접수",
     "createdAt": "2026-06-22",
-    "updatedAt": "2026-06-22"
+    "updatedAt": "2026-06-22",
+    "landingViews": 1
   },
   {
     "slug": "6월-21일-신규-사건-진행-리스트",
