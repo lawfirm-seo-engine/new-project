@@ -66,9 +66,16 @@ export function getLanding(item = {}, group = {}) {
 }
 
 export function isCaseAllowedForGroup(item = {}, group = {}) {
+  // gnlaw-recovery.co.kr(group c)는 recovery-manual / jipjeong-manual 전용
+  const lk = group.landingKey || group.key;
+  if (lk === "c" &&
+      item.createdBy !== "recovery-manual" &&
+      item.createdBy !== "jipjeong-manual") {
+    return false;
+  }
   const targets = Array.isArray(item.targetGroups) ? item.targetGroups.filter(Boolean) : [];
   if (!targets.length) return true;
-  return targets.includes(group.landingKey || group.key);
+  return targets.includes(lk);
 }
 
 export function sortNewest(cases = []) {
