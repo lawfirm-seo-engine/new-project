@@ -6034,7 +6034,7 @@
     "createdAt": "2026-06-01",
     "updatedAt": "2026-06-01",
     "thumbnailUrl": "",
-    "landingViews": 4714,
+    "landingViews": 4713,
     "reports": 12,
     "summary": "플레오렌탈 사기 렌탈 투자 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
     "tags": [
@@ -34240,6 +34240,28 @@
     "summary": "gremarket.shop 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "gremarket.shop",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "geuremakes",
+    "caseName": "그레마켓 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-02",
+    "updatedAt": "2026-07-02",
+    "thumbnailUrl": "",
+    "landingViews": 447,
+    "reports": 29,
+    "summary": "그레마켓 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "그레마켓",
       "사칭",
       "사기",
       "사기피해",
