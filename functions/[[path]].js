@@ -265,6 +265,11 @@ export async function onRequest(context) {
     "grucompany-sagi-syopingmor",
     "geuruaenkeompeoni-sagi-syopingmor",
   ];
+  // 모든 도메인 공통: suffix 없이 원본 URL 그대로 사용
+  const ALL_DOMAINS_NO_SUFFIX = [
+    "baidogseu-georaeso-litigation-noindex",
+    "bydoxe-litigation-noidex",
+  ];
   // new-project-9o2 전용 예외: 구suffix URL 그대로 유지 (URL slug → KV slug)
   const OLD_URL_MAP = {
     "mediacastlekr-com-sagi-tikesyemae-bueob-prosecute": "mediacastlekr-com-sagi-tikesyemae-bueob",
@@ -272,7 +277,8 @@ export async function onRequest(context) {
   // new-project 도메인의 구suffix 목록 (리디렉션 시 제거 대상)
   const NEW_PROJECT_OLD_SUFFIXES = ["prosecute", "civil", "success", "briefing", "case"];
 
-  const isNoSuffix = url.host === "gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS.includes(urlSlug);
+  const isNoSuffix = ALL_DOMAINS_NO_SUFFIX.includes(urlSlug)
+    || (url.host === "gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS.includes(urlSlug));
   const isOldUrlKeep = url.host === "gnlaw-criminal.co.kr" && OLD_URL_MAP[urlSlug];
 
   let slug;
@@ -689,10 +695,12 @@ function renderLanding(caseData, group, origin) {
   const pageTitle = useManualRecoveryText ? (landing.title || groupPageTitle(rawCaseName, lk)) : groupPageTitle(rawCaseName, lk);
   const pageH1 = useManualRecoveryText ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk)) : groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+  const ALL_DOMAINS_NO_SUFFIX_RENDER = ["baidogseu-georaeso-litigation-noindex", "bydoxe-litigation-noidex"];
   const OLD_URL_CANONICAL = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+  const isAllDomainsNoSuffix = ALL_DOMAINS_NO_SUFFIX_RENDER.includes(caseData.slug);
   const isNoSuffixSlug = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
   const oldSuffixOverride = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_CANONICAL[caseData.slug];
-  const urlSuffix = isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
+  const urlSuffix = isAllDomainsNoSuffix ? "" : isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const ogImage = caseOgImageUrl(caseData.slug || "landing", group.siteUrl);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
@@ -932,10 +940,12 @@ function createFallbackLanding(caseData, group, key) {
   const caseName = caseData.caseName || "";
   const base = primaryCaseKeyword(caseName);
   const NO_SUFFIX_SLUGS_FB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+  const ALL_DOMAINS_NO_SUFFIX_FB = ["baidogseu-georaeso-litigation-noindex", "bydoxe-litigation-noidex"];
   const OLD_URL_FB = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+  const isAllDomainsNoSuffixFB = ALL_DOMAINS_NO_SUFFIX_FB.includes(caseData.slug);
   const isNoSuffixFB = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_FB.includes(caseData.slug);
   const oldSuffixFB = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_FB[caseData.slug];
-  const fbUrlSuffix = isNoSuffixFB ? "" : oldSuffixFB ? `-${oldSuffixFB}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
+  const fbUrlSuffix = isAllDomainsNoSuffixFB ? "" : isNoSuffixFB ? "" : oldSuffixFB ? `-${oldSuffixFB}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${fbUrlSuffix}/`;
   const descriptions = {
     a: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 증거 상태와 사건 구조 기준으로 정리합니다.",

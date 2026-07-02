@@ -37,6 +37,11 @@ const NO_SUFFIX_SLUGS = new Set([
   "geuruaenkeompeoni-sagi-syopingmor",
 ]);
 
+const ALL_DOMAINS_NO_SUFFIX = new Set([
+  "baidogseu-georaeso-litigation-noindex",
+  "bydoxe-litigation-noidex",
+]);
+
 const OLD_URL_SUFFIX = {
   "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute",
 };
@@ -50,7 +55,9 @@ export function buildLandingUrl(group, slug = "") {
   const prefix = group.pathPrefix || group.prefix;
   const suffix = group.urlSlugSuffix || group.suffix || "";
   const isPrimaryCriminal = siteUrl === "https://gnlaw-criminal.co.kr" || group.host === "gnlaw-criminal.co.kr";
-  const finalSuffix = isPrimaryCriminal && NO_SUFFIX_SLUGS.has(slug)
+  const finalSuffix = ALL_DOMAINS_NO_SUFFIX.has(slug)
+    ? ""
+    : isPrimaryCriminal && NO_SUFFIX_SLUGS.has(slug)
     ? ""
     : isPrimaryCriminal && OLD_URL_SUFFIX[slug]
       ? `-${OLD_URL_SUFFIX[slug]}`

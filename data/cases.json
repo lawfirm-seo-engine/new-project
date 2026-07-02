@@ -29155,7 +29155,7 @@
     "createdBy": ""
   },
   {
-    "slug": "bydoxe",
+    "slug": "bydoxe-litigation-noidex",
     "caseName": "bydoxe 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-27",
@@ -29175,10 +29175,11 @@
     "memo": "",
     "noindex": true,
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "hideFromListing": true
   },
   {
-    "slug": "baidogseu-georaeso",
+    "slug": "baidogseu-georaeso-litigation-noindex",
     "caseName": "바이독스 거래소 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-27",
@@ -29199,7 +29200,8 @@
     "memo": "",
     "noindex": true,
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "hideFromListing": true
   },
   {
     "slug": "velocity-clearing",

@@ -399,10 +399,12 @@ function createFallbackLanding(caseItem, group) {
   const dispName = normalizeCaseName(caseName);
   const slug = caseItem.slug;
   const NO_SUFFIX_SLUGS_FB = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
+  const ALL_DOMAINS_NO_SUFFIX_GEN = ["baidogseu-georaeso-litigation-noindex", "bydoxe-litigation-noidex"];
   const OLD_URL_FB_GEN = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
+  const isAllDomainsNoSuffixGen = ALL_DOMAINS_NO_SUFFIX_GEN.includes(slug);
   const isExceptFB = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_FB.includes(slug);
   const oldSuffixFBGen = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_FB_GEN[slug];
-  const fbSlugSuffix = isExceptFB ? "" : oldSuffixFBGen ? `-${oldSuffixFBGen}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
+  const fbSlugSuffix = isAllDomainsNoSuffixGen ? "" : isExceptFB ? "" : oldSuffixFBGen ? `-${oldSuffixFBGen}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}${fbSlugSuffix}/`;
   const description = `${dispName} 관련 ${group.descriptionSuffix}`;
   const faq = makeFallbackFaq(landingKey);
@@ -1390,7 +1392,7 @@ function createHubFloatingWidgets(group) {
 }
 
 function createHubContent(group) {
-  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group));
+  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group) && !item.hideFromListing);
   // caseNoMap: slug → 1-based insertion order (position in original cases.json array)
   const caseNoMap = new Map(groupCases.map((c, i) => [c.slug, i + 1]));
   // Sort by insertion order descending: newest-added first (No.324 → No.1)
@@ -1452,16 +1454,17 @@ function createHubContent(group) {
   var TARGET_KEY=${JSON.stringify(group.landingKey || group.key)};
   var ADD_PL=${(group.key === "a" && !group.landingKey) ? 1 : 0};
   var NO_SUFFIX_SLUGS={"soiraeb-sagi-syopingmor":1,"grucompany-sagi-syopingmor":1,"geuruaenkeompeoni-sagi-syopingmor":1};
+  var ALL_NO_SUFFIX_SLUGS={"baidogseu-georaeso-litigation-noindex":1,"bydoxe-litigation-noidex":1};
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
   function normName(n){var s=String(n||'').trim();if(/사기$/.test(s))return s;var c=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c:c+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
-  function landingPath(slug){var extra=NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
+  function landingPath(slug){var extra=ALL_NO_SUFFIX_SLUGS[slug]?'':NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
   function getStatus(slug,createdBy){if(createdBy==='recovery-manual'||createdBy==='jipjeong-manual'){return'사건 접수 중';}if(TARGET_KEY==='c'||TARGET_KEY==='lc'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
-  function allowed(c){var t=Array.isArray(c&&c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
+  function allowed(c){if(c&&c.hideFromListing)return false;var t=Array.isArray(c&&c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
   function freshLink(item,noMap){
     var cn=normName(item.caseName||item.name||'');
     var dt=SUFFIX?cn+' '+SUFFIX:cn;
@@ -1629,7 +1632,7 @@ function createHubContent(group) {
 }
 
 function createCategoryContent(group) {
-  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group));
+  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group) && !item.hideFromListing);
   const caseNoMap = new Map(groupCases.map((c, i) => [c.slug, i + 1]));
   const sortedCases = [...groupCases].reverse();
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
