@@ -1287,6 +1287,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     links.push(`<meta name="twitter:card" content="summary_large_image">`);
     links.push(`<meta name="twitter:image" content="${group.siteUrl}/assets/og-template.png">`);
     links.push(`<meta name="twitter:image:alt" content="${escapeHtml(group.hubTitle)}">`);
+    links.push(`<style>.pg-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:16px 0 8px;margin:0 auto;max-width:900px}.pg-btn{min-width:36px;height:34px;padding:0 10px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#263244;font-size:13px;font-weight:700;cursor:pointer}.pg-btn:hover{background:#f0f4fa}.pg-active{background:#1f4fd8!important;color:#fff!important;border-color:#1f4fd8!important}</style>`);
   } else {
     const publishedDate = caseItem?.createdAt || today;
     const modifiedDate = caseItem?.updatedAt || publishedDate;
@@ -1514,16 +1515,40 @@ function createHubContent(group) {
     var count=document.getElementById('freshLandingCount');
     if(count)count.textContent=(freshDate===todayStr?'':freshDate+' ')+combined.length.toLocaleString('ko-KR')+'건';
   }
+  var PAGE_SIZE=100;var _pg=1;
+  function setupPagination(){
+    var rows=[].slice.call(document.querySelectorAll('.case-row'));
+    var total=rows.length;
+    var pgWrap=document.getElementById('pgWrap');
+    if(!pgWrap)return;
+    if(total<=PAGE_SIZE){pgWrap.innerHTML='';return;}
+    var pages=Math.ceil(total/PAGE_SIZE);
+    rows.forEach(function(r,i){r.style.display=(i>=(_pg-1)*PAGE_SIZE&&i<_pg*PAGE_SIZE)?'grid':'none';});
+    var html='';
+    if(_pg>1)html+='<button class="pg-btn" onclick="goPage('+(_pg-1)+')">이전</button>';
+    for(var p=1;p<=pages;p++){html+='<button class="pg-btn'+(p===_pg?' pg-active':'')+'" onclick="goPage('+p+')">'+p+'</button>';}
+    if(_pg<pages)html+='<button class="pg-btn" onclick="goPage('+(_pg+1)+')">다음</button>';
+    pgWrap.innerHTML=html;
+  }
+  window.goPage=function(p){_pg=p;setupPagination();window.scrollTo({top:0,behavior:'smooth'});};
   function setupSearch(){
     var inp=document.getElementById('case-search');
     if(!inp)return;
     var n=inp.cloneNode(true);inp.parentNode.replaceChild(n,inp);
     n.addEventListener('input',function(){
       var q=n.value.trim().toLowerCase();
-      document.querySelectorAll('.case-row').forEach(function(r){r.style.display=r.dataset.title.toLowerCase().indexOf(q)>=0?'grid':'none';});
+      var pgWrap=document.getElementById('pgWrap');
+      if(q){
+        document.querySelectorAll('.case-row').forEach(function(r){r.style.display=r.dataset.title.toLowerCase().indexOf(q)>=0?'grid':'none';});
+        if(pgWrap)pgWrap.style.display='none';
+      } else {
+        if(pgWrap)pgWrap.style.display='';
+        _pg=1;setupPagination();
+      }
     });
   }
   setupSearch();
+  setupPagination();
   var _BASE='https://gnlaw-criminal.co.kr';
   Promise.all([
     fetch(_BASE+'/api/get-cases',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
@@ -1596,6 +1621,7 @@ function createHubContent(group) {
       var trEl=document.getElementById('statTodayReports');
       if(trEl)trEl.textContent='오늘 추가 +'+todayRep;
       setupSearch();
+      _pg=1;setupPagination();
     }).catch(function(){});
 })();
 </script>`;
@@ -1629,6 +1655,7 @@ function createHubContent(group) {
       <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
       ${rows}
     </section>
+    <div id="pgWrap" class="pg-wrap"></div>
     ${dynScript}`;
 }
 

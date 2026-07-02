@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보이스피싱 랜딩 생성</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f6fb;color:#172033}
+    .wrap{max-width:980px;margin:0 auto;padding:32px 20px 48px}
+    .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+    h1{margin:0 0 6px;font-size:25px;line-height:1.25}
+    .meta{margin:0;color:#6b7a90;font-size:13px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 16px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer}
+    .btn.sec{background:#263244}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    form{background:#fff;border:1px solid #dde3ee;border-radius:8px;box-shadow:0 2px 18px rgba(15,23,42,.06);padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field.wide{grid-column:1/-1}
+    label{font-size:13px;font-weight:800;color:#4b5a70}
+    label .hint{font-weight:400;color:#8a96a8;margin-left:6px}
+    label .auto-hint{font-weight:400;color:#2a7a2a;font-size:11px;margin-left:6px}
+    input,textarea{width:100%;border:1px solid #cfd8e6;border-radius:7px;padding:11px 12px;font:inherit;background:#fff;color:#172033}
+    textarea{resize:vertical;line-height:1.6}
+    input.auto-filled,textarea.auto-filled{background:#f4fbf4;border-color:#b3d9b3}
+    .body-input{min-height:200px;font-size:13px}
+    .preview-box{grid-column:1/-1;background:#f8faff;border:1px solid #dde3ee;border-radius:7px;padding:14px;font-size:13px;display:none}
+    .preview-box h3{margin:0 0 8px;font-size:14px;color:#263244}
+    .preview-box pre{margin:0;white-space:pre-wrap;color:#4b5a70;font-size:12px;line-height:1.7;font-family:Consolas,"Courier New",monospace}
+    .actions{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .message{grid-column:1/-1;margin:0;font-size:14px;white-space:pre-wrap}
+    .message.ok{color:#14642d}
+    .message.err{color:#a83232}
+    .saved-link{grid-column:1/-1;display:none;padding:12px 14px;border-radius:7px;background:#edf7ed;color:#145b22;font-size:14px}
+    .saved-link a{color:#0f4fcf;font-weight:800;text-decoration:none}
+    .manual-hint{grid-column:1/-1;font-size:12px;color:#6b7a90;background:#fffbe6;border:1px solid #e8d87a;border-radius:6px;padding:10px 14px;line-height:1.6}
+    @media(max-width:760px){form{grid-template-columns:1fr}.top{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <div>
+        <h1>보이스피싱 랜딩 생성</h1>
+        <p class="meta">금융사기대응센터.kr 전용 · 보이스피싱 피해구제 페이지 생성</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn sec" href="/admin/dashboard.html">관리자 대시보드</a>
+      </div>
+    </div>
+
+    <form id="vpForm">
+      <div class="field">
+        <label for="title">페이지 제목 <span class="hint">예: 카카오뱅크 보이스피싱 피해구제 - 종로변호사</span></label>
+        <input id="title" name="title" type="text" placeholder="OO은행 보이스피싱 피해구제 - 종로변호사" required>
+      </div>
+      <div class="field">
+        <label for="slug">URL slug</label>
+        <input id="slug" name="slug" type="text" placeholder="제목 입력 시 자동 생성" required>
+      </div>
+      <div class="field wide">
+        <label for="summary">메타 설명 <span class="auto-hint" id="summaryHint">제목 입력 시 자동 생성</span></label>
+        <textarea id="summary" name="summary" rows="3" placeholder="제목을 입력하면 자동 생성됩니다"></textarea>
+      </div>
+      <div class="field wide">
+        <label for="imageAlt">이미지 Alt <span class="auto-hint" id="imageAltHint">제목 입력 시 자동 생성</span></label>
+        <input id="imageAlt" name="imageAlt" type="text" placeholder="제목을 입력하면 자동 생성됩니다">
+      </div>
+      <div class="field wide">
+        <label for="imageCaption">이미지 Caption <span class="auto-hint" id="imageCaptionHint">제목 입력 시 자동 생성</span></label>
+        <textarea id="imageCaption" name="imageCaption" rows="2" placeholder="제목을 입력하면 자동 생성됩니다"></textarea>
+      </div>
+      <div class="field wide">
+        <label for="imageDescription">이미지 Description <span class="auto-hint" id="imageDescriptionHint">제목 입력 시 자동 생성</span></label>
+        <textarea id="imageDescription" name="imageDescription" rows="3" placeholder="제목을 입력하면 자동 생성됩니다"></textarea>
+      </div>
+
+      <div class="manual-hint">
+        <strong>원고 입력 방법</strong><br>
+        기존 보이스피싱 페이지가 <strong>없을 때</strong>: 아래 원고 직접 입력란에 내용을 입력 후 저장하세요.<br>
+        기존 보이스피싱 페이지가 <strong>있을 때</strong>: <em>원고 미리보기</em>를 클릭하면 자동 추출됩니다.
+      </div>
+
+      <div class="field wide">
+        <label for="bodyInput">원고 직접 입력 <span class="hint">단락 구분은 빈 줄(엔터 2회). 원고 미리보기 시 자동 채워집니다.</span></label>
+        <textarea id="bodyInput" name="bodyInput" class="body-input" rows="12" placeholder="단락 1&#10;&#10;단락 2&#10;&#10;단락 3&#10;&#10;…"></textarea>
+      </div>
+
+      <div id="previewBox" class="preview-box">
+        <h3>자동 추출 원고 미리보기 <span style="font-size:11px;color:#8a96a8">(기존 보이스피싱 페이지 참조)</span></h3>
+        <p id="extractedInfo" style="font-size:12px;color:#5a6a80;margin:0 0 8px;line-height:1.6"></p>
+        <pre id="previewText"></pre>
+      </div>
+
+      <div id="savedLink" class="saved-link"></div>
+      <p id="message" class="message"></p>
+      <div class="actions">
+        <button id="previewButton" class="btn sec" type="button">원고 미리보기</button>
+        <button id="submitButton" class="btn" type="submit">보이스피싱 랜딩 생성</button>
+        <button id="resetButton" class="btn sec" type="button">새로 작성</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const API_ORIGIN = location.protocol === "file:" ? "https://gnlaw-criminal.co.kr" : "";
+    const form = document.getElementById("vpForm");
+    const titleEl = document.getElementById("title");
+    const slugEl = document.getElementById("slug");
+    const messageEl = document.getElementById("message");
+    const savedLinkEl = document.getElementById("savedLink");
+    const submitButtonEl = document.getElementById("submitButton");
+    const previewButtonEl = document.getElementById("previewButton");
+    const previewBoxEl = document.getElementById("previewBox");
+    const previewTextEl = document.getElementById("previewText");
+    const bodyInputEl = document.getElementById("bodyInput");
+
+    let slugTouched = false;
+    let autoBody = null; // 자동 추출된 원고 (배열)
+    const META_FIELD_IDS = ["summary", "imageAlt", "imageCaption", "imageDescription"];
+    const fieldTouched = {};
+
+    META_FIELD_IDS.forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        fieldTouched[id] = true;
+        markFieldManual(id);
+      });
+    });
+
+    titleEl.addEventListener("input", () => {
+      if (!slugTouched) slugEl.value = normalizeSlug(titleEl.value);
+      autoBody = null;
+      previewBoxEl.style.display = "none";
+      setMessage("", "");
+      autoFillMeta(titleEl.value.trim());
+    });
+    slugEl.addEventListener("input", () => { slugTouched = true; slugEl.value = normalizeSlug(slugEl.value); });
+    document.getElementById("resetButton").addEventListener("click", resetForm);
+
+    previewButtonEl.addEventListener("click", async () => {
+      const title = String(titleEl.value || "").trim();
+      if (!title) { setMessage("페이지 제목을 입력하세요.", "err"); return; }
+      setMessage("기존 보이스피싱 페이지에서 원고를 추출하는 중...", "");
+      previewButtonEl.disabled = true;
+      try {
+        const res = await fetch(API_ORIGIN + "/api/create-voicephishing-landing", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, slug: normalizeSlug(slugEl.value || title), preview: true }),
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          if (data.noReference) {
+            setMessage("기존 보이스피싱 페이지 없음 — 원고를 직접 입력하고 저장하세요.", "");
+          } else {
+            setMessage(data.message || "원고 추출 실패", "err");
+          }
+          if (data.bank) autoFillMetaFromParts(data.bank, data.region || "", data.action || "보이스피싱");
+          return;
+        }
+        autoBody = data.body;
+        bodyInputEl.value = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
+        document.getElementById("extractedInfo").textContent =
+          `인식된 은행명: ${data.bank || "—"}  /  지역명: ${data.region || "—"}  /  행위키워드: ${data.action || "—"}`;
+        previewTextEl.textContent = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
+        previewBoxEl.style.display = "block";
+        if (data.bank) autoFillMetaFromParts(data.bank, data.region || "", data.action || "보이스피싱");
+        setMessage("원고 추출 완료. 확인 후 '보이스피싱 랜딩 생성'을 클릭하세요.", "ok");
+      } catch (error) {
+        setMessage("원고 추출 오류: " + error.message, "err");
+      } finally {
+        previewButtonEl.disabled = false;
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      // 원고: 자동 추출 우선, 없으면 직접 입력 사용
+      const manualText = String(bodyInputEl.value || "").trim();
+      const body = autoBody || (manualText
+        ? manualText.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+        : null);
+
+      if (!body || !body.length) {
+        setMessage("원고를 입력하거나 원고 미리보기를 먼저 실행하세요.", "err");
+        return;
+      }
+
+      setMessage("저장 중...", "");
+      savedLinkEl.style.display = "none";
+      submitButtonEl.disabled = true;
+
+      try {
+        const payload = {
+          title: String(titleEl.value || "").trim(),
+          slug: normalizeSlug(slugEl.value || titleEl.value),
+          summary: String(document.getElementById("summary").value || "").trim(),
+          imageAlt: String(document.getElementById("imageAlt").value || "").trim(),
+          imageCaption: String(document.getElementById("imageCaption").value || "").trim(),
+          imageDescription: String(document.getElementById("imageDescription").value || "").trim(),
+          body,
+        };
+        const res = await fetch(API_ORIGIN + "/api/create-voicephishing-landing", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          setMessage(data.message || "저장 실패", "err");
+          submitButtonEl.disabled = false;
+          return;
+        }
+        setMessage(data.message || "저장되었습니다.", "ok");
+        savedLinkEl.innerHTML = `공개 URL: <a href="${data.url}" target="_blank" rel="noopener">${data.url}</a>`;
+        savedLinkEl.style.display = "block";
+      } catch (error) {
+        setMessage("저장 오류: " + error.message, "err");
+        submitButtonEl.disabled = false;
+      }
+    });
+
+    function resetForm() {
+      form.reset();
+      slugTouched = false;
+      autoBody = null;
+      META_FIELD_IDS.forEach((id) => {
+        delete fieldTouched[id];
+        const el = document.getElementById(id);
+        if (el) el.classList.remove("auto-filled");
+        const hint = document.getElementById(id + "Hint");
+        if (hint) { hint.textContent = "제목 입력 시 자동 생성"; hint.style.color = "#2a7a2a"; }
+      });
+      savedLinkEl.style.display = "none";
+      previewBoxEl.style.display = "none";
+      setMessage("", "");
+      titleEl.focus();
+    }
+
+    // ── 메타 자동 생성 ─────────────────────────────────────────────────────
+    function autoFillMeta(title) {
+      if (!title) return;
+      const bank   = extractBank(title);
+      const region = extractRegion(title);
+      const action = extractAction(title, bank);
+      autoFillMetaFromParts(bank, region, action);
+    }
+
+    function autoFillMetaFromParts(bank, region, action) {
+      const generated = generateMeta(bank, region, action);
+      META_FIELD_IDS.forEach((id) => {
+        if (!fieldTouched[id]) {
+          document.getElementById(id).value = generated[id] || "";
+          markFieldAuto(id);
+        }
+      });
+    }
+
+    function generateMeta(bank, region, action) {
+      const r = region || "종로";
+      const summary = `${bank} ${action}은 신고 즉시 전문가와 상담하고, 피해금 회수 가능성과 대응 방향을 확인하는 것이 중요합니다. ${bank} ${action} ${r}변호사가 피해 경위 분석부터 대응 절차까지 자세히 안내합니다.`.slice(0, 180);
+      const imageAlt = `${bank} ${action} ${r}변호사`;
+      const imageCaption = `${bank} ${action} — ${r}변호사가 피해 대응 방법을 안내합니다`;
+      const imageDescription = `${bank} ${action} 피해구제 절차, 신고 방법, 피해금 회수 가능성을 ${r}변호사가 자세히 안내합니다. 사기 신고부터 법적 대응까지 체계적으로 진행합니다.`;
+      return { summary, imageAlt, imageCaption, imageDescription };
+    }
+
+    // ── 제목 파싱 (서버 create-voicephishing-landing.js와 동일 로직) ──────
+    function extractBank(title) {
+      const s = title.trim().replace(/\s+/g, " ");
+      const m = s.match(/^(.+?)\s+(?:보이스피싱|전화금융사기|스미싱|피해)/);
+      return m ? m[1].trim() : s.split(/[\s,·]/)[0];
+    }
+
+    function extractRegion(title) {
+      const m = title.trim().replace(/\s+/g, " ").match(/[,\s\-–—·]?\s*(\S{1,6})변호사/);
+      return m ? m[1].trim() : "";
+    }
+
+    function extractAction(title, bank) {
+      const s = title.trim().replace(/\s+/g, " ");
+      let rest = s.startsWith(bank) ? s.slice(bank.length).trim() : s;
+      rest = rest.replace(/\s*[,·\-–—]?\s*\S{1,6}변호사[\s\S]*$/, "").trim();
+      return rest || "보이스피싱";
+    }
+
+    function markFieldAuto(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add("auto-filled");
+      const hint = document.getElementById(id + "Hint");
+      if (hint) { hint.textContent = "자동 생성됨"; hint.style.color = "#2a7a2a"; }
+    }
+
+    function markFieldManual(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("auto-filled");
+      const hint = document.getElementById(id + "Hint");
+      if (hint) { hint.textContent = "수동 입력"; hint.style.color = "#8a96a8"; }
+    }
+
+    function normalizeSlug(value) {
+      return String(value || "").trim().toLowerCase()
+        .replace(/[–—]/g, "-").replace(/[^a-z0-9가-힣_-]+/g, "-")
+        .replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 90);
+    }
+
+    function setMessage(text, type) {
+      messageEl.textContent = text || "";
+      messageEl.className = `message ${type || ""}`.trim();
+    }
+  </script>
+</body>
+</html>
