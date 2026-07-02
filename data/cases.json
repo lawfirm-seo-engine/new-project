@@ -27199,7 +27199,8 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "noindex": true
   },
   {
     "slug": "payda",
