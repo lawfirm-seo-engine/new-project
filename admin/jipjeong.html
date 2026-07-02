@@ -20,6 +20,8 @@
     .field.wide{grid-column:1/-1}
     label{font-size:13px;font-weight:800;color:#4b5a70}
     label .hint{font-weight:400;color:#8a96a8;margin-left:6px}
+    label .auto-hint{color:#2a7a2a;font-size:11px}
+    input.auto-filled,textarea.auto-filled{background:#f4fbf4;border-color:#b3d9b3}
     input,textarea{width:100%;border:1px solid #cfd8e6;border-radius:7px;padding:11px 12px;font:inherit;background:#fff;color:#172033}
     textarea{resize:vertical;line-height:1.6}
     .preview-box{grid-column:1/-1;background:#f8faff;border:1px solid #dde3ee;border-radius:7px;padding:14px;font-size:13px;display:none}
@@ -57,20 +59,20 @@
         <input id="slug" name="slug" type="text" placeholder="제목 입력 시 자동 생성" required>
       </div>
       <div class="field wide">
-        <label for="summary">메타 설명 <span class="hint">비워두면 자동 생성</span></label>
-        <textarea id="summary" name="summary" rows="3" placeholder="검색 결과와 공유 미리보기에 사용할 설명 (최대 180자)"></textarea>
+        <label for="summary">메타 설명 <span class="hint auto-hint" id="summaryHint">제목 입력 시 자동 생성</span></label>
+        <textarea id="summary" name="summary" rows="3" placeholder="제목을 입력하면 자동 생성됩니다"></textarea>
       </div>
       <div class="field wide">
-        <label for="imageAlt">이미지 Alt <span class="hint">비워두면 제목 사용</span></label>
-        <input id="imageAlt" name="imageAlt" type="text" placeholder="og:image 대체 텍스트">
+        <label for="imageAlt">이미지 Alt <span class="hint auto-hint" id="imageAltHint">제목 입력 시 자동 생성</span></label>
+        <input id="imageAlt" name="imageAlt" type="text" placeholder="제목을 입력하면 자동 생성됩니다">
       </div>
       <div class="field wide">
-        <label for="imageCaption">이미지 Caption</label>
-        <textarea id="imageCaption" name="imageCaption" rows="2" placeholder="이미지 캡션 — 네이버 이미지 검색 노출에 활용됩니다"></textarea>
+        <label for="imageCaption">이미지 Caption <span class="hint auto-hint" id="imageCaptionHint">제목 입력 시 자동 생성</span></label>
+        <textarea id="imageCaption" name="imageCaption" rows="2" placeholder="제목을 입력하면 자동 생성됩니다"></textarea>
       </div>
       <div class="field wide">
-        <label for="imageDescription">이미지 Description</label>
-        <textarea id="imageDescription" name="imageDescription" rows="3" placeholder="이미지 상세 설명 — schema.org ImageObject description 필드에 사용됩니다"></textarea>
+        <label for="imageDescription">이미지 Description <span class="hint auto-hint" id="imageDescriptionHint">제목 입력 시 자동 생성</span></label>
+        <textarea id="imageDescription" name="imageDescription" rows="3" placeholder="제목을 입력하면 자동 생성됩니다"></textarea>
       </div>
 
       <div id="previewBox" class="preview-box">
@@ -103,6 +105,15 @@
 
     let slugTouched = false;
     let generatedBody = null;
+    const META_FIELD_IDS = ["summary", "imageAlt", "imageCaption", "imageDescription"];
+    const fieldTouched = {};
+
+    META_FIELD_IDS.forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        fieldTouched[id] = true;
+        markFieldManual(id);
+      });
+    });
 
     titleEl.addEventListener("input", () => {
       if (!slugTouched) slugEl.value = normalizeSlug(titleEl.value);
@@ -110,6 +121,7 @@
       submitButtonEl.disabled = true;
       previewBoxEl.style.display = "none";
       setMessage("", "");
+      autoFillMeta(titleEl.value.trim());
     });
     slugEl.addEventListener("input", () => { slugTouched = true; slugEl.value = normalizeSlug(slugEl.value); });
     document.getElementById("resetButton").addEventListener("click", resetForm);
@@ -133,6 +145,7 @@
         previewTextEl.textContent = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
         previewBoxEl.style.display = "block";
         submitButtonEl.disabled = false;
+        if (data.bank) autoFillMetaFromParts(data.bank, data.region || "", data.action || "지급정지");
         setMessage("원고 추출 완료. 확인 후 '지급정지 랜딩 생성'을 클릭하세요.", "ok");
       } catch (error) {
         setMessage("원고 추출 오류: " + error.message, "err");
@@ -182,11 +195,81 @@
       form.reset();
       slugTouched = false;
       generatedBody = null;
+      META_FIELD_IDS.forEach((id) => {
+        delete fieldTouched[id];
+        const el = document.getElementById(id);
+        if (el) el.classList.remove("auto-filled");
+        const hint = document.getElementById(id + "Hint");
+        if (hint) { hint.textContent = "제목 입력 시 자동 생성"; hint.style.color = "#2a7a2a"; }
+      });
       submitButtonEl.disabled = true;
       savedLinkEl.style.display = "none";
       previewBoxEl.style.display = "none";
       setMessage("", "");
       titleEl.focus();
+    }
+
+    // ── 자동 생성 ────────────────────────────────────────────────────────────
+    function autoFillMeta(title) {
+      if (!title) return;
+      const bank   = extractBank(title);
+      const region = extractRegion(title);
+      const action = extractAction(title, bank);
+      autoFillMetaFromParts(bank, region, action);
+    }
+
+    function autoFillMetaFromParts(bank, region, action) {
+      const generated = generateMeta(bank, region, action);
+      META_FIELD_IDS.forEach((id) => {
+        if (!fieldTouched[id]) {
+          document.getElementById(id).value = generated[id] || "";
+          markFieldAuto(id);
+        }
+      });
+    }
+
+    function generateMeta(bank, region, action) {
+      const r = region || "종로";
+      const summary = `${bank} ${action}은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. ${bank} ${action} ${r}변호사가 지급정지 원인, ${action} 절차, 준비해야 할 자료와 주요 유의사항을 자세히 안내합니다.`.slice(0, 180);
+      const imageAlt = `${bank} ${action} ${r}변호사`;
+      const imageCaption = `${bank} ${action} — ${r}변호사가 절차와 준비자료를 안내합니다`;
+      const imageDescription = `${bank} ${action}에 관한 법적 절차, 준비서류, ${action} 과정을 ${r}변호사가 자세히 안내합니다. 지급정지 사유 확인부터 소명자료 준비까지 체계적으로 진행합니다.`;
+      return { summary, imageAlt, imageCaption, imageDescription };
+    }
+
+    // ── 제목 파싱 (서버 functions/api/create-jipjeong-landing.js와 동일 로직) ─
+    function extractBank(title) {
+      const s = title.trim().replace(/\s+/g, " ");
+      const m = s.match(/^(.+?)\s+(?:계좌\s+)?지급정지/);
+      return m ? m[1].trim() : s.split(/[\s,·]/)[0];
+    }
+
+    function extractRegion(title) {
+      const m = title.trim().replace(/\s+/g, " ").match(/[,\s\-–—·]?\s*(\S{1,6})변호사/);
+      return m ? m[1].trim() : "";
+    }
+
+    function extractAction(title, bank) {
+      const s = title.trim().replace(/\s+/g, " ");
+      let rest = s.startsWith(bank) ? s.slice(bank.length).trim() : s;
+      rest = rest.replace(/\s*[,·\-–—]?\s*\S{1,6}변호사[\s\S]*$/, "").trim();
+      return rest || "지급정지";
+    }
+
+    function markFieldAuto(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add("auto-filled");
+      const hint = document.getElementById(id + "Hint");
+      if (hint) { hint.textContent = "자동 생성됨"; hint.style.color = "#2a7a2a"; }
+    }
+
+    function markFieldManual(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("auto-filled");
+      const hint = document.getElementById(id + "Hint");
+      if (hint) { hint.textContent = "수동 입력"; hint.style.color = "#8a96a8"; }
     }
 
     function normalizeSlug(value) {
