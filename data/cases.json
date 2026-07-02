@@ -4467,7 +4467,8 @@
     "memo": "",
     "noindex": true,
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "hideFromListing": true
   },
   {
     "slug": "baidogseu-georaeso-litigation-noindex",
@@ -4491,7 +4492,8 @@
     "memo": "",
     "noindex": true,
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "hideFromListing": true
   },
   {
     "slug": "velocity-clearing",
