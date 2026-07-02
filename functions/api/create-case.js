@@ -204,13 +204,15 @@ async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
 }
 
 function buildIndexEntry(c) {
-  return {
+  const entry = {
     slug: c.slug, caseName: c.caseName || "", category: c.category || "",
     createdAt: c.createdAt || "", updatedAt: c.updatedAt || "",
     thumbnailUrl: c.thumbnailUrl || "", landingViews: c.landingViews || 0,
     reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
     targetGroups: c.targetGroups || [], createdBy: c.createdBy || "",
   };
+  if (c.hideFromListing) entry.hideFromListing = true;
+  return entry;
 }
 
 async function warmLandingCaches(slug) {

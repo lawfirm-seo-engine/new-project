@@ -1464,7 +1464,8 @@ function createHubContent(group) {
   function getStatus(slug,createdBy){if(createdBy==='recovery-manual'||createdBy==='jipjeong-manual'){return'사건 접수 중';}if(TARGET_KEY==='c'||TARGET_KEY==='lc'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
-  function allowed(c){if(c&&c.hideFromListing)return false;var t=Array.isArray(c&&c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
+  var HIDE_FROM_LISTING={"baidogseu-georaeso-litigation-noindex":1,"bydoxe-litigation-noidex":1};
+  function allowed(c){if(!c)return false;if(c.hideFromListing||HIDE_FROM_LISTING[c.slug])return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
   function freshLink(item,noMap){
     var cn=normName(item.caseName||item.name||'');
     var dt=SUFFIX?cn+' '+SUFFIX:cn;
