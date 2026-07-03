@@ -714,9 +714,11 @@ function renderLanding(caseData, group, origin) {
   const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
   const seoDescription = createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
   const articleTags = createArticleTags(rawCaseName, lk);
-  const imageAlt = landing.imageAlt || pageTitle;
-  const imageCaption = landing.imageCaption || imageAlt;
-  const imageDescription = landing.imageDescription || seoDescription;
+  const imageMeta = normalizeLandingImageMeta(landing, pageTitle, seoDescription, caseData);
+  const imageAlt = imageMeta.alt;
+  const imageCaption = imageMeta.caption;
+  const imageDescription = imageMeta.description;
+  const emitImageMeta = imageMeta.emit;
 
   const ogImageType = /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/png";
   const ogImageWidth = String(OG_IMAGE_WIDTH);
@@ -746,9 +748,9 @@ function renderLanding(caseData, group, origin) {
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
     `<link rel="image_src" href="${esc(ogImage)}">`,
     `<meta itemprop="image" content="${esc(ogImage)}">`,
-    landing.imageAlt ? `<meta name="image:alt" content="${esc(imageAlt)}">` : "",
-    landing.imageCaption ? `<meta name="image:caption" content="${esc(imageCaption)}">` : "",
-    landing.imageDescription ? `<meta name="image:description" content="${esc(imageDescription)}">` : "",
+    emitImageMeta ? `<meta name="image:alt" content="${esc(imageAlt)}">` : "",
+    emitImageMeta ? `<meta name="image:caption" content="${esc(imageCaption)}">` : "",
+    emitImageMeta ? `<meta name="image:description" content="${esc(imageDescription)}">` : "",
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${esc(pageTitle)}">`,
     `<meta name="twitter:description" content="${esc(seoDescription)}">`,
@@ -810,7 +812,7 @@ function renderLanding(caseData, group, origin) {
         width: Number(ogImageWidth),
         height: Number(ogImageHeight),
         caption: imageCaption,
-        ...(landing.imageDescription ? { description: imageDescription } : {}),
+        ...(emitImageMeta ? { description: imageDescription } : {}),
         inLanguage: "ko-KR",
         representativeOfPage: true,
       },
@@ -2173,6 +2175,59 @@ function createSeoDescription(description = "", caseName = "", key = "") {
     return `${primary} 피해라면 ${desc || "입금 계좌, 대화 기록, 출금 거부 정황을 기준으로 형사고소와 피해금 회수 가능성을 점검합니다."}`.slice(0, 150);
   }
   return (desc || "입금 내역, 대화 내용, 사이트 주소를 기준으로 피해 구조와 대응 가능성을 정리합니다.").slice(0, 150);
+}
+
+function normalizeLandingImageMeta(landing = {}, pageTitle = "", seoDescription = "", caseData = {}) {
+  let alt = landing.imageAlt || pageTitle;
+  let caption = landing.imageCaption || alt;
+  let description = landing.imageDescription || seoDescription;
+  let emit = Boolean(landing.imageAlt || landing.imageCaption || landing.imageDescription);
+
+  if (caseData.createdBy === "voicephishing-manual") {
+    const parsed = parseVoicephishingTitleForMeta(caseData.caseName || landing.title || pageTitle);
+    if (parsed.region) {
+      alt = `${parsed.subject} ${parsed.action} 보이스피싱 피해 대응`;
+      caption = `${parsed.subject}가 안내하는 ${parsed.action} 절차와 피해금 회수 대응`;
+      description = `${parsed.subject} 상담을 통해 보이스피싱 피해 직후 필요한 ${parsed.action}, 계좌추적, 형사고소 준비자료와 피해금 회수 가능성을 정리한 법률 정보 이미지입니다.`;
+      emit = true;
+    }
+  }
+
+  return { alt, caption, description, emit };
+}
+
+function parseVoicephishingTitleForMeta(title = "") {
+  const s = String(title || "").trim().replace(/\s+/g, " ").replace(/\s*,\s*/g, ", ");
+  const compact = s.replace(/\s+/g, "");
+  const direct = compact.match(/^(.+?)보이스피싱변호사/);
+  let region = direct ? direct[1].replace(/^(?:서울|경기|인천|부산|대구|대전|광주|울산|세종)\s*/g, "").replace(/[^가-힣A-Za-z0-9]/g, "").slice(0, 10) : "";
+  if (!region) {
+    const lawyer = s.match(/(?:[,·\-–—]|\s)\s*([가-힣A-Za-z0-9]{1,10})\s*변호사/);
+    if (lawyer) region = lawyer[1].replace(/[^가-힣A-Za-z0-9]/g, "").slice(0, 10);
+  }
+
+  let rest = "";
+  const marker = s.match(/보이스피싱\s*변호사|보이스피싱변호사/);
+  if (marker) rest = s.slice((marker.index || 0) + marker[0].length);
+  else rest = s;
+  rest = rest
+    .replace(/^[\s,·\-–—:]+/, "")
+    .replace(/\s*[-–—]\s*[가-힣A-Za-z0-9]{1,10}\s*변호사[\s\S]*$/, "")
+    .replace(/\s*(어떻게|어떻게 진행해야 할까|진행해야 할까|할까)\??\s*$/g, "")
+    .trim();
+
+  let action = rest || "지급정지";
+  if (/출금정지\s*신청/.test(rest)) action = "출금정지 신청";
+  else if (/계좌\s*지급정지/.test(rest)) action = "계좌 지급정지";
+  else if (/지급정지/.test(rest)) action = "지급정지";
+  else if (/출금정지/.test(rest)) action = "출금정지";
+  else if (/피해구제/.test(rest)) action = "피해구제";
+
+  return {
+    region,
+    action,
+    subject: region ? `${region}보이스피싱변호사` : "보이스피싱변호사",
+  };
 }
 
 function createArticleTags(caseName = "", key = "") {
