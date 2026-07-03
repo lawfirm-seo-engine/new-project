@@ -1069,7 +1069,7 @@ function createLandingContent(landing, group, caseData) {
     const _siteName = esc(group.siteName);
     const _trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${_slug}'})}).catch(function(){});})();</script>`;
     const _memoSection = renderOperatorMemos(caseData);
-    const _body = renderBodyForLanding(landing, _contentGroup, caseData).map((item) => reduceCaseNameText(item, _rawCaseName, false, _replacementContext));
+    const _body = renderBodyForLanding(landing, _contentGroup, caseData).map((item) => normalizeScamCopyPhrases(reduceCaseNameText(item, _rawCaseName, false, _replacementContext)));
     const _victimCases = renderVictimCasesForLanding(landing, _contentGroup, caseData, _replacementContext);
     const _faq = renderFaqForLanding(landing, _contentGroup, caseData);
     const _authoritySections = isLawLandingKey(_contentKey) ? createLawAuthoritySections(_contentKey, caseData) : "";
@@ -1193,7 +1193,7 @@ function createNeutralAeoSummary(caseName = "") {
 function createConfirmedSignals(caseName, landing, replacementContext) {
   {
     const items = Array.isArray(landing?.scamIntroItems) && landing.scamIntroItems.length > 0
-      ? landing.scamIntroItems.map((item) => reduceCaseNameText(item, caseName, false, replacementContext))
+      ? landing.scamIntroItems.map((item) => normalizeScamCopyPhrases(reduceCaseNameText(item, caseName, false, replacementContext)))
       : [
           "해당 명칭 또는 유사 명칭으로 실제 브랜드처럼 접근",
           "텔레그램·카카오톡·네이버밴드 등에서 허위 수익 인증과 투자 권유 반복",
@@ -1221,7 +1221,7 @@ function createConfirmedSignals(caseName, landing, replacementContext) {
 
 function createScamMethodItems(caseName, landing, replacementContext) {
   if (Array.isArray(landing?.scamMethodItems) && landing.scamMethodItems.length > 0) {
-    return landing.scamMethodItems.map((item) => reduceCaseNameText(item, caseName, false, replacementContext));
+    return landing.scamMethodItems.map((item) => normalizeScamCopyPhrases(reduceCaseNameText(item, caseName, false, replacementContext)));
   }
   return [
     "유명인·증권사·투자 리딩방 명칭을 사용해 정상 업체 또는 플랫폼처럼 신뢰를 형성합니다.",
@@ -1647,13 +1647,18 @@ function sanitizeAwkwardText(value = "") {
 }
 
 function normalizeScamCopyPhrases(value = "") {
+  const SUBST = "(?:접수 기록|상담 메모|거래 흐름|증거 묶음|계좌 단서|대화 자료|송금 내역|화면 기록|접근 경로|안내 문구|담당자 기록|분석 대상|검토 자료|신고 자료|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록|진행 자료)";
   return String(value || "")
-    .replace(/신고 자료 또는 유사 명칭으로/g, "유사 또는 사칭 명칭으로")
-    .replace(/접수 기록 관련 명칭으로/g, "유사 또는 사칭 명칭으로")
-    .replace(/(?:접수 기록|신고 자료|담당자 기록|검토 자료|대화 자료|진행 자료|송금 내역|상담 메모|거래 흐름|증거 묶음|계좌 단서|화면 기록|접근 경로|안내 문구|분석 대상|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록)\s*관련\s*명칭으로/g, "유사 또는 사칭 명칭으로")
-    .replace(/(?:대화 자료|검토 자료)\s*피해가 의심된다면/g, "피해가 의심된다면")
-    .replace(/(?:진행 자료|송금 내역)\s*사건은/g, "사건은")
-    .replace(/(?:담당자 기록|접수 기록|대화 자료|검토 자료|진행 자료|송금 내역)\s*관련(?=\s|[은는이가을를과와,.;:!?])/g, "")
+    // [SUBST] (또는 유사)? (관련)? 명칭으로/의/을 → 유사 또는 사칭 명칭으로/의/을
+    .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭으로`, "g"), "유사 또는 사칭 명칭으로")
+    .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭의`, "g"), "유사 또는 사칭 명칭의")
+    .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭을`, "g"), "유사 또는 사칭 명칭을")
+    // Delete [SUBST] before sentence-starting words that come from body templates
+    .replace(new RegExp(`${SUBST}\\s*(?=사건|피해|전체\\s*허브|금융피해|유사\\s*성공|실제\\s*회수|AI\\b|사기\\s*피해|금융사기\\s*사건)`, "g"), "")
+    // Delete [SUBST] before 관련 (all substitute words)
+    .replace(new RegExp(`${SUBST}\\s*관련(?=\\s|[은는이가을를과와,.;:!?])`, "g"), "")
+    // Delete [SUBST]처럼 (comparison particle)
+    .replace(new RegExp(`${SUBST}처럼`, "g"), "")
     .replace(/\s+([,.;:!?])/g, "$1")
     .replace(/\s{2,}/g, " ")
     .trim();
