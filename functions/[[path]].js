@@ -692,8 +692,10 @@ function renderLanding(caseData, group, origin) {
   const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
   const rawCaseName = caseData.caseName || "";
   const useManualRecoveryText = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual") && lk === "c";
-  const pageTitle = useManualRecoveryText ? (landing.title || groupPageTitle(rawCaseName, lk)) : groupPageTitle(rawCaseName, lk);
-  const pageH1 = useManualRecoveryText ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk)) : groupPageH1(rawCaseName, lk);
+  const useManualVoicephishingText = caseData.createdBy === "voicephishing-manual" && lk === "la";
+  const useManualTitle = useManualRecoveryText || useManualVoicephishingText;
+  const pageTitle = useManualTitle ? (landing.title || groupPageTitle(rawCaseName, lk)) : groupPageTitle(rawCaseName, lk);
+  const pageH1 = useManualTitle ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk)) : groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const ALL_DOMAINS_NO_SUFFIX_RENDER = ["baidogseu-georaeso-litigation-noindex", "bydoxe-litigation-noidex"];
   const OLD_URL_CANONICAL = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
@@ -892,7 +894,7 @@ function renderLanding(caseData, group, origin) {
 
   const ogThumbnail = "";
 
-  const content = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual")
+  const content = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual" || caseData.createdBy === "voicephishing-manual")
     ? createRecoveryManualContent(landing, group, caseData)
     : createLandingContent(landing, group, caseData);
   const footerLinks = CROSS_LINKS.map((l) => {
