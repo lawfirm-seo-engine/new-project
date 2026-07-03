@@ -924,7 +924,7 @@ function renderLanding(caseData, group, origin) {
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName),
     ogThumbnail,
     summary: pageSummary,
-    heroTyping: useManualRecoveryText ? "" : createHeroTypingBlock(rawCaseName),
+    heroTyping: useManualTitle ? "" : createHeroTypingBlock(rawCaseName),
     receiptBadge: createReceiptBadge(caseData),
     heroCta: "",
     content,
