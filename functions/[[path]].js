@@ -1011,6 +1011,31 @@ function renderManualBodyArray(items) {
   return parts.join("\n");
 }
 
+function collectOperatorMemos(caseData = {}) {
+  const entries = [];
+  const seen = new Set();
+  function addEntry(item) {
+    const text = typeof item === "string" ? item : item?.text;
+    const clean = String(text || "").trim();
+    if (!clean) return;
+    const createdAt = typeof item === "object" && item?.createdAt ? String(item.createdAt).trim() : "";
+    const key = clean;
+    if (seen.has(key)) return;
+    seen.add(key);
+    entries.push({ text: clean, createdAt });
+  }
+  if (caseData.memo) addEntry({ text: caseData.memo });
+  if (Array.isArray(caseData.memos)) caseData.memos.forEach(addEntry);
+  return entries;
+}
+
+function renderOperatorMemos(caseData, heading = "운영 안내") {
+  const entries = collectOperatorMemos(caseData);
+  if (!entries.length) return "";
+  const items = entries.map((entry) => `<div class="memo-item"><p>${esc(entry.text)}</p>${entry.createdAt ? `<time>${esc(entry.createdAt)}</time>` : ""}</div>`).join("\n");
+  return `<section class="article-block memo-section"><h2>${esc(heading)}</h2>${items}</section>`;
+}
+
 function createRecoveryManualContent(landing, group, caseData) {
   const cn = esc(normalizeCaseName(caseData.caseName));
   const siteName = esc(group.siteName);
@@ -1019,9 +1044,7 @@ function createRecoveryManualContent(landing, group, caseData) {
   const bodyHtml = Array.isArray(landing.body)
     ? renderManualBodyArray(landing.body)
     : renderManualArticle(String(landing.body || ""));
-  const memoSection = caseData.memo
-    ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${esc(caseData.memo)}</p></section>`
-    : "";
+  const memoSection = renderOperatorMemos(caseData);
   return [
     MANUAL_BODY_STYLE,
     `<section class="article-block manual-body">${bodyHtml}</section>`,
@@ -1043,9 +1066,7 @@ function createLandingContent(landing, group, caseData) {
     const _cn = esc(normalizeCaseName(_rawCaseName));
     const _siteName = esc(group.siteName);
     const _trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${_slug}'})}).catch(function(){});})();</script>`;
-    const _memoSection = caseData.memo
-      ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${esc(caseData.memo)}</p></section>`
-      : "";
+    const _memoSection = renderOperatorMemos(caseData);
     const _body = renderBodyForLanding(landing, _contentGroup, caseData).map((item) => reduceCaseNameText(item, _rawCaseName, false, _replacementContext));
     const _victimCases = renderVictimCasesForLanding(landing, _contentGroup, caseData, _replacementContext);
     const _faq = renderFaqForLanding(landing, _contentGroup, caseData);
@@ -1080,9 +1101,7 @@ function createLandingContent(landing, group, caseData) {
   const siteName = esc(group.siteName);
 
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
-  const memoSection = caseData.memo
-    ? `<section class="article-block memo-section"><h2>운영자 안내</h2><p>${esc(caseData.memo)}</p></section>`
-    : "";
+  const memoSection = renderOperatorMemos(caseData, "운영자 안내");
   const body = renderBodyForLanding(landing, contentGroup, caseData);
   const victimCases = renderVictimCasesForLanding(landing, contentGroup, caseData);
   const faq = renderFaqForLanding(landing, contentGroup, caseData);
@@ -1615,13 +1634,26 @@ function detectScenario(caseData = {}) {
 }
 
 function sanitizeAwkwardText(value = "") {
-  return String(value || "")
+  return normalizeScamCopyPhrases(value)
     .replace(/관련 사실 관련/g, "관련 자료")
     .replace(/대응 자료 관련 앱/g, "의심 앱")
     .replace(/해당 피해 관련 앱/g, "문제 앱")
     .replace(/담당자 담당자/g, "담당자")
     .replace(/피해 피해/g, "피해")
     .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeScamCopyPhrases(value = "") {
+  return String(value || "")
+    .replace(/신고 자료 또는 유사 명칭으로/g, "유사 또는 사칭 명칭으로")
+    .replace(/접수 기록 관련 명칭으로/g, "유사 또는 사칭 명칭으로")
+    .replace(/(?:접수 기록|신고 자료|담당자 기록|검토 자료|대화 자료|진행 자료|송금 내역|상담 메모|거래 흐름|증거 묶음|계좌 단서|화면 기록|접근 경로|안내 문구|분석 대상|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록)\s*관련\s*명칭으로/g, "유사 또는 사칭 명칭으로")
+    .replace(/(?:대화 자료|검토 자료)\s*피해가 의심된다면/g, "피해가 의심된다면")
+    .replace(/(?:진행 자료|송금 내역)\s*사건은/g, "사건은")
+    .replace(/(?:담당자 기록|접수 기록|대화 자료|검토 자료|진행 자료|송금 내역)\s*관련(?=\s|[은는이가을를과와,.;:!?])/g, "")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/\s{2,}/g, " ")
     .trim();
 }
 
@@ -2178,7 +2210,7 @@ function reduceCaseNameTextLegacy(value, caseName, keepFirst = false) {
 }
 
 function cleanupRepeatedWords(value = "") {
-  return String(value || "")
+  return normalizeScamCopyPhrases(value)
     .replace(/이\s*사건\s*사건/g, "이 사안")
     .replace(/해당\s*피해\s*피해/g, "해당 피해")
     .replace(/사칭\s*사칭/g, "사칭")
@@ -2272,7 +2304,7 @@ function softenRepeatedContextTerms(value = "") {
 }
 
 function cleanupRepeatedWordsLegacy(value = "") {
-  return String(value || "")
+  return normalizeScamCopyPhrases(value)
     .replace(/이\s*사건\s*사건/g, "이 사안")
     .replace(/이\s*사안\s*사안/g, "이 사안")
     .replace(/해당\s*피해\s*피해/g, "해당 피해")

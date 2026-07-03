@@ -23,6 +23,7 @@ export async function onRequestPost(context) {
     if (idx === -1) return json({ ok: false, message: "사건을 찾을 수 없습니다." }, 404);
 
     const now = new Date().toISOString().slice(0, 10);
+    const nowKst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace("T", " ").slice(0, 16);
 
     if (action === "update-landing" && groupKey && field) {
       if (!EDITABLE_LANDING_FIELDS.includes(field)) {
@@ -49,6 +50,18 @@ export async function onRequestPost(context) {
 
     } else if (action === "update-memo") {
       cases[idx].memo = String(value || "").trim();
+      cases[idx].updatedAt = now;
+
+    } else if (action === "add-memo") {
+      const text = String(value || "").trim();
+      if (!text) return json({ ok: false, message: "메모 내용 필수" }, 400);
+      if (!Array.isArray(cases[idx].memos)) cases[idx].memos = [];
+      cases[idx].memos.push({
+        id: Date.now(),
+        text,
+        createdAt: nowKst,
+      });
+      cases[idx].updatedAt = now;
 
     } else if (action === "update-thumbnail") {
       cases[idx].thumbnailUrl = String(value || "").trim();
@@ -93,7 +106,7 @@ export async function onRequestPost(context) {
     // KV 업데이트 — rename 시 기존 KV의 landings 보존
     if (env.CASES) {
       let kvEntry = cases[idx];
-      if (action === "rename" || action === "set-noindex" || action === "update-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
+      if (action === "rename" || action === "set-noindex" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
         const existing = await env.CASES.get(`case:${slug}`);
         if (existing) {
           const existingParsed = JSON.parse(existing);

@@ -348,13 +348,26 @@ function detectScenario({ caseName = "", slug = "" }) {
 }
 
 function sanitizeAwkwardText(value = "") {
-  return String(value || "")
+  return normalizeScamCopyPhrases(value)
     .replace(/관련 사실 관련/g, "관련 자료")
     .replace(/대응 자료 관련 앱/g, "의심 앱")
     .replace(/해당 피해 관련 앱/g, "문제 앱")
     .replace(/담당자 담당자/g, "담당자")
     .replace(/피해 피해/g, "피해")
     .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeScamCopyPhrases(value = "") {
+  return String(value || "")
+    .replace(/신고 자료 또는 유사 명칭으로/g, "유사 또는 사칭 명칭으로")
+    .replace(/접수 기록 관련 명칭으로/g, "유사 또는 사칭 명칭으로")
+    .replace(/(?:접수 기록|신고 자료|담당자 기록|검토 자료|대화 자료|진행 자료|송금 내역|상담 메모|거래 흐름|증거 묶음|계좌 단서|화면 기록|접근 경로|안내 문구|분석 대상|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록)\s*관련\s*명칭으로/g, "유사 또는 사칭 명칭으로")
+    .replace(/(?:대화 자료|검토 자료)\s*피해가 의심된다면/g, "피해가 의심된다면")
+    .replace(/(?:진행 자료|송금 내역)\s*사건은/g, "사건은")
+    .replace(/(?:담당자 기록|접수 기록|대화 자료|검토 자료|진행 자료|송금 내역)\s*관련(?=\s|[은는이가을를과와,.;:!?])/g, "")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/\s{2,}/g, " ")
     .trim();
 }
 

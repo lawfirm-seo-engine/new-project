@@ -52,8 +52,8 @@
 
     <form id="vpForm">
       <div class="field">
-        <label for="title">페이지 제목 <span class="hint">예: 카카오뱅크 보이스피싱 피해구제 - 종로변호사</span></label>
-        <input id="title" name="title" type="text" placeholder="OO은행 보이스피싱 피해구제 - 종로변호사" required>
+        <label for="title">페이지 제목 <span class="hint">예: 종로보이스피싱변호사 출금정지 신청 어떻게 진행해야 할까</span></label>
+        <input id="title" name="title" type="text" placeholder="OO보이스피싱변호사 지급정지 어떻게 진행해야 할까" required>
       </div>
       <div class="field">
         <label for="slug">URL slug</label>
@@ -77,18 +77,18 @@
       </div>
 
       <div class="manual-hint">
-        <strong>원고 입력 방법</strong><br>
-        기존 보이스피싱 페이지가 <strong>없을 때</strong>: 아래 원고 직접 입력란에 내용을 입력 후 저장하세요.<br>
-        기존 보이스피싱 페이지가 <strong>있을 때</strong>: <em>원고 미리보기</em>를 클릭하면 자동 추출됩니다.
+        <strong>원고 생성 방식</strong><br>
+        제목 입력 후 저장하면 자동 원고가 생성됩니다. 필요하면 아래 직접 입력란으로 원고를 덮어쓸 수 있습니다.<br>
+        지역명은 <strong>OO보이스피싱변호사</strong>에서 <strong>OO</strong> 부분으로 인식됩니다.
       </div>
 
       <div class="field wide">
-        <label for="bodyInput">원고 직접 입력 <span class="hint">단락 구분은 빈 줄(엔터 2회). 원고 미리보기 시 자동 채워집니다.</span></label>
-        <textarea id="bodyInput" name="bodyInput" class="body-input" rows="12" placeholder="단락 1&#10;&#10;단락 2&#10;&#10;단락 3&#10;&#10;…"></textarea>
+        <label for="bodyInput">원고 직접 입력 <span class="hint">선택 사항. 단락 구분은 빈 줄(엔터 2회)</span></label>
+        <textarea id="bodyInput" name="bodyInput" class="body-input" rows="12" placeholder="비워두면 자동 생성 원고가 사용됩니다"></textarea>
       </div>
 
       <div id="previewBox" class="preview-box">
-        <h3>자동 추출 원고 미리보기 <span style="font-size:11px;color:#8a96a8">(기존 보이스피싱 페이지 참조)</span></h3>
+        <h3>자동 생성 원고 미리보기 <span style="font-size:11px;color:#8a96a8">(보이스피싱 지급정지 참조 템플릿)</span></h3>
         <p id="extractedInfo" style="font-size:12px;color:#5a6a80;margin:0 0 8px;line-height:1.6"></p>
         <pre id="previewText"></pre>
       </div>
@@ -141,7 +141,7 @@
     previewButtonEl.addEventListener("click", async () => {
       const title = String(titleEl.value || "").trim();
       if (!title) { setMessage("페이지 제목을 입력하세요.", "err"); return; }
-      setMessage("기존 보이스피싱 페이지에서 원고를 추출하는 중...", "");
+      setMessage("보이스피싱 자동 원고를 생성하는 중...", "");
       previewButtonEl.disabled = true;
       try {
         const res = await fetch(API_ORIGIN + "/api/create-voicephishing-landing", {
@@ -151,24 +151,20 @@
         });
         const data = await res.json();
         if (!data.ok) {
-          if (data.noReference) {
-            setMessage("기존 보이스피싱 페이지 없음 — 원고를 직접 입력하고 저장하세요.", "");
-          } else {
-            setMessage(data.message || "원고 추출 실패", "err");
-          }
-          if (data.bank) autoFillMetaFromParts(data.bank, data.region || "", data.action || "보이스피싱");
+          setMessage(data.message || "원고 생성 실패", "err");
+          if (data.subject) autoFillMetaFromParts(data.subject, data.region || "", data.action || "지급정지");
           return;
         }
         autoBody = data.body;
         bodyInputEl.value = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
         document.getElementById("extractedInfo").textContent =
-          `인식된 은행명: ${data.bank || "—"}  /  지역명: ${data.region || "—"}  /  행위키워드: ${data.action || "—"}`;
+          `인식된 키워드: ${data.subject || data.bank || "—"}  /  지역명: ${data.region || "—"}  /  행위키워드: ${data.action || "—"}`;
         previewTextEl.textContent = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
         previewBoxEl.style.display = "block";
-        if (data.bank) autoFillMetaFromParts(data.bank, data.region || "", data.action || "보이스피싱");
-        setMessage("원고 추출 완료. 확인 후 '보이스피싱 랜딩 생성'을 클릭하세요.", "ok");
+        if (data.subject || data.bank) autoFillMetaFromParts(data.subject || data.bank, data.region || "", data.action || "지급정지");
+        setMessage("원고 생성 완료. 확인 후 '보이스피싱 랜딩 생성'을 클릭하세요.", "ok");
       } catch (error) {
-        setMessage("원고 추출 오류: " + error.message, "err");
+        setMessage("원고 생성 오류: " + error.message, "err");
       } finally {
         previewButtonEl.disabled = false;
       }
@@ -177,16 +173,11 @@
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      // 원고: 자동 추출 우선, 없으면 직접 입력 사용
+      // 원고: 자동 미리보기 우선, 직접 입력이 있으면 직접 입력 사용, 둘 다 없으면 서버 자동 생성
       const manualText = String(bodyInputEl.value || "").trim();
       const body = autoBody || (manualText
         ? manualText.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
         : null);
-
-      if (!body || !body.length) {
-        setMessage("원고를 입력하거나 원고 미리보기를 먼저 실행하세요.", "err");
-        return;
-      }
 
       setMessage("저장 중...", "");
       savedLinkEl.style.display = "none";
@@ -200,7 +191,7 @@
           imageAlt: String(document.getElementById("imageAlt").value || "").trim(),
           imageCaption: String(document.getElementById("imageCaption").value || "").trim(),
           imageDescription: String(document.getElementById("imageDescription").value || "").trim(),
-          body,
+          ...(body && body.length ? { body } : {}),
         };
         const res = await fetch(API_ORIGIN + "/api/create-voicephishing-landing", {
           method: "POST",
@@ -248,8 +239,8 @@
       autoFillMetaFromParts(bank, region, action);
     }
 
-    function autoFillMetaFromParts(bank, region, action) {
-      const generated = generateMeta(bank, region, action);
+    function autoFillMetaFromParts(subject, region, action) {
+      const generated = generateMeta(subject, region, action);
       META_FIELD_IDS.forEach((id) => {
         if (!fieldTouched[id]) {
           document.getElementById(id).value = generated[id] || "";
@@ -258,32 +249,69 @@
       });
     }
 
-    function generateMeta(bank, region, action) {
+    function generateMeta(subject, region, action) {
       const r = region || "종로";
-      const summary = `${bank} ${action}은 신고 즉시 전문가와 상담하고, 피해금 회수 가능성과 대응 방향을 확인하는 것이 중요합니다. ${bank} ${action} ${r}변호사가 피해 경위 분석부터 대응 절차까지 자세히 안내합니다.`.slice(0, 180);
-      const imageAlt = `${bank} ${action} ${r}변호사`;
-      const imageCaption = `${bank} ${action} — ${r}변호사가 피해 대응 방법을 안내합니다`;
-      const imageDescription = `${bank} ${action} 피해구제 절차, 신고 방법, 피해금 회수 가능성을 ${r}변호사가 자세히 안내합니다. 사기 신고부터 법적 대응까지 체계적으로 진행합니다.`;
+      const a = action || "지급정지";
+      const summary = `${subject} 상담은 보이스피싱 피해 직후 ${a} 가능성, 계좌추적, 형사고소와 피해금 회수 방향을 빠르게 확인하는 과정이 중요합니다. ${r} 지역 피해 대응 절차와 준비자료를 안내합니다.`.slice(0, 180);
+      const imageAlt = `${subject} ${a} 보이스피싱 피해 대응`;
+      const imageCaption = `${subject}가 안내하는 ${a} 절차와 피해금 회수 대응`;
+      const imageDescription = `${subject} 상담을 통해 보이스피싱 피해 직후 필요한 ${a}, 계좌추적, 형사고소 준비자료와 피해금 회수 가능성을 정리한 법률 정보 이미지입니다.`;
       return { summary, imageAlt, imageCaption, imageDescription };
     }
 
     // ── 제목 파싱 (서버 create-voicephishing-landing.js와 동일 로직) ──────
     function extractBank(title) {
-      const s = title.trim().replace(/\s+/g, " ");
-      const m = s.match(/^(.+?)\s+(?:보이스피싱|전화금융사기|스미싱|피해)/);
-      return m ? m[1].trim() : s.split(/[\s,·]/)[0];
+      return parseTitleParts(title).subject;
     }
 
     function extractRegion(title) {
-      const m = title.trim().replace(/\s+/g, " ").match(/[,\s\-–—·]?\s*(\S{1,6})변호사/);
-      return m ? m[1].trim() : "";
+      return parseTitleParts(title).region;
     }
 
-    function extractAction(title, bank) {
-      const s = title.trim().replace(/\s+/g, " ");
-      let rest = s.startsWith(bank) ? s.slice(bank.length).trim() : s;
-      rest = rest.replace(/\s*[,·\-–—]?\s*\S{1,6}변호사[\s\S]*$/, "").trim();
-      return rest || "보이스피싱";
+    function extractAction(title) {
+      return parseTitleParts(title).action;
+    }
+
+    function parseTitleParts(title) {
+      const s = String(title || "").trim().replace(/\s+/g, " ").replace(/\s*,\s*/g, ", ");
+      const compact = s.replace(/\s+/g, "");
+      const direct = compact.match(/^(.+?)보이스피싱변호사/);
+      let region = direct ? cleanRegion(direct[1]) : "";
+      if (!region) {
+        const lawyer = s.match(/(?:[,·\-–—]|\s)\s*([가-힣A-Za-z0-9]{1,10})\s*변호사/);
+        if (lawyer) region = cleanRegion(lawyer[1]);
+      }
+
+      let rest = "";
+      const marker = s.match(/보이스피싱\s*변호사|보이스피싱변호사/);
+      if (marker) rest = s.slice((marker.index || 0) + marker[0].length);
+      else rest = s;
+      rest = rest
+        .replace(/^[\s,·\-–—:]+/, "")
+        .replace(/\s*[-–—]\s*[가-힣A-Za-z0-9]{1,10}\s*변호사[\s\S]*$/, "")
+        .replace(/\s*(어떻게|어떻게 진행해야 할까|진행해야 할까|할까)\??\s*$/g, "")
+        .trim();
+
+      let action = rest || "지급정지";
+      if (/출금정지\s*신청/.test(rest)) action = "출금정지 신청";
+      else if (/계좌\s*지급정지/.test(rest)) action = "계좌 지급정지";
+      else if (/지급정지/.test(rest)) action = "지급정지";
+      else if (/출금정지/.test(rest)) action = "출금정지";
+      else if (/피해구제/.test(rest)) action = "피해구제";
+
+      return {
+        subject: region ? `${region}보이스피싱변호사` : "보이스피싱변호사",
+        region,
+        action,
+      };
+    }
+
+    function cleanRegion(value) {
+      return String(value || "")
+        .trim()
+        .replace(/^(?:서울|경기|인천|부산|대구|대전|광주|울산|세종)\s*/g, "")
+        .replace(/[^가-힣A-Za-z0-9]/g, "")
+        .slice(0, 10);
     }
 
     function markFieldAuto(id) {

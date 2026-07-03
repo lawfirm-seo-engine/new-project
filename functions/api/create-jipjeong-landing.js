@@ -140,12 +140,12 @@ export async function onRequestPost(context) {
       ? body.body
       : generatedBody;
 
-    const imageAlt        = normalizeSpace(body.imageAlt).slice(0, 160);
-    const imageCaption    = normalizeSpace(body.imageCaption).slice(0, 220);
-    const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300);
+    const generatedMeta = generateMeta(newBank, newRegion, newAction);
+    const imageAlt        = normalizeSpace(body.imageAlt).slice(0, 160) || generatedMeta.imageAlt;
+    const imageCaption    = normalizeSpace(body.imageCaption).slice(0, 220) || generatedMeta.imageCaption;
+    const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300) || generatedMeta.imageDescription;
 
-    const autoSummary = applySubstitutions(TEMPLATE_SUMMARY, newBank, newRegion, newAction);
-    const summary = normalizeSpace(body.summary).slice(0, 180) || autoSummary;
+    const summary = normalizeSpace(body.summary).slice(0, 180) || generatedMeta.summary;
 
     const existing = await loadExisting(env, slug);
     if (existing && !isJipjeongManual(existing)) {
@@ -241,6 +241,28 @@ function applySubstitutions(str, bank, region, action) {
   return s;
 }
 
+function generateMeta(bank, region, action) {
+  const r = region || "종로";
+  const subject = `${bank} ${action}`.trim();
+  const summary = `${subject}${topicParticle(subject)} 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. ${subject} ${r}변호사가 지급정지 원인, ${action} 절차, 준비해야 할 자료와 주요 유의사항을 자세히 안내합니다.`.slice(0, 180);
+  const imageAlt = `${bank} ${action} ${r}변호사`;
+  const imageCaption = `${bank} ${action} — ${r}변호사가 절차와 준비자료를 안내합니다`;
+  const imageDescription = `${bank} ${action}에 관한 법적 절차, 준비서류, ${action} 과정을 ${r}변호사가 자세히 안내합니다. 지급정지 사유 확인부터 소명자료 준비까지 체계적으로 진행합니다.`;
+  return { summary, imageAlt, imageCaption, imageDescription };
+}
+
+function topicParticle(value = "") {
+  return hasFinalConsonant(value) ? "은" : "는";
+}
+
+function hasFinalConsonant(value = "") {
+  const chars = [...String(value || "").trim()].reverse();
+  const lastHangul = chars.find((char) => /[가-힣]/.test(char));
+  if (!lastHangul) return true;
+  const code = lastHangul.charCodeAt(0) - 0xac00;
+  return code >= 0 && code <= 11171 ? code % 28 !== 0 : true;
+}
+
 // KV 기존 지급정지 케이스 원고 참조 — 찾으면 은행·지역·행위 치환 후 반환
 async function findJipjeongReferenceFromKv(env, newBank, newRegion, newAction) {
   try {
@@ -293,8 +315,11 @@ function extractBank(title) {
 
 function extractRegion(title) {
   // "중랑변호사가..." → "중랑" / "- 종로변호사" → "종로"
-  const m = normalizeSpace(title).match(/[,\s\-–—·]?\s*(\S{1,6})변호사/);
-  return m ? m[1].trim() : "";
+  const s = normalizeSpace(title);
+  const separated = s.match(/[,·\-–—]\s*([가-힣A-Za-z0-9]{1,10})\s*변호사/);
+  if (separated) return separated[1].trim();
+  const spaced = s.match(/(?:^|\s)([가-힣A-Za-z0-9]{1,10})\s*변호사(?:가|는|은|의|와|과|를|을)?(?:\s|$|[,.?])/);
+  return spaced ? spaced[1].trim() : "";
 }
 
 function extractAction(title, bank) {
@@ -303,7 +328,10 @@ function extractAction(title, bank) {
   const s = normalizeSpace(title);
   let rest = s.startsWith(bank) ? s.slice(bank.length).trim() : s;
   // 지역명+변호사 이후 제거
-  rest = rest.replace(/\s*[,·\-–—]?\s*\S{1,6}변호사[\s\S]*$/, "").trim();
+  rest = rest
+    .replace(/\s*[,·\-–—]\s*[가-힣A-Za-z0-9]{1,10}\s*변호사[\s\S]*$/, "")
+    .replace(/\s+[가-힣A-Za-z0-9]{1,10}\s*변호사[\s\S]*$/, "")
+    .trim();
   return rest || "지급정지";
 }
 

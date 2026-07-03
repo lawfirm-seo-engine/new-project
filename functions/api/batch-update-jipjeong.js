@@ -196,14 +196,20 @@ function extractBank(title) {
 }
 
 function extractRegion(title) {
-  const m = normalizeSpace(title).match(/[,\s\-–—·]?\s*(\S{1,6})변호사/);
-  return m ? m[1].trim() : "";
+  const s = normalizeSpace(title);
+  const separated = s.match(/[,·\-–—]\s*([가-힣A-Za-z0-9]{1,10})\s*변호사/);
+  if (separated) return separated[1].trim();
+  const spaced = s.match(/(?:^|\s)([가-힣A-Za-z0-9]{1,10})\s*변호사(?:가|는|은|의|와|과|를|을)?(?:\s|$|[,.?])/);
+  return spaced ? spaced[1].trim() : "";
 }
 
 function extractAction(title, bank) {
   const s = normalizeSpace(title);
   let rest = s.startsWith(bank) ? s.slice(bank.length).trim() : s;
-  rest = rest.replace(/\s*[,·\-–—]?\s*\S{1,6}변호사[\s\S]*$/, "").trim();
+  rest = rest
+    .replace(/\s*[,·\-–—]\s*[가-힣A-Za-z0-9]{1,10}\s*변호사[\s\S]*$/, "")
+    .replace(/\s+[가-힣A-Za-z0-9]{1,10}\s*변호사[\s\S]*$/, "")
+    .trim();
   return rest || "지급정지";
 }
 

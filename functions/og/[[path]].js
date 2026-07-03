@@ -98,7 +98,7 @@ function textUnits(value) {
 function splitTitle(title) {
   const clean = cleanTitle(title);
   if (!clean) return ["법무법인 선린"];
-  if (textUnits(clean) <= 13.2) return [clean];
+  if (textUnits(clean) <= 16.8) return [clean];
 
   const chars = [...clean];
   const total = textUnits(clean);
@@ -122,28 +122,28 @@ function buildSvg(title, templateHref) {
   const lines = splitTitle(title);
   const maxUnits = Math.max(...lines.map(textUnits), 1);
   const fontSize = lines.length > 1
-    ? Math.min(82, Math.max(58, Math.floor(930 / maxUnits)))
-    : Math.min(108, Math.max(72, Math.floor(1005 / maxUnits)));
-  const lineGap = Math.round(fontSize * 0.18);
+    ? Math.min(92, Math.max(66, Math.floor(980 / maxUnits)))
+    : Math.min(124, Math.max(84, Math.floor(1130 / maxUnits)));
+  const lineGap = Math.round(fontSize * 0.14);
   const lineHeight = fontSize + lineGap;
   const centerY = 1127;
   const firstY = centerY - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
-  const strokeWidth = Math.max(2, Math.round(fontSize * 0.035));
+  const strokeWidth = Math.max(4, Math.round(fontSize * 0.055));
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" viewBox="0 0 ${TEMPLATE_WIDTH} ${TEMPLATE_HEIGHT}">
 <defs>
   <linearGradient id="goldText" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#fff0b3"/>
-    <stop offset="45%" stop-color="#f7c75f"/>
-    <stop offset="100%" stop-color="#b8791d"/>
+    <stop offset="0%" stop-color="#ffe08a"/>
+    <stop offset="48%" stop-color="#d99a24"/>
+    <stop offset="100%" stop-color="#8f5009"/>
   </linearGradient>
   <filter id="textShadow" x="-20%" y="-40%" width="140%" height="180%">
-    <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000000" flood-opacity="0.85"/>
-    <feDropShadow dx="0" dy="0" stdDeviation="1.6" flood-color="#fff3c2" flood-opacity="0.45"/>
+    <feDropShadow dx="0" dy="6" stdDeviation="4.5" flood-color="#000000" flood-opacity="0.92"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="1.8" flood-color="#fff1b0" flood-opacity="0.38"/>
   </filter>
 </defs>
 <image href="${templateHref}" x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" preserveAspectRatio="xMidYMid slice"/>
-${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="900" letter-spacing="0" fill="url(#goldText)" stroke="#3a2106" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
+${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="1000" letter-spacing="0" fill="url(#goldText)" stroke="#180b01" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
 </svg>`;
 }
 
