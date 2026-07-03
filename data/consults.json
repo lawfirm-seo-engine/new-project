@@ -340,5 +340,14 @@
     "caseName": "모찌TV 사기",
     "domain": "피해 사건 정보",
     "createdAt": "2026. 7. 3. 오후 3:53:14"
+  },
+  {
+    "id": 1783066532600,
+    "name": "하정현",
+    "phone": "01056257279",
+    "amount": "90만원",
+    "caseName": "ya-noljaticket.com 사칭 사기",
+    "domain": "피해 사건 정보",
+    "createdAt": "2026. 7. 3. 오후 5:15:31"
   }
 ]
