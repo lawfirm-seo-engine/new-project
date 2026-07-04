@@ -1177,7 +1177,7 @@ function createAeoOverviewSection(caseData, key, replacementContext) {
   };
   const cfg = lawAeo[key];
   const title = cfg ? esc(cfg.t) : `${keyword} 핵심 요약`;
-  const body = cfg ? esc(reduceCaseNameText(cfg.b, caseName, false, replacementContext)) : withSentenceBreaks(createNeutralAeoSummary(caseName));
+  const body = cfg ? esc(normalizeScamCopyPhrases(reduceCaseNameText(cfg.b, caseName, false, replacementContext))) : withSentenceBreaks(createNeutralAeoSummary(caseName));
   return `<section class="aeo-summary" id="aeo-summary" aria-label="${title}">
   <h2>${title}</h2>
   <blockquote>${body}</blockquote>
@@ -1653,10 +1653,16 @@ function normalizeScamCopyPhrases(value = "") {
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭으로`, "g"), "유사 또는 사칭 명칭으로")
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭의`, "g"), "유사 또는 사칭 명칭의")
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭을`, "g"), "유사 또는 사칭 명칭을")
+    // [SUBST] (또는 유사)? (관련)? 이름의 → delete
+    .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?이름의`, "g"), "")
+    // [SUBST] (관련)? 계정에서 → delete (from templates like "000 계정에서...")
+    .replace(new RegExp(`${SUBST}\\s*(?:관련\\s*)?계정에서`, "g"), "")
     // Delete [SUBST] before sentence-starting words that come from body templates
     .replace(new RegExp(`${SUBST}\\s*(?=사건|피해|전체\\s*허브|금융피해|유사\\s*성공|실제\\s*회수|AI\\b|사기\\s*피해|금융사기\\s*사건)`, "g"), "")
     // Delete [SUBST] before 관련 (all substitute words)
     .replace(new RegExp(`${SUBST}\\s*관련(?=\\s|[은는이가을를과와,.;:!?])`, "g"), "")
+    // Delete [SUBST] before Korean particles (와/과) — e.g. "사례 기록와 유사한..."
+    .replace(new RegExp(`${SUBST}(?=[와과]\\s)`, "g"), "")
     // Delete [SUBST]처럼 (comparison particle)
     .replace(new RegExp(`${SUBST}처럼`, "g"), "")
     .replace(/\s+([,.;:!?])/g, "$1")
@@ -2291,16 +2297,11 @@ const CASE_NAME_REPLACEMENTS = [
   "송금 내역",
   "화면 기록",
   "접근 경로",
-  "안내 문구",
-  "담당자 기록",
-  "분석 대상",
-  "검토 자료",
   "신고 자료",
   "확인 항목",
   "보존 자료",
   "대응 메모",
   "정리 내용",
-  "사례 기록",
   "진행 자료",
 ];
 
