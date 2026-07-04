@@ -281,7 +281,7 @@ function improveGeneratedLanding(landing, { caseName, slug, group }) {
 }
 
 function scenarioBodyAdditions({ scenario, base, group }) {
-  const subject = base || "접수 기록";
+  const subject = base || "이 사건";
   const commonByScenario = {
     app: [
       `${subject} 사건은 앱 설치 파일, 로그인 화면, 지갑 주소, 고객센터 대화가 함께 남아 있는지부터 확인해야 합니다. 앱을 삭제하기 전 화면 캡처와 설치 파일명, 접속 도메인을 따로 보관하면 계정 운영 주체를 추적하는 단서가 됩니다.`,
@@ -360,7 +360,12 @@ function sanitizeAwkwardText(value = "") {
 
 function normalizeScamCopyPhrases(value = "") {
   const SUBST = "(?:접수 기록|상담 메모|거래 흐름|증거 묶음|계좌 단서|대화 자료|송금 내역|화면 기록|접근 경로|안내 문구|담당자 기록|분석 대상|검토 자료|신고 자료|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록|진행 자료)";
+  const REMOVE_SUBST = "(?:대응 메모|상담 메모|대화 자료|보존 자료|거래 흐름|접수 기록|신고 자료|진행 자료|접근 경로|송금 내역|확인 항목|정리 내용)";
   return String(value || "")
+    .replace(new RegExp(`${SUBST}\\s*(?:관련\\s*)?이름을\\s*사용해`, "g"), "사칭한 명칭을 사용해")
+    .replace(/관련\s*이름을\s*사용해/g, "사칭한 명칭을 사용해")
+    .replace(new RegExp(`${SUBST}\\s*(?:관련\\s*)?계정으로부터`, "g"), "사칭 계정으로부터")
+    .replace(/관련\s*계정으로부터/g, "사칭 계정으로부터")
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭으로`, "g"), "유사 또는 사칭 명칭으로")
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭의`, "g"), "유사 또는 사칭 명칭의")
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭을`, "g"), "유사 또는 사칭 명칭을")
@@ -370,6 +375,7 @@ function normalizeScamCopyPhrases(value = "") {
     .replace(new RegExp(`${SUBST}\\s*관련(?=\\s|[은는이가을를과와,.;:!?])`, "g"), "")
     .replace(new RegExp(`${SUBST}(?=[와과]\\s)`, "g"), "")
     .replace(new RegExp(`${SUBST}처럼`, "g"), "")
+    .replace(new RegExp(`${REMOVE_SUBST}(?:은|는|이|가|을|를|의|에서|에|으로|로|과|와|처럼|보다|만)?\\s*`, "g"), "")
     .replace(/\s+([,.;:!?])/g, "$1")
     .replace(/\s{2,}/g, " ")
     .trim();
@@ -751,8 +757,8 @@ function escapeRegex(s) {
 }
 
 const CONTEXT_TERM_LIMITS = [
-  { term: "해당 사건", limit: 1, replacements: ["접수 기록", "상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
-  { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "거래 흐름", "검토 대상"] },
+  { term: "해당 사건", limit: 1, replacements: ["상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
+  { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "검토 대상"] },
   { term: "해당 플랫폼", limit: 1, replacements: ["문제 사이트", "거래 화면", "접속 페이지", "운영 계정"] },
   { term: "유사 피해", limit: 1, replacements: ["같은 유형의 사례", "비슷한 접수", "관련 상담 기록"] },
   { term: "출금 거부", limit: 2, replacements: ["출금 제한", "지급 보류", "환급 지연", "인출 제한"] },

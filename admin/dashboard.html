@@ -113,6 +113,7 @@
         updatedAt: c.updatedAt || '',
         memo: c.memo || false,
         noindex: c.noindex || false,
+        createdBy: c.createdBy || '',
       })),
       ...pls.map(p => ({
         type: 'pl',
@@ -181,7 +182,7 @@
           <a href="${PL_SITE}/powerlink/${encodeURIComponent(e.slug)}/" target="_blank">보기</a>
           <a href="#" class="del" onclick="deletePl('${esc(e.slug)}','${esc(e.name)}');return false;">삭제</a>`;
       } else {
-        const domainLinks = DOMAINS.map(d => `<a href="${d.url}/${d.prefix}/${encodeURIComponent(e.slug)}-${domainSuffix(d.label)}/" target="_blank">${d.label}</a>`).join('');
+        const domainLinks = DOMAINS.filter(d => d.label !== 'lA' || e.createdBy === 'voicephishing-manual').map(d => `<a href="${d.url}/${d.prefix}/${encodeURIComponent(e.slug)}-${domainSuffix(d.label)}/" target="_blank">${d.label}</a>`).join('');
         const niLabel = e.noindex ? 'noindex 해제' : 'noindex';
         const niStyle = e.noindex ? 'background:#8a96a8' : 'background:#c0392b';
         actions = `

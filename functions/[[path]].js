@@ -682,6 +682,11 @@ function isCaseAllowedForGroup(caseData = {}, group = {}) {
       caseData.createdBy !== "jipjeong-manual") {
     return false;
   }
+  // 금융사기대응센터.kr (la domain)는 voicephishing-manual 전용 — 일반 사건 접근 차단
+  if (group.siteUrl === "https://금융사기대응센터.kr" &&
+      caseData.createdBy !== "voicephishing-manual") {
+    return false;
+  }
   const targets = Array.isArray(caseData.targetGroups) ? caseData.targetGroups.filter(Boolean) : [];
   if (!targets.length) return true;
   return targets.includes(group.landingKey || group.key);
@@ -1077,6 +1082,7 @@ function createLandingContent(landing, group, caseData) {
     const _methodBody = _body.slice(3, 8);
 
     return [
+      _memoSection,
       createHeroCta(_rawCaseName),
       `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName, landing, _replacementContext)}${paragraphs(_introBody)}</section>`,
       createAeoOverviewSection(caseData, _contentKey, _replacementContext),
@@ -1087,7 +1093,6 @@ function createLandingContent(landing, group, caseData) {
       `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
       createLiveReceiptStatus(caseData),
       renderComments(caseData),
-      _memoSection,
       createConsultForm(_cn, _siteName),
       createFloatingWidgets(_cn, _siteName, _slug),
       _trackScript,
@@ -1648,23 +1653,32 @@ function sanitizeAwkwardText(value = "") {
 
 function normalizeScamCopyPhrases(value = "") {
   const SUBST = "(?:접수 기록|상담 메모|거래 흐름|증거 묶음|계좌 단서|대화 자료|송금 내역|화면 기록|접근 경로|안내 문구|담당자 기록|분석 대상|검토 자료|신고 자료|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록|진행 자료)";
+  const REMOVE_SUBST = "(?:대응 메모|상담 메모|대화 자료|보존 자료|거래 흐름|접수 기록|신고 자료|진행 자료|접근 경로|송금 내역|확인 항목|정리 내용)";
   return String(value || "")
+    // [SUBST] 이름을 사용해 → 사칭한 명칭을 사용해
+    .replace(new RegExp(`${SUBST}\\s*(?:관련\\s*)?이름을\\s*사용해`, "g"), "사칭한 명칭을 사용해")
+    .replace(/관련\s*이름을\s*사용해/g, "사칭한 명칭을 사용해")
+    // [SUBST] 계정으로부터 → 사칭 계정으로부터
+    .replace(new RegExp(`${SUBST}\\s*(?:관련\\s*)?계정으로부터`, "g"), "사칭 계정으로부터")
+    .replace(/관련\s*계정으로부터/g, "사칭 계정으로부터")
     // [SUBST] (또는 유사)? (관련)? 명칭으로/의/을 → 유사 또는 사칭 명칭으로/의/을
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭으로`, "g"), "유사 또는 사칭 명칭으로")
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭의`, "g"), "유사 또는 사칭 명칭의")
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?명칭을`, "g"), "유사 또는 사칭 명칭을")
     // [SUBST] (또는 유사)? (관련)? 이름의 → delete
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?이름의`, "g"), "")
-    // [SUBST] (관련)? 계정에서 → delete (from templates like "000 계정에서...")
+    // [SUBST] (관련)? 계정에서 → delete
     .replace(new RegExp(`${SUBST}\\s*(?:관련\\s*)?계정에서`, "g"), "")
-    // Delete [SUBST] before sentence-starting words that come from body templates
+    // Delete [SUBST] before sentence-starting words
     .replace(new RegExp(`${SUBST}\\s*(?=사건|피해|전체\\s*허브|금융피해|유사\\s*성공|실제\\s*회수|AI\\b|사기\\s*피해|금융사기\\s*사건)`, "g"), "")
-    // Delete [SUBST] before 관련 (all substitute words)
+    // Delete [SUBST] before 관련
     .replace(new RegExp(`${SUBST}\\s*관련(?=\\s|[은는이가을를과와,.;:!?])`, "g"), "")
-    // Delete [SUBST] before Korean particles (와/과) — e.g. "사례 기록와 유사한..."
+    // Delete [SUBST] before 와/과
     .replace(new RegExp(`${SUBST}(?=[와과]\\s)`, "g"), "")
-    // Delete [SUBST]처럼 (comparison particle)
+    // Delete [SUBST]처럼
     .replace(new RegExp(`${SUBST}처럼`, "g"), "")
+    // 삭제 대상 12개 대체어를 조사 포함 전면 제거
+    .replace(new RegExp(`${REMOVE_SUBST}(?:은|는|이|가|을|를|의|에서|에|으로|로|과|와|처럼|보다|만)?\\s*`, "g"), "")
     .replace(/\s+([,.;:!?])/g, "$1")
     .replace(/\s{2,}/g, " ")
     .trim();
@@ -2288,21 +2302,9 @@ function cleanupRepeatedWords(value = "") {
 }
 
 const CASE_NAME_REPLACEMENTS = [
-  "접수 기록",
-  "상담 메모",
-  "거래 흐름",
   "증거 묶음",
   "계좌 단서",
-  "대화 자료",
-  "송금 내역",
   "화면 기록",
-  "접근 경로",
-  "신고 자료",
-  "확인 항목",
-  "보존 자료",
-  "대응 메모",
-  "정리 내용",
-  "진행 자료",
 ];
 
 function createReplacementContext(seed = "") {
@@ -2339,8 +2341,8 @@ function reduceCaseNameText(value, caseName, keepFirst = false, replacementConte
 }
 
 const CONTEXT_TERM_LIMITS = [
-  { term: "해당 사건", limit: 1, replacements: ["접수 기록", "상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
-  { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "거래 흐름", "검토 대상"] },
+  { term: "해당 사건", limit: 1, replacements: ["상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
+  { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "검토 대상"] },
   { term: "해당 플랫폼", limit: 1, replacements: ["문제 사이트", "거래 화면", "접속 페이지", "운영 계정"] },
   { term: "유사 피해", limit: 1, replacements: ["같은 유형의 사례", "비슷한 접수", "관련 상담 기록"] },
   { term: "출금 거부", limit: 2, replacements: ["출금 제한", "지급 보류", "환급 지연", "인출 제한"] },
@@ -2387,12 +2389,14 @@ function cleanupRepeatedWordsLegacy(value = "") {
 
 function createHeroCta(caseName = "") {
   return `<div class="hero-cta">
-    <p class="hero-cta-lead">입금 전 자료를 먼저 확인하세요.</p>
+    <p class="hero-cta-lead"><span class="hero-cta-typing"></span><span class="hero-cta-cursor"></span></p>
     <div>
       <a href="#consult" class="hero-cta-primary">상담<br>접수하기</a>
       <a href="tel:0263480406" class="hero-cta-secondary">추가 입금 전 문의<br>02-6348-0406</a>
     </div>
-  </div>`;
+  </div>
+  <style>.hero-cta-cursor{display:inline-block;width:2px;height:1em;background:currentColor;vertical-align:text-bottom;margin-left:2px;animation:ctaBlink .65s step-end infinite}@keyframes ctaBlink{0%,100%{opacity:1}50%{opacity:0}}</style>
+  <script>(function(){var t='잠깐! 입금을 요구 받았나요? 입금 하기 전에 먼저 사기인지 확인 부터 해주세요.';var el=document.querySelector('.hero-cta-typing');var cur=document.querySelector('.hero-cta-cursor');if(!el)return;var i=0;function tick(){if(i<=t.length){el.textContent=t.slice(0,i);if(i===t.length&&cur)cur.style.display='none';i++;setTimeout(tick,i<3?300:i<8?150:65);}};setTimeout(tick,500);})();</script>`;
 
   const keyword = esc(seoCaseKeyword(caseName));
   const lead = keyword ? `${keyword} 피해가 의심되나요?` : "사기 피해가 의심되나요?";
