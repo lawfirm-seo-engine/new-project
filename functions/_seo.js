@@ -22,11 +22,11 @@ export const GROUPS = [
   { host: "gnlaw-recovery.co.kr", key: "c", landingKey: "c", prefix: "success", suffix: "result", label: "성공사례", siteUrl: "https://gnlaw-recovery.co.kr", naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"] },
   { host: "gnlaw-case.co.kr", key: "d", landingKey: "d", prefix: "briefing", suffix: "review", label: "사건브리핑", siteUrl: "https://gnlaw-case.co.kr" },
   { host: "gnlaw-center.co.kr", key: "e", landingKey: "e", prefix: "case", suffix: "issue", label: "사건현황", siteUrl: "https://gnlaw-center.co.kr" },
-  { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", key: "la", landingKey: "la", prefix: "criminal", suffix: "legal-action", label: "법적조치", siteUrl: "https://xn--jj0b0cw1o75qwua31zyfp19e.kr" },
-  { host: "xn--jj0b77gmsoyyfbet54ddvg2ma.kr", key: "lb", landingKey: "lb", prefix: "litigation", suffix: "recovery", label: "피해회복", siteUrl: "https://xn--jj0b77gmsoyyfbet54ddvg2ma.kr" },
-  { host: "xn--2e0bno217bsqa58yp8nd1g2ma.kr", key: "lc", landingKey: "lc", prefix: "results", suffix: "solution", label: "해결사례", siteUrl: "https://xn--2e0bno217bsqa58yp8nd1g2ma.kr" },
-  { host: "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", key: "ld", landingKey: "ld", prefix: "insights", suffix: "report", label: "피해정보", siteUrl: "https://xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr" },
-  { host: "xn--ok0b84g7tosqai7vyka788co0b.kr", key: "le", landingKey: "le", prefix: "incidents", suffix: "incident", label: "진행현황", siteUrl: "https://xn--ok0b84g7tosqai7vyka788co0b.kr" },
+  { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", key: "la", landingKey: "la", prefix: "criminal", suffix: "legal-action", label: "법적조치", siteUrl: "https://금융사기대응센터.kr" },
+  { host: "xn--jj0b77gmsoyyfbet54ddvg2ma.kr", key: "lb", landingKey: "lb", prefix: "litigation", suffix: "recovery", label: "피해회복", siteUrl: "https://금융피해대응센터.kr" },
+  { host: "xn--2e0bno217bsqa58yp8nd1g2ma.kr", key: "lc", landingKey: "lc", prefix: "results", suffix: "solution", label: "해결사례", siteUrl: "https://사기피해구제센터.kr" },
+  { host: "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", key: "ld", landingKey: "ld", prefix: "insights", suffix: "report", label: "피해정보", siteUrl: "https://리딩방피해회수센터.kr" },
+  { host: "xn--ok0b84g7tosqai7vyka788co0b.kr", key: "le", landingKey: "le", prefix: "incidents", suffix: "incident", label: "진행현황", siteUrl: "https://투자사기대응센터.kr" },
 ];
 
 export const GROUP_BY_HOST = Object.fromEntries(GROUPS.map((group) => [group.host, group]));
