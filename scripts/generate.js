@@ -195,7 +195,7 @@ const groups = [
     ctaText: "입금 내역, 대화 내용, 사이트 주소를 기준으로 고소장 작성과 계좌 추적 방향을 검토합니다.",
     ctaLabel: "피해 사실 접수",
     tableTitle: "형사고소 진행 현황",
-    naverVerification: "b7340a4493754bfb33fa4f961ed0185300848065",
+    naverVerification: ["b7340a4493754bfb33fa4f961ed0185300848065", "43cfb60a82b0a8b8a58d02d4e03116cb60d576d4"],
   },
   {
     key: "b",

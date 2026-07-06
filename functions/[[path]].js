@@ -242,14 +242,6 @@ export async function onRequest(context) {
 
   if (!group) return next();
 
-  // 루트 URL: naverVerification 태그 포함 최소 HTML 반환 (소유권 확인용)
-  if (pathname === "/") {
-    const verifications = Array.isArray(group.naverVerification) ? group.naverVerification : (group.naverVerification ? [group.naverVerification] : []);
-    const metaTags = verifications.map((v) => `<meta name="naver-site-verification" content="${v}">`).join("\n  ");
-    const html = `<!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow">\n  ${metaTags}\n  <title>${esc(group.siteName || "")}</title></head><body></body></html>`;
-    return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
-  }
-
   // /[pathPrefix]/[slug]-[suffix]/ 형태의 랜딩 페이지만 처리
   const parts = pathname.replace(/^\/|\/$/g, "").split("/");
   if (parts.length !== 2 || parts[0] !== group.pathPrefix || !parts[1]) {
