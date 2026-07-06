@@ -552,7 +552,7 @@ function renderManualArticle(body = "") {
   };
 
   for (const rawLine of lines) {
-    const line = rawLine.trim();
+    const line = normalizeManualBodyText(rawLine.trim());
     if (!line) {
       flushParagraph();
       flushList();
@@ -1013,6 +1013,18 @@ const MANUAL_BODY_STYLE = `<style>
 .manual-body>ul li{margin:.25em 0}
 </style>`;
 
+function normalizeManualBodyText(value = "") {
+  return String(value || "")
+    .replaceAll(
+      "경찰청 사이버범죄신고시스템(ECRM) 또는 검찰청 고소장 접수",
+      "경찰청 고소장 접수",
+    )
+    .replaceAll(
+      "금융감독원 불법금융신고센터, 한국인터넷진흥원(KISA) 사이버범죄 신고",
+      "금융감독원 불법금융신고센터 신고",
+    );
+}
+
 function renderManualBodyArray(items) {
   const parts = [];
   let listBuf = [];
@@ -1022,7 +1034,7 @@ function renderManualBodyArray(items) {
     listBuf = [];
   }
   for (const raw of items) {
-    const p = String(raw || "").trim();
+    const p = normalizeManualBodyText(String(raw || "").trim());
     if (!p) continue;
     const h2 = p.match(/^##\s+(.+)/);
     const h3 = p.match(/^###\s+(.+)/);
