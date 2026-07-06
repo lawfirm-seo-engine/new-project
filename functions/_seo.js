@@ -73,11 +73,23 @@ export function getLanding(item = {}, group = {}) {
 }
 
 export function isCaseAllowedForGroup(item = {}, group = {}) {
-  // gnlaw-recovery.co.kr(group c)는 recovery-manual / jipjeong-manual 전용
   const lk = group.landingKey || group.key;
+  // gnlaw-recovery.co.kr(lk="c")는 recovery-manual / jipjeong-manual 전용
   if (lk === "c" &&
       item.createdBy !== "recovery-manual" &&
       item.createdBy !== "jipjeong-manual") {
+    return false;
+  }
+  // 금융사기대응센터.kr(lk="la")는 voicephishing-manual 전용
+  if (lk === "la" && item.createdBy !== "voicephishing-manual") {
+    return false;
+  }
+  // 사기피해구제센터.kr(lk="lc")는 tujasagi-manual 전용
+  if (lk === "lc" && item.createdBy !== "tujasagi-manual") {
+    return false;
+  }
+  // 투자사기대응센터.kr(lk="le")는 chaemubu-manual 전용
+  if (lk === "le" && item.createdBy !== "chaemubu-manual") {
     return false;
   }
   const targets = Array.isArray(item.targetGroups) ? item.targetGroups.filter(Boolean) : [];
