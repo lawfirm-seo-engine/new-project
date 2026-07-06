@@ -412,5 +412,14 @@
     "caseName": "AIT 사기",
     "domain": "피해금 추적 법률센터",
     "createdAt": "2026. 7. 6. 오후 12:32:47"
+  },
+  {
+    "id": 1783328331124,
+    "name": "조혜경",
+    "phone": "01092286403",
+    "amount": "1200만원",
+    "caseName": "Velocity Clearing 사칭 사기",
+    "domain": "피해 사건 정보",
+    "createdAt": "2026. 7. 6. 오후 5:58:50"
   }
 ]
