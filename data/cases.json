@@ -8914,8 +8914,7 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": "",
-    "noindex": true
+    "memo": ""
   },
   {
     "slug": "feepwoo-net",
@@ -32466,7 +32465,8 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "noindex": true
   },
   {
     "slug": "turnkey",
