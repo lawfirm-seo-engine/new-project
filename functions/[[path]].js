@@ -84,7 +84,7 @@ const GROUPS = {
     ctaText: "입금 내역, 대화 내용, 사이트 주소를 기준으로 고소장 작성과 계좌 추적 방향을 검토합니다.",
     ctaLabel: "피해 사실 접수", ogType: "article",
     descriptionSuffix: "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 사건별로 정리합니다.",
-    naverVerification: "b7340a4493754bfb33fa4f961ed0185300848065",
+    naverVerification: ["b7340a4493754bfb33fa4f961ed0185300848065", "43cfb60a82b0a8b8a58d02d4e03116cb60d576d4"],
     siteUrl: "https://금융사기대응센터.kr",
   },
   "xn--jj0b77gmsoyyfbet54ddvg2ma.kr": {
