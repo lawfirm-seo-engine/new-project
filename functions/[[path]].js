@@ -695,6 +695,11 @@ function isCaseAllowedForGroup(caseData = {}, group = {}) {
       caseData.createdBy !== "voicephishing-manual") {
     return false;
   }
+  // 투자사기대응센터.kr (le domain)는 chaemubu-manual 전용 — 일반 사건 접근 차단
+  if (group.siteUrl === "https://투자사기대응센터.kr" &&
+      caseData.createdBy !== "chaemubu-manual") {
+    return false;
+  }
   const targets = Array.isArray(caseData.targetGroups) ? caseData.targetGroups.filter(Boolean) : [];
   if (!targets.length) return true;
   return targets.includes(group.landingKey || group.key);
@@ -909,7 +914,7 @@ function renderLanding(caseData, group, origin) {
 
   const ogThumbnail = "";
 
-  const content = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual" || caseData.createdBy === "voicephishing-manual")
+  const content = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual" || caseData.createdBy === "voicephishing-manual" || caseData.createdBy === "chaemubu-manual")
     ? createRecoveryManualContent(landing, group, caseData)
     : createLandingContent(landing, group, caseData);
   const footerLinks = CROSS_LINKS.map((l) => {
