@@ -702,13 +702,21 @@ function isCaseAllowedForGroup(caseData = {}, group = {}) {
   return targets.includes(group.landingKey || group.key);
 }
 
+function isManualLandingCase(caseData = {}) {
+  return [
+    "recovery-manual",
+    "jipjeong-manual",
+    "voicephishing-manual",
+    "chaemubu-manual",
+    "tujasagi-manual",
+  ].includes(caseData.createdBy);
+}
+
 function renderLanding(caseData, group, origin) {
   const lk = group.landingKey ?? group.key;
   const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
   const rawCaseName = caseData.caseName || "";
-  const useManualRecoveryText = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual") && lk === "c";
-  const useManualVoicephishingText = caseData.createdBy === "voicephishing-manual" && lk === "la";
-  const useManualTitle = useManualRecoveryText || useManualVoicephishingText;
+  const useManualTitle = isManualLandingCase(caseData);
   const pageTitle = useManualTitle ? (landing.title || groupPageTitle(rawCaseName, lk)) : groupPageTitle(rawCaseName, lk);
   const pageH1 = useManualTitle ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk)) : groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
@@ -791,7 +799,7 @@ function renderLanding(caseData, group, origin) {
 
   const caseKeywordForSchema = primaryCaseKeyword(rawCaseName) || rawCaseName;
   const breadcrumbCategory = breadcrumbLabel(group);
-  const breadcrumbPageName = groupPageTitle(rawCaseName, group.landingKey || group.key);
+  const breadcrumbPageName = pageTitle;
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -911,7 +919,7 @@ function renderLanding(caseData, group, origin) {
 
   const ogThumbnail = "";
 
-  const content = (caseData.createdBy === "recovery-manual" || caseData.createdBy === "jipjeong-manual" || caseData.createdBy === "voicephishing-manual" || caseData.createdBy === "chaemubu-manual" || caseData.createdBy === "tujasagi-manual")
+  const content = isManualLandingCase(caseData)
     ? createRecoveryManualContent(landing, group, caseData)
     : createLandingContent(landing, group, caseData);
   const footerLinks = CROSS_LINKS.map((l) => {
@@ -938,11 +946,11 @@ function renderLanding(caseData, group, origin) {
     bodyClass: `${group.bodyClass} landing-page`,
     tone: esc(group.tone),
     h1: esc(pageH1),
-    breadcrumb: createHtmlBreadcrumb(group, rawCaseName),
+    breadcrumb: createHtmlBreadcrumb(group, rawCaseName, pageTitle),
     ogThumbnail,
     summary: pageSummary,
     heroTyping: useManualTitle ? "" : createHeroTypingBlock(rawCaseName),
-    receiptBadge: createReceiptBadge(caseData),
+    receiptBadge: useManualTitle ? "" : createReceiptBadge(caseData),
     heroCta: "",
     content,
     intent: esc(group.intent),
@@ -1028,6 +1036,18 @@ function renderManualBodyArray(items) {
   return parts.join("\n");
 }
 
+function normalizeManualLine(value = "") {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function stripLeadingDuplicateManualTitle(items = [], title = "") {
+  if (!Array.isArray(items) || !items.length) return items;
+  const cleanTitle = normalizeManualLine(title);
+  if (!cleanTitle) return items;
+  const firstLine = normalizeManualLine(items[0]);
+  return firstLine === cleanTitle ? items.slice(1) : items;
+}
+
 function collectOperatorMemos(caseData = {}) {
   const entries = [];
   const seen = new Set();
@@ -1058,9 +1078,13 @@ function createRecoveryManualContent(landing, group, caseData) {
   const siteName = esc(group.siteName);
   const slug = esc(caseData.slug);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
+  const manualTitle = landing.h1 || landing.title || caseData.caseName || "";
+  const manualBody = Array.isArray(landing.body)
+    ? stripLeadingDuplicateManualTitle(landing.body, manualTitle)
+    : landing.body;
   const bodyHtml = Array.isArray(landing.body)
-    ? renderManualBodyArray(landing.body)
-    : renderManualArticle(String(landing.body || ""));
+    ? renderManualBodyArray(manualBody)
+    : renderManualArticle(String(manualBody || ""));
   const memoSection = renderOperatorMemos(caseData);
   return [
     MANUAL_BODY_STYLE,
@@ -1841,14 +1865,19 @@ function fallbackFaq(caseName, base, key) {
   return renderFaqForLanding({ faq: [] }, { key }, { caseName }).slice(0, 7);
 }
 
+function isFinancialFraudCenterName(siteName = "") {
+  return siteName === "금융피해 대응센터";
+}
+
 function createConsultForm(cn, siteName) {
+  const amountPlaceholder = isFinancialFraudCenterName(siteName) ? "사건 발생 일시" : "대략적인 피해금액";
   return `<section class="article-block consult-form-section" id="consult">
   <h2>상담 접수</h2>
   <p>추가 입금 요구를 받았거나 출금이 막혔다면 지금 자료를 남겨주세요. 상담 접수 후 전화 또는 카톡으로 입금 내역, 대화 캡처, 계좌 정보를 확인해 초기 대응 방향을 안내합니다.</p>
   <form class="consult-form" id="consultForm">
     <input type="text" name="cname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="phone" placeholder="연락처 (010-xxxx-xxxx)" required autocomplete="tel">
-    <input type="text" name="amount" placeholder="대략적인 피해금액" required>
+    <input type="text" name="amount" placeholder="${amountPlaceholder}" required>
     <button type="submit">상담 접수</button>
   </form>
   <p class="consult-msg" id="consultMsg"></p>
@@ -1874,16 +1903,18 @@ function createConsultForm(cn, siteName) {
 }
 
 function createFloatingWidgets(cn, siteName, slug) {
+  const stickyTitle = isFinancialFraudCenterName(siteName) ? "지금 바로 전문 상담" : "추가 입금 전 긴급 점검";
+  const amountPlaceholder = isFinancialFraudCenterName(siteName) ? "사건 발생 일시" : "대략적인 피해금액";
   return `<div class="floating-contact">
   <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
-  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6348-0406</span>
+  <span class="sticky-title">${stickyTitle} ｜ 02-6348-0406</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
-    <input type="text" name="samount" placeholder="대략적인 피해금액" required>
+    <input type="text" name="samount" placeholder="${amountPlaceholder}" required>
     <button type="submit">확인 요청</button>
   </form>
   <span id="stickyMsg" class="sticky-msg"></span>
@@ -2106,9 +2137,9 @@ function breadcrumbLabel(groupOrKey) {
   }[key] || "사건현황";
 }
 
-function createHtmlBreadcrumb(group, caseName) {
+function createHtmlBreadcrumb(group, caseName, currentTitle = "") {
   const category = breadcrumbLabel(group);
-  const current = groupPageTitle(caseName, group.landingKey || group.key);
+  const current = currentTitle || groupPageTitle(caseName, group.landingKey || group.key);
   return `<nav class="breadcrumb" aria-label="breadcrumb">
     <a href="${group.siteUrl}/">홈</a>
     <a href="${group.siteUrl}/${group.pathPrefix}/">${esc(category)}</a>

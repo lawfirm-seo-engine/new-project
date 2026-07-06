@@ -503,13 +503,15 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
 function createConsultForm(caseItem, group) {
   const cn = escapeHtml(normalizeCaseName(caseItem.caseName));
   const siteName = escapeHtml(group.siteName);
+  const isFinancialFraudCenter = group.landingKey === "la";
+  const amountPlaceholder = isFinancialFraudCenter ? "사건 발생 일시" : "대략적인 피해금액";
   return `<section class="article-block consult-form-section" id="consult">
   <h2>상담 접수</h2>
   <p>추가 입금 요구를 받았거나 출금이 막혔다면 지금 자료를 남겨주세요. 상담 접수 후 전화 또는 카톡으로 입금 내역, 대화 캡처, 계좌 정보를 확인해 초기 대응 방향을 안내합니다.</p>
   <form class="consult-form" id="consultForm">
     <input type="text" name="cname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="phone" placeholder="연락처 (010-xxxx-xxxx)" required autocomplete="tel">
-    <input type="text" name="amount" placeholder="대략적인 피해금액" required>
+    <input type="text" name="amount" placeholder="${amountPlaceholder}" required>
     <button type="submit">상담 접수</button>
   </form>
   <p class="consult-msg" id="consultMsg"></p>
@@ -919,16 +921,19 @@ function renderFaqForLanding(landing, group, caseItem) {
 function createFloatingWidgets(caseItem, group) {
   const cn = escapeHtml(normalizeCaseName(caseItem.caseName));
   const siteName = escapeHtml(group.siteName);
+  const isFinancialFraudCenter = group.landingKey === "la";
+  const stickyTitle = isFinancialFraudCenter ? "지금 바로 전문 상담" : "추가 입금 전 긴급 점검";
+  const amountPlaceholder = isFinancialFraudCenter ? "사건 발생 일시" : "대략적인 피해금액";
   return `<div class="floating-contact">
   <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
-  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6348-0406</span>
+  <span class="sticky-title">${stickyTitle} ｜ 02-6348-0406</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
-    <input type="text" name="samount" placeholder="대략적인 피해금액" required>
+    <input type="text" name="samount" placeholder="${amountPlaceholder}" required>
     <button type="submit">확인 요청</button>
   </form>
   <span id="stickyMsg" class="sticky-msg"></span>
@@ -1356,19 +1361,42 @@ const HUB_SUFFIX = {
   le: "진행현황",
 };
 
+function isManualLandingItem(item = {}) {
+  return [
+    "recovery-manual",
+    "jipjeong-manual",
+    "voicephishing-manual",
+    "chaemubu-manual",
+    "tujasagi-manual",
+  ].includes(item.createdBy);
+}
+
+function landingDisplayName(item = {}) {
+  const raw = item.caseName || item.name || "";
+  return isManualLandingItem(item) ? String(raw || "").trim() : normalizeCaseName(raw);
+}
+
+function landingDisplayTitle(item = {}, suffix = "") {
+  const name = landingDisplayName(item);
+  return isManualLandingItem(item) || !suffix ? name : `${name} ${suffix}`;
+}
+
 function createHubFloatingWidgets(group) {
   const sn = JSON.stringify(group.siteName);
+  const isFinancialFraudCenter = group.landingKey === "la";
+  const stickyTitle = isFinancialFraudCenter ? "지금 바로 전문 상담" : "추가 입금 전 긴급 점검";
+  const amountPlaceholder = isFinancialFraudCenter ? "사건 발생 일시" : "대략적인 피해금액";
   const logScanScript = group.siteUrl === "https://gnlaw-criminal.co.kr" ? `\n${LOGSCAN_SCRIPT}` : "";
   return `<div class="floating-contact">
   <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
-  <span class="sticky-title">추가 입금 전 긴급 점검 ｜ 02-6348-0406</span>
+  <span class="sticky-title">${stickyTitle} ｜ 02-6348-0406</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
-    <input type="text" name="samount" placeholder="대략적인 피해금액" required>
+    <input type="text" name="samount" placeholder="${amountPlaceholder}" required>
     <button type="submit">확인 요청</button>
   </form>
   <span id="stickyMsg" class="sticky-msg"></span>
@@ -1428,8 +1456,10 @@ function createHubContent(group) {
         </a>`;
     }
     const item = entry.data;
-    const caseName = escapeHtml(normalizeCaseName(item.caseName || item.name));
-    const displayTitle = suffix ? `${caseName} ${suffix}` : caseName;
+    const caseNameRaw = landingDisplayName(item);
+    const displayTitleRaw = landingDisplayTitle(item, suffix);
+    const caseName = escapeHtml(caseNameRaw);
+    const displayTitle = escapeHtml(displayTitleRaw);
     const url = buildRelativeLandingPath(group, item.slug);
     const todayBadge = item.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
     return `
@@ -1459,17 +1489,18 @@ function createHubContent(group) {
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-  function normName(n){var s=String(n||'').trim();if(/사기$/.test(s))return s;var c=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(c)?c:c+' 사칭 사기';}
+  function manual(c){return !!c&&['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual'].indexOf(c.createdBy)>=0;}
+  function normName(n,c){if(manual(c))return String(n||'').trim();var s=String(n||'').trim();if(/사기$/.test(s))return s;var clean=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(clean)?clean:clean+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
   function landingPath(slug){var extra=ALL_NO_SUFFIX_SLUGS[slug]?'':NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
   function getStatus(slug,createdBy){if(createdBy==='recovery-manual'||createdBy==='jipjeong-manual'){return'사건 접수 중';}if(TARGET_KEY==='c'||TARGET_KEY==='lc'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
   var HIDE_FROM_LISTING={"baidogseu-georaeso-litigation-noindex":1,"bydoxe-litigation-noidex":1};
-  function allowed(c){if(!c)return false;if(c.hideFromListing||HIDE_FROM_LISTING[c.slug])return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
+  function allowed(c){if(!c)return false;if(c.hideFromListing||HIDE_FROM_LISTING[c.slug])return false;if(TARGET_KEY==='c'&&c.createdBy!=='recovery-manual'&&c.createdBy!=='jipjeong-manual')return false;if(TARGET_KEY==='la'&&c.createdBy!=='voicephishing-manual')return false;if(TARGET_KEY==='lc'&&c.createdBy!=='tujasagi-manual')return false;if(TARGET_KEY==='le'&&c.createdBy!=='chaemubu-manual')return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
   function freshLink(item,noMap){
-    var cn=normName(item.caseName||item.name||'');
-    var dt=SUFFIX?cn+' '+SUFFIX:cn;
+    var cn=normName(item.caseName||item.name||'',item);
+    var dt=manual(item)||!SUFFIX?cn:cn+' '+SUFFIX;
     var summary=compact(item.summary||'');
     var search=[cn,dt,item.slug,summary,item.createdAt,item.updatedAt].filter(Boolean).join(' ');
     return '<a class="fresh-landing-link" href="'+landingPath(item.slug)+'" data-title="'+attr(cn)+'" data-slug="'+attr(item.slug)+'" data-search="'+attr(search)+'">'
@@ -1594,8 +1625,8 @@ function createHubContent(group) {
             insertSorted(wrap,b,entry._date);
           } else {
             var item=entry.data;
-            var cn=esc(normName(item.caseName||''));
-            var dt=SUFFIX?cn+' '+SUFFIX:cn;
+            var cn=esc(normName(item.caseName||'',item));
+            var dt=manual(item)||!SUFFIX?cn:cn+' '+SUFFIX;
             var a=document.createElement('a');
             a.href=landingPath(item.slug);
             a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;a.dataset.date=entry._date;
@@ -1735,8 +1766,8 @@ function createFreshLandingSection(group, sortedCases, caseNoMap, suffix, option
     }
     const item = entry.data;
     const landing = getLanding(item, group);
-    const cleanName = normalizeCaseName(item.caseName || item.name);
-    const displayTitleRaw = suffix ? `${cleanName} ${suffix}` : cleanName;
+    const cleanName = landingDisplayName(item);
+    const displayTitleRaw = landingDisplayTitle(item, suffix);
     const displayTitle = escapeHtml(displayTitleRaw);
     const summaryRaw = compactText(landing.description || item.summary || group.hubLead || "");
     const summary = escapeHtml(summaryRaw.slice(0, 135));
