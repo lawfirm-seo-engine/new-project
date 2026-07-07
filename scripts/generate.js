@@ -247,7 +247,7 @@ const groups = [
     ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
     ctaLabel: "사례 비교 문의",
     tableTitle: "성공사례 진행 현황",
-    naverVerification: "2c5bbb8ba945084619345dacd54228bca059390e",
+    naverVerification: ["2c5bbb8ba945084619345dacd54228bca059390e", "e10f148327e5a3840cc311ef9c880fd1c924c605"],
   },
   {
     key: "d",
