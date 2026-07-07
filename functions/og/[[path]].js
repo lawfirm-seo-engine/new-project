@@ -14,6 +14,7 @@ const TEMPLATE_HEIGHT = 1254;
 
 let initPromise = null;
 let fontBuffer = null;
+let templateBuffer = null;
 let templateDataUri = null;
 
 async function getFont(env) {
@@ -46,13 +47,20 @@ function ensureInit(env) {
   return initPromise;
 }
 
-async function getTemplateDataUri(origin) {
-  if (templateDataUri) return templateDataUri;
+async function getTemplateBuffer(origin) {
+  if (templateBuffer) return templateBuffer;
   const response = await fetch(`${origin}${TEMPLATE_PATH}`, {
     headers: { "Cache-Control": "no-cache" },
   });
   if (!response.ok) throw new Error(`OG template ${response.status}`);
   const buffer = await response.arrayBuffer();
+  templateBuffer = buffer;
+  return templateBuffer;
+}
+
+async function getTemplateDataUri(origin) {
+  if (templateDataUri) return templateDataUri;
+  const buffer = await getTemplateBuffer(origin);
   templateDataUri = `data:image/png;base64,${arrayBufferToBase64(buffer)}`;
   return templateDataUri;
 }
@@ -154,6 +162,18 @@ const CACHE_HEADERS = {
   "Access-Control-Allow-Origin": "*",
 };
 
+async function templateImageResponse(url, method, reason = "TEMPLATE") {
+  const buffer = await getTemplateBuffer(url.origin);
+  return new Response(method === "HEAD" ? null : buffer, {
+    status: 200,
+    headers: {
+      ...CACHE_HEADERS,
+      "Content-Length": String(buffer.byteLength),
+      "X-OG-Fallback": reason,
+    },
+  });
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
   const method = request.method.toUpperCase();
@@ -181,19 +201,23 @@ export async function onRequest(context) {
   const slug = isPowerlink ? rawSlug.slice("powerlink-".length) : rawSlug;
 
   if (!slug || slug === "landing") {
-    return Response.redirect(`${url.origin}${TEMPLATE_PATH}`, 302);
+    return templateImageResponse(url, method, "LANDING");
   }
 
   const cacheKey = `og:img:v${OG_IMAGE_VERSION}:${rawSlug}`;
   try {
     const cached = await env.CASES.get(cacheKey, { type: "arrayBuffer" });
     if (cached && cached.byteLength > 1000) {
-      return new Response(cached, {
+      return new Response(method === "HEAD" ? null : cached, {
         status: 200,
-        headers: { ...CACHE_HEADERS, "X-Cache": "HIT" },
+        headers: { ...CACHE_HEADERS, "Content-Length": String(cached.byteLength), "X-Cache": "HIT" },
       });
     }
   } catch (_) {}
+
+  if (method === "HEAD") {
+    return templateImageResponse(url, method, "HEAD_TEMPLATE");
+  }
 
   let title = humanizeSlug(slug);
   try {
@@ -235,7 +259,7 @@ export async function onRequest(context) {
 
     return new Response(png, {
       status: 200,
-      headers: { ...CACHE_HEADERS, "X-Cache": "MISS" },
+      headers: { ...CACHE_HEADERS, "Content-Length": String(png.byteLength), "X-Cache": "MISS" },
     });
   } catch (error) {
     const message = error?.stack || error?.message || String(error);
@@ -246,6 +270,6 @@ export async function onRequest(context) {
         headers: { "Content-Type": "text/plain; charset=utf-8" },
       });
     }
-    return Response.redirect(`${url.origin}${TEMPLATE_PATH}`, 302);
+    return templateImageResponse(url, method, "ERROR_TEMPLATE");
   }
 }
