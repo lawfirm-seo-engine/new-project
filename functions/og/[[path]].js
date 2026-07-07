@@ -19,19 +19,21 @@ let templateDataUri = null;
 
 async function getFont(env) {
   if (fontBuffer) return fontBuffer;
-  try {
-    const kv = await env.CASES.get(FONT_KV_KEY, { type: "arrayBuffer" });
-    if (kv && kv.byteLength > 100_000) {
-      fontBuffer = new Uint8Array(kv);
-      return fontBuffer;
-    }
-  } catch (_) {}
+  if (env.CASES) {
+    try {
+      const kv = await env.CASES.get(FONT_KV_KEY, { type: "arrayBuffer" });
+      if (kv && kv.byteLength > 100_000) {
+        fontBuffer = new Uint8Array(kv);
+        return fontBuffer;
+      }
+    } catch (_) {}
+  }
 
   const response = await fetch(FONT_CDN_URL);
   if (!response.ok) throw new Error(`Font CDN ${response.status}`);
   const buffer = await response.arrayBuffer();
   fontBuffer = new Uint8Array(buffer);
-  env.CASES.put(FONT_KV_KEY, buffer).catch(() => {});
+  env.CASES?.put?.(FONT_KV_KEY, buffer)?.catch?.(() => {});
   return fontBuffer;
 }
 
@@ -206,7 +208,7 @@ export async function onRequest(context) {
 
   const cacheKey = `og:img:v${OG_IMAGE_VERSION}:${rawSlug}`;
   try {
-    const cached = await env.CASES.get(cacheKey, { type: "arrayBuffer" });
+    const cached = await env.CASES?.get?.(cacheKey, { type: "arrayBuffer" });
     if (cached && cached.byteLength > 1000) {
       return new Response(method === "HEAD" ? null : cached, {
         status: 200,
@@ -222,8 +224,8 @@ export async function onRequest(context) {
   let title = humanizeSlug(slug);
   try {
     const raw = isPowerlink
-      ? await env.CASES.get(`powerlink:${slug}`)
-      : await env.CASES.get(`case:${slug}`);
+      ? await env.CASES?.get?.(`powerlink:${slug}`)
+      : await env.CASES?.get?.(`case:${slug}`);
     if (raw) {
       const data = JSON.parse(raw);
       title = cleanTitle(
@@ -251,10 +253,9 @@ export async function onRequest(context) {
     });
     const png = resvg.render().asPng();
 
-    if (context.waitUntil) {
-      context.waitUntil(
-        env.CASES.put(cacheKey, png.buffer, { expirationTtl: IMG_CACHE_TTL }).catch(() => {}),
-      );
+    const cachePut = env.CASES?.put?.(cacheKey, png.buffer, { expirationTtl: IMG_CACHE_TTL });
+    if (context.waitUntil && cachePut) {
+      context.waitUntil(cachePut.catch(() => {}));
     }
 
     return new Response(png, {
