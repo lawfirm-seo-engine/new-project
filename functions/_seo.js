@@ -4,7 +4,7 @@ export const RECENT_SITEMAP_DAYS = 14;
 export const RECENT_SITEMAP_LIMIT = 300;
 export const RSS_LIMIT = 120;
 export const SEO_STABILIZED_AT = "2026-06-14";
-export const OG_IMAGE_VERSION = "20260707a1";
+export const OG_IMAGE_VERSION = "20260707a2";
 export const OG_IMAGE_WIDTH = 1254;
 export const OG_IMAGE_HEIGHT = 1254;
 
