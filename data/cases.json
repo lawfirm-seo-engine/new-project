@@ -58814,5 +58814,49 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": ""
+  },
+  {
+    "slug": "yunikonpirreum",
+    "caseName": "유니콘필름 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-08",
+    "updatedAt": "2026-07-08",
+    "thumbnailUrl": "",
+    "landingViews": 1895,
+    "reports": 27,
+    "summary": "유니콘필름 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "유니콘필름",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
+  },
+  {
+    "slug": "sunnydaykeurreob",
+    "caseName": "SUNNYDAY클럽 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-08",
+    "updatedAt": "2026-07-08",
+    "thumbnailUrl": "",
+    "landingViews": 4430,
+    "reports": 15,
+    "summary": "SUNNYDAY클럽 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "SUNNYDAY클럽",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": ""
   }
 ]
