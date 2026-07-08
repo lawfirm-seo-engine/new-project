@@ -206,7 +206,7 @@ function normalizeRssText(value = "", item = {}) {
     normalized = normalized.split(variant).join(primary);
   });
   return normalized
-    .replace(/관련 사기 피해 의심 사건으로,\s*입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다\./g, "관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.")
+    .replace(/관련 사기 피해 의심 사건으로,\s*입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다\./g, "관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 정보, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.")
     .replace(/\s+/g, " ")
     .trim();
 }

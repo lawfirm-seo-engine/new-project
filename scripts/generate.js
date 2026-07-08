@@ -639,7 +639,7 @@ function createSeoDescription(description = "", caseName = "", key = "") {
   const primary = seoCaseKeyword(caseName);
   const desc = String(description || "").trim();
   const fallback = primary
-    ? `${primary} 관련 상담 자료를 기준으로 송금 경위, 대화 기록, 계좌 단서, 접속 주소를 정리해 형사고소와 회수 가능성을 점검합니다.`
+    ? `${primary} 관련 상담 자료를 기준으로 송금 경위, 대화 기록, 계좌 정보, 접속 주소를 정리해 형사고소와 회수 가능성을 점검합니다.`
     : "송금 내역, 대화 기록, 사이트 주소를 기준으로 사기 정황과 대응 방법을 정리합니다.";
   if (!primary) return (desc || fallback).slice(0, 150);
   return (!desc || !desc.toLowerCase().includes(primary.toLowerCase()) ? fallback : desc).slice(0, 150);
@@ -985,7 +985,7 @@ function reduceCaseNameTextLegacy(value, caseName, keepFirst = false) {
   let text = String(value || "");
   const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
   const primary = primaryCaseKeyword(caseName);
-  const replacements = ["접수 기록", "상담 메모", "거래 흐름", "증거 묶음", "계좌 단서", "대화 자료"];
+  const replacements = ["접수 기록", "상담 메모", "거래 흐름", "증거 자료", "계좌 정보", "대화 자료"];
   let replacementIndex = 0;
   let used = false;
   names.forEach((name) => {
@@ -1016,8 +1016,8 @@ const CASE_NAME_REPLACEMENTS = [
   "접수 기록",
   "상담 메모",
   "거래 흐름",
-  "증거 묶음",
-  "계좌 단서",
+  "증거 자료",
+  "계좌 정보",
   "대화 자료",
   "송금 내역",
   "화면 기록",

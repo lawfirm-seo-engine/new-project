@@ -676,30 +676,19 @@ function logScanScriptForSite(siteUrl = "") {
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function isCaseAllowedForGroup(caseData = {}, group = {}) {
-  // gnlaw-recovery.co.kr는 recovery-manual / jipjeong-manual 전용 — 일반 사건 접근 차단
-  if (group.siteUrl === "https://gnlaw-recovery.co.kr" &&
-      caseData.createdBy !== "recovery-manual" &&
-      caseData.createdBy !== "jipjeong-manual") {
-    return false;
-  }
-  // 금융사기대응센터.kr (la domain)는 voicephishing-manual 전용 — 일반 사건 접근 차단
-  if (group.siteUrl === "https://금융사기대응센터.kr" &&
-      caseData.createdBy !== "voicephishing-manual") {
-    return false;
-  }
-  // 투자사기대응센터.kr (le domain)는 chaemubu-manual 전용 — 일반 사건 접근 차단
-  if (group.siteUrl === "https://투자사기대응센터.kr" &&
-      caseData.createdBy !== "chaemubu-manual") {
-    return false;
-  }
-  // 사기피해구제센터.kr (lc domain)는 tujasagi-manual 전용 — 일반 사건 접근 차단
-  if (group.siteUrl === "https://사기피해구제센터.kr" &&
-      caseData.createdBy !== "tujasagi-manual") {
+  const lk = group.landingKey || group.key;
+  const allowedCreatedBy = {
+    c: ["recovery-manual", "jipjeong-manual"],
+    la: ["voicephishing-manual"],
+    lc: ["tujasagi-manual"],
+    le: ["chaemubu-manual"],
+  }[lk];
+  if (allowedCreatedBy && !allowedCreatedBy.includes(caseData.createdBy)) {
     return false;
   }
   const targets = Array.isArray(caseData.targetGroups) ? caseData.targetGroups.filter(Boolean) : [];
   if (!targets.length) return true;
-  return targets.includes(group.landingKey || group.key);
+  return targets.includes(lk);
 }
 
 function isManualLandingCase(caseData = {}) {
@@ -932,7 +921,7 @@ function renderLanding(caseData, group, origin) {
     "최근 접수 흐름과 대응 절차를 기준으로 피해 구조, 증거 보존, 상담 전 확인사항을 정리했습니다."
   );
 
-  return softenRepeatedContextTerms(pageTemplate({
+  const renderedHtml = softenRepeatedContextTerms(pageTemplate({
     title: esc(`${pageTitle} | 법무법인 선린`),
     description: esc(seoDescription),
     canonical,
@@ -961,6 +950,13 @@ function renderLanding(caseData, group, origin) {
     headerCall: "",
     bodyScripts: logScanScriptForSite(group.siteUrl),
   }));
+  return useManualTitle ? renderedHtml : cleanStandardLandingText(renderedHtml);
+}
+
+function cleanStandardLandingText(value = "") {
+  return String(value || "")
+    .replace(/계좌 단서/g, "계좌 정보")
+    .replace(/증거 묶음/g, "증거 자료");
 }
 
 function createFallbackLanding(caseData, group, key) {
@@ -1249,7 +1245,7 @@ function createAeoOverviewSection(caseData, key, replacementContext) {
   const lawAeo = {
     la: { t: `${base} 형사고소 핵심 요약`, b: `피해가 의심되면 추가 입금을 멈추고 입금증, 수취 계좌, 대화 기록, 출금 거부 화면을 보존해야 합니다. 형사고소는 사기죄 구성요건과 계좌 추적 가능성을 함께 검토하는 절차이며, 상담 접수 전 자료를 시간순으로 정리하면 초기 대응이 빨라집니다.` },
     lb: { t: `${base} 피해금 회수 핵심 요약`, b: `${base} 피해금 회수는 형사고소와 별도로 가압류, 손해배상, 부당이득반환 청구를 검토해야 합니다. 수취 계좌와 상대방 특정 자료가 남아 있을수록 보전처분 가능성을 빠르게 판단할 수 있습니다.` },
-    lc: { t: `${base} 회수 사례 핵심 요약`, b: `${base}와 유사한 사건에서 회수 가능성이 높아지는 조건은 입금 직후 자료 보존, 계좌 단서 확보, 동일 피해자 확인, 지급정지 또는 가압류 검토가 빠르게 이어진 경우입니다.` },
+    lc: { t: `${base} 회수 사례 핵심 요약`, b: `${base}와 유사한 사건에서 회수 가능성이 높아지는 조건은 입금 직후 자료 보존, 계좌 정보 확보, 동일 피해자 확인, 지급정지 또는 가압류 검토가 빠르게 이어진 경우입니다.` },
     ld: { t: `${base} 피해 구조 요약`, b: `${base} 사건은 접근 채널, 입금 명목, 출금 거부, 추가 입금 요구를 순서대로 정리해야 합니다. 지금 해야 할 행동은 추가 입금 중단, 증거 보존, 신고 접수입니다.` },
     le: { t: `${base} 피해 대응 요약`, b: `${base} 사건은 처벌을 원하면 형사고소형, 회수를 원하면 민사 회수형, 결과 흐름을 보고 싶으면 성공사례형, 사건 구조를 먼저 파악하려면 브리핑형 페이지를 함께 확인하는 것이 좋습니다.` },
   };
@@ -1344,7 +1340,7 @@ function buildLawBody(landing, group, caseData) {
   const original = Array.isArray(landing.body) ? landing.body.filter(Boolean).map(toStr) : [];
   const additions = {
     la: [
-      `${base} 피해는 입금 계좌, 예금주, 금융기관명, 이체 일시를 먼저 확보해야 형사고소와 지급정지 검토를 동시에 진행할 수 있습니다. 출금 거부 직후 세금, 보증금, 인증비를 요구받았다면 추가 입금을 멈추고 계좌 단서부터 보존해야 합니다.`,
+      `${base} 피해는 입금 계좌, 예금주, 금융기관명, 이체 일시를 먼저 확보해야 형사고소와 지급정지 검토를 동시에 진행할 수 있습니다. 출금 거부 직후 세금, 보증금, 인증비를 요구받았다면 추가 입금을 멈추고 계좌 정보부터 보존해야 합니다.`,
       `형법 제347조 사기죄는 기망행위, 착오, 처분행위, 재산상 이익 취득 구조를 봅니다. ${brand} 관련 안내가 허위 수익, 원금 보장, 출금 가능성처럼 표시됐다면 대화 원문과 입금 흐름을 시간순으로 묶어야 합니다.`,
       `고소장에는 단순히 돈을 돌려달라는 내용보다 언제 누구에게 어떤 설명을 듣고 어느 계좌로 입금했는지가 중요합니다. 담당자 프로필, 초대 링크, 사이트 주소, 앱 화면, 출금 제한 문구가 함께 있으면 피의자 특정 가능성을 높일 수 있습니다.`,
       `상담 접수 전에는 입금증과 대화 캡처만 있어도 1차 검토가 가능합니다. 자료가 흩어져 있다면 전화나 카톡 상담으로 먼저 현재 증거 상태를 점검한 뒤 고소장 작성 범위와 추가 확보 자료를 정리하는 편이 빠릅니다.`,
@@ -1355,7 +1351,7 @@ function buildLawBody(landing, group, caseData) {
       `가압류는 판결 전 재산을 묶어두는 절차라서 속도가 중요합니다. 상담 단계에서 수취 은행, 예금주, 입금일, 금액, 상대방 식별 정보를 정리하면 회수 전략 판단이 빨라집니다.`,
     ],
     lc: [
-      `${base}와 유사한 사건에서 회수 가능성이 높았던 흐름은 피해 직후 지급정지, 계좌 단서 확보, 공동 피해자 확인, 민사 보전처분이 빠르게 연결된 경우였습니다.`,
+      `${base}와 유사한 사건에서 회수 가능성이 높았던 흐름은 피해 직후 지급정지, 계좌 정보 확보, 공동 피해자 확인, 민사 보전처분이 빠르게 연결된 경우였습니다.`,
       `성공사례형 페이지에서는 단순히 전액 회수 여부만 보지 말고 어떤 자료가 언제 확보됐는지를 봐야 합니다. 입금증, 대화 원문, 사이트 화면, 담당자 계정이 남아 있을수록 합의나 일부 회수 가능성을 검토하기 쉽습니다.`,
       `지역별 상담 사례를 보면 출금 거부 후 24~72시간 안에 자료를 정리한 사건과 몇 주 뒤 접수한 사건은 계좌 추적 속도에서 차이가 큽니다. 현재 자료가 일부뿐이어도 먼저 점검하는 것이 좋습니다.`,
     ],
@@ -1400,7 +1396,7 @@ function buildLawVictimCases(landing, group, caseData) {
     ],
     le: [
       `처음에는 형사고소 가능성만 문의했지만, 상담 과정에서 가압류와 피해금 회수 전략까지 함께 검토할 필요가 확인된 사례입니다.`,
-      `피해자는 성공사례만 찾다가 자신의 사건은 계좌 단서가 부족하다는 점을 확인했고, 먼저 AI 브리핑형 체크리스트로 증거를 다시 정리했습니다.`,
+      `피해자는 성공사례만 찾다가 자신의 사건은 계좌 정보가 부족하다는 점을 확인했고, 먼저 AI 브리핑형 체크리스트로 증거를 다시 정리했습니다.`,
       `같은 사건명으로 여러 피해자가 접수되면서 각자 다른 계좌와 담당자 계정을 사용한 정황이 확인되어 허브에서 대응 경로를 나눠 안내했습니다.`,
     ],
   };
@@ -1431,7 +1427,7 @@ function buildLawFaq(landing, group, caseData) {
     ],
     lc: [
       { question: `${caseName}와 유사한 회수 사례는 어떤 공통점이 있나요?`, answer: "입금 직후 자료 보존, 지급정지 요청, 동일 피해자 확인, 민사 보전처분 검토가 빠르게 이어진 사건에서 회수 가능성이 높았습니다." },
-      { question: "성공사례를 볼 때 가장 중요한 기준은 무엇인가요?", answer: "전액 회수 여부보다 어떤 증거가 언제 확보됐는지, 계좌 단서가 남아 있었는지, 형사와 민사가 어떻게 연결됐는지를 봐야 합니다." },
+      { question: "성공사례를 볼 때 가장 중요한 기준은 무엇인가요?", answer: "전액 회수 여부보다 어떤 증거가 언제 확보됐는지, 계좌 정보가 남아 있었는지, 형사와 민사가 어떻게 연결됐는지를 봐야 합니다." },
       { question: "일부 회수라도 가능성이 있나요?", answer: "계좌 잔액 일부가 묶이거나 합의가 진행되는 경우 일부 회수 가능성이 있습니다. 입금 내역과 상대방 특정 자료가 남아 있다면 먼저 상담으로 가능성을 확인해야 합니다." },
       { question: "사건 종결까지 보통 얼마나 걸리나요?", answer: "형사 수사는 사건 복잡도에 따라 수개월에서 1년 이상 걸릴 수 있습니다. 민사 보전처분은 그보다 빠르게 진행되는 경우가 많아, 회수 목적이라면 민사 절차를 병행하는 것이 유리합니다." },
       { question: "피해자가 여러 명인 경우 공동으로 대응할 수 있나요?", answer: "동일 계좌나 유사 URL로 피해를 입은 사람이 여럿이면 피해 입증 자료를 합산해 수사 협조와 민사 청구를 함께 진행할 수 있습니다. 자료 공유 전 신원 확인은 필요합니다." },
@@ -1446,7 +1442,7 @@ function buildLawFaq(landing, group, caseData) {
     le: [
       { question: `${caseName} 피해 대응에서 무엇을 먼저 확인해야 하나요?`, answer: "현재 목적이 처벌인지 회수인지부터 나누면 됩니다. 추가 입금 요구가 있으면 형사고소형을 먼저 보고, 송금 후 회수를 원하면 민사 회수형과 사례형을 함께 보는 것이 좋습니다." },
       { question: "형사고소와 민사 회수를 동시에 진행할 수 있나요?", answer: "가능합니다. 형사고소는 피의자 특정과 처벌을 목적으로 하고, 민사 회수는 가압류와 손해배상 청구를 통해 피해금 회수를 목표로 합니다. 두 절차는 독립적으로 진행할 수 있으며 같은 증거 자료를 함께 활용할 수 있습니다." },
-      { question: "입금 계좌가 이미 막혔는데 신고가 가능한가요?", answer: "지급정지가 됐더라도 수취 계좌 정보, 거래 일시, 예금주, 연결 계좌 단서가 남아 있으면 형사고소와 민사 절차를 이어갈 수 있습니다. 계좌 제한 기록 자체가 피해 입증 자료로 활용됩니다." },
+      { question: "입금 계좌가 이미 막혔는데 신고가 가능한가요?", answer: "지급정지가 됐더라도 수취 계좌 정보, 거래 일시, 예금주, 연결 계좌 정보가 남아 있으면 형사고소와 민사 절차를 이어갈 수 있습니다. 계좌 제한 기록 자체가 피해 입증 자료로 활용됩니다." },
       { question: "피해 금액이 소액이어도 법적 대응이 의미 있나요?", answer: "피해 금액과 상관없이 동일 수법과 계좌로 피해를 입은 사람이 여러 명이면 합산 피해액으로 수사가 진행될 수 있습니다. 소액이더라도 자료를 보존하고 신고하면 집단 피해 파악에 도움이 됩니다." },
       { question: "신고 이후 추가 피해를 막으려면 어떻게 해야 하나요?", answer: "신고 접수 후에도 같은 조직이 이름을 바꿔 재접근하는 경우가 있습니다. 기존 자료를 보존하고 새로운 연락이 오면 캡처해 두세요. 상담 접수 시 이전 피해 자료와 함께 새 접근 정황을 함께 제출하면 대응 범위가 넓어집니다." },
     ],
@@ -1464,7 +1460,7 @@ function createLawAuthoritySections(key, caseData) {
       lead: "추가 입금 요구가 이어지는 사건은 증거가 사라지기 전에 형사고소 자료를 먼저 묶어야 합니다.",
       steps: [
         ["01", "증거 보존", "입금증, 계좌번호, 예금주, 대화방, 담당자 프로필, 사이트 주소를 원본 상태로 저장합니다."],
-        ["02", "지급정지 검토", "수취 은행에 지급정지 가능성을 확인하고 계좌 단서를 보전합니다."],
+        ["02", "지급정지 검토", "수취 은행에 지급정지 가능성을 확인하고 계좌 정보를 보전합니다."],
         ["03", "고소장 작성", "형법 제347조 사기죄의 기망, 착오, 처분행위, 재산상 이익 구조에 맞춰 사실관계를 정리합니다."],
         ["04", "수사 대응", "추가 피해자, 동일 계좌, 연결 계좌 자료를 보강해 피의자 특정 가능성을 높입니다."],
       ],
@@ -1483,7 +1479,7 @@ function createLawAuthoritySections(key, caseData) {
       title: "피해금 회수 절차 타임라인",
       lead: "회수 가능성은 판결보다 앞서 재산 단서를 얼마나 빨리 보전하느냐에 따라 달라질 수 있습니다.",
       steps: [
-        ["01", "계좌 단서 확인", "수취 계좌, 예금주, 입금일, 금액, 연결 계좌 가능성을 정리합니다."],
+        ["01", "계좌 정보 확인", "수취 계좌, 예금주, 입금일, 금액, 연결 계좌 가능성을 정리합니다."],
         ["02", "가압류 검토", "자금이 이동되기 전 보전처분이 가능한지 판단합니다."],
         ["03", "본안 청구", "손해배상과 부당이득반환 중 사건 자료에 맞는 청구 구조를 세웁니다."],
         ["04", "판결·합의 회수", "형사 절차 자료와 민사 자료를 연결해 회수 협상 또는 집행 가능성을 봅니다."],
@@ -1492,7 +1488,7 @@ function createLawAuthoritySections(key, caseData) {
       compare: [
         ["구분", "형사고소만 진행", "민사 보전처분 병행"],
         ["목적", "처벌과 피의자 특정", "실제 회수 가능성 확보"],
-        ["속도", "수사 진행에 좌우", "계좌 단서 확인 즉시 검토"],
+        ["속도", "수사 진행에 좌우", "계좌 정보 확인 즉시 검토"],
         ["핵심 자료", "피해 진술과 입금 내역", "입금 내역, 재산 단서, 상대방 특정 자료"],
       ],
       aeoTitle: `${base} 피해금 회수 핵심 요약`,
@@ -1516,7 +1512,7 @@ function createLawAuthoritySections(key, caseData) {
         ["회수 판단", "가능성 추정에 그침", "지급정지·가압류 검토가 구체화됨"],
       ],
       aeoTitle: `${base} 회수 사례 핵심 요약`,
-      aeo: `${base}와 유사한 사건에서 회수 가능성이 높아지는 조건은 입금 직후 자료 보존, 계좌 단서 확보, 동일 피해자 확인, 지급정지 또는 가압류 검토가 빠르게 이어진 경우입니다.`,
+      aeo: `${base}와 유사한 사건에서 회수 가능성이 높아지는 조건은 입금 직후 자료 보존, 계좌 정보 확보, 동일 피해자 확인, 지급정지 또는 가압류 검토가 빠르게 이어진 경우입니다.`,
     },
     ld: {
       label: "CASE BRIEFING",
@@ -1614,7 +1610,7 @@ function renderBodyForLanding(landing, group, caseData) {
       `같은 사건이라도 처벌을 원하면 형사형, 회수를 원하면 민사형, 유사 결과를 보고 싶으면 성공사례형, 구조를 파악하려면 브리핑형이 적합합니다. 전체 허브는 이 선택을 돕는 안내 페이지입니다.`,
     ],
     la: [
-      `${base} 금융피해는 입금 계좌, 예금주, 금융기관명, 이체 일시를 먼저 확보해야 합니다. 형사고소와 함께 지급정지 가능성을 확인하면 자금 이동 전에 계좌 단서를 묶을 수 있습니다.`,
+      `${base} 금융피해는 입금 계좌, 예금주, 금융기관명, 이체 일시를 먼저 확보해야 합니다. 형사고소와 함께 지급정지 가능성을 확인하면 자금 이동 전에 계좌 정보를 정리할 수 있습니다.`,
       `대화 캡처와 입금증을 시간순으로 정리하면 계좌 추적과 고소장 작성이 빨라집니다. 자료가 준비되면 상담 접수로 다음 절차를 확인하는 것이 좋습니다.`,
     ],
     lb: [
@@ -1725,7 +1721,7 @@ function sanitizeAwkwardText(value = "") {
 }
 
 function normalizeScamCopyPhrases(value = "") {
-  const SUBST = "(?:접수 기록|상담 메모|거래 흐름|증거 묶음|계좌 단서|대화 자료|송금 내역|화면 기록|접근 경로|안내 문구|담당자 기록|분석 대상|검토 자료|신고 자료|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록|진행 자료)";
+  const SUBST = "(?:접수 기록|상담 메모|거래 흐름|증거 자료|계좌 정보|대화 자료|송금 내역|화면 기록|접근 경로|안내 문구|담당자 기록|분석 대상|검토 자료|신고 자료|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록|진행 자료)";
   const REMOVE_SUBST = "(?:대응 메모|상담 메모|대화 자료|보존 자료|거래 흐름|접수 기록|신고 자료|진행 자료|접근 경로|송금 내역|확인 항목|정리 내용)";
   return String(value || "")
     // [SUBST] 이름을 사용해 → 사칭한 명칭을 사용해
@@ -1897,7 +1893,7 @@ function fallbackVictimCases(key, brand = "담당자") {
     `정상 금융상품처럼 설명받았지만 출금 단계에서 보증금과 인증비를 요구받아 앱 화면 녹화, 계좌 변경 내역, 담당자 프로필을 별도 보존한 사례`,
     `환불을 기다리던 중 금융피해 회복팀이라는 새 계정이 접근해 선입금 요구 메시지를 2차 피해 정황으로 보존한 사례`,
     `같은 수취 계좌로 입금한 피해자가 추가 확인되어 입금 시간, 금액, 대화방 초대 경로를 비교한 사례`,
-    `형사고소 자료와 계좌 단서를 함께 정리해 계좌 제한 가능성과 추가 피해 확산 차단을 상담 접수 단계에서 검토한 사례`,
+    `형사고소 자료와 계좌 정보를 함께 정리해 계좌 제한 가능성과 추가 피해 확산 차단을 상담 접수 단계에서 검토한 사례`,
   ];
   return String(key || "").startsWith("l") ? law : common;
 }
@@ -2281,7 +2277,7 @@ function createSeoDescription(description = "", caseName = "", key = "") {
     const primary = seoCaseKeyword(caseName);
     const desc = String(description || "").trim();
     const fallback = primary
-      ? `${primary} 관련 상담 자료를 기준으로 송금 경위, 대화 기록, 계좌 단서, 접속 주소를 정리해 형사고소와 회수 가능성을 점검합니다.`
+      ? `${primary} 관련 상담 자료를 기준으로 송금 경위, 대화 기록, 계좌 정보, 접속 주소를 정리해 형사고소와 회수 가능성을 점검합니다.`
       : "송금 내역, 대화 기록, 사이트 주소를 기준으로 사기 정황과 대응 방법을 정리합니다.";
     if (!primary) return (desc || fallback).slice(0, 150);
     return (!desc || !desc.toLowerCase().includes(primary.toLowerCase()) ? fallback : desc).slice(0, 150);
@@ -2367,7 +2363,7 @@ function reduceCaseNameTextLegacy(value, caseName, keepFirst = false) {
   let text = toStr(value);
   const names = caseNameVariants(caseName).sort((a, b) => b.length - a.length);
   const primary = primaryCaseKeyword(caseName);
-  const replacements = ["접수 기록", "상담 메모", "거래 흐름", "증거 묶음", "계좌 단서", "대화 자료"];
+  const replacements = ["접수 기록", "상담 메모", "거래 흐름", "증거 자료", "계좌 정보", "대화 자료"];
   let replacementIndex = 0;
   let used = false;
   names.forEach((name) => {
@@ -2395,8 +2391,8 @@ function cleanupRepeatedWords(value = "") {
 }
 
 const CASE_NAME_REPLACEMENTS = [
-  "증거 묶음",
-  "계좌 단서",
+  "증거 자료",
+  "계좌 정보",
   "화면 기록",
 ];
 

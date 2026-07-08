@@ -359,7 +359,7 @@ function sanitizeAwkwardText(value = "") {
 }
 
 function normalizeScamCopyPhrases(value = "") {
-  const SUBST = "(?:접수 기록|상담 메모|거래 흐름|증거 묶음|계좌 단서|대화 자료|송금 내역|화면 기록|접근 경로|안내 문구|담당자 기록|분석 대상|검토 자료|신고 자료|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록|진행 자료)";
+  const SUBST = "(?:접수 기록|상담 메모|거래 흐름|증거 자료|계좌 정보|대화 자료|송금 내역|화면 기록|접근 경로|안내 문구|담당자 기록|분석 대상|검토 자료|신고 자료|확인 항목|보존 자료|대응 메모|정리 내용|사례 기록|진행 자료)";
   const REMOVE_SUBST = "(?:대응 메모|상담 메모|대화 자료|보존 자료|거래 흐름|접수 기록|신고 자료|진행 자료|접근 경로|송금 내역|확인 항목|정리 내용)";
   return String(value || "")
     .replace(new RegExp(`${SUBST}\\s*(?:관련\\s*)?이름을\\s*사용해`, "g"), "사칭한 명칭을 사용해")
@@ -720,7 +720,7 @@ function explainCategory() {
 
 function createSummary(caseName) {
   const keyword = primaryCaseKeyword(caseName) || caseName;
-  return `${keyword} 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.`;
+  return `${keyword} 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 정보, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.`;
 }
 
 function createTags(caseName) {
