@@ -631,7 +631,7 @@ function createPowerlinkFloatingWidgets(landing) {
   const caseNameJson = JSON.stringify(landing.title || "파워링크 랜딩");
   const domainJson = JSON.stringify("파워링크 랜딩");
   return `<div class="floating-contact">
-  <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
+  <a href="https://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
@@ -1877,12 +1877,24 @@ function fallbackFaq(caseName, base, key) {
   return renderFaqForLanding({ faq: [] }, { key }, { caseName }).slice(0, 7);
 }
 
-function isFinancialFraudCenterName(siteName = "") {
-  return siteName === "금융피해 대응센터";
+function consultationLabelsForSite(siteName = "") {
+  if (siteName === "금융피해 대응센터") {
+    return { stickyTitle: "지금 바로 전문 상담", amountPlaceholder: "사건 발생 일시" };
+  }
+  if (siteName === "피해 회수 성공사례") {
+    return { stickyTitle: "지급정지 피해 상담", amountPlaceholder: "문의 내용" };
+  }
+  if (siteName === "실제 회수 사례 아카이브") {
+    return { stickyTitle: "사기 피해 구제 상담", amountPlaceholder: "문의 내용" };
+  }
+  if (siteName === "금융피해 통합 허브") {
+    return { stickyTitle: "피해금 소송 대응 상담", amountPlaceholder: "대략적인 피해금액" };
+  }
+  return { stickyTitle: "추가 입금 전 긴급 점검", amountPlaceholder: "대략적인 피해금액" };
 }
 
 function createConsultForm(cn, siteName) {
-  const amountPlaceholder = isFinancialFraudCenterName(siteName) ? "사건 발생 일시" : "대략적인 피해금액";
+  const { amountPlaceholder } = consultationLabelsForSite(siteName);
   return `<section class="article-block consult-form-section" id="consult">
   <h2>상담 접수</h2>
   <p>추가 입금 요구를 받았거나 출금이 막혔다면 지금 자료를 남겨주세요. 상담 접수 후 전화 또는 카톡으로 입금 내역, 대화 캡처, 계좌 정보를 확인해 초기 대응 방향을 안내합니다.</p>
@@ -1915,10 +1927,9 @@ function createConsultForm(cn, siteName) {
 }
 
 function createFloatingWidgets(cn, siteName, slug) {
-  const stickyTitle = isFinancialFraudCenterName(siteName) ? "지금 바로 전문 상담" : "추가 입금 전 긴급 점검";
-  const amountPlaceholder = isFinancialFraudCenterName(siteName) ? "사건 발생 일시" : "대략적인 피해금액";
+  const { stickyTitle, amountPlaceholder } = consultationLabelsForSite(siteName);
   return `<div class="floating-contact">
-  <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
+  <a href="https://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">

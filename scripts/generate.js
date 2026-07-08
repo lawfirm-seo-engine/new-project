@@ -503,8 +503,7 @@ function createSchemaData({ title, description, canonical, faq, groupKey = "a", 
 function createConsultForm(caseItem, group) {
   const cn = escapeHtml(normalizeCaseName(caseItem.caseName));
   const siteName = escapeHtml(group.siteName);
-  const isFinancialFraudCenter = group.landingKey === "la";
-  const amountPlaceholder = isFinancialFraudCenter ? "사건 발생 일시" : "대략적인 피해금액";
+  const { amountPlaceholder } = consultationLabelsForGroup(group);
   return `<section class="article-block consult-form-section" id="consult">
   <h2>상담 접수</h2>
   <p>추가 입금 요구를 받았거나 출금이 막혔다면 지금 자료를 남겨주세요. 상담 접수 후 전화 또는 카톡으로 입금 내역, 대화 캡처, 계좌 정보를 확인해 초기 대응 방향을 안내합니다.</p>
@@ -535,6 +534,23 @@ function createConsultForm(caseItem, group) {
     });
   </script>
 </section>`;
+}
+
+function consultationLabelsForGroup(group = {}) {
+  const key = group.landingKey || group.key;
+  if (key === "la") {
+    return { stickyTitle: "지금 바로 전문 상담", amountPlaceholder: "사건 발생 일시" };
+  }
+  if (key === "c") {
+    return { stickyTitle: "지급정지 피해 상담", amountPlaceholder: "문의 내용" };
+  }
+  if (key === "lc") {
+    return { stickyTitle: "사기 피해 구제 상담", amountPlaceholder: "문의 내용" };
+  }
+  if (key === "le") {
+    return { stickyTitle: "피해금 소송 대응 상담", amountPlaceholder: "대략적인 피해금액" };
+  }
+  return { stickyTitle: "추가 입금 전 긴급 점검", amountPlaceholder: "대략적인 피해금액" };
 }
 
 function createLandingContent(landing, group, caseItem) {
@@ -921,11 +937,9 @@ function renderFaqForLanding(landing, group, caseItem) {
 function createFloatingWidgets(caseItem, group) {
   const cn = escapeHtml(normalizeCaseName(caseItem.caseName));
   const siteName = escapeHtml(group.siteName);
-  const isFinancialFraudCenter = group.landingKey === "la";
-  const stickyTitle = isFinancialFraudCenter ? "지금 바로 전문 상담" : "추가 입금 전 긴급 점검";
-  const amountPlaceholder = isFinancialFraudCenter ? "사건 발생 일시" : "대략적인 피해금액";
+  const { stickyTitle, amountPlaceholder } = consultationLabelsForGroup(group);
   return `<div class="floating-contact">
-  <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
+  <a href="https://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">
@@ -1263,6 +1277,10 @@ function formatDate(value) {
 
 function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = "" }) {
   const slug = caseItem?.slug ? encodeURIComponent(caseItem.slug) : "";
+  const ogImage = isHub ? `${group.siteUrl}/assets/og-template.png` : landing?.ogImage;
+  const imageAlt = isHub
+    ? group.hubTitle
+    : (landing?.imageAlt || landing?.ogTitle || landing?.title || group.hubTitle || group.siteName);
   const links = [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
     `<meta name="NaverBot" content="All">`,
@@ -1282,16 +1300,22 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     links.push(`<link rel="prefetch" href="${landing.ogImage}" as="image">`);
   }
 
-  if (isHub) {
-    links.push(`<meta name="classification" content="${escapeHtml(group.intent)}">`);
-    links.push(`<meta property="og:updated_time" content="${today}">`);
+  if (ogImage) {
+    links.push(`<meta property="og:image:secure_url" content="${escapeHtml(ogImage)}">`);
     links.push(`<meta property="og:image:type" content="image/png">`);
     links.push(`<meta property="og:image:width" content="1254">`);
     links.push(`<meta property="og:image:height" content="1254">`);
-    links.push(`<meta property="og:image:alt" content="${escapeHtml(group.hubTitle)}">`);
+    links.push(`<meta property="og:image:alt" content="${escapeHtml(imageAlt)}">`);
+    links.push(`<link rel="image_src" href="${escapeHtml(ogImage)}">`);
+    links.push(`<meta itemprop="image" content="${escapeHtml(ogImage)}">`);
     links.push(`<meta name="twitter:card" content="summary_large_image">`);
-    links.push(`<meta name="twitter:image" content="${group.siteUrl}/assets/og-template.png">`);
-    links.push(`<meta name="twitter:image:alt" content="${escapeHtml(group.hubTitle)}">`);
+    links.push(`<meta name="twitter:image" content="${escapeHtml(ogImage)}">`);
+    links.push(`<meta name="twitter:image:alt" content="${escapeHtml(imageAlt)}">`);
+  }
+
+  if (isHub) {
+    links.push(`<meta name="classification" content="${escapeHtml(group.intent)}">`);
+    links.push(`<meta property="og:updated_time" content="${today}">`);
     links.push(`<style>.pg-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:16px 0 8px;margin:0 auto;max-width:900px}.pg-btn{min-width:36px;height:34px;padding:0 10px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#263244;font-size:13px;font-weight:700;cursor:pointer}.pg-btn:hover{background:#f0f4fa}.pg-active{background:#1f4fd8!important;color:#fff!important;border-color:#1f4fd8!important}</style>`);
   } else {
     const publishedDate = caseItem?.createdAt || today;
@@ -1383,12 +1407,10 @@ function landingDisplayTitle(item = {}, suffix = "") {
 
 function createHubFloatingWidgets(group) {
   const sn = JSON.stringify(group.siteName);
-  const isFinancialFraudCenter = group.landingKey === "la";
-  const stickyTitle = isFinancialFraudCenter ? "지금 바로 전문 상담" : "추가 입금 전 긴급 점검";
-  const amountPlaceholder = isFinancialFraudCenter ? "사건 발생 일시" : "대략적인 피해금액";
+  const { stickyTitle, amountPlaceholder } = consultationLabelsForGroup(group);
   const logScanScript = group.siteUrl === "https://gnlaw-criminal.co.kr" ? `\n${LOGSCAN_SCRIPT}` : "";
   return `<div class="floating-contact">
-  <a href="http://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
+  <a href="https://pf.kakao.com/_WkdxfX/chat" class="float-btn kakao" target="_blank" rel="noopener">카카오톡 상담</a>
   <a href="tel:02-6348-0406" class="float-btn phone">전화문의</a>
 </div>
 <div class="sticky-bar" id="stickyBar">

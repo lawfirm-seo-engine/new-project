@@ -4,13 +4,14 @@ import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
 import { OG_IMAGE_VERSION } from "../_seo.js";
 
-const FONT_KV_KEY = "og:font:pretendard-v1";
+const FONT_KV_KEY = "og:font:pretendard-black-v1";
 const FONT_CDN_URL =
-  "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Regular.otf";
+  "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Black.otf";
 const IMG_CACHE_TTL = 60 * 60 * 24 * 60; // 60 days
 const TEMPLATE_PATH = "/assets/og-template.png";
 const TEMPLATE_WIDTH = 1254;
 const TEMPLATE_HEIGHT = 1254;
+const PLAQUE_TEXT_CENTER_Y = 1116;
 
 let initPromise = null;
 let fontBuffer = null;
@@ -108,7 +109,7 @@ function textUnits(value) {
 function splitTitle(title) {
   const clean = cleanTitle(title);
   if (!clean) return ["법무법인 선린"];
-  if (textUnits(clean) <= 16.8) return [clean];
+  if (textUnits(clean) <= 22.5) return [clean];
 
   const chars = [...clean];
   const total = textUnits(clean);
@@ -118,7 +119,10 @@ function splitTitle(title) {
   for (let i = 4; i < chars.length - 3; i += 1) {
     const left = chars.slice(0, i).join("");
     const right = chars.slice(i).join("");
-    const score = Math.abs(textUnits(left) - total / 2) + Math.abs(textUnits(right) - total / 2);
+    const boundary = chars[i - 1] || "";
+    const next = chars[i] || "";
+    const boundaryPenalty = /[\s·,./-]/.test(boundary) || /[\s·,./-]/.test(next) ? 0 : 0.65;
+    const score = Math.abs(textUnits(left) - total / 2) + Math.abs(textUnits(right) - total / 2) + boundaryPenalty;
     if (score < bestScore) {
       best = i;
       bestScore = score;
@@ -132,28 +136,25 @@ function buildSvg(title, templateHref) {
   const lines = splitTitle(title);
   const maxUnits = Math.max(...lines.map(textUnits), 1);
   const fontSize = lines.length > 1
-    ? Math.min(92, Math.max(66, Math.floor(980 / maxUnits)))
-    : Math.min(124, Math.max(84, Math.floor(1130 / maxUnits)));
-  const lineGap = Math.round(fontSize * 0.14);
-  const lineHeight = fontSize + lineGap;
-  const centerY = 1127;
-  const firstY = centerY - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
-  const strokeWidth = Math.max(4, Math.round(fontSize * 0.055));
+    ? Math.min(86, Math.max(58, Math.floor(920 / maxUnits)))
+    : Math.min(120, Math.max(66, Math.floor(1080 / maxUnits)));
+  const lineHeight = Math.round(fontSize * 1.08);
+  const firstY = PLAQUE_TEXT_CENTER_Y - ((lines.length - 1) * lineHeight) / 2;
+  const strokeWidth = Math.max(5, Math.round(fontSize * 0.075));
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" viewBox="0 0 ${TEMPLATE_WIDTH} ${TEMPLATE_HEIGHT}">
 <defs>
   <linearGradient id="goldText" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#ffe08a"/>
-    <stop offset="48%" stop-color="#d99a24"/>
-    <stop offset="100%" stop-color="#8f5009"/>
+    <stop offset="0%" stop-color="#ffd86f"/>
+    <stop offset="52%" stop-color="#f0b430"/>
+    <stop offset="100%" stop-color="#c97912"/>
   </linearGradient>
-  <filter id="textShadow" x="-20%" y="-40%" width="140%" height="180%">
-    <feDropShadow dx="0" dy="6" stdDeviation="4.5" flood-color="#000000" flood-opacity="0.92"/>
-    <feDropShadow dx="0" dy="0" stdDeviation="1.8" flood-color="#fff1b0" flood-opacity="0.38"/>
+  <filter id="textShadow" x="-12%" y="-22%" width="124%" height="144%">
+    <feDropShadow dx="0" dy="4" stdDeviation="1.8" flood-color="#000000" flood-opacity="0.86"/>
   </filter>
 </defs>
 <image href="${templateHref}" x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" preserveAspectRatio="xMidYMid slice"/>
-${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="1000" letter-spacing="0" fill="url(#goldText)" stroke="#180b01" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
+${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="900" letter-spacing="0" fill="url(#goldText)" stroke="#120800" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" text-rendering="geometricPrecision" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
 </svg>`;
 }
 
@@ -217,10 +218,6 @@ export async function onRequest(context) {
     }
   } catch (_) {}
 
-  if (method === "HEAD") {
-    return templateImageResponse(url, method, "HEAD_TEMPLATE");
-  }
-
   let title = humanizeSlug(slug);
   try {
     const raw = isPowerlink
@@ -245,6 +242,9 @@ export async function onRequest(context) {
     const templateHref = await getTemplateDataUri(url.origin);
     const svg = buildSvg(title, templateHref);
     const resvg = new Resvg(svg, {
+      shapeRendering: 2,
+      textRendering: 1,
+      imageRendering: 0,
       font: {
         fontBuffers: [fontBuffer],
         defaultFontFamily: "Pretendard",
@@ -258,7 +258,7 @@ export async function onRequest(context) {
       context.waitUntil(cachePut.catch(() => {}));
     }
 
-    return new Response(png, {
+    return new Response(method === "HEAD" ? null : png, {
       status: 200,
       headers: { ...CACHE_HEADERS, "Content-Length": String(png.byteLength), "X-Cache": "MISS" },
     });
