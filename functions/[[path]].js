@@ -1715,6 +1715,8 @@ function normalizeScamCopyPhrases(value = "") {
     .replace(new RegExp(`${SUBST}\\s*(?:또는\\s*유사\\s*)?(?:관련\\s*)?이름의`, "g"), "")
     // [SUBST] (관련)? 계정에서 → delete
     .replace(new RegExp(`${SUBST}\\s*(?:관련\\s*)?계정에서`, "g"), "")
+    // [SUBST] before 사칭 계정이 → delete (e.g. "화면 기록 사칭 계정이" → "사칭 계정이")
+    .replace(new RegExp(`${SUBST}\\s*(?=사칭\\s*계정이)`, "g"), "")
     // Delete [SUBST] before sentence-starting words
     .replace(new RegExp(`${SUBST}\\s*(?=사건|피해|전체\\s*허브|금융피해|유사\\s*성공|실제\\s*회수|AI\\b|사기\\s*피해|금융사기\\s*사건)`, "g"), "")
     // Delete [SUBST] before 관련

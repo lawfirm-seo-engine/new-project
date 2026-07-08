@@ -47,6 +47,23 @@
   <h1 id="pageTitle">사건 편집</h1>
   <p class="meta" id="slugLabel">로딩 중...</p>
 
+  <!-- 기본 정보 편집 -->
+  <div class="card">
+    <h2>기본 정보</h2>
+    <div class="field">
+      <label>사건명 / 제목</label>
+      <input type="text" id="fieldCaseName" placeholder="사건명을 입력하세요">
+    </div>
+    <div class="field">
+      <label>요약 설명 (메타 description, 최대 300자)</label>
+      <textarea id="fieldSummary" rows="3" placeholder="요약 설명을 입력하세요"></textarea>
+    </div>
+    <div class="save-row">
+      <button class="btn" onclick="saveBasicInfo()">저장</button>
+      <span class="msg" id="basicMsg"></span>
+    </div>
+  </div>
+
   <!-- 랜딩 본문 편집 -->
   <div class="card">
     <h2>랜딩 본문 편집</h2>
@@ -89,16 +106,21 @@
 
 <script>
   const GROUPS = [
-    { key: 'a', label: 'A 형사고소' },
-    { key: 'b', label: 'B 민사소송' },
-    { key: 'c', label: 'C 성공사례' },
-    { key: 'd', label: 'D 사건정보' },
-    { key: 'e', label: 'E 전체허브' },
+    { key: 'a',  label: 'A 형사고소' },
+    { key: 'b',  label: 'B 민사소송' },
+    { key: 'c',  label: 'C 성공사례/회수/지급정지' },
+    { key: 'd',  label: 'D 사건정보' },
+    { key: 'e',  label: 'E 전체허브' },
+    { key: 'la', label: 'lA 보이스피싱' },
+    { key: 'lc', label: 'lC 투자사기' },
+    { key: 'le', label: 'lE 채무부존재소송' },
   ];
   const FIELDS = [
-    { key: 'h1', label: 'H1 제목', multi: false },
-    { key: 'body', label: '본문 (줄바꿈으로 문단 구분)', multi: true },
-    { key: 'victimCases', label: '피해 사례 (줄바꿈으로 항목 구분)', multi: true },
+    { key: 'h1',           label: 'H1 제목',                        multi: false },
+    { key: 'title',        label: '페이지 제목 (title/ogTitle)',       multi: false },
+    { key: 'description',  label: '메타 설명 (description/ogDesc)',   multi: false },
+    { key: 'body',         label: '본문 (줄바꿈으로 문단 구분)',         multi: true  },
+    { key: 'victimCases',  label: '피해 사례 (줄바꿈으로 항목 구분)',    multi: true  },
   ];
 
   const params = new URLSearchParams(location.search);
@@ -116,6 +138,8 @@
       if (!caseData) throw new Error('사건을 찾을 수 없습니다.');
       document.getElementById('pageTitle').textContent = caseData.caseName + ' 편집';
       document.getElementById('slugLabel').textContent = 'slug: ' + slug;
+      document.getElementById('fieldCaseName').value = caseData.caseName || '';
+      document.getElementById('fieldSummary').value = caseData.summary || '';
       document.getElementById('memoField').value = '';
       renderTabs();
       renderLandingEditor();
@@ -152,18 +176,38 @@
     document.getElementById('landingEditor').className = '';
   }
 
+  async function saveBasicInfo() {
+    const msg = document.getElementById('basicMsg');
+    msg.textContent = '저장 중...'; msg.className = 'msg';
+    const newName = document.getElementById('fieldCaseName').value.trim();
+    const newSummary = document.getElementById('fieldSummary').value.trim();
+    if (!newName) { msg.textContent = '사건명을 입력하세요.'; msg.className = 'msg err'; return; }
+    const r1 = await api('/api/update-case', { slug, action: 'rename', value: newName });
+    if (!r1.ok) { msg.textContent = '저장 실패: ' + (r1.message || ''); msg.className = 'msg err'; return; }
+    if (r1.updatedCase) caseData = r1.updatedCase;
+    if (newSummary) {
+      const r2 = await api('/api/update-case', { slug, action: 'update-summary', value: newSummary });
+      if (!r2.ok) { msg.textContent = '요약 저장 실패: ' + (r2.message || ''); msg.className = 'msg err'; return; }
+      if (r2.updatedCase) caseData = r2.updatedCase;
+    }
+    document.getElementById('pageTitle').textContent = caseData.caseName + ' 편집';
+    msg.textContent = '저장 완료'; msg.className = 'msg ok';
+    setTimeout(() => msg.textContent = '', 3000);
+  }
+
   async function saveLanding() {
     const msg = document.getElementById('landingMsg');
     msg.textContent = '저장 중...'; msg.className = 'msg';
     for (const f of FIELDS) {
       const el = document.getElementById('field_' + f.key);
       if (!el) continue;
+      const rawVal = el.value;
+      if (!rawVal.trim()) continue; // 비어 있는 필드는 건너뜀
       const value = f.multi
-        ? el.value.split('\n').map(s => s.trim()).filter(Boolean)
-        : el.value.trim();
+        ? rawVal.split('\n').map(s => s.trim()).filter(Boolean)
+        : rawVal.trim();
       const res = await api('/api/update-case', { slug, action: 'update-landing', groupKey: activeGroup, field: f.key, value });
       if (!res.ok) { msg.textContent = '저장 실패: ' + (res.message || ''); msg.className = 'msg err'; return; }
-      // 로컬 caseData 동기화
       if (res.updatedCase) caseData = res.updatedCase;
     }
     msg.textContent = '저장 완료'; msg.className = 'msg ok';

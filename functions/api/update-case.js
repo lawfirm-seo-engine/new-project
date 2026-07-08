@@ -45,6 +45,12 @@ export async function onRequestPost(context) {
       cases[idx].caseName = newName;
       cases[idx].updatedAt = now;
 
+    } else if (action === "update-summary") {
+      const newSummary = String(value || "").trim().slice(0, 300);
+      if (!newSummary) return json({ ok: false, message: "요약 내용 필수" }, 400);
+      cases[idx].summary = newSummary;
+      cases[idx].updatedAt = now;
+
     } else if (action === "set-noindex") {
       cases[idx].noindex = value === true || value === "true" || value === 1;
 
@@ -106,7 +112,7 @@ export async function onRequestPost(context) {
     // KV 업데이트 — rename 시 기존 KV의 landings 보존
     if (env.CASES) {
       let kvEntry = cases[idx];
-      if (action === "rename" || action === "set-noindex" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
+      if (action === "rename" || action === "update-summary" || action === "set-noindex" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
         const existing = await env.CASES.get(`case:${slug}`);
         if (existing) {
           const existingParsed = JSON.parse(existing);
