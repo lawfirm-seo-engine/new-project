@@ -43,6 +43,7 @@
 <div class="wrap">
   <div class="nav">
     <a class="btn sec" href="/admin/dashboard.html">← 대시보드</a>
+    <button class="btn sec" onclick="syncFromGithub()">GitHub→KV 즉시 반영</button>
   </div>
   <h1 id="pageTitle">사건 편집</h1>
   <p class="meta" id="slugLabel">로딩 중...</p>
@@ -305,6 +306,25 @@
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       return await res.json();
     } catch (e) { return { ok: false, message: e.message }; }
+  }
+
+  async function syncFromGithub() {
+    if (!confirm('GitHub cases.json의 최신 데이터를 KV에 즉시 반영합니다.\n계속하시겠습니까?')) return;
+    const msg = document.getElementById('basicMsg');
+    msg.textContent = '동기화 중...'; msg.className = 'msg';
+    const res = await api('/api/update-case', { slug, action: 'sync-from-github' });
+    if (res.ok) {
+      if (res.updatedCase) {
+        caseData = res.updatedCase;
+        document.getElementById('fieldCaseName').value = caseData.caseName || '';
+        document.getElementById('fieldSummary').value = caseData.summary || '';
+        document.getElementById('pageTitle').textContent = caseData.caseName + ' 편집';
+      }
+      msg.textContent = 'KV 반영 완료'; msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    } else {
+      msg.textContent = '실패: ' + (res.message || ''); msg.className = 'msg err';
+    }
   }
 
   function esc(str) {

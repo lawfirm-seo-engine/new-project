@@ -34,6 +34,22 @@ export async function onRequestPost(context) {
       cases[idx].landings[groupKey][field] = value;
       cases[idx].updatedAt = now;
 
+    } else if (action === "sync-from-github") {
+      // GitHub의 최신 cases.json 데이터를 KV에 즉시 반영
+      if (!env.CASES) return json({ ok: false, message: "KV 없음" }, 500);
+      const existing = await env.CASES.get(`case:${slug}`);
+      const kvEntry = existing ? { ...JSON.parse(existing), ...cases[idx] } : cases[idx];
+      await env.CASES.put(`case:${slug}`, JSON.stringify(kvEntry));
+      const idxRaw = await env.CASES.get("cases:index");
+      if (idxRaw) {
+        const indexArr = JSON.parse(idxRaw);
+        const pos = indexArr.findIndex((e) => e.slug === slug);
+        if (pos !== -1) indexArr[pos] = buildIndexEntry(kvEntry);
+        else indexArr.push(buildIndexEntry(kvEntry));
+        await env.CASES.put("cases:index", JSON.stringify(indexArr));
+      }
+      return json({ ok: true, message: "KV 동기화 완료", updatedCase: kvEntry });
+
     } else if (action === "save-landings") {
       if (!value || typeof value !== "object") return json({ ok: false, message: "landings 객체 필수" }, 400);
       cases[idx].landings = value;
