@@ -60,6 +60,9 @@ function buildIndexEntry(c) {
     summary: c.summary || "",
     tags: c.tags || [],
     memo: c.memo || "",
+    noindex: c.noindex || false,
+    targetGroups: Array.isArray(c.targetGroups) ? c.targetGroups : [],
+    createdBy: c.createdBy || "",
   };
 }
 

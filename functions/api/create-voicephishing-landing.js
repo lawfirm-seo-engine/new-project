@@ -156,7 +156,7 @@ export async function onRequestPost(context) {
       reports: Number.isInteger(existing?.reports) ? existing.reports : 0,
       summary,
       tags: ["보이스피싱", "피해구제", "금융사기"],
-      landings: { ...(existing?.landings || {}), la: landing },
+      landings: { la: landing },
     };
 
     if (env.CASES) {

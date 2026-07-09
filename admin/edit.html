@@ -120,7 +120,7 @@
     { key: 'h1',           label: 'H1 제목',                        multi: false },
     { key: 'title',        label: '페이지 제목 (title/ogTitle)',       multi: false },
     { key: 'description',  label: '메타 설명 (description/ogDesc)',   multi: false },
-    { key: 'body',         label: '본문 (줄바꿈으로 문단 구분)',         multi: true  },
+    { key: 'body',         label: '본문 / H2 제목 (## 제목 줄로 수정)', multi: true  },
     { key: 'victimCases',  label: '피해 사례 (줄바꿈으로 항목 구분)',    multi: true  },
   ];
 
@@ -129,7 +129,7 @@
   if (!slug) { document.body.innerHTML = '<p style="padding:40px;color:red">slug 파라미터가 없습니다.</p>'; }
 
   let caseData = null;
-  let activeGroup = 'a';
+  let activeGroup = params.get('group') || 'a';
 
   fetch('/api/get-case?slug=' + encodeURIComponent(slug))
     .then(r => r.json())
@@ -137,6 +137,7 @@
       if (!data.ok) throw new Error(data.message || '로드 실패');
       caseData = data.case;
       if (!caseData) throw new Error('사건을 찾을 수 없습니다.');
+      activeGroup = params.get('group') || defaultGroupForCase(caseData);
       document.getElementById('pageTitle').textContent = caseData.caseName + ' 편집';
       document.getElementById('slugLabel').textContent = 'slug: ' + slug;
       document.getElementById('fieldCaseName').value = caseData.caseName || '';
@@ -163,6 +164,15 @@
     renderLandingEditor();
   }
 
+  function defaultGroupForCase(item) {
+    const targetGroups = Array.isArray(item?.targetGroups) ? item.targetGroups : [];
+    if (item?.createdBy === 'voicephishing-manual' || targetGroups.includes('la')) return 'la';
+    if (item?.createdBy === 'tujasagi-manual' || targetGroups.includes('lc')) return 'lc';
+    if (item?.createdBy === 'chaemubu-manual' || targetGroups.includes('le')) return 'le';
+    if (item?.createdBy === 'recovery-manual' || item?.createdBy === 'jipjeong-manual' || targetGroups.includes('c')) return 'c';
+    return 'a';
+  }
+
   function renderLandingEditor() {
     const landing = caseData?.landings?.[activeGroup] || {};
     document.getElementById('landingEditor').innerHTML = FIELDS.map(f => {
@@ -171,7 +181,7 @@
       return `<div class="field">
         <label>${esc(f.label)}</label>
         <textarea id="field_${f.key}" rows="${f.multi ? 5 : 2}">${esc(text)}</textarea>
-        ${f.multi ? '<p class="hint">줄바꿈(Enter)으로 항목을 구분합니다.</p>' : ''}
+        ${f.multi ? '<p class="hint">줄바꿈(Enter)으로 항목을 구분합니다. 본문에서 ## 로 시작하는 줄은 H2 제목으로 표시됩니다.</p>' : ''}
       </div>`;
     }).join('');
     document.getElementById('landingEditor').className = '';
