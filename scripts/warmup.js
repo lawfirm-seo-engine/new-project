@@ -17,6 +17,7 @@ const targets = GROUPS.flatMap((group) => [
   buildLandingUrl(group, latest.slug),
   caseOgImageUrl(latest.slug, group.siteUrl),
   `${group.siteUrl}/assets/og-template.png`,
+  `${group.siteUrl}/assets/og-template.webp`,
   `${group.siteUrl}/sitemap-index.xml`,
   `${group.siteUrl}/sitemap-recent.xml`,
   `${group.siteUrl}/sitemap.xml`,
