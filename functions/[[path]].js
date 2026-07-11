@@ -31,7 +31,24 @@ import {
   standardMethodTemplate,
   standardPageTitle,
   standardResponseSections,
+  standardSubtitle,
 } from "./_standardLanding.js";
+import {
+  BOARD_HOST,
+  BOARD_REFRESHED_AT,
+  boardDescription,
+  boardImageUrl,
+  boardLastModified,
+  boardListUrl,
+  boardPostUrl,
+  boardTitle,
+  filterRecentBoardPosts,
+  getBoardPost,
+  injectBoardSitemapEntries,
+  isBoardHost,
+  listBoardPosts,
+  sortBoardPosts,
+} from "./_board.js";
 
 const GROUPS = {
   "gnlaw-criminal.co.kr": {
@@ -201,7 +218,12 @@ async function handleSeoXmlRoute({ pathname, url, env }) {
   if (pathname === "/sitemap-recent.xml") {
     const cases = await loadSeoCases(env);
     const recentCases = getRecentCases(cases, RECENT_SITEMAP_DAYS, RECENT_SITEMAP_LIMIT);
-    return xmlResponse(buildSitemapXml(group, recentCases, { includeHome: false, recent: true }));
+    let xml = buildSitemapXml(group, recentCases, { includeHome: false, recent: true });
+    if (isBoardHost(url.host)) {
+      const boardPosts = await listBoardPosts(env).catch(() => []);
+      xml = injectBoardSitemapEntries(xml, filterRecentBoardPosts(boardPosts, RECENT_SITEMAP_DAYS, RECENT_SITEMAP_LIMIT), { includeList: true });
+    }
+    return xmlResponse(xml);
   }
 
   if (pathname === "/rss.xml") {
@@ -211,7 +233,12 @@ async function handleSeoXmlRoute({ pathname, url, env }) {
   }
 
   const cases = await loadSeoCases(env);
-  return xmlResponse(buildSitemapXml(group, cases));
+  let xml = buildSitemapXml(group, cases);
+  if (isBoardHost(url.host)) {
+    const boardPosts = await listBoardPosts(env).catch(() => []);
+    xml = injectBoardSitemapEntries(xml, boardPosts, { includeList: true });
+  }
+  return xmlResponse(xml);
 }
 
 function xmlResponse(body, contentType = "application/xml; charset=utf-8") {
@@ -256,6 +283,9 @@ export async function onRequest(context) {
   if (powerlinkResponse) return powerlinkResponse;
 
   if (!group) return next();
+
+  const boardResponse = await handleCenterBoardRoute({ context, url, pathname });
+  if (boardResponse) return boardResponse;
 
   // /[pathPrefix]/[slug]-[suffix]/ 형태의 랜딩 페이지만 처리
   const parts = pathname.replace(/^\/|\/$/g, "").split("/");
@@ -554,6 +584,350 @@ function renderPowerlinkLanding(landing) {
     footerLinks: "",
     headerCall: "",
     bodyScripts: logScanScriptForSite("https://gnlaw-criminal.co.kr"),
+  });
+}
+
+// ─── Center Board Renderer ───────────────────────────────────────────────────
+
+async function handleCenterBoardRoute({ context, url, pathname }) {
+  if (!isBoardHost(url.host)) return null;
+
+  const parts = pathname.replace(/^\/|\/$/g, "").split("/").filter(Boolean);
+  if (parts[0] !== "board") return null;
+
+  if (pathname === "/board") {
+    return new Response(null, {
+      status: 301,
+      headers: { Location: `${url.origin}/board/${url.search}` },
+    });
+  }
+
+  const group = GROUPS[BOARD_HOST];
+
+  if (parts.length === 1) {
+    const posts = await listBoardPosts(context.env).catch(() => []);
+    return htmlResponse(renderBoardListPage(group, posts, url));
+  }
+
+  if (parts.length === 2 && parts[1]) {
+    if (!pathname.endsWith("/")) {
+      return new Response(null, {
+        status: 301,
+        headers: { Location: `${url.origin}${pathname}/${url.search}` },
+      });
+    }
+
+    const slug = decodeURIComponent(parts[1]);
+    const post = await getBoardPost(context.env, slug).catch(() => null);
+    if (!post || post.status !== "published") {
+      return new Response("게시글을 찾을 수 없습니다.", {
+        status: 404,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    return htmlResponse(renderBoardPostPage(group, post));
+  }
+
+  return null;
+}
+
+function renderBoardListPage(group, posts = [], url) {
+  const query = normalizeSpace(url.searchParams.get("q") || "");
+  const canonical = boardListUrl();
+  const title = "사기피해 통합 허브 게시판";
+  const description = "사기 피해 대응 공지와 안내 게시글을 검색하고 확인할 수 있는 통합 허브 게시판입니다.";
+  const visiblePosts = sortBoardPosts(posts)
+    .filter((post) => post.status === "published")
+    .filter((post) => {
+      if (!query) return true;
+      const haystack = [post.title, post.slug, post.excerpt, post.metaDescription].join(" ").toLowerCase();
+      return haystack.includes(query.toLowerCase());
+    });
+  const ogImage = boardImageUrl({});
+  const itemList = visiblePosts.map((post, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    url: boardPostUrl(post.slug),
+    name: post.title,
+  }));
+  const schema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${canonical}#webpage`,
+        name: title,
+        description,
+        url: canonical,
+        inLanguage: "ko-KR",
+        dateModified: BOARD_REFRESHED_AT,
+        isPartOf: { "@id": `${group.siteUrl}/#website` },
+        primaryImageOfPage: { "@id": `${canonical}#primaryimage` },
+        breadcrumb: { "@id": `${canonical}#breadcrumb` },
+      },
+      {
+        "@type": "ImageObject",
+        "@id": `${canonical}#primaryimage`,
+        url: ogImage,
+        contentUrl: ogImage,
+        width: OG_IMAGE_WIDTH,
+        height: OG_IMAGE_HEIGHT,
+        representativeOfPage: true,
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${canonical}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "홈", item: `${group.siteUrl}/` },
+          { "@type": "ListItem", position: 2, name: "게시판", item: canonical },
+        ],
+      },
+      {
+        "@type": "ItemList",
+        itemListElement: itemList,
+      },
+      { ...ORGANIZATION },
+    ],
+  }, null, 2);
+
+  const cards = visiblePosts.length ? visiblePosts.map((post) => {
+    const image = boardImageUrl(post);
+    const postTitle = boardTitle(post);
+    const desc = boardDescription(post);
+    return `<article class="board-card">
+  <a href="${esc(boardPostUrl(post.slug))}">
+    <img src="${esc(image)}" alt="${esc(postTitle)} 대표 이미지" loading="lazy">
+    <span class="board-card-body">
+      <strong>${esc(postTitle)}${post.pinned ? '<em>고정</em>' : ''}</strong>
+      <small>발행 ${esc(post.publishedAt || post.createdAt || "")} · 수정 ${esc(boardLastModified(post))}</small>
+      <span>${esc(desc)}</span>
+    </span>
+  </a>
+</article>`;
+  }).join("\n") : `<p class="board-empty">게시글이 없습니다.</p>`;
+
+  const content = `${boardInlineStyle()}
+<section class="article-block board-list-section">
+  <form class="board-search" action="/board/" method="get">
+    <input name="q" value="${esc(query)}" placeholder="게시글 검색" aria-label="게시글 검색">
+    <button type="submit">검색</button>
+  </form>
+  <div class="board-count">${visiblePosts.length}개 게시글</div>
+  <div class="board-grid">${cards}</div>
+</section>`;
+
+  return pageTemplate({
+    title: esc(`${title} | 법무법인 선린`),
+    description: esc(description),
+    canonical,
+    ogType: "website",
+    ogTitle: esc(title),
+    ogDescription: esc(description),
+    ogImage: esc(ogImage),
+    siteName: esc(group.siteName),
+    headExtra: boardHeadExtra({ canonical, ogImage, imageAlt: `${title} 대표 이미지`, description }),
+    schema,
+    bodyClass: `${group.bodyClass} board-page`,
+    tone: "통합 허브 게시판",
+    h1: esc(title),
+    breadcrumb: `<nav class="breadcrumb" aria-label="breadcrumb"><a href="${group.siteUrl}/">홈</a><strong>게시판</strong></nav>`,
+    ogThumbnail: "",
+    summary: esc(description),
+    heroTyping: "",
+    receiptBadge: "",
+    heroCta: "",
+    content,
+    intent: "사기피해 통합 허브 게시판",
+    ctaTitle: "사기 피해 상담",
+    ctaText: "현재 피해 상황을 기준으로 필요한 대응 경로를 확인합니다.",
+    ctaLabel: "상담 접수",
+    footerLinks: "",
+    headerCall: "",
+    bodyScripts: "",
+  });
+}
+
+function renderBoardPostPage(group, post) {
+  const canonical = boardPostUrl(post.slug);
+  const title = boardTitle(post);
+  const description = boardDescription(post);
+  const ogImage = boardImageUrl(post);
+  const publishedDate = post.publishedAt || post.createdAt || BOARD_REFRESHED_AT;
+  const modifiedDate = boardLastModified(post);
+  const faq = Array.isArray(post.faq) ? post.faq : [];
+  const schemaGraph = [
+    {
+      "@type": "WebPage",
+      "@id": `${canonical}#webpage`,
+      name: title,
+      description,
+      url: canonical,
+      inLanguage: "ko-KR",
+      datePublished: publishedDate,
+      dateModified: modifiedDate,
+      isPartOf: { "@id": `${group.siteUrl}/#website` },
+      primaryImageOfPage: { "@id": `${canonical}#primaryimage` },
+      breadcrumb: { "@id": `${canonical}#breadcrumb` },
+      author: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
+    },
+    {
+      "@type": "Article",
+      "@id": `${canonical}#article`,
+      headline: title,
+      description,
+      url: canonical,
+      inLanguage: "ko-KR",
+      datePublished: publishedDate,
+      dateModified: modifiedDate,
+      author: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
+      publisher: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
+      image: { "@id": `${canonical}#primaryimage` },
+    },
+    {
+      "@type": "ImageObject",
+      "@id": `${canonical}#primaryimage`,
+      url: ogImage,
+      contentUrl: ogImage,
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+      caption: `${title} 대표 이미지`,
+      representativeOfPage: true,
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${canonical}#breadcrumb`,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "홈", item: `${group.siteUrl}/` },
+        { "@type": "ListItem", position: 2, name: "게시판", item: boardListUrl() },
+        { "@type": "ListItem", position: 3, name: title, item: canonical },
+      ],
+    },
+    { ...ORGANIZATION },
+  ];
+  if (faq.length) {
+    schemaGraph.push({
+      "@type": "FAQPage",
+      mainEntity: faq.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+      })),
+    });
+  }
+
+  const schema = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }, null, 2);
+  const imageBlock = ogImage
+    ? `<figure class="board-hero-image"><img src="${esc(ogImage)}" alt="${esc(title)} 대표 이미지"><figcaption>${esc(title)} 대표 이미지</figcaption></figure>`
+    : "";
+  const faqBlock = faq.length
+    ? `<section class="article-block faq" id="faq-list"><h2>FAQ</h2>${faqHtml(faq, "")}</section>`
+    : "";
+  const content = `${boardInlineStyle()}
+${imageBlock}
+<section class="article-block manual-body board-post-body">${renderManualArticle(post.body)}</section>
+${faqBlock}
+<section class="article-block board-back"><a href="/board/">게시글 목록으로 돌아가기</a></section>`;
+
+  return pageTemplate({
+    title: esc(`${title} | 법무법인 선린`),
+    description: esc(description),
+    canonical,
+    ogType: "article",
+    ogTitle: esc(title),
+    ogDescription: esc(description),
+    ogImage: esc(ogImage),
+    siteName: esc(group.siteName),
+    headExtra: boardHeadExtra({ canonical, ogImage, imageAlt: `${title} 대표 이미지`, description, publishedDate, modifiedDate }),
+    schema,
+    bodyClass: `${group.bodyClass} board-page board-post-page`,
+    tone: "통합 허브 게시글",
+    h1: esc(title),
+    breadcrumb: `<nav class="breadcrumb" aria-label="breadcrumb"><a href="${group.siteUrl}/">홈</a><a href="${boardListUrl()}">게시판</a><strong>${esc(title)}</strong></nav>`,
+    ogThumbnail: "",
+    summary: esc(description),
+    heroTyping: "",
+    receiptBadge: "",
+    heroCta: "",
+    content,
+    intent: "사기피해 통합 허브 게시글",
+    ctaTitle: "사기 피해 상담",
+    ctaText: "현재 피해 상황을 기준으로 필요한 대응 경로를 확인합니다.",
+    ctaLabel: "상담 접수",
+    footerLinks: "",
+    headerCall: "",
+    bodyScripts: "",
+  });
+}
+
+function boardHeadExtra({ canonical, ogImage, imageAlt, description, publishedDate = "", modifiedDate = "" }) {
+  const imageType = detectImageType(ogImage);
+  return [
+    `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
+    `<meta name="NaverBot" content="All">`,
+    `<meta name="Yeti" content="All">`,
+    `<meta http-equiv="content-language" content="ko">`,
+    `<link rel="icon" type="image/x-icon" href="/assets/favicon.ico">`,
+    `<link rel="alternate" hreflang="ko" href="${esc(canonical)}">`,
+    `<link rel="alternate" type="application/rss+xml" title="사기피해 통합 허브 RSS" href="/rss.xml">`,
+    `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
+    `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
+    `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
+    `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
+    `<meta property="og:image:type" content="${imageType}">`,
+    `<meta property="og:image:width" content="${OG_IMAGE_WIDTH}">`,
+    `<meta property="og:image:height" content="${OG_IMAGE_HEIGHT}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    `<meta name="twitter:description" content="${esc(description)}">`,
+    `<meta name="twitter:image" content="${esc(ogImage)}">`,
+    `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
+    `<link rel="image_src" href="${esc(ogImage)}">`,
+    `<meta itemprop="image" content="${esc(ogImage)}">`,
+    publishedDate ? `<meta property="article:published_time" content="${publishedDate}T00:00:00+09:00">` : "",
+    modifiedDate ? `<meta property="article:modified_time" content="${modifiedDate}T00:00:00+09:00">` : "",
+  ].filter(Boolean).join("\n  ");
+}
+
+function boardInlineStyle() {
+  return `<style>
+.board-list-section{padding-top:22px}
+.board-search{display:flex;gap:8px;margin-bottom:12px}
+.board-search input{flex:1;border:1px solid #cfd8e6;border-radius:8px;padding:11px 13px;font:inherit}
+.board-search button{border:0;border-radius:8px;background:#1f2937;color:#fff;font-weight:800;padding:0 18px}
+.board-count{margin:0 0 12px;color:#748196;font-size:.92rem;font-weight:700}
+.board-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.board-card{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff}
+.board-card a{display:grid;grid-template-columns:138px 1fr;color:inherit;text-decoration:none;min-height:138px}
+.board-card img{width:138px;height:138px;object-fit:cover;background:#f3f4f6}
+.board-card-body{display:flex;flex-direction:column;gap:6px;padding:13px}
+.board-card strong{font-size:1rem;line-height:1.35;color:#172033}
+.board-card strong em{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:4px;background:#e8f0fe;color:#1f4fd8;font-size:.68rem;font-style:normal}
+.board-card small{color:#748196;font-size:.78rem}
+.board-card span span{color:#4b5563;font-size:.9rem;line-height:1.55}
+.board-empty{margin:0;color:#748196}
+.board-hero-image{margin:0 0 18px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}
+.board-hero-image img{display:block;width:100%;max-height:520px;object-fit:cover}
+.board-hero-image figcaption{padding:10px 14px;color:#748196;font-size:.82rem}
+.board-back a{font-weight:800;color:#1f4fd8;text-decoration:none}
+@media(max-width:760px){.board-grid{grid-template-columns:1fr}.board-card a{grid-template-columns:104px 1fr;min-height:104px}.board-card img{width:104px;height:104px}.board-search{flex-direction:column}.board-search button{height:42px}}
+</style>`;
+}
+
+function detectImageType(url = "") {
+  if (/\.webp(?:$|\?)/i.test(url)) return "image/webp";
+  if (/\.jpe?g(?:$|\?)/i.test(url)) return "image/jpeg";
+  if (/\.png(?:$|\?)/i.test(url)) return "image/png";
+  return "image/webp";
+}
+
+function htmlResponse(body, status = 200) {
+  return new Response(body, {
+    status,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=60, s-maxage=300",
+      "X-Robots-Tag": "index, follow",
+    },
   });
 }
 
@@ -959,6 +1333,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   }).join("\n");
 
   const pageSummary = esc(
+    useStandardTemplate ? standardSubtitle(rawCaseName) :
     landing.description || caseData.summary ||
     "최근 접수 흐름과 대응 절차를 기준으로 피해 구조, 증거 보존, 상담 전 확인사항을 정리했습니다."
   );
@@ -1330,8 +1705,7 @@ function createScamTypeSelfAnalysisSection() {
 }
 
 function createHeroTypingBlock(caseName, caseData = {}) {
-  const keyword = esc(seoCaseKeyword(caseName));
-  const question = keyword ? `${keyword} 피해가 의심되나요?` : "사기 피해가 의심되나요?";
+  const question = esc(standardSubtitle(caseName));
   const typeKey = normalizeFraudTypeKey(caseData.fraudType || caseData.scamType, { ...caseData, caseName });
   const message = splitHeroText(standardHeroText(typeKey));
   return `<div class="hero-typing">
@@ -2203,6 +2577,10 @@ const PERSON_ATTORNEY = {
 
 function esc(v = "") {
   return String(v).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("'", "&#039;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function normalizeSpace(value = "") {
+  return String(value || "").replace(/\s+/g, " ").trim();
 }
 
 function normalizeCaseName(name) {

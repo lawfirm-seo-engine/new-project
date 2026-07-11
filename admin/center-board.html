@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>통합 허브 게시글 관리</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#172033}
+    .wrap{max-width:1180px;margin:0 auto;padding:32px 20px 60px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    h1{margin:0;font-size:24px}
+    h2{margin:0 0 12px;font-size:17px;color:#263244}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 15px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none}
+    .btn.sec{background:#263244}
+    .btn.danger{background:#c0392b}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    .panel{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:18px}
+    label{display:block;margin:12px 0 6px;font-size:13px;font-weight:800;color:#4b5a70}
+    input,select,textarea{width:100%;border:1px solid #cfd8e6;border-radius:7px;padding:10px 12px;font:inherit;font-size:14px;background:#fff}
+    textarea{min-height:180px;resize:vertical;line-height:1.55}
+    .body-text{min-height:360px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .check{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:800;color:#4b5a70}
+    .check input{width:auto}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .hint{margin:6px 0 0;font-size:12px;color:#748196;line-height:1.5}
+    .msg{margin-top:12px;font-size:13px;font-weight:800}
+    .ok{color:#16723a}.err{color:#c0392b}
+    .search{margin-bottom:10px}
+    .list{display:grid;gap:8px;max-height:760px;overflow:auto;padding-right:4px}
+    .item{border:1px solid #e2e8f0;border-radius:8px;padding:11px;background:#fff;cursor:pointer}
+    .item:hover{border-color:#1f4fd8;background:#f8faff}
+    .item strong{display:block;font-size:13px;margin-bottom:4px}
+    .item span{display:block;color:#748196;font-size:12px}
+    .badge{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:4px;background:#e8f0fe;color:#1f4fd8;font-size:10px;font-weight:900}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>통합 허브 게시글 관리</h1>
+    <a class="btn sec" href="/admin/dashboard.html">관리자 대시보드</a>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>게시글 작성/수정</h2>
+      <form id="form">
+        <input type="hidden" id="originalSlug">
+        <label for="title">제목</label>
+        <input id="title" required placeholder="예: 사기 피해 신고 전 확인해야 할 자료">
+
+        <div class="row">
+          <div>
+            <label for="slug">URL slug</label>
+            <input id="slug" placeholder="제목 입력 시 자동 생성">
+          </div>
+          <div>
+            <label for="publishedAt">발행일</label>
+            <input id="publishedAt" type="date">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="thumbnailUrl">썸네일 URL</label>
+            <input id="thumbnailUrl" placeholder="목록용 이미지 URL">
+          </div>
+          <div>
+            <label for="imageUrl">대표 이미지 URL</label>
+            <input id="imageUrl" placeholder="OG/본문 대표 이미지 URL">
+          </div>
+        </div>
+
+        <label for="seoTitle">SEO 제목</label>
+        <input id="seoTitle" placeholder="비워두면 제목 사용">
+
+        <label for="metaDescription">메타 설명</label>
+        <textarea id="metaDescription" style="min-height:80px" placeholder="비워두면 본문 앞부분으로 자동 생성"></textarea>
+
+        <label for="body">본문</label>
+        <textarea id="body" class="body-text" required placeholder="## 소제목&#10;본문을 입력하세요.&#10;&#10;- 목록 문장"></textarea>
+        <p class="hint">본문은 줄바꿈, `## 소제목`, `### 소제목`, `- 목록` 형식으로 작성할 수 있습니다.</p>
+
+        <label for="faq">FAQ / Schema</label>
+        <textarea id="faq" style="min-height:110px" placeholder="질문 | 답변&#10;질문 | 답변"></textarea>
+
+        <div class="row">
+          <label class="check"><input id="pinned" type="checkbox"> 상단 고정</label>
+          <div>
+            <label for="status">상태</label>
+            <select id="status">
+              <option value="published">공개</option>
+              <option value="draft">임시저장</option>
+              <option value="hidden">숨김</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="saveBtn" type="submit">저장</button>
+          <button class="btn sec" type="button" onclick="resetForm()">새 글</button>
+          <button class="btn danger" id="deleteBtn" type="button" onclick="deletePost()" disabled>삭제</button>
+          <a class="btn sec" id="openLink" href="https://gnlaw-center.co.kr/board/" target="_blank" rel="noopener">공개 페이지</a>
+        </div>
+        <div id="msg" class="msg"></div>
+      </form>
+    </section>
+
+    <aside class="panel">
+      <h2>게시글 목록 <span id="count" class="hint"></span></h2>
+      <input id="search" class="search" placeholder="제목, slug 검색" oninput="renderList()">
+      <div id="list" class="list"><div class="hint">로딩 중...</div></div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const API = '/api/center-board';
+const SITE = 'https://gnlaw-center.co.kr/board/';
+let posts = [];
+
+const $ = (id) => document.getElementById(id);
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('publishedAt').value = todayKst();
+  $('title').addEventListener('input', () => {
+    if (!$('originalSlug').value || !$('slug').value) $('slug').value = createSlug($('title').value);
+    updateOpenLink();
+  });
+  $('slug').addEventListener('input', updateOpenLink);
+  $('form').addEventListener('submit', savePost);
+  loadPosts();
+});
+
+async function loadPosts() {
+  const res = await fetch(API);
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.message || '목록 로드 실패');
+  posts = data.posts || [];
+  renderList();
+}
+
+function renderList() {
+  const q = $('search').value.trim().toLowerCase();
+  const filtered = posts.filter((post) => !q || [post.title, post.slug, post.excerpt].join(' ').toLowerCase().includes(q));
+  $('count').textContent = `${filtered.length}건`;
+  $('list').innerHTML = filtered.length ? filtered.map((post) => `
+    <div class="item" onclick="editPost('${escapeAttr(post.slug)}')">
+      <strong>${escapeHtml(post.title || post.slug)}${post.pinned ? '<span class="badge">고정</span>' : ''}${post.status !== 'published' ? '<span class="badge">비공개</span>' : ''}</strong>
+      <span>${escapeHtml(post.slug)} · ${escapeHtml(post.updatedAt || post.createdAt || '')}</span>
+      <span>${escapeHtml(post.excerpt || '')}</span>
+    </div>
+  `).join('') : '<div class="hint">게시글이 없습니다.</div>';
+}
+
+async function editPost(slug) {
+  const res = await fetch(`${API}?slug=${encodeURIComponent(slug)}`);
+  const data = await res.json();
+  if (!data.ok) return show(data.message || '게시글을 찾을 수 없습니다.', false);
+  const post = data.post;
+  $('originalSlug').value = post.slug || '';
+  $('title').value = post.title || '';
+  $('slug').value = post.slug || '';
+  $('publishedAt').value = post.publishedAt || post.createdAt || todayKst();
+  $('thumbnailUrl').value = post.thumbnailUrl || '';
+  $('imageUrl').value = post.imageUrl || '';
+  $('seoTitle').value = post.seoTitle || '';
+  $('metaDescription').value = post.metaDescription || '';
+  $('body').value = post.body || '';
+  $('faq').value = (post.faq || []).map((item) => `${item.question} | ${item.answer}`).join('\n');
+  $('pinned').checked = Boolean(post.pinned);
+  $('status').value = post.status || 'published';
+  $('deleteBtn').disabled = false;
+  updateOpenLink();
+  show('수정할 게시글을 불러왔습니다.', true);
+}
+
+async function savePost(event) {
+  event.preventDefault();
+  $('saveBtn').disabled = true;
+  const payload = {
+    originalSlug: $('originalSlug').value.trim(),
+    title: $('title').value.trim(),
+    slug: $('slug').value.trim(),
+    publishedAt: $('publishedAt').value,
+    thumbnailUrl: $('thumbnailUrl').value.trim(),
+    imageUrl: $('imageUrl').value.trim(),
+    seoTitle: $('seoTitle').value.trim(),
+    metaDescription: $('metaDescription').value.trim(),
+    body: $('body').value.trim(),
+    faq: parseFaq($('faq').value),
+    pinned: $('pinned').checked,
+    status: $('status').value,
+  };
+  try {
+    const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || '저장 실패');
+    show('저장되었습니다.', true);
+    $('originalSlug').value = data.post.slug;
+    $('slug').value = data.post.slug;
+    $('deleteBtn').disabled = false;
+    updateOpenLink();
+    await loadPosts();
+  } catch (err) {
+    show(err.message, false);
+  } finally {
+    $('saveBtn').disabled = false;
+  }
+}
+
+async function deletePost() {
+  const slug = $('originalSlug').value.trim();
+  if (!slug) return;
+  if (!confirm(`"${slug}" 게시글을 삭제하시겠습니까?`)) return;
+  const res = await fetch(`${API}?slug=${encodeURIComponent(slug)}`, { method:'DELETE' });
+  const data = await res.json();
+  if (!data.ok) return show(data.message || '삭제 실패', false);
+  show('삭제되었습니다.', true);
+  resetForm();
+  await loadPosts();
+}
+
+function resetForm() {
+  $('form').reset();
+  $('originalSlug').value = '';
+  $('publishedAt').value = todayKst();
+  $('deleteBtn').disabled = true;
+  $('openLink').href = SITE;
+  $('msg').textContent = '';
+}
+
+function updateOpenLink() {
+  const slug = $('slug').value.trim();
+  $('openLink').href = slug ? `${SITE}${encodeURIComponent(slug)}/` : SITE;
+}
+
+function parseFaq(text) {
+  return text.split(/\n+/).map((line) => {
+    const parts = line.split('|').map((v) => v.trim()).filter(Boolean);
+    return parts.length >= 2 ? { question: parts[0], answer: parts.slice(1).join(' | ') } : null;
+  }).filter(Boolean);
+}
+
+function show(text, ok) {
+  $('msg').textContent = text;
+  $('msg').className = `msg ${ok ? 'ok' : 'err'}`;
+}
+
+function todayKst() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function escapeHtml(value) {
+  return String(value || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replaceAll('\\','\\\\');
+}
+
+const CHO = ["g","gg","n","d","dd","r","m","b","bb","s","ss","","j","jj","ch","k","t","p","h"];
+const JUNG = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
+const JONG = ["","g","gg","gs","n","nj","nh","d","r","rg","rm","rb","rs","rt","rp","rh","m","b","bs","s","ss","ng","j","ch","k","t","p","h"];
+
+function romanize(text) {
+  let out = '';
+  for (const ch of String(text || '')) {
+    const code = ch.charCodeAt(0);
+    if (code >= 0xAC00 && code <= 0xD7A3) {
+      const off = code - 0xAC00;
+      out += CHO[Math.floor(off / 28 / 21)] + JUNG[Math.floor(off / 28) % 21] + JONG[off % 28];
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+function createSlug(value) {
+  const romanSlug = romanize(value)
+    .toLowerCase()
+    .replace(/https?:\/\//g, '')
+    .replace(/www\./g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
+    .slice(0, 80);
+  return romanSlug || String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[/?#]+/g, '-')
+    .replace(/\s+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+</script>
+</body>
+</html>
