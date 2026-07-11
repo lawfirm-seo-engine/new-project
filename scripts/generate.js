@@ -1277,7 +1277,12 @@ function formatDate(value) {
 
 function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = "" }) {
   const slug = caseItem?.slug ? encodeURIComponent(caseItem.slug) : "";
-  const ogImage = isHub ? `${group.siteUrl}/assets/og-template.png` : landing?.ogImage;
+  const ogImage = isHub ? `${group.siteUrl}/assets/og-template.webp` : landing?.ogImage;
+  const ogImageType = /\.webp(?:$|\?)/i.test(ogImage || "")
+    ? "image/webp"
+    : /\.jpe?g(?:$|\?)/i.test(ogImage || "")
+      ? "image/jpeg"
+      : "image/png";
   const imageAlt = isHub
     ? group.hubTitle
     : (landing?.imageAlt || landing?.ogTitle || landing?.title || group.hubTitle || group.siteName);
@@ -1292,7 +1297,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
-    `<link rel="preload" as="image" href="/assets/og-template.png">`,
+    `<link rel="preload" as="image" href="/assets/og-template.webp">`,
   ];
 
   if (slug) {
@@ -1302,7 +1307,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
 
   if (ogImage) {
     links.push(`<meta property="og:image:secure_url" content="${escapeHtml(ogImage)}">`);
-    links.push(`<meta property="og:image:type" content="image/png">`);
+    links.push(`<meta property="og:image:type" content="${ogImageType}">`);
     links.push(`<meta property="og:image:width" content="1254">`);
     links.push(`<meta property="og:image:height" content="1254">`);
     links.push(`<meta property="og:image:alt" content="${escapeHtml(imageAlt)}">`);
@@ -1519,7 +1524,7 @@ function createHubContent(group) {
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
   var HIDE_FROM_LISTING={"baidogseu-georaeso-litigation-noindex":1,"bydoxe-litigation-noidex":1};
-  function allowed(c){if(!c)return false;if(c.hideFromListing||HIDE_FROM_LISTING[c.slug])return false;if(TARGET_KEY==='c'&&c.createdBy!=='recovery-manual'&&c.createdBy!=='jipjeong-manual')return false;if(TARGET_KEY==='la'&&c.createdBy!=='voicephishing-manual')return false;if(TARGET_KEY==='lc'&&c.createdBy!=='tujasagi-manual')return false;if(TARGET_KEY==='le'&&c.createdBy!=='chaemubu-manual')return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
+  function allowed(c){if(!c)return false;if(c.hideFromListing||HIDE_FROM_LISTING[c.slug])return false;if(!c.createdBy&&TARGET_KEY!=='a')return false;if(TARGET_KEY==='c'&&c.createdBy!=='recovery-manual'&&c.createdBy!=='jipjeong-manual')return false;if(TARGET_KEY==='la'&&c.createdBy!=='voicephishing-manual')return false;if(TARGET_KEY==='lc'&&c.createdBy!=='tujasagi-manual')return false;if(TARGET_KEY==='le'&&c.createdBy!=='chaemubu-manual')return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
   function freshLink(item,noMap){
     var cn=normName(item.caseName||item.name||'',item);
     var dt=manual(item)||!SUFFIX?cn:cn+' '+SUFFIX;
@@ -1717,7 +1722,20 @@ function createCategoryContent(group) {
   const caseNoMap = new Map(groupCases.map((c, i) => [c.slug, i + 1]));
   const sortedCases = [...groupCases].reverse();
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
-  return createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { powerlinks: group.key === "a" ? powerlinks : [] });
+  return [
+    createCategoryHeroCta(group),
+    createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { powerlinks: group.key === "a" ? powerlinks : [] }),
+  ].join("\n");
+}
+
+function createCategoryHeroCta(group) {
+  return `<div class="hero-cta category-hero-cta">
+    <p class="hero-cta-lead">${escapeHtml(group.ctaText)}</p>
+    <div>
+      <a href="#fresh-landings" class="hero-cta-primary">진행중인<br>사건 보기</a>
+      <a href="tel:0263480406" class="hero-cta-secondary">상담 문의<br>02-6348-0406</a>
+    </div>
+  </div>`;
 }
 
 function createTypeEntrySection(group) {
@@ -2102,6 +2120,7 @@ for (const group of groups) {
     const pngSrc = path.join(group.outDir, "assets", "og-template.png");
     const webpDest = path.join(group.outDir, "assets", "og-template.webp");
     if (await fs.pathExists(pngSrc)) {
+      await fs.remove(webpDest);
       await sharp(pngSrc).webp({ quality: 90 }).toFile(webpDest);
     }
   }
@@ -2118,7 +2137,7 @@ for (const group of groups) {
     canonical: `${group.siteUrl}/`,
     ogTitle: escapeHtml(hubTitle),
     ogDescription: escapeHtml(hubDescription),
-    ogImage: `${group.siteUrl}/assets/og-template.png`,
+    ogImage: `${group.siteUrl}/assets/og-template.webp`,
     headExtra: createHeadExtra({ group, isHub: true }),
     schema: JSON.stringify({
       "@context": "https://schema.org",
@@ -2156,7 +2175,7 @@ for (const group of groups) {
     canonical: categoryCanonical,
     ogTitle: escapeHtml(categoryTitle),
     ogDescription: escapeHtml(categoryDescription),
-    ogImage: `${group.siteUrl}/assets/og-template.png`,
+    ogImage: `${group.siteUrl}/assets/og-template.webp`,
     headExtra: createHeadExtra({ group, isHub: true }),
     schema: createCategorySchema(group, categoryTitle, categoryDescription, categoryCanonical),
     h1: escapeHtml(categoryTitle),

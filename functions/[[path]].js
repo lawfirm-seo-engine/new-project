@@ -8,6 +8,7 @@ import {
   RSS_LIMIT,
   RECENT_SITEMAP_DAYS,
   RECENT_SITEMAP_LIMIT,
+  buildLandingUrl,
   buildRssXml,
   buildSitemapIndexXml,
   buildSitemapXml,
@@ -17,6 +18,20 @@ import {
   loadCases as loadSeoCases,
   powerlinkOgImageUrl,
 } from "./_seo.js";
+import {
+  isStandardLandingAllowedForGroup,
+  isStandardLandingCase,
+  normalizeFraudTypeKey,
+  standardCaseKeyword,
+  standardCoreSummary,
+  standardHeroText,
+  standardIntroParagraphs,
+  standardLastModified,
+  standardMetaDescription,
+  standardMethodTemplate,
+  standardPageTitle,
+  standardResponseSections,
+} from "./_standardLanding.js";
 
 const GROUPS = {
   "gnlaw-criminal.co.kr": {
@@ -321,11 +336,20 @@ export async function onRequest(context) {
   if (!caseData) {
     return new Response("사건을 찾을 수 없습니다.", { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
+  if (isStandardLandingCase(caseData) && !caseData.fraudType) {
+    caseData = {
+      ...caseData,
+      fraudType: normalizeFraudTypeKey("", caseData),
+    };
+  }
   if (!isCaseAllowedForGroup(caseData, group)) {
     return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
   }
 
-  const html = renderLanding(caseData, group, url.origin);
+  const relatedCases = !isManualLandingCase(caseData) && isStandardLandingCase(caseData)
+    ? await loadSeoCases(env).catch(() => [])
+    : [];
+  const html = renderLanding(caseData, group, url.origin, relatedCases);
   const robotsTag = caseData.noindex ? "noindex, nofollow" : "index, follow";
 
   return new Response(html, {
@@ -483,7 +507,7 @@ function renderPowerlinkLanding(landing) {
     `<meta property="og:image:secure_url" content="${ogImage}">`,
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
-    `<meta property="og:image:type" content="image/png">`,
+    `<meta property="og:image:type" content="image/webp">`,
     `<meta property="og:image:width" content="${OG_IMAGE_WIDTH}">`,
     `<meta property="og:image:height" content="${OG_IMAGE_HEIGHT}">`,
     `<link rel="image_src" href="${ogImage}">`,
@@ -677,6 +701,9 @@ function logScanScriptForSite(siteUrl = "") {
 
 function isCaseAllowedForGroup(caseData = {}, group = {}) {
   const lk = group.landingKey || group.key;
+  if (!isStandardLandingAllowedForGroup(caseData, group)) {
+    return false;
+  }
   const allowedCreatedBy = {
     c: ["recovery-manual", "jipjeong-manual"],
     la: ["voicephishing-manual"],
@@ -701,13 +728,22 @@ function isManualLandingCase(caseData = {}) {
   ].includes(caseData.createdBy);
 }
 
-function renderLanding(caseData, group, origin) {
+function renderLanding(caseData, group, origin, relatedCases = []) {
   const lk = group.landingKey ?? group.key;
   const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
   const rawCaseName = caseData.caseName || "";
   const useManualTitle = isManualLandingCase(caseData);
-  const pageTitle = useManualTitle ? (landing.title || groupPageTitle(rawCaseName, lk)) : groupPageTitle(rawCaseName, lk);
-  const pageH1 = useManualTitle ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk)) : groupPageH1(rawCaseName, lk);
+  const useStandardTemplate = !useManualTitle && isStandardLandingCase(caseData) && lk === "a";
+  const pageTitle = useManualTitle
+    ? (landing.title || groupPageTitle(rawCaseName, lk))
+    : useStandardTemplate
+      ? standardPageTitle(rawCaseName)
+      : groupPageTitle(rawCaseName, lk);
+  const pageH1 = useManualTitle
+    ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk))
+    : useStandardTemplate
+      ? standardPageTitle(rawCaseName)
+      : groupPageH1(rawCaseName, lk);
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const ALL_DOMAINS_NO_SUFFIX_RENDER = ["baidogseu-georaeso-litigation-noindex", "bydoxe-litigation-noidex"];
   const OLD_URL_CANONICAL = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
@@ -718,13 +754,15 @@ function renderLanding(caseData, group, origin) {
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const ogImage = caseOgImageUrl(caseData.slug || "landing", group.siteUrl);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
-  const modifiedDate = caseData.updatedAt || publishedDate;
+  const modifiedDate = useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate);
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
   const keyword = searchKeyword(rawCaseName);
   const renderedFaq = renderFaqForLanding(landing, { ...group, key: lk }, caseData);
   const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
-  const seoDescription = createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
+  const seoDescription = useStandardTemplate
+    ? standardMetaDescription(rawCaseName)
+    : createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
   const articleTags = createArticleTags(rawCaseName, lk);
   const imageMeta = normalizeLandingImageMeta(landing, pageTitle, seoDescription, caseData);
   const imageAlt = imageMeta.alt;
@@ -732,7 +770,11 @@ function renderLanding(caseData, group, origin) {
   const imageDescription = imageMeta.description;
   const emitImageMeta = imageMeta.emit;
 
-  const ogImageType = /\.jpe?g(?:$|\?)/i.test(ogImage) ? "image/jpeg" : "image/png";
+  const ogImageType = /\.webp(?:$|\?)/i.test(ogImage)
+    ? "image/webp"
+    : /\.jpe?g(?:$|\?)/i.test(ogImage)
+      ? "image/jpeg"
+      : "image/png";
   const ogImageWidth = String(OG_IMAGE_WIDTH);
   const ogImageHeight = String(OG_IMAGE_HEIGHT);
   const robotsMeta = caseData.noindex
@@ -910,7 +952,7 @@ function renderLanding(caseData, group, origin) {
 
   const content = isManualLandingCase(caseData)
     ? createRecoveryManualContent(landing, group, caseData)
-    : createLandingContent(landing, group, caseData);
+    : createLandingContent(landing, group, caseData, relatedCases);
   const footerLinks = CROSS_LINKS.map((l) => {
     const active = l.key === group.key ? "is-active" : "";
     return `<a class="${active}" href="${l.url}/">${esc(l.label)}</a>`;
@@ -927,7 +969,7 @@ function renderLanding(caseData, group, origin) {
     canonical,
     ogType: group.ogType,
     ogTitle: esc(pageTitle),
-    ogDescription: esc(createSeoDescription(landing.ogDescription || landing.description || caseData.summary || "", rawCaseName, lk)),
+    ogDescription: esc(useStandardTemplate ? seoDescription : createSeoDescription(landing.ogDescription || landing.description || caseData.summary || "", rawCaseName, lk)),
     ogImage: esc(ogImage),
     siteName: esc(group.siteName),
     headExtra,
@@ -938,9 +980,9 @@ function renderLanding(caseData, group, origin) {
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName, pageTitle),
     ogThumbnail,
     summary: pageSummary,
-    heroTyping: useManualTitle ? "" : createHeroTypingBlock(rawCaseName),
+    heroTyping: useManualTitle ? "" : createHeroTypingBlock(rawCaseName, caseData),
     receiptBadge: useManualTitle ? "" : createReceiptBadge(caseData),
-    heroCta: "",
+    heroCta: useManualTitle ? "" : createHeroCta(rawCaseName, group),
     content,
     intent: esc(group.intent),
     ctaTitle: esc(group.ctaTitle),
@@ -1104,7 +1146,12 @@ function createRecoveryManualContent(landing, group, caseData) {
   ].filter(Boolean).join("\n");
 }
 
-function createLandingContent(landing, group, caseData) {
+function createLandingContent(landing, group, caseData, relatedCases = []) {
+  const templateContentKey = group.landingKey || group.key;
+  if (isStandardLandingCase(caseData) && templateContentKey === "a") {
+    return createStandardLandingContent(landing, group, caseData, relatedCases);
+  }
+
   {
     const _contentKey = group.landingKey || group.key;
     const _contentGroup = { ...group, key: _contentKey };
@@ -1180,6 +1227,73 @@ ${authoritySections}
   return [faqSection, liveStatus, createInlineCta("실시간 접수와 비슷한 정황이 있다면 추가 입금 전에 현재 자료부터 점검해 보세요."), memoSection, consultForm, floatingWidgets, trackScript].filter(Boolean).join("\n");
 }
 
+function createStandardLandingContent(landing, group, caseData, relatedCases = []) {
+  const rawCaseName = caseData.caseName || "";
+  const typeKey = normalizeFraudTypeKey(caseData.fraudType || caseData.scamType, caseData);
+  const keyword = esc(standardCaseKeyword(rawCaseName));
+  const slug = esc(caseData.slug);
+  const cn = esc(normalizeCaseName(rawCaseName));
+  const siteName = esc(group.siteName);
+  const method = standardMethodTemplate(typeKey);
+  const responseSections = standardResponseSections();
+  const replacementContext = createReplacementContext(rawCaseName);
+  const victimCases = renderVictimCasesForLanding(landing, { ...group, key: "a" }, caseData, replacementContext);
+  const faq = renderFaqForLanding(landing, { ...group, key: "a" }, caseData);
+  const memoSection = renderOperatorMemos(caseData);
+  const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
+
+  const responseHtml = responseSections.map((section) => (
+    `<h3>${esc(section.title)}</h3>${list(section.bullets)}`
+  )).join("\n");
+
+  return [
+    memoSection,
+    `<section class="article-block"><h2>${keyword}란?</h2>${paragraphs(standardIntroParagraphs(typeKey, rawCaseName))}</section>`,
+    `<section class="aeo-summary" id="aeo-summary" aria-label="${keyword} 핵심요약"><h2>${keyword} 핵심요약</h2><blockquote>${withSentenceBreaks(standardCoreSummary(typeKey, rawCaseName))}</blockquote></section>`,
+    `<section class="article-block"><h2>${keyword} 수법</h2><h3>${esc(method.title)}</h3>${list(method.bullets)}<h3>주요 진행 단계</h3>${orderedList(method.steps)}</section>`,
+    `<section class="article-block"><h2>${keyword} 피해 사례</h2>${list(victimCases)}</section>`,
+    `<section class="article-block"><h2>${keyword} 대응 방법</h2>${responseHtml}${createEvidenceCheckSection()}</section>`,
+    `<section class="article-block faq" id="faq-list"><h2>${keyword} FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`,
+    createLiveReceiptStatus(caseData),
+    createScamTypeSelfAnalysisSection(),
+    createSameTypeLatestSection(caseData, group, relatedCases, typeKey),
+    renderComments(caseData),
+    createConsultForm(cn, siteName),
+    createFloatingWidgets(cn, siteName, slug),
+    trackScript,
+  ].filter(Boolean).join("\n");
+}
+
+function createSameTypeLatestSection(caseData, group, relatedCases = [], typeKey = "") {
+  const currentSlug = caseData.slug || "";
+  const rows = (Array.isArray(relatedCases) ? relatedCases : [])
+    .filter((item) => item?.slug && item.slug !== currentSlug)
+    .filter((item) => isStandardLandingCase(item))
+    .filter((item) => normalizeFraudTypeKey(item.fraudType || item.scamType, item) === typeKey)
+    .sort((a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")))
+    .slice(0, 3);
+
+  if (!rows.length) return "";
+
+  const items = rows.map((item) => {
+    const title = standardPageTitle(item.caseName || item.name || item.slug);
+    const url = buildLandingUrl(group, item.slug);
+    const desc = standardMetaDescription(item.caseName || item.name || item.slug);
+    return `<li><a href="${esc(url)}">${esc(title)}</a><p>${esc(shortText(desc, 118))}</p></li>`;
+  }).join("\n");
+
+  return `<section class="article-block same-type-latest"><h2>같은 유형의 최신사례</h2><ul>${items}</ul></section>`;
+}
+
+function orderedList(items = []) {
+  return `<ol>${(items || []).map((item) => `<li>${withSentenceBreaks(toStr(item))}</li>`).join("\n")}</ol>`;
+}
+
+function shortText(value = "", limit = 120) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  return text.length > limit ? `${text.slice(0, limit - 1)}…` : text;
+}
+
 function renderComments(caseData) {
   const comments = Array.isArray(caseData.comments) ? caseData.comments : [];
   if (!comments.length) return "";
@@ -1215,27 +1329,29 @@ function createScamTypeSelfAnalysisSection() {
 </section>`;
 }
 
-function createHeroTypingBlock(caseName) {
-  {
-    const keyword = esc(seoCaseKeyword(caseName));
-    const question = keyword ? `${keyword} 피해가 의심되나요?` : "사기 피해가 의심되나요?";
-    return `<div class="hero-typing">
+function createHeroTypingBlock(caseName, caseData = {}) {
+  const keyword = esc(seoCaseKeyword(caseName));
+  const question = keyword ? `${keyword} 피해가 의심되나요?` : "사기 피해가 의심되나요?";
+  const typeKey = normalizeFraudTypeKey(caseData.fraudType || caseData.scamType, { ...caseData, caseName });
+  const message = splitHeroText(standardHeroText(typeKey));
+  return `<div class="hero-typing">
   <p class="hero-typing-q"><strong>${question}</strong></p>
   <p class="hero-typing-s">추가 입금을 요구받고 있다면 즉시 중단하세요.</p>
-  <p class="hero-typing-l1">출금 지연, 세금·보증금 요구, 환전 제한은 금융사기에서 반복적으로 나타나는 대표적인 패턴입니다.</p>
-  <p class="hero-typing-l2">금융피해 대응센터 상담을 통해 현재 상황에 맞는 대응 절차를 확인해 보시기 바랍니다.</p>
+  <p class="hero-typing-l1">${esc(message[0])}</p>
+  <p class="hero-typing-l2">${esc(message[1])}</p>
 </div>
 <script>(function(){var CYCLE=9400;function restart(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.style.animation='none';l2.style.animation='none';void l1.offsetWidth;void l2.offsetWidth;l1.style.animation='';l2.style.animation='';setTimeout(restart,CYCLE);}setTimeout(restart,CYCLE);})();</script>`;
-  }
+}
 
-  const keyword = esc(seoCaseKeyword(caseName));
-  return `<div class="hero-typing">
-  <p class="hero-typing-q"><strong>${keyword} 사칭 피해가 의심되나요?</strong></p>
-  <p class="hero-typing-s">추가 입금을 요구받고 있다면 즉시 중단하세요.</p>
-  <p class="hero-typing-l1">출금 지연, 세금·보증금 요구, 환전 제한은 금융사기에서 반복적으로 나타나는 대표적인 패턴입니다.</p>
-  <p class="hero-typing-l2">금융피해 대응센터 상담을 통해 현재 상황에 맞는 대응 절차를 확인해 보시기 바랍니다.</p>
-</div>
-<script>(function(){var CYCLE=9400;function restart(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.style.animation='none';l2.style.animation='none';void l1.offsetWidth;void l2.offsetWidth;l1.style.animation='';l2.style.animation='';setTimeout(restart,CYCLE);}setTimeout(restart,CYCLE);})();</script>`;
+function splitHeroText(value = "") {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (text.length <= 92) return [text, ""];
+  const midpoint = Math.floor(text.length / 2);
+  const cut = text.indexOf(" ", midpoint);
+  if (cut > 0 && cut < text.length - 20) {
+    return [text.slice(0, cut).trim(), text.slice(cut).trim()];
+  }
+  return [text.slice(0, midpoint).trim(), text.slice(midpoint).trim()];
 }
 
 function createAeoOverviewSection(caseData, key, replacementContext) {
@@ -2476,12 +2592,14 @@ function cleanupRepeatedWordsLegacy(value = "") {
     .trim();
 }
 
-function createHeroCta(caseName = "") {
+function createHeroCta(caseName = "", group = {}) {
+  const prefix = esc(group.pathPrefix || "prosecute");
   return `<div class="hero-cta">
     <p class="hero-cta-lead"><span class="hero-cta-typing"></span><span class="hero-cta-cursor"></span></p>
     <div>
       <a href="#consult" class="hero-cta-primary">상담<br>접수하기</a>
       <a href="tel:0263480406" class="hero-cta-secondary">추가 입금 전 문의<br>02-6348-0406</a>
+      <a href="/${prefix}/" class="hero-cta-secondary">진행중인<br>사건 보기</a>
     </div>
   </div>
   <style>.hero-cta-cursor{display:inline-block;width:2px;height:1em;background:currentColor;vertical-align:text-bottom;margin-left:2px;animation:ctaBlink .65s step-end infinite}@keyframes ctaBlink{0%,100%{opacity:1}50%{opacity:0}}</style>

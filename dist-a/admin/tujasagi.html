@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>보이스피싱 랜딩 생성</title>
+  <title>투자사기 랜딩 생성</title>
   <style>
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f6fb;color:#172033}
@@ -42,18 +42,18 @@
   <main class="wrap">
     <div class="top">
       <div>
-        <h1>보이스피싱 랜딩 생성</h1>
-        <p class="meta">금융사기대응센터.kr 전용 · 보이스피싱 피해구제 페이지 생성</p>
+        <h1>투자사기 랜딩 생성</h1>
+        <p class="meta">사기피해구제센터.kr 전용 · 투자사기 피해구제 페이지 생성</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <a class="btn sec" href="/admin/dashboard.html">관리자 대시보드</a>
       </div>
     </div>
 
-    <form id="vpForm">
+    <form id="tsForm">
       <div class="field">
-        <label for="title">페이지 제목 <span class="hint">예: 종로보이스피싱변호사 출금정지 신청 어떻게 진행해야 할까</span></label>
-        <input id="title" name="title" type="text" placeholder="OO보이스피싱변호사 지급정지 어떻게 진행해야 할까" required>
+        <label for="title">페이지 제목 <span class="hint">예: 서울투자사기변호사 피해구제 어떻게 진행해야 할까</span></label>
+        <input id="title" name="title" type="text" placeholder="OO투자사기변호사 피해구제 어떻게 진행해야 할까" required>
       </div>
       <div class="field">
         <label for="slug">URL slug</label>
@@ -78,8 +78,8 @@
 
       <div class="manual-hint">
         <strong>원고 생성 방식</strong><br>
-        제목 입력 후 저장하면 자동 원고가 생성됩니다. 필요하면 아래 직접 입력란으로 원고를 덮어쓸 수 있습니다.<br>
-        지역명은 <strong>OO보이스피싱변호사</strong>에서 <strong>OO</strong> 부분으로 인식됩니다.
+        제목 입력 후 저장하면 자동 원고가 생성됩니다. 지역명은 <strong>OO투자사기변호사</strong>에서 <strong>OO</strong> 부분으로 인식됩니다.<br>
+        생성 페이지는 <strong>사기피해구제센터.kr</strong>에만 배포됩니다.
       </div>
 
       <div class="field wide">
@@ -88,7 +88,7 @@
       </div>
 
       <div id="previewBox" class="preview-box">
-        <h3>자동 생성 원고 미리보기 <span style="font-size:11px;color:#8a96a8">(보이스피싱 지급정지 참조 템플릿)</span></h3>
+        <h3>자동 생성 원고 미리보기 <span style="font-size:11px;color:#8a96a8">(투자사기 피해구제 참조 템플릿)</span></h3>
         <p id="extractedInfo" style="font-size:12px;color:#5a6a80;margin:0 0 8px;line-height:1.6"></p>
         <pre id="previewText"></pre>
       </div>
@@ -97,7 +97,7 @@
       <p id="message" class="message"></p>
       <div class="actions">
         <button id="previewButton" class="btn sec" type="button">원고 미리보기</button>
-        <button id="submitButton" class="btn" type="submit">보이스피싱 랜딩 생성</button>
+        <button id="submitButton" class="btn" type="submit">투자사기 랜딩 생성</button>
         <button id="resetButton" class="btn sec" type="button">새로 작성</button>
       </div>
     </form>
@@ -105,7 +105,7 @@
 
   <script>
     const API_ORIGIN = location.protocol === "file:" ? "https://gnlaw-criminal.co.kr" : "";
-    const form = document.getElementById("vpForm");
+    const form = document.getElementById("tsForm");
     const titleEl = document.getElementById("title");
     const slugEl = document.getElementById("slug");
     const messageEl = document.getElementById("message");
@@ -117,7 +117,7 @@
     const bodyInputEl = document.getElementById("bodyInput");
 
     let slugTouched = false;
-    let autoBody = null; // 자동 추출된 원고 (배열)
+    let autoBody = null;
     const META_FIELD_IDS = ["summary", "imageAlt", "imageCaption", "imageDescription"];
     const fieldTouched = {};
 
@@ -141,10 +141,10 @@
     previewButtonEl.addEventListener("click", async () => {
       const title = String(titleEl.value || "").trim();
       if (!title) { setMessage("페이지 제목을 입력하세요.", "err"); return; }
-      setMessage("보이스피싱 자동 원고를 생성하는 중...", "");
+      setMessage("투자사기 자동 원고를 생성하는 중...", "");
       previewButtonEl.disabled = true;
       try {
-        const res = await fetch(API_ORIGIN + "/api/create-voicephishing-landing", {
+        const res = await fetch(API_ORIGIN + "/api/create-tujasagi-landing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title, slug: normalizeSlug(slugEl.value || title), preview: true }),
@@ -152,17 +152,16 @@
         const data = await res.json();
         if (!data.ok) {
           setMessage(data.message || "원고 생성 실패", "err");
-          if (data.subject) autoFillMetaFromParts(data.subject, data.region || "", data.action || "지급정지");
           return;
         }
         autoBody = data.body;
         bodyInputEl.value = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
         document.getElementById("extractedInfo").textContent =
-          `인식된 키워드: ${data.subject || data.bank || "—"}  /  지역명: ${data.region || "—"}  /  행위키워드: ${data.action || "—"}`;
+          `인식된 키워드: ${data.subject || "—"}  /  지역명: ${data.region || "—"}`;
         previewTextEl.textContent = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
         previewBoxEl.style.display = "block";
-        if (data.subject || data.bank) autoFillMetaFromParts(data.subject || data.bank, data.region || "", data.action || "지급정지");
-        setMessage("원고 생성 완료. 확인 후 '보이스피싱 랜딩 생성'을 클릭하세요.", "ok");
+        if (data.subject) autoFillMetaFromParts(data.subject, data.region || "");
+        setMessage("원고 생성 완료. 확인 후 '투자사기 랜딩 생성'을 클릭하세요.", "ok");
       } catch (error) {
         setMessage("원고 생성 오류: " + error.message, "err");
       } finally {
@@ -173,7 +172,6 @@
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      // 원고: 자동 미리보기 우선, 직접 입력이 있으면 직접 입력 사용, 둘 다 없으면 서버 자동 생성
       const manualText = String(bodyInputEl.value || "").trim();
       const body = autoBody || (manualText
         ? manualText.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
@@ -193,7 +191,7 @@
           imageDescription: String(document.getElementById("imageDescription").value || "").trim(),
           ...(body && body.length ? { body } : {}),
         };
-        const res = await fetch(API_ORIGIN + "/api/create-voicephishing-landing", {
+        const res = await fetch(API_ORIGIN + "/api/create-tujasagi-landing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -233,14 +231,12 @@
     // ── 메타 자동 생성 ─────────────────────────────────────────────────────
     function autoFillMeta(title) {
       if (!title) return;
-      const bank   = extractBank(title);
-      const region = extractRegion(title);
-      const action = extractAction(title, bank);
-      autoFillMetaFromParts(bank, region, action);
+      const { subject, region } = parseTitleParts(title);
+      autoFillMetaFromParts(subject, region);
     }
 
-    function autoFillMetaFromParts(subject, region, action) {
-      const generated = generateMeta(subject, region, action);
+    function autoFillMetaFromParts(subject, region) {
+      const generated = generateMeta(subject, region);
       META_FIELD_IDS.forEach((id) => {
         if (!fieldTouched[id]) {
           document.getElementById(id).value = generated[id] || "";
@@ -249,61 +245,26 @@
       });
     }
 
-    function generateMeta(subject, region, action) {
-      const r = region || "종로";
-      const a = action || "지급정지";
-      const summary = `${subject} 상담은 보이스피싱 피해 직후 ${a} 가능성, 계좌추적, 형사고소와 피해금 회수 방향을 빠르게 확인하는 과정이 중요합니다. ${r} 지역 피해 대응 절차와 준비자료를 안내합니다.`.slice(0, 180);
-      const imageAlt = `${subject} ${a} 보이스피싱 피해 대응`;
-      const imageCaption = `${subject}가 안내하는 ${a} 절차와 피해금 회수 대응`;
-      const imageDescription = `${subject} 상담을 통해 보이스피싱 피해 직후 필요한 ${a}, 계좌추적, 형사고소 준비자료와 피해금 회수 가능성을 정리한 법률 정보 이미지입니다.`;
+    function generateMeta(subject, region) {
+      const r = region || "서울";
+      const summary = `${subject} 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. ${r} 지역 피해 대응 절차를 안내합니다.`.slice(0, 180);
+      const imageAlt = `${subject} 투자사기 피해 대응`;
+      const imageCaption = `${subject}가 안내하는 투자사기 피해구제 절차와 피해금 회수 대응`;
+      const imageDescription = `${subject} 상담을 통해 투자사기 피해 직후 필요한 형사고소, 계좌추적, 피해금 회수 가능성을 정리한 법률 정보 이미지입니다.`;
       return { summary, imageAlt, imageCaption, imageDescription };
     }
 
-    // ── 제목 파싱 (서버 create-voicephishing-landing.js와 동일 로직) ──────
-    function extractBank(title) {
-      return parseTitleParts(title).subject;
-    }
-
-    function extractRegion(title) {
-      return parseTitleParts(title).region;
-    }
-
-    function extractAction(title) {
-      return parseTitleParts(title).action;
-    }
-
+    // ── 제목 파싱 (지역명 추출) ───────────────────────────────────────────
     function parseTitleParts(title) {
-      const s = String(title || "").trim().replace(/\s+/g, " ").replace(/\s*,\s*/g, ", ");
-      const compact = s.replace(/\s+/g, "");
-      const direct = compact.match(/^(.+?)보이스피싱변호사/);
+      const s = String(title || "").trim().replace(/\s+/g, "");
+      const direct = s.match(/^([가-힣]{1,8})투자사기변호사/);
       let region = direct ? cleanRegion(direct[1]) : "";
       if (!region) {
-        const lawyer = s.match(/(?:[,·\-–—]|\s)\s*([가-힣A-Za-z0-9]{1,10})\s*변호사/);
-        if (lawyer) region = cleanRegion(lawyer[1]);
+        const m = s.match(/([가-힣]{1,8})(?:투자사기|사기피해|피해구제)변호사/);
+        if (m) region = cleanRegion(m[1]);
       }
-
-      let rest = "";
-      const marker = s.match(/보이스피싱\s*변호사|보이스피싱변호사/);
-      if (marker) rest = s.slice((marker.index || 0) + marker[0].length);
-      else rest = s;
-      rest = rest
-        .replace(/^[\s,·\-–—:]+/, "")
-        .replace(/\s*[-–—]\s*[가-힣A-Za-z0-9]{1,10}\s*변호사[\s\S]*$/, "")
-        .replace(/\s*(어떻게|어떻게 진행해야 할까|진행해야 할까|할까)\??\s*$/g, "")
-        .trim();
-
-      let action = rest || "지급정지";
-      if (/출금정지\s*신청/.test(rest)) action = "출금정지 신청";
-      else if (/계좌\s*지급정지/.test(rest)) action = "계좌 지급정지";
-      else if (/지급정지/.test(rest)) action = "지급정지";
-      else if (/출금정지/.test(rest)) action = "출금정지";
-      else if (/피해구제/.test(rest)) action = "피해구제";
-
-      return {
-        subject: region ? `${region}보이스피싱변호사` : "보이스피싱변호사",
-        region,
-        action,
-      };
+      const subject = region ? `${region}투자사기변호사` : "투자사기변호사";
+      return { subject, region };
     }
 
     function cleanRegion(value) {

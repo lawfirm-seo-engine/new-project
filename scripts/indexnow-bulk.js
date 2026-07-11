@@ -8,7 +8,7 @@
 
 import fs from "fs-extra";
 import path from "path";
-import { GROUPS, INDEXNOW_KEY, buildLandingUrl } from "../functions/_seo.js";
+import { GROUPS, INDEXNOW_KEY, buildLandingUrl, isCaseAllowedForGroup } from "../functions/_seo.js";
 
 const root = process.cwd();
 const cases = await fs.readJson(path.join(root, "data", "cases.json"));
@@ -22,7 +22,9 @@ const results = await Promise.allSettled(
   GROUPS.map(async (group) => {
     const host = group.host || new URL(group.siteUrl).host;
     const category = categoryUrl(group);
-    const caseUrls = cases.filter((item) => item?.slug).map((item) => buildLandingUrl(group, item.slug));
+    const caseUrls = cases
+      .filter((item) => item?.slug && isCaseAllowedForGroup(item, group))
+      .map((item) => buildLandingUrl(group, item.slug));
     const powerlinkUrls = host === POWERLINK_HOST
       ? powerlinks.filter((item) => item?.slug).map((item) => `${POWERLINK_SITE}/powerlink/${encodeURIComponent(item.slug)}/`)
       : [];

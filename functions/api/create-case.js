@@ -1,4 +1,5 @@
 import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl } from "../_seo.js";
+import { normalizeFraudTypeKey } from "../_standardLanding.js";
 
 const DEFAULT_CATEGORY = "형사대응";
 
@@ -15,6 +16,7 @@ export async function onRequestPost(context) {
     const tags = Array.isArray(body.tags) ? body.tags.map(normalizeSpace).filter(Boolean) : [];
     const landingViews = Number.isInteger(body.landingViews) ? body.landingViews : randomInt(140, 8000, slug);
     const reports = Number.isInteger(body.reports) ? body.reports : randomInt(4, 34, `${slug}-reports`);
+    const fraudType = normalizeFraudTypeKey(body.fraudType || body.scamType, { caseName, slug, summary });
 
     if (!caseName || !slug || !summary) {
       return json({ ok: false, message: "필수 입력값이 누락되었습니다." }, 400);
@@ -38,6 +40,7 @@ export async function onRequestPost(context) {
       updatedAt: normalizeSpace(body.updatedAt) || now,
       summary,
       tags,
+      fraudType,
       landings,
     };
 
@@ -209,7 +212,7 @@ function buildIndexEntry(c) {
     createdAt: c.createdAt || "", updatedAt: c.updatedAt || "",
     thumbnailUrl: c.thumbnailUrl || "", landingViews: c.landingViews || 0,
     reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
-    targetGroups: c.targetGroups || [], createdBy: c.createdBy || "",
+    targetGroups: c.targetGroups || [], createdBy: c.createdBy || "", fraudType: c.fraudType || "",
   };
   if (c.hideFromListing) entry.hideFromListing = true;
   return entry;
@@ -217,7 +220,7 @@ function buildIndexEntry(c) {
 
 async function warmLandingCaches(slug) {
   await Promise.allSettled(
-    GROUPS.filter((g) => g.host !== "gnlaw-recovery.co.kr").flatMap((group) => [
+    GROUPS.filter((g) => (g.landingKey || g.key) === "a").flatMap((group) => [
       fetch(caseOgImageUrl(slug, group.siteUrl), { method: "GET" }),
       fetch(buildLandingUrl(group, slug), { method: "GET" }),
     ]),
@@ -226,7 +229,7 @@ async function warmLandingCaches(slug) {
 
 async function pingIndexNow(slug, key) {
   const results = await Promise.allSettled(
-    GROUPS.filter((g) => g.host !== "gnlaw-recovery.co.kr").map(async (group) => {
+    GROUPS.filter((g) => (g.landingKey || g.key) === "a").map(async (group) => {
       const host = group.host || new URL(group.siteUrl).host;
       const urlList = [buildLandingUrl(group, slug), `${group.siteUrl}/`];
       const response = await fetch("https://searchadvisor.naver.com/indexnow", {
@@ -256,7 +259,7 @@ async function pingIndexNow(slug, key) {
 function hasRequiredLandingData(landings) {
   if (!landings) return false;
 
-  return ["a", "b", "d", "e", "la", "lb", "lc", "ld", "le"].every((key) => {
+  return ["a"].every((key) => {
     const item = landings[key];
     return item &&
       item.title &&

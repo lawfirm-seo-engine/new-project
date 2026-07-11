@@ -53,6 +53,8 @@
     <a class="btn" href="/admin/recovery.html">리커버리 랜딩 생성</a>
     <a class="btn" href="/admin/jipjeong.html">지급정지 랜딩 생성</a>
     <a class="btn" href="/admin/voicephishing.html">보이스피싱 랜딩 생성</a>
+    <a class="btn" href="/admin/chaemubu.html">채무부존재소송 랜딩 생성</a>
+    <a class="btn" href="/admin/tujasagi.html">투자사기 랜딩 생성</a>
     <button class="btn sec" onclick="syncKvToGithub()">KV→GitHub 동기화</button>
     <button class="btn sec" onclick="batchApplyTemplates()">템플릿 일괄 적용</button>
     <a class="btn sec" href="/admin/settings.html">텔레그램 설정</a>
@@ -113,6 +115,7 @@
         updatedAt: c.updatedAt || '',
         memo: c.memo || false,
         noindex: c.noindex || false,
+        createdBy: c.createdBy || '',
       })),
       ...pls.map(p => ({
         type: 'pl',
@@ -181,7 +184,13 @@
           <a href="${PL_SITE}/powerlink/${encodeURIComponent(e.slug)}/" target="_blank">보기</a>
           <a href="#" class="del" onclick="deletePl('${esc(e.slug)}','${esc(e.name)}');return false;">삭제</a>`;
       } else {
-        const domainLinks = DOMAINS.map(d => `<a href="${d.url}/${d.prefix}/${encodeURIComponent(e.slug)}-${domainSuffix(d.label)}/" target="_blank">${d.label}</a>`).join('');
+        const domainLinks = DOMAINS.filter(d =>
+          (e.createdBy || d.label === 'A') &&
+          (d.label !== 'C'  || e.createdBy === 'recovery-manual' || e.createdBy === 'jipjeong-manual') &&
+          (d.label !== 'lA' || e.createdBy === 'voicephishing-manual') &&
+          (d.label !== 'lC' || e.createdBy === 'tujasagi-manual') &&
+          (d.label !== 'lE' || e.createdBy === 'chaemubu-manual')
+        ).map(d => `<a href="${d.url}/${d.prefix}/${encodeURIComponent(e.slug)}-${domainSuffix(d.label)}/" target="_blank">${d.label}</a>`).join('');
         const niLabel = e.noindex ? 'noindex 해제' : 'noindex';
         const niStyle = e.noindex ? 'background:#8a96a8' : 'background:#c0392b';
         actions = `

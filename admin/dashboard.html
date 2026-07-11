@@ -185,6 +185,7 @@
           <a href="#" class="del" onclick="deletePl('${esc(e.slug)}','${esc(e.name)}');return false;">삭제</a>`;
       } else {
         const domainLinks = DOMAINS.filter(d =>
+          (e.createdBy || d.label === 'A') &&
           (d.label !== 'C'  || e.createdBy === 'recovery-manual' || e.createdBy === 'jipjeong-manual') &&
           (d.label !== 'lA' || e.createdBy === 'voicephishing-manual') &&
           (d.label !== 'lC' || e.createdBy === 'tujasagi-manual') &&

@@ -32,6 +32,10 @@
     .comment-item{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid #e8edf4;border-radius:6px;background:#fafbfd}
     .comment-text{font-size:14px;flex:1}
     .comment-date{font-size:11px;color:#8a96a8;white-space:nowrap}
+    .memo-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+    .memo-item{padding:10px 14px;border:1px solid #e8edf4;border-radius:6px;background:#fafbfd}
+    .memo-text{font-size:14px;line-height:1.6;white-space:pre-wrap}
+    .memo-date{margin-top:4px;font-size:11px;color:#8a96a8}
     .loading{color:#8a96a8;font-size:14px}
   </style>
 </head>
@@ -39,9 +43,27 @@
 <div class="wrap">
   <div class="nav">
     <a class="btn sec" href="/admin/dashboard.html">← 대시보드</a>
+    <button class="btn sec" onclick="syncFromGithub()">GitHub→KV 즉시 반영</button>
   </div>
   <h1 id="pageTitle">사건 편집</h1>
   <p class="meta" id="slugLabel">로딩 중...</p>
+
+  <!-- 기본 정보 편집 -->
+  <div class="card">
+    <h2>기본 정보</h2>
+    <div class="field">
+      <label>사건명 / 제목</label>
+      <input type="text" id="fieldCaseName" placeholder="사건명을 입력하세요">
+    </div>
+    <div class="field">
+      <label>요약 설명 (메타 description, 최대 300자)</label>
+      <textarea id="fieldSummary" rows="3" placeholder="요약 설명을 입력하세요"></textarea>
+    </div>
+    <div class="save-row">
+      <button class="btn" onclick="saveBasicInfo()">저장</button>
+      <span class="msg" id="basicMsg"></span>
+    </div>
+  </div>
 
   <!-- 랜딩 본문 편집 -->
   <div class="card">
@@ -57,11 +79,13 @@
   <!-- 운영자 메모 -->
   <div class="card">
     <h2>운영자 메모</h2>
+    <div id="memoList" class="memo-list loading">로딩 중...</div>
     <div class="field">
-      <textarea id="memoField" rows="4" placeholder="내부 메모 (공개되지 않음)"></textarea>
+      <label>새 운영자 메모 추가</label>
+      <textarea id="memoField" rows="4" placeholder="공개 페이지에 노출할 운영자 안내 메모를 입력하세요"></textarea>
     </div>
     <div class="save-row">
-      <button class="btn" onclick="saveMemo()">메모 저장</button>
+      <button class="btn" onclick="saveMemo()">메모 추가</button>
       <span class="msg" id="memoMsg"></span>
     </div>
   </div>
@@ -83,16 +107,21 @@
 
 <script>
   const GROUPS = [
-    { key: 'a', label: 'A 형사고소' },
-    { key: 'b', label: 'B 민사소송' },
-    { key: 'c', label: 'C 성공사례' },
-    { key: 'd', label: 'D 사건정보' },
-    { key: 'e', label: 'E 전체허브' },
+    { key: 'a',  label: 'A 형사고소' },
+    { key: 'b',  label: 'B 민사소송' },
+    { key: 'c',  label: 'C 성공사례/회수/지급정지' },
+    { key: 'd',  label: 'D 사건정보' },
+    { key: 'e',  label: 'E 전체허브' },
+    { key: 'la', label: 'lA 보이스피싱' },
+    { key: 'lc', label: 'lC 투자사기' },
+    { key: 'le', label: 'lE 채무부존재소송' },
   ];
   const FIELDS = [
-    { key: 'h1', label: 'H1 제목', multi: false },
-    { key: 'body', label: '본문 (줄바꿈으로 문단 구분)', multi: true },
-    { key: 'victimCases', label: '피해 사례 (줄바꿈으로 항목 구분)', multi: true },
+    { key: 'h1',           label: 'H1 제목',                        multi: false },
+    { key: 'title',        label: '페이지 제목 (title/ogTitle)',       multi: false },
+    { key: 'description',  label: '메타 설명 (description/ogDesc)',   multi: false },
+    { key: 'body',         label: '본문 / H2 제목 (## 제목 줄로 수정)', multi: true  },
+    { key: 'victimCases',  label: '피해 사례 (줄바꿈으로 항목 구분)',    multi: true  },
   ];
 
   const params = new URLSearchParams(location.search);
@@ -100,7 +129,7 @@
   if (!slug) { document.body.innerHTML = '<p style="padding:40px;color:red">slug 파라미터가 없습니다.</p>'; }
 
   let caseData = null;
-  let activeGroup = 'a';
+  let activeGroup = params.get('group') || 'a';
 
   fetch('/api/get-case?slug=' + encodeURIComponent(slug))
     .then(r => r.json())
@@ -108,11 +137,15 @@
       if (!data.ok) throw new Error(data.message || '로드 실패');
       caseData = data.case;
       if (!caseData) throw new Error('사건을 찾을 수 없습니다.');
+      activeGroup = params.get('group') || defaultGroupForCase(caseData);
       document.getElementById('pageTitle').textContent = caseData.caseName + ' 편집';
       document.getElementById('slugLabel').textContent = 'slug: ' + slug;
-      document.getElementById('memoField').value = caseData.memo || '';
+      document.getElementById('fieldCaseName').value = caseData.caseName || '';
+      document.getElementById('fieldSummary').value = caseData.summary || '';
+      document.getElementById('memoField').value = '';
       renderTabs();
       renderLandingEditor();
+      renderMemoHistory();
       renderComments();
     })
     .catch(err => {
@@ -131,6 +164,15 @@
     renderLandingEditor();
   }
 
+  function defaultGroupForCase(item) {
+    const targetGroups = Array.isArray(item?.targetGroups) ? item.targetGroups : [];
+    if (item?.createdBy === 'voicephishing-manual' || targetGroups.includes('la')) return 'la';
+    if (item?.createdBy === 'tujasagi-manual' || targetGroups.includes('lc')) return 'lc';
+    if (item?.createdBy === 'chaemubu-manual' || targetGroups.includes('le')) return 'le';
+    if (item?.createdBy === 'recovery-manual' || item?.createdBy === 'jipjeong-manual' || targetGroups.includes('c')) return 'c';
+    return 'a';
+  }
+
   function renderLandingEditor() {
     const landing = caseData?.landings?.[activeGroup] || {};
     document.getElementById('landingEditor').innerHTML = FIELDS.map(f => {
@@ -139,10 +181,29 @@
       return `<div class="field">
         <label>${esc(f.label)}</label>
         <textarea id="field_${f.key}" rows="${f.multi ? 5 : 2}">${esc(text)}</textarea>
-        ${f.multi ? '<p class="hint">줄바꿈(Enter)으로 항목을 구분합니다.</p>' : ''}
+        ${f.multi ? '<p class="hint">줄바꿈(Enter)으로 항목을 구분합니다. 본문에서 ## 로 시작하는 줄은 H2 제목으로 표시됩니다.</p>' : ''}
       </div>`;
     }).join('');
     document.getElementById('landingEditor').className = '';
+  }
+
+  async function saveBasicInfo() {
+    const msg = document.getElementById('basicMsg');
+    msg.textContent = '저장 중...'; msg.className = 'msg';
+    const newName = document.getElementById('fieldCaseName').value.trim();
+    const newSummary = document.getElementById('fieldSummary').value.trim();
+    if (!newName) { msg.textContent = '사건명을 입력하세요.'; msg.className = 'msg err'; return; }
+    const r1 = await api('/api/update-case', { slug, action: 'rename', value: newName });
+    if (!r1.ok) { msg.textContent = '저장 실패: ' + (r1.message || ''); msg.className = 'msg err'; return; }
+    if (r1.updatedCase) caseData = r1.updatedCase;
+    if (newSummary) {
+      const r2 = await api('/api/update-case', { slug, action: 'update-summary', value: newSummary });
+      if (!r2.ok) { msg.textContent = '요약 저장 실패: ' + (r2.message || ''); msg.className = 'msg err'; return; }
+      if (r2.updatedCase) caseData = r2.updatedCase;
+    }
+    document.getElementById('pageTitle').textContent = caseData.caseName + ' 편집';
+    msg.textContent = '저장 완료'; msg.className = 'msg ok';
+    setTimeout(() => msg.textContent = '', 3000);
   }
 
   async function saveLanding() {
@@ -151,12 +212,13 @@
     for (const f of FIELDS) {
       const el = document.getElementById('field_' + f.key);
       if (!el) continue;
+      const rawVal = el.value;
+      if (!rawVal.trim()) continue; // 비어 있는 필드는 건너뜀
       const value = f.multi
-        ? el.value.split('\n').map(s => s.trim()).filter(Boolean)
-        : el.value.trim();
+        ? rawVal.split('\n').map(s => s.trim()).filter(Boolean)
+        : rawVal.trim();
       const res = await api('/api/update-case', { slug, action: 'update-landing', groupKey: activeGroup, field: f.key, value });
       if (!res.ok) { msg.textContent = '저장 실패: ' + (res.message || ''); msg.className = 'msg err'; return; }
-      // 로컬 caseData 동기화
       if (res.updatedCase) caseData = res.updatedCase;
     }
     msg.textContent = '저장 완료'; msg.className = 'msg ok';
@@ -165,10 +227,46 @@
 
   async function saveMemo() {
     const msg = document.getElementById('memoMsg');
+    const text = document.getElementById('memoField').value.trim();
+    if (!text) { msg.textContent = '메모 내용을 입력하세요.'; msg.className = 'msg err'; return; }
     msg.textContent = '저장 중...'; msg.className = 'msg';
-    const res = await api('/api/update-case', { slug, action: 'update-memo', value: document.getElementById('memoField').value });
-    if (res.ok) { msg.textContent = '메모 저장 완료'; msg.className = 'msg ok'; setTimeout(() => msg.textContent = '', 3000); }
+    const res = await api('/api/update-case', { slug, action: 'add-memo', value: text });
+    if (res.ok) {
+      caseData = res.updatedCase;
+      renderMemoHistory();
+      document.getElementById('memoField').value = '';
+      msg.textContent = '메모 추가 완료';
+      msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    }
     else { msg.textContent = '저장 실패: ' + (res.message || ''); msg.className = 'msg err'; }
+  }
+
+  function renderMemoHistory() {
+    const list = [];
+    const seen = new Set();
+    function addMemo(item) {
+      const text = typeof item === 'string' ? item : item?.text;
+      const clean = String(text || '').trim();
+      if (!clean || seen.has(clean)) return;
+      seen.add(clean);
+      list.push({ text: clean, createdAt: typeof item === 'object' ? (item.createdAt || '') : '' });
+    }
+    if (caseData?.memo) addMemo({ text: caseData.memo });
+    if (Array.isArray(caseData?.memos)) {
+      caseData.memos.forEach(addMemo);
+    }
+    const el = document.getElementById('memoList');
+    el.className = 'memo-list';
+    if (!list.length) {
+      el.innerHTML = '<p style="color:#8a96a8;font-size:14px;margin:0">등록된 운영자 메모가 없습니다.</p>';
+      return;
+    }
+    el.innerHTML = list.map((item) => `
+      <div class="memo-item">
+        <div class="memo-text">${esc(item.text)}</div>
+        ${item.createdAt ? `<div class="memo-date">${esc(item.createdAt)}</div>` : ''}
+      </div>`).join('');
   }
 
   function renderComments() {
@@ -218,6 +316,25 @@
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       return await res.json();
     } catch (e) { return { ok: false, message: e.message }; }
+  }
+
+  async function syncFromGithub() {
+    if (!confirm('GitHub cases.json의 최신 데이터를 KV에 즉시 반영합니다.\n계속하시겠습니까?')) return;
+    const msg = document.getElementById('basicMsg');
+    msg.textContent = '동기화 중...'; msg.className = 'msg';
+    const res = await api('/api/update-case', { slug, action: 'sync-from-github' });
+    if (res.ok) {
+      if (res.updatedCase) {
+        caseData = res.updatedCase;
+        document.getElementById('fieldCaseName').value = caseData.caseName || '';
+        document.getElementById('fieldSummary').value = caseData.summary || '';
+        document.getElementById('pageTitle').textContent = caseData.caseName + ' 편집';
+      }
+      msg.textContent = 'KV 반영 완료'; msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    } else {
+      msg.textContent = '실패: ' + (res.message || ''); msg.className = 'msg err';
+    }
   }
 
   function esc(str) {

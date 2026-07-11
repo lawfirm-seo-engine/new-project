@@ -738,6 +738,17 @@ button{
   margin:0;
   white-space:pre-line;
 }
+.memo-section .memo-item + .memo-item{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(160,104,0,.18);
+}
+.memo-section time{
+  display:block;
+  margin-top:6px;
+  color:#8a6200;
+  font-size:12px;
+}
 
 .article-block h2,
 .related h2,

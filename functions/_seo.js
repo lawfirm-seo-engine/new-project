@@ -1,3 +1,11 @@
+import {
+  isStandardLandingAllowedForGroup,
+  isStandardLandingCase,
+  standardLastModified,
+  standardMetaDescription,
+  standardPageTitle,
+} from "./_standardLanding.js";
+
 export const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
 
 export const RECENT_SITEMAP_DAYS = 14;
@@ -9,11 +17,11 @@ export const OG_IMAGE_WIDTH = 1254;
 export const OG_IMAGE_HEIGHT = 1254;
 
 export function caseOgImageUrl(slug = "landing", siteUrl = "https://gnlaw-criminal.co.kr") {
-  return `${trimSiteUrl(siteUrl)}/og/${encodeURIComponent(slug || "landing")}.png?v=${OG_IMAGE_VERSION}`;
+  return `${trimSiteUrl(siteUrl)}/og/${encodeURIComponent(slug || "landing")}.webp?v=${OG_IMAGE_VERSION}`;
 }
 
 export function powerlinkOgImageUrl(slug = "landing") {
-  return `https://gnlaw-criminal.co.kr/og/powerlink-${encodeURIComponent(slug || "landing")}.png?v=${OG_IMAGE_VERSION}`;
+  return `https://gnlaw-criminal.co.kr/og/powerlink-${encodeURIComponent(slug || "landing")}.webp?v=${OG_IMAGE_VERSION}`;
 }
 
 export const GROUPS = [
@@ -74,6 +82,9 @@ export function getLanding(item = {}, group = {}) {
 
 export function isCaseAllowedForGroup(item = {}, group = {}) {
   const lk = group.landingKey || group.key;
+  if (!isStandardLandingAllowedForGroup(item, group)) {
+    return false;
+  }
   // gnlaw-recovery.co.kr(lk="c")는 recovery-manual / jipjeong-manual 전용
   if (lk === "c" &&
       item.createdBy !== "recovery-manual" &&
@@ -126,7 +137,7 @@ export function buildSitemapXml(group, cases = [], options = {}) {
   const urls = cases
     .filter((item) => item?.slug && isCaseAllowedForGroup(item, group))
     .map((item) => {
-      const sourceLastmod = item.updatedAt || item.createdAt || today;
+      const sourceLastmod = isStandardLandingCase(item) ? standardLastModified(item) : (item.updatedAt || item.createdAt || today);
       const lastmod = options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
       const priority = options.recent ? "1.0" : "0.9";
       const changefreq = options.recent ? "hourly" : "daily";
@@ -213,12 +224,16 @@ function normalizeRssText(value = "", item = {}) {
 
 function buildRssItem(group, item) {
   const landing = getLanding(item, group);
-  const canonical = landing.canonical || buildLandingUrl(group, item.slug);
+  const standard = isStandardLandingCase(item) && (group.landingKey || group.key) === "a";
+  const canonical = standard ? buildLandingUrl(group, item.slug) : (landing.canonical || buildLandingUrl(group, item.slug));
   const fallbackTitle = rssFallbackTitle(item, group);
-  const title = landing.title || fallbackTitle;
-  const description = landing.description || normalizeRssText(item.summary, item) || `${primaryCaseKeyword(item.caseName || item.name || item.slug)} 관련 신규 페이지입니다.`;
+  const title = standard ? standardPageTitle(item.caseName || item.name || item.slug) : (landing.title || fallbackTitle);
+  const description = standard
+    ? standardMetaDescription(item.caseName || item.name || item.slug)
+    : landing.description || normalizeRssText(item.summary, item) || `${primaryCaseKeyword(item.caseName || item.name || item.slug)} 관련 신규 페이지입니다.`;
   const published = item.updatedAt || item.createdAt || kstDate();
-  const content = buildRssContent(item, landing, group, canonical, title, description);
+  const contentLanding = standard ? { ...landing, h1: title, title, description } : landing;
+  const content = buildRssContent(item, contentLanding, group, canonical, title, description);
 
   return `    <item>\n      <title>${escapeXml(title)}</title>\n      <link>${escapeXml(canonical)}</link>\n      <guid isPermaLink="true">${escapeXml(canonical)}</guid>\n      <description>${escapeXml(description)}</description>\n      <pubDate>${dateToRfc822(published)}</pubDate>\n      <category>${escapeXml(group.label || "landing")}</category>\n      <content:encoded><![CDATA[${safeCdata(content)}]]></content:encoded>\n    </item>`;
 }

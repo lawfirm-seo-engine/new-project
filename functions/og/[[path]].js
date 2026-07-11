@@ -2,6 +2,10 @@
 // Uses the shared PNG template and renders the landing title inside the lower plaque.
 import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
+import webpEncodeFactory from "@jsquash/webp/codec/enc/webp_enc.js";
+import webpEncodeWasm from "@jsquash/webp/codec/enc/webp_enc.wasm";
+import { defaultOptions as webpDefaultOptions } from "@jsquash/webp/meta.js";
+import { initEmscriptenModule } from "@jsquash/webp/utils.js";
 import { OG_IMAGE_VERSION } from "../_seo.js";
 
 const FONT_KV_KEY = "og:font:pretendard-black-v1";
@@ -9,13 +13,16 @@ const FONT_CDN_URL =
   "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Black.otf";
 const IMG_CACHE_TTL = 60 * 60 * 24 * 60; // 60 days
 const TEMPLATE_PATH = "/assets/og-template.png";
+const TEMPLATE_WEBP_PATH = "/assets/og-template.webp";
 const TEMPLATE_WIDTH = 1254;
 const TEMPLATE_HEIGHT = 1254;
 const PLAQUE_TEXT_CENTER_Y = 1116;
 
 let initPromise = null;
+let webpEncoderPromise = null;
 let fontBuffer = null;
 let templateBuffer = null;
+let templateWebpBuffer = null;
 let templateDataUri = null;
 
 async function getFont(env) {
@@ -61,11 +68,46 @@ async function getTemplateBuffer(origin) {
   return templateBuffer;
 }
 
+async function getTemplateWebpBuffer(origin) {
+  if (templateWebpBuffer) return templateWebpBuffer;
+  const response = await fetch(`${origin}${TEMPLATE_WEBP_PATH}`, {
+    headers: { "Cache-Control": "no-cache" },
+  });
+  if (!response.ok) throw new Error(`OG template webp ${response.status}`);
+  const buffer = await response.arrayBuffer();
+  templateWebpBuffer = buffer;
+  return templateWebpBuffer;
+}
+
 async function getTemplateDataUri(origin) {
   if (templateDataUri) return templateDataUri;
   const buffer = await getTemplateBuffer(origin);
   templateDataUri = `data:image/png;base64,${arrayBufferToBase64(buffer)}`;
   return templateDataUri;
+}
+
+function ensureWebpEncoder() {
+  if (webpEncoderPromise) return webpEncoderPromise;
+  webpEncoderPromise = initEmscriptenModule(webpEncodeFactory, webpEncodeWasm);
+  return webpEncoderPromise;
+}
+
+async function encodeWebp(renderedImage) {
+  const encoder = await ensureWebpEncoder();
+  const result = encoder.encode(
+    renderedImage.pixels,
+    renderedImage.width,
+    renderedImage.height,
+    {
+      ...webpDefaultOptions,
+      quality: 86,
+      method: 5,
+      alpha_quality: 100,
+      use_sharp_yuv: 1,
+    },
+  );
+  if (!result?.buffer) throw new Error("WebP encoding failed");
+  return new Uint8Array(result.buffer);
 }
 
 function arrayBufferToBase64(buffer) {
@@ -158,19 +200,27 @@ ${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lin
 </svg>`;
 }
 
-const CACHE_HEADERS = {
-  "Content-Type": "image/png",
+const BASE_CACHE_HEADERS = {
   "Cache-Control": "public, max-age=2592000, s-maxage=2592000, immutable",
   "CDN-Cache-Control": "public, max-age=2592000",
   "Access-Control-Allow-Origin": "*",
 };
 
-async function templateImageResponse(url, method, reason = "TEMPLATE") {
-  const buffer = await getTemplateBuffer(url.origin);
+function imageHeaders(format = "webp") {
+  return {
+    ...BASE_CACHE_HEADERS,
+    "Content-Type": format === "png" ? "image/png" : "image/webp",
+  };
+}
+
+async function templateImageResponse(url, method, format = "webp", reason = "TEMPLATE") {
+  const buffer = format === "png"
+    ? await getTemplateBuffer(url.origin)
+    : await getTemplateWebpBuffer(url.origin);
   return new Response(method === "HEAD" ? null : buffer, {
     status: 200,
     headers: {
-      ...CACHE_HEADERS,
+      ...imageHeaders(format),
       "Content-Length": String(buffer.byteLength),
       "X-OG-Fallback": reason,
     },
@@ -194,26 +244,28 @@ export async function onRequest(context) {
   if (!isPng && !isWebp) {
     const base = rawName.replace(/\.[^.]*$/, "");
     return Response.redirect(
-      `${url.origin}/og/${encodeURIComponent(base)}.png?v=${OG_IMAGE_VERSION}`,
+      `${url.origin}/og/${encodeURIComponent(base)}.webp?v=${OG_IMAGE_VERSION}`,
       302,
     );
   }
+
+  const format = isPng ? "png" : "webp";
 
   const rawSlug = rawName.replace(/\.(png|webp)$/i, "").slice(0, 180);
   const isPowerlink = rawSlug.startsWith("powerlink-");
   const slug = isPowerlink ? rawSlug.slice("powerlink-".length) : rawSlug;
 
   if (!slug || slug === "landing") {
-    return templateImageResponse(url, method, "LANDING");
+    return templateImageResponse(url, method, format, "LANDING");
   }
 
-  const cacheKey = `og:img:v${OG_IMAGE_VERSION}:${rawSlug}`;
+  const cacheKey = `og:img:v${OG_IMAGE_VERSION}:${format}:${rawSlug}`;
   try {
     const cached = await env.CASES?.get?.(cacheKey, { type: "arrayBuffer" });
     if (cached && cached.byteLength > 1000) {
       return new Response(method === "HEAD" ? null : cached, {
         status: 200,
-        headers: { ...CACHE_HEADERS, "Content-Length": String(cached.byteLength), "X-Cache": "HIT" },
+        headers: { ...imageHeaders(format), "Content-Length": String(cached.byteLength), "X-Cache": "HIT" },
       });
     }
   } catch (_) {}
@@ -251,16 +303,19 @@ export async function onRequest(context) {
         loadSystemFonts: false,
       },
     });
-    const png = resvg.render().asPng();
+    const renderedImage = resvg.render();
+    const image = format === "png"
+      ? renderedImage.asPng()
+      : await encodeWebp(renderedImage);
 
-    const cachePut = env.CASES?.put?.(cacheKey, png.buffer, { expirationTtl: IMG_CACHE_TTL });
+    const cachePut = env.CASES?.put?.(cacheKey, image.buffer, { expirationTtl: IMG_CACHE_TTL });
     if (context.waitUntil && cachePut) {
       context.waitUntil(cachePut.catch(() => {}));
     }
 
-    return new Response(method === "HEAD" ? null : png, {
+    return new Response(method === "HEAD" ? null : image, {
       status: 200,
-      headers: { ...CACHE_HEADERS, "Content-Length": String(png.byteLength), "X-Cache": "MISS" },
+      headers: { ...imageHeaders(format), "Content-Length": String(image.byteLength), "X-Cache": "MISS" },
     });
   } catch (error) {
     const message = error?.stack || error?.message || String(error);
@@ -271,6 +326,6 @@ export async function onRequest(context) {
         headers: { "Content-Type": "text/plain; charset=utf-8" },
       });
     }
-    return templateImageResponse(url, method, "ERROR_TEMPLATE");
+    return templateImageResponse(url, method, format, "ERROR_TEMPLATE");
   }
 }

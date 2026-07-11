@@ -1,4 +1,14 @@
 import { caseOgImageUrl } from "../_seo.js";
+import {
+  normalizeFraudTypeKey,
+  standardCaseKeyword,
+  standardCoreSummary,
+  standardIntroParagraphs,
+  standardMetaDescription,
+  standardMethodTemplate,
+  standardPageTitle,
+  standardResponseSections,
+} from "../_standardLanding.js";
 
 const GROUPS = [
   {
@@ -95,6 +105,7 @@ const GROUPS = [
 ];
 
 const DEFAULT_CATEGORY = "형사대응";
+const STANDARD_GROUPS = GROUPS.filter((group) => group.key === "a");
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -103,6 +114,7 @@ export async function onRequestPost(context) {
     const body = await request.json();
     const rawName = normalizeSpace(body.caseName);
     const caseName = normalizeCaseName(rawName);
+    const fraudType = normalizeFraudTypeKey(body.fraudType || body.scamType, { caseName, slug: createSlug(slugBase(rawName)) });
 
     if (!caseName) {
       return json({ ok: false, message: "사건명을 입력해주세요." }, 400);
@@ -112,7 +124,7 @@ export async function onRequestPost(context) {
     const slug = createSlug(slugBase(rawName));
     const category = DEFAULT_CATEGORY;
     const duplicateCheck = findDuplicateRisks(caseName, slug, cases);
-    const generated = await createGeneratedData({ caseName, slug, duplicateCheck, env });
+    const generated = await createGeneratedData({ caseName, slug, fraudType, duplicateCheck, env });
 
     return json({
       ok: true,
@@ -125,6 +137,7 @@ export async function onRequestPost(context) {
         reports: randomInt(4, 34, `${slug}-reports`),
         updatedAt: today(),
         createdAt: today(),
+        fraudType,
         tags: generated.tags,
         landings: generated.landings,
       },
@@ -161,13 +174,13 @@ async function loadCases(env) {
   return raw ? JSON.parse(raw) : [];
 }
 
-async function createGeneratedData({ caseName, slug, duplicateCheck, env }) {
-  return createRuleBasedData({ caseName, slug, duplicateCheck, env });
+async function createGeneratedData({ caseName, slug, fraudType, duplicateCheck, env }) {
+  return createRuleBasedData({ caseName, slug, fraudType, duplicateCheck, env });
 }
 
 
-async function createRuleBasedData({ caseName, slug, duplicateCheck, env }) {
-  const summary = createSummary(caseName);
+async function createRuleBasedData({ caseName, slug, fraudType, duplicateCheck, env }) {
+  const summary = createSummary(caseName, fraudType);
   const tags = createTags(caseName);
   const reviewNotes = [
     duplicateCheck.block
@@ -178,12 +191,16 @@ async function createRuleBasedData({ caseName, slug, duplicateCheck, env }) {
     "사건명 검색 의도 기준으로 SEO 원고를 생성했습니다.",
   ];
   const templates = env ? await readTemplates(env) : {};
-  const landings = Object.fromEntries(GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, group, templates })]));
+  const landings = Object.fromEntries(STANDARD_GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, fraudType, group, templates })]));
 
   return { source: "rule-based", summary, tags, reviewNotes, landings };
 }
 
-function createLandingData({ caseName, slug, group, templates = {} }) {
+function createLandingData({ caseName, slug, fraudType, group, templates = {} }) {
+  if (group.key === "a") {
+    return createStandardLandingData({ caseName, slug, fraudType, group });
+  }
+
   const base = primaryCaseKeyword(caseName);
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}/`;
   const title = groupPageTitle(caseName, group.key);
@@ -241,6 +258,43 @@ function createLandingData({ caseName, slug, group, templates = {} }) {
     faq: landing.faq,
   });
 
+  return landing;
+}
+
+function createStandardLandingData({ caseName, slug, fraudType, group }) {
+  const title = standardPageTitle(caseName);
+  const description = standardMetaDescription(caseName);
+  const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}-litigation/`;
+  const method = standardMethodTemplate(fraudType);
+  const responseTexts = standardResponseSections().flatMap((section) => [section.title, ...section.bullets]);
+  const body = [
+    ...standardIntroParagraphs(fraudType, caseName),
+    standardCoreSummary(fraudType, caseName),
+    method.title,
+    ...method.bullets,
+    ...method.steps,
+    ...responseTexts,
+  ];
+  const faq = makeFaq({ caseName, base: standardCaseKeyword(caseName), group }).slice(0, 6);
+  const landing = {
+    title,
+    description,
+    canonical,
+    ogTitle: title,
+    ogDescription: description,
+    ogImage: caseOgImageUrl(slug || "landing", group.siteUrl),
+    h1: title,
+    body,
+    scamIntroItems: standardIntroParagraphs(fraudType, caseName),
+    scamMethodItems: [...method.bullets, ...method.steps],
+    victimCases: makeVictimCases({ base: standardCaseKeyword(caseName), group }),
+    suspiciousCompanies: makeSuspiciousCompanies({ caseName }),
+    faq,
+    imageAlt: `${standardCaseKeyword(caseName)} 피해 대응 안내 썸네일`,
+    imageCaption: `${standardCaseKeyword(caseName)} 출금불가 및 형사고소 대응`,
+    imageDescription: description,
+  };
+  landing.schema = createSchemaData({ title, description, canonical, caseName, faq });
   return landing;
 }
 
@@ -718,9 +772,8 @@ function explainCategory() {
   return "카테고리 자동 분류는 사용하지 않습니다.";
 }
 
-function createSummary(caseName) {
-  const keyword = primaryCaseKeyword(caseName) || caseName;
-  return `${keyword} 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 정보, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.`;
+function createSummary(caseName, fraudType = "") {
+  return standardCoreSummary(fraudType, caseName);
 }
 
 function createTags(caseName) {
@@ -936,6 +989,7 @@ function today() {
 
 function normalizeCaseName(name) {
   const str = String(name || "").trim();
+  if (!str) return "";
   if (/사기$/.test(str)) return str;
   const clean = str.replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
   return /사기/.test(clean) ? clean : `${clean} 사칭 사기`;

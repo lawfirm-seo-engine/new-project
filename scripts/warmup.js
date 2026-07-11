@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
-import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl, sortNewest } from "../functions/_seo.js";
+import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl, isCaseAllowedForGroup, sortNewest } from "../functions/_seo.js";
 
 const root = process.cwd();
 const cases = await fs.readJson(path.join(root, "data", "cases.json"));
@@ -11,7 +11,9 @@ if (!latest?.slug) {
   process.exit(0);
 }
 
-const targets = GROUPS.flatMap((group) => [
+const targetGroups = GROUPS.filter((group) => isCaseAllowedForGroup(latest, group));
+
+const targets = targetGroups.flatMap((group) => [
   `${group.siteUrl}/`,
   categoryUrl(group),
   buildLandingUrl(group, latest.slug),
@@ -39,7 +41,7 @@ const shouldPingIndexNow = process.env.INDEXNOW === "1" || process.argv.includes
 
 if (shouldPingIndexNow) {
   const indexNowResults = await Promise.allSettled(
-    GROUPS.map((group) => pingIndexNow(group, latest.slug)),
+    targetGroups.map((group) => pingIndexNow(group, latest.slug)),
   );
 
   for (const result of indexNowResults) {

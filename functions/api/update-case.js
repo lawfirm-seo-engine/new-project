@@ -164,6 +164,7 @@ function buildIndexEntry(c) {
     noindex: c.noindex || false,
     targetGroups: c.targetGroups || [],
     createdBy: c.createdBy || "",
+    fraudType: c.fraudType || "",
   };
 }
 
