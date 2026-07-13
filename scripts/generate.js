@@ -1189,7 +1189,7 @@ function createLiveReceiptStatus(caseItem) {
   return `<section class="article-block live-receipts" aria-label="실시간 접수 현황">
   <h2>실시간 접수 현황</h2>
   <div class="live-receipt-window">
-    <ul class="live-receipt-track">${html}${html}</ul>
+    <ul class="live-receipt-track">${html}</ul>
   </div>
 </section>`;
 }
@@ -1214,7 +1214,7 @@ function createLiveReceiptRows(caseItem) {
   return Array.from({ length: 50 }, (_, index) => {
     const randKey = `${seed}-live-${index}`;
     const date = new Date(baseDate);
-    date.setDate(baseDate.getDate() - seededInt(`${randKey}-day`, 0, 7));
+    date.setDate(baseDate.getDate() - seededInt(`${randKey}-day`, 0, 14));
     const amount = seededInt(`${randKey}-amount`, 1600, 9800);
     const useMessage = index < 3 || seededInt(`${randKey}-type`, 0, 100) < 42;
     const text = useMessage

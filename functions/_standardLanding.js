@@ -1,5 +1,5 @@
 export const STANDARD_LANDING_KEY = "a";
-export const STANDARD_LANDING_REFRESHED_AT = "2026-07-11";
+export const STANDARD_LANDING_REFRESHED_AT = "2026-07-13";
 
 export const FRAUD_TYPE_OPTIONS = [
   { key: "stock-project", label: "주식 리딩방 사기·투자 프로젝트 사칭형" },

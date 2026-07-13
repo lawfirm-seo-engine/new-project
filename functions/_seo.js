@@ -11,7 +11,7 @@ export const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
 export const RECENT_SITEMAP_DAYS = 14;
 export const RECENT_SITEMAP_LIMIT = 300;
 export const RSS_LIMIT = 120;
-export const SEO_STABILIZED_AT = "2026-06-14";
+export const SEO_STABILIZED_AT = "2026-07-13";
 export const OG_IMAGE_VERSION = "20260713a1";
 export const OG_IMAGE_WIDTH = 1254;
 export const OG_IMAGE_HEIGHT = 1254;
@@ -76,6 +76,8 @@ export function buildLandingUrl(group, slug = "") {
 }
 
 export function landingUrlForItem(group, item = {}) {
+  if (item?.slug) return buildLandingUrl(group, item.slug);
+
   const siteUrl = String(group.siteUrl || (group.host ? `https://${group.host}` : "")).replace(/\/$/, "");
   const landingKey = group.landingKey || group.key;
   const candidate =

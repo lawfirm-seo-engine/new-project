@@ -1147,10 +1147,6 @@ function isManualLandingCase(caseData = {}) {
 }
 
 function canonicalForLanding(landing = {}, group = {}, fallback = "") {
-  const siteUrl = String(group.siteUrl || "").replace(/\/$/, "");
-  const canonical = String(landing.canonical || "").trim();
-  if (siteUrl && canonical.startsWith(`${siteUrl}/`)) return canonical;
-  if (siteUrl && canonical.startsWith("/")) return `${siteUrl}${canonical}`;
   return fallback;
 }
 
@@ -1180,9 +1176,8 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const fallbackCanonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const canonical = canonicalForLanding(landing, group, fallbackCanonical);
   const ogImage = caseOgImageUrl(caseData.slug || "landing", group.siteUrl);
-  const ogImagePng = ogImageFormatUrl(ogImage, "png");
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
-  const modifiedDate = useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate);
+  const modifiedDate = latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), "2026-07-13");
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
   const keyword = searchKeyword(rawCaseName);
@@ -1222,16 +1217,15 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     `<link rel="alternate" type="application/rss+xml" title="${esc(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
-    `<link rel="prefetch" href="${esc(ogImagePng)}" as="image">`,
     `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:type" content="${ogImageType}">`,
     `<meta property="og:image:width" content="${ogImageWidth}">`,
     `<meta property="og:image:height" content="${ogImageHeight}">`,
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
-    `<link rel="image_src" href="${esc(ogImagePng)}">`,
+    `<link rel="image_src" href="${esc(ogImage)}">`,
     `<meta itemprop="image" content="${esc(ogImage)}">`,
-    `<meta itemprop="thumbnailUrl" content="${esc(ogImagePng)}">`,
+    `<meta itemprop="thumbnailUrl" content="${esc(ogImage)}">`,
     emitImageMeta ? `<meta name="image:alt" content="${esc(imageAlt)}">` : "",
     emitImageMeta ? `<meta name="image:caption" content="${esc(imageCaption)}">` : "",
     emitImageMeta ? `<meta name="image:description" content="${esc(imageDescription)}">` : "",
@@ -1293,7 +1287,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
         "@id": `${canonical}#primaryimage`,
         url: ogImage,
         contentUrl: ogImage,
-        thumbnailUrl: ogImagePng,
+        thumbnailUrl: ogImage,
         width: Number(ogImageWidth),
         height: Number(ogImageHeight),
         caption: imageCaption,
@@ -1380,15 +1374,15 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   }, null, 2);
 
   const ogThumbnail = createRepresentativeImageMarkup({
-    webpUrl: ogImage,
-    fallbackUrl: ogImagePng,
+    imageUrl: ogImage,
     alt: imageAlt,
     caption: imageCaption,
   });
 
-  const content = isManualLandingCase(caseData)
+  const rawContent = isManualLandingCase(caseData)
     ? createRecoveryManualContent(landing, group, caseData)
     : createLandingContent(landing, group, caseData, relatedCases);
+  const content = isManualLandingCase(caseData) ? rawContent : softenRepeatedContextTerms(rawContent);
   const footerLinks = CROSS_LINKS.map((l) => {
     const active = l.key === group.key ? "is-active" : "";
     return `<a class="${active}" href="${l.url}/">${esc(l.label)}</a>`;
@@ -1400,13 +1394,13 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     "최근 접수 흐름과 대응 절차를 기준으로 피해 구조, 증거 보존, 상담 전 확인사항을 정리했습니다."
   );
 
-  const renderedHtml = softenRepeatedContextTerms(pageTemplate({
+  const renderedHtml = pageTemplate({
     title: esc(`${pageTitle} | 법무법인 선린`),
     description: esc(seoDescription),
     canonical,
     ogType: group.ogType,
     ogTitle: esc(pageTitle),
-    ogDescription: esc(useStandardTemplate ? seoDescription : createSeoDescription(landing.ogDescription || landing.description || caseData.summary || "", rawCaseName, lk)),
+    ogDescription: esc(seoDescription),
     ogImage: esc(ogImage),
     siteName: esc(group.siteName),
     headExtra,
@@ -1428,7 +1422,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     footerLinks,
     headerCall: "",
     bodyScripts: logScanScriptForSite(group.siteUrl),
-  }));
+  });
   return useManualTitle ? renderedHtml : cleanStandardLandingText(renderedHtml);
 }
 
@@ -1438,17 +1432,9 @@ function cleanStandardLandingText(value = "") {
     .replace(/증거 묶음/g, "증거 자료");
 }
 
-function ogImageFormatUrl(value = "", format = "webp") {
-  return String(value || "").replace(/\.(webp|png)(\?)/i, `.${format}$2`);
-}
-
-function createRepresentativeImageMarkup({ webpUrl = "", fallbackUrl = "", alt = "", caption = "" } = {}) {
-  const img = fallbackUrl || webpUrl;
-  if (!img) return "";
-  const source = webpUrl && webpUrl !== img
-    ? `<source srcset="${esc(webpUrl)}" type="image/webp">`
-    : "";
-  return `<figure class="hero-thumb-wrap"><picture>${source}<img class="hero-thumb" src="${esc(img)}" alt="${esc(alt || caption || "대표 이미지")}" width="${OG_IMAGE_WIDTH}" height="${OG_IMAGE_HEIGHT}" loading="eager" fetchpriority="high" decoding="async"></picture>${caption ? `<figcaption class="hero-thumb-caption">${esc(caption)}</figcaption>` : ""}</figure>`;
+function createRepresentativeImageMarkup({ imageUrl = "", alt = "", caption = "" } = {}) {
+  if (!imageUrl) return "";
+  return `<figure class="hero-thumb-wrap"><img class="hero-thumb" src="${esc(imageUrl)}" alt="${esc(alt || caption || "대표 이미지")}" width="${OG_IMAGE_WIDTH}" height="${OG_IMAGE_HEIGHT}" loading="eager" fetchpriority="high" decoding="async">${caption ? `<figcaption class="hero-thumb-caption">${esc(caption)}</figcaption>` : ""}</figure>`;
 }
 
 function createFallbackLanding(caseData, group, key) {
@@ -1924,7 +1910,6 @@ function createHeroTypingBlock(caseName, caseData = {}) {
   const message = splitHeroText(standardHeroText(typeKey));
   return `<div class="hero-typing">
   <p class="hero-typing-q"><strong>${question}</strong></p>
-  <p class="hero-typing-s">추가 입금을 요구받고 있다면 즉시 중단하세요.</p>
   <p class="hero-typing-l1">${esc(message[0])}</p>
   <p class="hero-typing-l2">${esc(message[1])}</p>
 </div>
@@ -2756,7 +2741,7 @@ const ORGANIZATION = {
   name: "법무법인 선린",
   legalName: "법무법인 선린",
   alternateName: "선린 법무법인",
-  url: "https://gnlaw-criminal.co.kr",
+  url: "https://gnlaw-criminal.co.kr/",
   telephone: "02-6348-0406",
   logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo.png" },
   address: {
@@ -3276,7 +3261,7 @@ function createLiveReceiptStatus(caseData) {
   return `<section class="article-block live-receipts" aria-label="실시간 접수 현황">
   <h2>실시간 접수 현황</h2>
   <div class="live-receipt-window">
-    <ul class="live-receipt-track">${html}${html}</ul>
+    <ul class="live-receipt-track">${html}</ul>
   </div>
 </section>`;
 }
@@ -3301,7 +3286,7 @@ function createLiveReceiptRows(caseData) {
   return Array.from({ length: 50 }, (_, index) => {
     const randKey = `${seed}-live-${index}`;
     const date = new Date(baseDate);
-    date.setDate(baseDate.getDate() - seededInt(`${randKey}-day`, 0, 7));
+    date.setDate(baseDate.getDate() - seededInt(`${randKey}-day`, 0, 14));
     const amount = seededInt(`${randKey}-amount`, 1600, 9800);
     const useMessage = index < 3 || seededInt(`${randKey}-type`, 0, 100) < 42;
     const text = useMessage
@@ -3355,6 +3340,14 @@ function seededInt(seed, min, max) {
 function parseDate(value) {
   const date = new Date(`${value || ""}T00:00:00+09:00`);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function latestSeoDate(...values) {
+  const dates = values
+    .map((value) => String(value || "").trim())
+    .filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value))
+    .sort();
+  return dates[dates.length - 1] || "";
 }
 
 function formatDate(value) {

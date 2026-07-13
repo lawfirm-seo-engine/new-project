@@ -275,6 +275,10 @@ a{color:inherit;text-decoration:none}
   color:var(--primary);
 }
 
+.hero-typing-q strong{
+  white-space:nowrap;
+}
+
 .hero-typing-s{
   margin:0 0 16px;
   font-size:clamp(16px,2vw,19px);
@@ -308,6 +312,10 @@ a{color:inherit;text-decoration:none}
 .domain-a .hero .hero-typing-l2{color:rgba(255,255,255,.62)}
 
 @media(max-width:640px){
+  .hero-typing-q strong{
+    white-space:normal;
+  }
+
   .hero-typing-l1,
   .hero-typing-l2{
     white-space:normal;
