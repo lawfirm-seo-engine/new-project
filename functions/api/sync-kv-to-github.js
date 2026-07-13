@@ -1,3 +1,5 @@
+import { boardPostCaseEntry, listBoardPosts } from "../_board.js";
+
 /**
  * POST /api/sync-kv-to-github
  * KV cases:index + case:{slug} → data/cases.json (GitHub)
@@ -53,6 +55,13 @@ export async function onRequestPost(context) {
     }
     const fileInfo = await fileRes.json();
     const sha = fileInfo.sha;
+    const existingCases = parseJson(await readFileContent(fileInfo, token), []);
+    const boardEntries = mergeBySlug(
+      existingCases.filter(isBoardCaseEntry),
+      await loadBoardCaseEntries(env),
+    );
+    const boardAdded = mergeIntoCases(full, boardEntries);
+    full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
 
     // ── 5. GitHub 덮어쓰기 ──────────────────────────────────────────────────
     const newContent = JSON.stringify(full, null, 2);
@@ -80,11 +89,70 @@ export async function onRequestPost(context) {
       message: `KV(${index.length}개) → GitHub cases.json 동기화 완료`,
       total: full.length,
       fromIndexOnly: fromIndex,
+      boardEntries: boardEntries.length,
+      boardAdded,
     });
 
   } catch (e) {
     return json({ ok: false, message: e.message }, 500);
   }
+}
+
+async function loadBoardCaseEntries(env) {
+  const posts = await listBoardPosts(env).catch(() => []);
+  return posts
+    .filter((post) => (post.status || "published") === "published" && post.slug)
+    .map(boardPostCaseEntry);
+}
+
+function isBoardCaseEntry(item = {}) {
+  return item?.createdBy === "board-manual" || String(item?.listingPath || "").startsWith("/board/");
+}
+
+function mergeBySlug(...groups) {
+  const bySlug = new Map();
+  groups.flat().filter((item) => item?.slug).forEach((item) => {
+    bySlug.set(item.slug, { ...(bySlug.get(item.slug) || {}), ...item });
+  });
+  return [...bySlug.values()];
+}
+
+function mergeIntoCases(cases, additions) {
+  let added = 0;
+  const bySlug = new Map(cases.map((item, index) => [item.slug, index]));
+  additions.filter((item) => item?.slug).forEach((item) => {
+    const index = bySlug.get(item.slug);
+    if (index === undefined) {
+      cases.push(item);
+      bySlug.set(item.slug, cases.length - 1);
+      added += 1;
+    } else {
+      cases[index] = { ...cases[index], ...item };
+    }
+  });
+  return added;
+}
+
+async function readFileContent(file, token) {
+  if (file.content && file.encoding !== "none") return decodeBase64(file.content).trim();
+  if (file.download_url) {
+    const res = await fetch(file.download_url, { headers: githubHeaders(token) });
+    if (res.ok) return (await res.text()).trim();
+  }
+  return "";
+}
+
+function parseJson(value, fallback) {
+  try {
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function decodeBase64(value = "") {
+  const clean = value.replace(/\n/g, "");
+  return new TextDecoder().decode(Uint8Array.from(atob(clean), (c) => c.charCodeAt(0)));
 }
 
 function githubHeaders(token) {

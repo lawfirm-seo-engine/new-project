@@ -1,3 +1,5 @@
+import { boardPostCaseEntry, listBoardPosts } from "../_board.js";
+
 export async function onRequestGet(context) {
   const { env } = context;
 
@@ -6,7 +8,7 @@ export async function onRequestGet(context) {
     if (env.CASES) {
       const idxRaw = await env.CASES.get("cases:index");
       if (idxRaw) {
-        const cases = JSON.parse(idxRaw);
+        const cases = await mergeBoardPosts(env, JSON.parse(idxRaw));
         return json({ ok: true, cases, source: "kv" });
       }
     }
@@ -24,11 +26,29 @@ export async function onRequestGet(context) {
 
     const file = await res.json();
     const raw = await readFileContent(file, token);
-    const cases = raw ? JSON.parse(raw) : [];
+    const cases = await mergeBoardPosts(env, raw ? JSON.parse(raw) : []);
     return json({ ok: true, cases, source: "github" });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+async function mergeBoardPosts(env, cases = []) {
+  const list = Array.isArray(cases) ? [...cases] : [];
+  const posts = await listBoardPosts(env).catch(() => []);
+  if (!posts.length) return list;
+
+  const bySlug = new Map(list.filter((item) => item?.slug).map((item) => [item.slug, item]));
+  posts
+    .filter((post) => (post.status || "published") === "published" && post.slug)
+    .map(boardPostCaseEntry)
+    .forEach((entry) => {
+      bySlug.set(entry.slug, { ...(bySlug.get(entry.slug) || {}), ...entry });
+    });
+
+  return [...bySlug.values()].sort((a, b) =>
+    String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || ""))
+  );
 }
 
 async function readFileContent(file, token) {

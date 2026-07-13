@@ -40,6 +40,50 @@ export function boardOgText(post = {}) {
   return normalizeSpace(post.ogText) || createBoardOgText(post.title || post.seoTitle || post.slug);
 }
 
+export function boardPostCaseEntry(post = {}) {
+  const slug = normalizeSlug(post.slug);
+  const title = boardTitle(post);
+  const description = boardDescription(post);
+  const image = boardImageUrl(post);
+  const canonical = boardPostUrl(slug);
+  const createdAt = normalizeDate(post.createdAt) || normalizeDate(post.publishedAt) || boardLastModified(post);
+  const updatedAt = boardLastModified(post);
+
+  return {
+    slug,
+    caseName: title,
+    category: "통합 허브 게시글",
+    createdAt,
+    updatedAt,
+    thumbnailUrl: image,
+    landingViews: 0,
+    reports: 0,
+    summary: description,
+    tags: ["통합 허브", "사기피해"],
+    memo: "",
+    noindex: false,
+    targetGroups: ["e"],
+    createdBy: "board-manual",
+    listingPath: `/${BOARD_PREFIX}/${encodeURIComponent(slug)}/`,
+    listingUrl: canonical,
+    landings: {
+      e: {
+        title,
+        description,
+        canonical,
+        ogTitle: title,
+        ogDescription: description,
+        ogImage: image,
+        h1: title,
+        body: [],
+        victimCases: [],
+        suspiciousCompanies: [],
+        faq: normalizeFaq(post.faq),
+      },
+    },
+  };
+}
+
 export function boardLastModified(post = {}) {
   return maxDate(post.updatedAt, post.publishedAt, post.createdAt, BOARD_REFRESHED_AT);
 }
