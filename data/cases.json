@@ -74007,5 +74007,28 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "institution-exchange"
+  },
+  {
+    "slug": "bugugjeunggwon",
+    "caseName": "부국증권 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-13",
+    "updatedAt": "2026-07-13",
+    "thumbnailUrl": "",
+    "landingViews": 5024,
+    "reports": 15,
+    "summary": "부국증권 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "부국증권",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "institution-exchange"
   }
 ]
