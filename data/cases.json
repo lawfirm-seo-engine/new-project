@@ -72264,5 +72264,28 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "live-dating"
+  },
+  {
+    "slug": "turaibeutv",
+    "caseName": "투라이브TV 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-13",
+    "updatedAt": "2026-07-13",
+    "thumbnailUrl": "",
+    "landingViews": 7553,
+    "reports": 20,
+    "summary": "투라이브TV 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "투라이브TV",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
   }
 ]
