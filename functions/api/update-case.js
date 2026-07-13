@@ -165,6 +165,9 @@ function buildIndexEntry(c) {
     targetGroups: c.targetGroups || [],
     createdBy: c.createdBy || "",
     fraudType: c.fraudType || "",
+    ...(c.listingPath ? { listingPath: c.listingPath } : {}),
+    ...(c.publicPath ? { publicPath: c.publicPath } : {}),
+    ...(c.listingUrl ? { listingUrl: c.listingUrl } : {}),
   };
 }
 

@@ -75,6 +75,30 @@ export function buildLandingUrl(group, slug = "") {
   return `${siteUrl}/${prefix}/${encodeURIComponent(slug)}${finalSuffix}/`;
 }
 
+export function landingUrlForItem(group, item = {}) {
+  const siteUrl = String(group.siteUrl || (group.host ? `https://${group.host}` : "")).replace(/\/$/, "");
+  const landingKey = group.landingKey || group.key;
+  const candidate =
+    item.listingUrl ||
+    item.publicUrl ||
+    item.landings?.[landingKey]?.canonical ||
+    item.landings?.[group.key]?.canonical ||
+    "";
+
+  if (candidate && siteUrl) {
+    const value = String(candidate).trim();
+    if (value.startsWith(`${siteUrl}/`)) return value;
+    if (value.startsWith("/")) return `${siteUrl}${value}`;
+  }
+
+  const path = item.listingPath || item.publicPath || "";
+  if (path && siteUrl && String(path).startsWith("/")) {
+    return `${siteUrl}${path}`;
+  }
+
+  return buildLandingUrl(group, item.slug || "");
+}
+
 export function getLanding(item = {}, group = {}) {
   const landingKey = group.landingKey || group.key;
   return item.landings?.[landingKey] || item.landings?.[group.key] || {};
@@ -141,7 +165,7 @@ export function buildSitemapXml(group, cases = [], options = {}) {
       const lastmod = options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
       const priority = options.recent ? "1.0" : "0.9";
       const changefreq = options.recent ? "hourly" : "daily";
-      const loc = escapeXml(buildLandingUrl(group, item.slug));
+      const loc = escapeXml(landingUrlForItem(group, item));
       const imgLoc = escapeXml(caseOgImageUrl(item.slug, base));
       const imgTitle = escapeXml(item.caseName || item.slug);
       return `  <url><loc>${loc}</loc><lastmod>${escapeXml(lastmod)}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority><image:image><image:loc>${imgLoc}</image:loc><image:title>${imgTitle}</image:title></image:image></url>`;
@@ -225,7 +249,7 @@ function normalizeRssText(value = "", item = {}) {
 function buildRssItem(group, item) {
   const landing = getLanding(item, group);
   const standard = isStandardLandingCase(item) && (group.landingKey || group.key) === "a";
-  const canonical = standard ? buildLandingUrl(group, item.slug) : (landing.canonical || buildLandingUrl(group, item.slug));
+  const canonical = standard ? buildLandingUrl(group, item.slug) : landingUrlForItem(group, item);
   const fallbackTitle = rssFallbackTitle(item, group);
   const title = standard ? standardPageTitle(item.caseName || item.name || item.slug) : (landing.title || fallbackTitle);
   const description = standard

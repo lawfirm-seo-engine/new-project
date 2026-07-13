@@ -289,7 +289,8 @@ export async function onRequest(context) {
 
   // /[pathPrefix]/[slug]-[suffix]/ 형태의 랜딩 페이지만 처리
   const parts = pathname.replace(/^\/|\/$/g, "").split("/");
-  if (parts.length !== 2 || parts[0] !== group.pathPrefix || !parts[1]) {
+  const isBoardRoute = url.host === "gnlaw-center.co.kr" && parts[0] === "board";
+  if (parts.length !== 2 || (!isBoardRoute && parts[0] !== group.pathPrefix) || !parts[1]) {
     return next();
   }
 
@@ -302,7 +303,7 @@ export async function onRequest(context) {
   }
 
   const urlSlug = decodeURIComponent(parts[1]);
-  const suffix = group.urlSlugSuffix;
+  const suffix = isBoardRoute ? "" : group.urlSlugSuffix;
 
   // new-project-9o2 전용 예외: suffix 없이 원본 URL 그대로 사용
   const NO_SUFFIX_SLUGS = [
@@ -1099,7 +1100,16 @@ function isManualLandingCase(caseData = {}) {
     "voicephishing-manual",
     "chaemubu-manual",
     "tujasagi-manual",
+    "board-manual",
   ].includes(caseData.createdBy);
+}
+
+function canonicalForLanding(landing = {}, group = {}, fallback = "") {
+  const siteUrl = String(group.siteUrl || "").replace(/\/$/, "");
+  const canonical = String(landing.canonical || "").trim();
+  if (siteUrl && canonical.startsWith(`${siteUrl}/`)) return canonical;
+  if (siteUrl && canonical.startsWith("/")) return `${siteUrl}${canonical}`;
+  return fallback;
 }
 
 function renderLanding(caseData, group, origin, relatedCases = []) {
@@ -1125,7 +1135,8 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const isNoSuffixSlug = group.siteUrl === "https://gnlaw-criminal.co.kr" && NO_SUFFIX_SLUGS_RENDER.includes(caseData.slug);
   const oldSuffixOverride = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_CANONICAL[caseData.slug];
   const urlSuffix = isAllDomainsNoSuffix ? "" : isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
-  const canonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
+  const fallbackCanonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
+  const canonical = canonicalForLanding(landing, group, fallbackCanonical);
   const ogImage = caseOgImageUrl(caseData.slug || "landing", group.siteUrl);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate);

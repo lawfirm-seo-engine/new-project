@@ -11,6 +11,7 @@ import {
   caseOgImageUrl,
   getRecentCases,
   isCaseAllowedForGroup,
+  landingUrlForItem,
 } from "../functions/_seo.js";
 
 const root = process.cwd();
@@ -1397,6 +1398,7 @@ function isManualLandingItem(item = {}) {
     "voicephishing-manual",
     "chaemubu-manual",
     "tujasagi-manual",
+    "board-manual",
   ].includes(item.createdBy);
 }
 
@@ -1487,7 +1489,7 @@ function createHubContent(group) {
     const displayTitleRaw = landingDisplayTitle(item, suffix);
     const caseName = escapeHtml(caseNameRaw);
     const displayTitle = escapeHtml(displayTitleRaw);
-    const url = buildRelativeLandingPath(group, item.slug);
+    const url = buildRelativeLandingPath(group, item);
     const todayBadge = item.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
     return `
         <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}" data-date="${escapeHtml(entry.date)}">
@@ -1516,10 +1518,11 @@ function createHubContent(group) {
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-  function manual(c){return !!c&&['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual'].indexOf(c.createdBy)>=0;}
+  function manual(c){return !!c&&['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual','board-manual'].indexOf(c.createdBy)>=0;}
   function normName(n,c){if(manual(c))return String(n||'').trim();var s=String(n||'').trim();if(/사기$/.test(s))return s;var clean=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(clean)?clean:clean+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
   function landingPath(slug){var extra=ALL_NO_SUFFIX_SLUGS[slug]?'':NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
+  function itemPath(item){if(item&&(item.listingPath||item.publicPath)){return item.listingPath||item.publicPath;}return landingPath(item.slug);}
   function getStatus(slug,createdBy){if(createdBy==='recovery-manual'||createdBy==='jipjeong-manual'){return'사건 접수 중';}if(TARGET_KEY==='c'||TARGET_KEY==='lc'){var h=seededH(slug+'-success-full');return(h%100)<25?'전액 회수':(seededH(slug+'-success-rate')%50+48)+'% 회수';}return{a:'형사 진행중',b:'민사 진행중',d:'사건 접수중',e:'사건 진행중'}[GKEY]||'진행중';}
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
@@ -1530,7 +1533,7 @@ function createHubContent(group) {
     var dt=manual(item)||!SUFFIX?cn:cn+' '+SUFFIX;
     var summary=compact(item.summary||'');
     var search=[cn,dt,item.slug,summary,item.createdAt,item.updatedAt].filter(Boolean).join(' ');
-    return '<a class="fresh-landing-link" href="'+landingPath(item.slug)+'" data-title="'+attr(cn)+'" data-slug="'+attr(item.slug)+'" data-search="'+attr(search)+'">'
+    return '<a class="fresh-landing-link" href="'+itemPath(item)+'" data-title="'+attr(cn)+'" data-slug="'+attr(item.slug)+'" data-search="'+attr(search)+'">'
       +'<span class="fresh-landing-no">No. '+(noMap[item.slug]||'')+'</span>'
       +'<strong>'+esc(dt)+'</strong>'
       +'<span>'+esc(summary.slice(0,135))+'</span>'
@@ -1655,7 +1658,7 @@ function createHubContent(group) {
             var cn=esc(normName(item.caseName||'',item));
             var dt=manual(item)||!SUFFIX?cn:cn+' '+SUFFIX;
             var a=document.createElement('a');
-            a.href=landingPath(item.slug);
+            a.href=itemPath(item);
             a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;a.dataset.date=entry._date;
             a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
@@ -1749,8 +1752,10 @@ function createTypeEntrySection(group) {
   </section>`;
 }
 
-function buildRelativeLandingPath(group, slug) {
-  const fullUrl = buildSeoLandingUrl(group, slug);
+function buildRelativeLandingPath(group, itemOrSlug) {
+  const isItem = itemOrSlug && typeof itemOrSlug === "object";
+  const slug = isItem ? itemOrSlug.slug : itemOrSlug;
+  const fullUrl = isItem ? landingUrlForItem(group, itemOrSlug) : buildSeoLandingUrl(group, slug);
   const baseUrl = String(group.siteUrl || "").replace(/\/$/, "");
   return fullUrl.startsWith(baseUrl)
     ? fullUrl.slice(baseUrl.length) || "/"
@@ -1813,7 +1818,7 @@ function createFreshLandingSection(group, sortedCases, caseNoMap, suffix, option
     const summary = escapeHtml(summaryRaw.slice(0, 135));
     const date = escapeHtml(item.updatedAt || item.createdAt || "");
     const searchText = escapeHtml([cleanName, displayTitleRaw, item.slug, summaryRaw, item.createdAt, item.updatedAt].filter(Boolean).join(" "));
-    return `<a class="fresh-landing-link" href="${buildRelativeLandingPath(group, item.slug)}" data-title="${escapeHtml(cleanName)}" data-slug="${escapeHtml(item.slug)}" data-search="${searchText}">
+    return `<a class="fresh-landing-link" href="${buildRelativeLandingPath(group, item)}" data-title="${escapeHtml(cleanName)}" data-slug="${escapeHtml(item.slug)}" data-search="${searchText}">
       <span class="fresh-landing-no">No. ${caseNoMap.get(item.slug) ?? ""}</span>
       <strong>${displayTitle}</strong>
       <span>${summary}</span>

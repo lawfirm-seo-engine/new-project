@@ -63,6 +63,9 @@ function buildIndexEntry(c) {
     noindex: c.noindex || false,
     targetGroups: Array.isArray(c.targetGroups) ? c.targetGroups : [],
     createdBy: c.createdBy || "",
+    ...(c.listingPath ? { listingPath: c.listingPath } : {}),
+    ...(c.publicPath ? { publicPath: c.publicPath } : {}),
+    ...(c.listingUrl ? { listingUrl: c.listingUrl } : {}),
   };
 }
 

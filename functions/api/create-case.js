@@ -214,6 +214,9 @@ function buildIndexEntry(c) {
     reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
     targetGroups: c.targetGroups || [], createdBy: c.createdBy || "", fraudType: c.fraudType || "",
   };
+  if (c.listingPath) entry.listingPath = c.listingPath;
+  if (c.publicPath) entry.publicPath = c.publicPath;
+  if (c.listingUrl) entry.listingUrl = c.listingUrl;
   if (c.hideFromListing) entry.hideFromListing = true;
   return entry;
 }
