@@ -76,6 +76,10 @@
           </div>
         </div>
 
+        <label for="ogText">OG 이미지 문구</label>
+        <input id="ogText" placeholder="예: TMEKRPORTAL 사칭 사기">
+        <p class="hint">비워두면 제목에서 사건명을 읽어 OG 이미지에 자동으로 표시합니다.</p>
+
         <label for="seoTitle">SEO 제목</label>
         <input id="seoTitle" placeholder="비워두면 제목 사용">
 
@@ -130,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('publishedAt').value = todayKst();
   $('title').addEventListener('input', () => {
     if (!$('originalSlug').value || !$('slug').value) $('slug').value = createSlug($('title').value);
+    if (!$('ogText').value.trim()) $('ogText').value = createOgText($('title').value);
     updateOpenLink();
   });
   $('slug').addEventListener('input', updateOpenLink);
@@ -169,6 +174,7 @@ async function editPost(slug) {
   $('publishedAt').value = post.publishedAt || post.createdAt || todayKst();
   $('thumbnailUrl').value = post.thumbnailUrl || '';
   $('imageUrl').value = post.imageUrl || '';
+  $('ogText').value = post.ogText || createOgText(post.title || post.seoTitle || '');
   $('seoTitle').value = post.seoTitle || '';
   $('metaDescription').value = post.metaDescription || '';
   $('body').value = post.body || '';
@@ -190,6 +196,7 @@ async function savePost(event) {
     publishedAt: $('publishedAt').value,
     thumbnailUrl: $('thumbnailUrl').value.trim(),
     imageUrl: $('imageUrl').value.trim(),
+    ogText: $('ogText').value.trim() || createOgText($('title').value),
     seoTitle: $('seoTitle').value.trim(),
     metaDescription: $('metaDescription').value.trim(),
     body: $('body').value.trim(),
@@ -298,6 +305,23 @@ function createSlug(value) {
     .replace(/\s+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 80);
+}
+
+function createOgText(value) {
+  let text = String(value || '')
+    .replace(/\s+/g, ' ')
+    .replace(/[|｜].*$/, '')
+    .replace(/\s*[-:：]\s*(피해|대응|방법|절차|가이드|정리|상담|회복|구제).*/u, '')
+    .trim();
+  const scamMatch = text.match(/^(.{2,42}?(?:사칭\s*사기|투자\s*사기|보이스피싱|피싱|사기))/u);
+  if (scamMatch) text = scamMatch[1].trim();
+  else text = text.split(/[,\n]/)[0].trim();
+  text = text
+    .replace(/\s*(피해\s*)?(회복|대응|방법|절차|가이드|상담|구제|총정리).*$/u, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (text && !/(사기|피싱|스캠|scam)/i.test(text)) text = `${text} 사칭 사기`;
+  return text.slice(0, 44).trim();
 }
 </script>
 </body>

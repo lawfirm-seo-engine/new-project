@@ -7,6 +7,7 @@ import webpEncodeWasm from "@jsquash/webp/codec/enc/webp_enc.wasm";
 import { defaultOptions as webpDefaultOptions } from "@jsquash/webp/meta.js";
 import { initEmscriptenModule } from "@jsquash/webp/utils.js";
 import { OG_IMAGE_VERSION } from "../_seo.js";
+import { BOARD_POST_KEY_PREFIX, boardOgText } from "../_board.js";
 
 const FONT_KV_KEY = "og:font:pretendard-black-v1";
 const FONT_CDN_URL =
@@ -253,7 +254,12 @@ export async function onRequest(context) {
 
   const rawSlug = rawName.replace(/\.(png|webp)$/i, "").slice(0, 180);
   const isPowerlink = rawSlug.startsWith("powerlink-");
-  const slug = isPowerlink ? rawSlug.slice("powerlink-".length) : rawSlug;
+  const isBoard = rawSlug.startsWith("board-");
+  const slug = isPowerlink
+    ? rawSlug.slice("powerlink-".length)
+    : isBoard
+      ? rawSlug.slice("board-".length)
+      : rawSlug;
 
   if (!slug || slug === "landing") {
     return templateImageResponse(url, method, format, "LANDING");
@@ -274,17 +280,21 @@ export async function onRequest(context) {
   try {
     const raw = isPowerlink
       ? await env.CASES?.get?.(`powerlink:${slug}`)
+      : isBoard
+        ? await env.CASES?.get?.(`${BOARD_POST_KEY_PREFIX}${slug}`)
       : await env.CASES?.get?.(`case:${slug}`);
     if (raw) {
       const data = JSON.parse(raw);
-      title = cleanTitle(
-        data.ogText ||
-        data.title ||
-        data.h1 ||
-        data.caseName ||
-        data.name ||
-        title,
-      );
+      title = cleanTitle(isBoard
+        ? boardOgText(data)
+        : (
+          data.ogText ||
+          data.title ||
+          data.h1 ||
+          data.caseName ||
+          data.name ||
+          title
+        ));
     }
   } catch (_) {}
 

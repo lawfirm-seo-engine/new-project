@@ -933,6 +933,7 @@ function htmlResponse(body, status = 200) {
 }
 
 function renderManualArticle(body = "") {
+  return renderManualArticleParts(body);
   const lines = String(body || "").replace(/\r\n/g, "\n").split("\n");
   const html = [];
   let paragraph = [];
@@ -1450,6 +1451,7 @@ function normalizeManualBodyText(value = "") {
 }
 
 function renderManualBodyArray(items) {
+  return renderManualArticleParts(items);
   const parts = [];
   let listBuf = [];
   function flushList() {
@@ -1470,6 +1472,129 @@ function renderManualBodyArray(items) {
   }
   flushList();
   return parts.join("\n");
+}
+
+function renderManualArticleParts(input) {
+  const lines = manualInputToLines(input);
+  const parts = [];
+  let paragraph = [];
+  let listBuf = [];
+  let previousBlank = true;
+  let hasH2 = false;
+
+  function flushParagraph() {
+    if (!paragraph.length) return;
+    parts.push(`<p>${paragraph.map((line) => esc(line)).join("<br>")}</p>`);
+    paragraph = [];
+  }
+
+  function flushList() {
+    if (!listBuf.length) return;
+    parts.push(`<ul>${listBuf.map((text) => `<li>${esc(text)}</li>`).join("")}</ul>`);
+    listBuf = [];
+  }
+
+  function pushHeading(level, text) {
+    flushParagraph();
+    flushList();
+    const tag = level === "h3" ? "h3" : "h2";
+    if (tag === "h2") hasH2 = true;
+    parts.push(`<${tag}>${esc(text)}</${tag}>`);
+  }
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = normalizeManualBodyText(String(lines[index] || "").trim());
+    if (!line) {
+      flushParagraph();
+      flushList();
+      previousBlank = true;
+      continue;
+    }
+
+    const explicit = line.match(/^(#{1,4})\s+(.+)/);
+    if (explicit) {
+      pushHeading(explicit[1].length >= 3 ? "h3" : "h2", explicit[2]);
+      previousBlank = false;
+      continue;
+    }
+
+    const nextLine = nextManualLine(lines, index);
+    const inferredHeading = inferManualHeadingLevel(line, { previousBlank, nextLine, hasH2 });
+    if (inferredHeading) {
+      pushHeading(inferredHeading, stripManualHeadingMarker(line));
+      previousBlank = false;
+      continue;
+    }
+
+    const bullet = line.match(/^(?:[-*•·ㆍ]|[①-⑳])\s+(.+)/u);
+    if (bullet) {
+      flushParagraph();
+      listBuf.push(bullet[1]);
+      previousBlank = false;
+      continue;
+    }
+
+    const numbered = line.match(/^\d{1,2}[.)]\s+(.+)/);
+    if (numbered && !looksLikeManualHeading(numbered[1], nextLine)) {
+      flushParagraph();
+      listBuf.push(numbered[1]);
+      previousBlank = false;
+      continue;
+    }
+
+    flushList();
+    paragraph.push(line);
+    previousBlank = false;
+  }
+
+  flushParagraph();
+  flushList();
+  return parts.length ? parts.join("\n") : "<p>원고가 입력되지 않았습니다.</p>";
+}
+
+function manualInputToLines(input) {
+  const text = Array.isArray(input)
+    ? input.map((item) => String(item || "").trim()).filter(Boolean).join("\n\n")
+    : String(input || "");
+  return text.replace(/\r\n/g, "\n").split("\n");
+}
+
+function nextManualLine(lines, index) {
+  for (let cursor = index + 1; cursor < lines.length; cursor += 1) {
+    const line = normalizeManualBodyText(String(lines[cursor] || "").trim());
+    if (line) return line;
+  }
+  return "";
+}
+
+function inferManualHeadingLevel(line, { previousBlank = true, nextLine = "", hasH2 = false } = {}) {
+  if (!previousBlank || !nextLine) return "";
+  if (/^Q\s*\d*[\).:]?\s+/i.test(line)) return "h3";
+  const numbered = line.match(/^(?:\d{1,2}[.)]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.)]?)\s+(.+)/u);
+  if (numbered && looksLikeManualHeading(numbered[1], nextLine)) return "h2";
+  const koreanSub = line.match(/^[가-하][.)]\s+(.+)/u);
+  if (koreanSub && looksLikeManualHeading(koreanSub[1], nextLine)) return hasH2 ? "h3" : "h2";
+  if (/[:：]$/.test(line) && looksLikeManualHeading(line.replace(/[:：]$/, ""), nextLine)) return hasH2 ? "h3" : "h2";
+  if (!looksLikeManualHeading(line, nextLine)) return "";
+  if (/(FAQ|Q&A|자주\s*묻는\s*질문|질문과\s*답변)/i.test(line)) return "h2";
+  if (/(개요|핵심|요약|피해|대응|절차|방법|준비|자료|증거|사례|상담|회수|고소|지급정지|가압류|체크리스트|주의|유의|정리|법적|신청|확인|구제|구조|유형)/u.test(line)) return "h2";
+  return line.length <= 34 ? (hasH2 ? "h3" : "h2") : "";
+}
+
+function stripManualHeadingMarker(line = "") {
+  return String(line || "")
+    .replace(/^(?:\d{1,2}[.)]|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+[.)]?|[가-하][.)])\s+/u, "")
+    .replace(/[:：]$/, "")
+    .trim();
+}
+
+function looksLikeManualHeading(text = "", nextLine = "") {
+  const clean = String(text || "").trim();
+  if (!clean || !nextLine || clean.length > 72) return false;
+  if (/[.!。]$/.test(clean)) return false;
+  if (/(습니다|합니다|됩니다|입니다|니다|였다|했다|된다|한다|이다)\.?$/u.test(clean)) return false;
+  if (clean.split(/\s+/).length > 10) return false;
+  return true;
 }
 
 function normalizeManualLine(value = "") {

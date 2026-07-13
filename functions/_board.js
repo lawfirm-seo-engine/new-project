@@ -1,3 +1,5 @@
+import { OG_IMAGE_VERSION } from "./_seo.js";
+
 export const BOARD_HOST = "gnlaw-center.co.kr";
 export const BOARD_PREFIX = "board";
 export const BOARD_SITE_URL = "https://gnlaw-center.co.kr";
@@ -28,7 +30,14 @@ export function boardDescription(post = {}) {
 }
 
 export function boardImageUrl(post = {}) {
-  return normalizeSpace(post.imageUrl) || normalizeSpace(post.thumbnailUrl) || DEFAULT_OG_IMAGE;
+  const customImage = normalizeSpace(post.imageUrl) || normalizeSpace(post.thumbnailUrl);
+  if (customImage) return customImage;
+  const slug = normalizeSlug(post.slug);
+  return slug ? `${BOARD_SITE_URL}/og/board-${encodeURIComponent(slug)}.webp?v=${OG_IMAGE_VERSION}` : DEFAULT_OG_IMAGE;
+}
+
+export function boardOgText(post = {}) {
+  return normalizeSpace(post.ogText) || createBoardOgText(post.title || post.seoTitle || post.slug);
 }
 
 export function boardLastModified(post = {}) {
@@ -109,6 +118,7 @@ export function normalizeBoardPost(input = {}, existing = {}, options = {}) {
   const thumbnailUrl = normalizeSpace(input.thumbnailUrl ?? existing.thumbnailUrl ?? imageUrl);
   const seoTitle = normalizeSpace(input.seoTitle ?? existing.seoTitle);
   const metaDescription = normalizeSpace(input.metaDescription ?? existing.metaDescription) || excerpt;
+  const ogText = normalizeSpace(input.ogText ?? existing.ogText) || createBoardOgText(title || seoTitle);
   const createdAt = normalizeDate(input.createdAt ?? existing.createdAt) || now;
   const updatedAt = options.forIndex
     ? (normalizeDate(input.updatedAt ?? existing.updatedAt) || createdAt)
@@ -122,6 +132,7 @@ export function normalizeBoardPost(input = {}, existing = {}, options = {}) {
     excerpt,
     thumbnailUrl,
     imageUrl,
+    ogText,
     seoTitle,
     metaDescription,
     faq: normalizeFaq(input.faq ?? existing.faq),
@@ -143,6 +154,7 @@ export function boardIndexEntry(post = {}) {
     excerpt: post.excerpt || "",
     thumbnailUrl: post.thumbnailUrl || "",
     imageUrl: post.imageUrl || "",
+    ogText: post.ogText || "",
     seoTitle: post.seoTitle || "",
     metaDescription: post.metaDescription || "",
     pinned: Boolean(post.pinned),
@@ -198,6 +210,25 @@ export function createExcerpt(value = "", limit = 120) {
   const text = stripHtml(value).replace(/[#*_>`~\[\]()]/g, " ").replace(/\s+/g, " ").trim();
   if (!text) return "사기 피해 대응과 피해 회복 절차를 정리한 게시글입니다.";
   return text.length > limit ? `${text.slice(0, limit - 1)}…` : text;
+}
+
+export function createBoardOgText(value = "") {
+  let text = normalizeSpace(value)
+    .replace(/[|｜].*$/, "")
+    .replace(/\s*[-:：]\s*(피해|대응|방법|절차|가이드|정리|상담|회복|구제).*/u, "")
+    .trim();
+
+  const scamMatch = text.match(/^(.{2,42}?(?:사칭\s*사기|투자\s*사기|보이스피싱|피싱|사기))/u);
+  if (scamMatch) text = scamMatch[1].trim();
+  else text = text.split(/[,\n]/)[0].trim();
+
+  text = text
+    .replace(/\s*(피해\s*)?(회복|대응|방법|절차|가이드|상담|구제|총정리).*$/u, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (text && !/(사기|피싱|스캠|scam)/i.test(text)) text = `${text} 사칭 사기`;
+  return text.slice(0, 44).trim();
 }
 
 function normalizeFaq(value) {
