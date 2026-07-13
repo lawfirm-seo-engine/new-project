@@ -23,6 +23,14 @@
     textarea{min-height:180px;resize:vertical;line-height:1.55}
     .body-text{min-height:360px}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .og-auto{display:grid;grid-template-columns:116px 1fr;gap:12px;align-items:center;margin:12px 0;padding:12px;border:1px solid #dbe4f0;border-radius:8px;background:#f8faff}
+    .og-auto img{width:116px;height:116px;border-radius:6px;object-fit:cover;background:#e8edf4}
+    .og-auto strong{display:block;font-size:13px;margin-bottom:4px;color:#172033}
+    .og-auto code{display:block;word-break:break-all;font-size:11px;color:#64748b}
+    .editor-tools{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+    .tool-btn{height:32px;padding:0 10px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#263244;font-size:12px;font-weight:800;cursor:pointer}
+    .tool-btn:hover{background:#f0f4fa}
+    .image-tools{margin:8px 0 4px;padding:12px;border:1px solid #e2e8f0;border-radius:8px;background:#fbfcff}
     .check{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:800;color:#4b5a70}
     .check input{width:auto}
     .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
@@ -65,14 +73,12 @@
           </div>
         </div>
 
-        <div class="row">
+        <div class="og-auto">
+          <img id="ogPreview" alt="자동 생성 OG 미리보기">
           <div>
-            <label for="thumbnailUrl">썸네일 URL</label>
-            <input id="thumbnailUrl" placeholder="목록용 이미지 URL">
-          </div>
-          <div>
-            <label for="imageUrl">대표 이미지 URL</label>
-            <input id="imageUrl" placeholder="OG/본문 대표 이미지 URL">
+            <strong id="ogText">OG 텍스트 자동 생성</strong>
+            <p class="hint">썸네일과 대표 이미지는 기존 랜딩페이지와 같은 템플릿에 위 문구만 넣어 자동 생성됩니다.</p>
+            <code id="ogUrl"></code>
           </div>
         </div>
 
@@ -82,9 +88,34 @@
         <label for="metaDescription">메타 설명</label>
         <textarea id="metaDescription" style="min-height:80px" placeholder="비워두면 본문 앞부분으로 자동 생성"></textarea>
 
+        <label>대표 이미지 메타</label>
+        <div class="row">
+          <input id="imageAlt" placeholder="이미지 alt (비워두면 제목 사용)">
+          <input id="imageCaption" placeholder="이미지 caption (비워두면 alt 사용)">
+        </div>
+        <textarea id="imageDescription" style="min-height:80px" placeholder="이미지 description (비워두면 메타 설명 사용)"></textarea>
+
         <label for="body">본문</label>
+        <div class="editor-tools" aria-label="본문 편집 도구">
+          <button class="tool-btn" type="button" onclick="insertHeading(2)">H2</button>
+          <button class="tool-btn" type="button" onclick="insertHeading(3)">H3</button>
+          <button class="tool-btn" type="button" onclick="insertHeading(4)">H4</button>
+          <button class="tool-btn" type="button" onclick="insertBullet()">목록</button>
+          <button class="tool-btn" type="button" onclick="insertParagraphBreak()">문단</button>
+        </div>
+        <div class="image-tools">
+          <div class="row">
+            <input id="bodyImageUrl" placeholder="본문 이미지 URL (https://...)">
+            <input id="bodyImageAlt" placeholder="이미지 alt">
+          </div>
+          <div class="row" style="margin-top:8px">
+            <input id="bodyImageCaption" placeholder="이미지 caption (선택)">
+            <button class="btn sec" type="button" onclick="insertBodyImage()">본문에 이미지 삽입</button>
+          </div>
+          <p class="hint">이미지는 파일로 저장하지 않고 URL만 본문에 삽입합니다. 렌더링 시 lazy-load로 출력됩니다.</p>
+        </div>
         <textarea id="body" class="body-text" required placeholder="## 소제목&#10;본문을 입력하세요.&#10;&#10;- 목록 문장"></textarea>
-        <p class="hint">본문은 줄바꿈, `## 소제목`, `### 소제목`, `- 목록` 형식으로 작성할 수 있습니다.</p>
+        <p class="hint">본문은 줄바꿈, `H2 제목`, `H3 제목`, `H4 제목`, `## 제목`, `### 제목`, `#### 제목`, `- 목록`, `![alt](이미지URL "caption")` 형식으로 작성할 수 있습니다.</p>
 
         <label for="faq">FAQ / Schema</label>
         <textarea id="faq" style="min-height:110px" placeholder="질문 | 답변&#10;질문 | 답변"></textarea>
@@ -122,6 +153,7 @@
 <script>
 const API = '/api/center-board';
 const SITE = 'https://gnlaw-center.co.kr/board/';
+const OG_IMAGE_VERSION = '20260713a1';
 let posts = [];
 
 const $ = (id) => document.getElementById(id);
@@ -130,10 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
   $('publishedAt').value = todayKst();
   $('title').addEventListener('input', () => {
     if (!$('originalSlug').value || !$('slug').value) $('slug').value = createSlug($('title').value);
+    updateOgPreview();
     updateOpenLink();
   });
-  $('slug').addEventListener('input', updateOpenLink);
+  $('slug').addEventListener('input', () => { updateOgPreview(); updateOpenLink(); });
   $('form').addEventListener('submit', savePost);
+  updateOgPreview();
   loadPosts();
 });
 
@@ -167,15 +201,17 @@ async function editPost(slug) {
   $('title').value = post.title || '';
   $('slug').value = post.slug || '';
   $('publishedAt').value = post.publishedAt || post.createdAt || todayKst();
-  $('thumbnailUrl').value = post.thumbnailUrl || '';
-  $('imageUrl').value = post.imageUrl || '';
   $('seoTitle').value = post.seoTitle || '';
   $('metaDescription').value = post.metaDescription || '';
+  $('imageAlt').value = post.imageAlt || '';
+  $('imageCaption').value = post.imageCaption || '';
+  $('imageDescription').value = post.imageDescription || '';
   $('body').value = post.body || '';
   $('faq').value = (post.faq || []).map((item) => `${item.question} | ${item.answer}`).join('\n');
   $('pinned').checked = Boolean(post.pinned);
   $('status').value = post.status || 'published';
   $('deleteBtn').disabled = false;
+  updateOgPreview(post);
   updateOpenLink();
   show('수정할 게시글을 불러왔습니다.', true);
 }
@@ -188,10 +224,11 @@ async function savePost(event) {
     title: $('title').value.trim(),
     slug: $('slug').value.trim(),
     publishedAt: $('publishedAt').value,
-    thumbnailUrl: $('thumbnailUrl').value.trim(),
-    imageUrl: $('imageUrl').value.trim(),
     seoTitle: $('seoTitle').value.trim(),
     metaDescription: $('metaDescription').value.trim(),
+    imageAlt: $('imageAlt').value.trim(),
+    imageCaption: $('imageCaption').value.trim(),
+    imageDescription: $('imageDescription').value.trim(),
     body: $('body').value.trim(),
     faq: parseFaq($('faq').value),
     pinned: $('pinned').checked,
@@ -233,11 +270,74 @@ function resetForm() {
   $('deleteBtn').disabled = true;
   $('openLink').href = SITE;
   $('msg').textContent = '';
+  updateOgPreview();
 }
 
 function updateOpenLink() {
   const slug = $('slug').value.trim();
   $('openLink').href = slug ? `${SITE}${encodeURIComponent(slug)}/` : SITE;
+}
+
+function updateOgPreview(post = null) {
+  const title = post?.title || $('title')?.value || '';
+  const slug = post?.slug || $('slug')?.value || createSlug(title);
+  const revision = post?.revision || Date.now();
+  const text = post?.ogText || extractOgText(title);
+  const url = slug ? `https://gnlaw-center.co.kr/og/board-${encodeURIComponent(slug)}.webp?v=${OG_IMAGE_VERSION}&r=${encodeURIComponent(revision)}&t=${encodeURIComponent(text)}` : 'https://gnlaw-center.co.kr/assets/og-template.webp';
+  $('ogText').textContent = text ? `OG 텍스트: ${text}` : 'OG 텍스트 자동 생성';
+  $('ogUrl').textContent = url;
+  $('ogPreview').src = url;
+}
+
+function extractOgText(value) {
+  const source = String(value || '').replace(/\s+/g, ' ').trim();
+  const exact = source.match(/^(.{1,42}?사칭\s*사기)(?:[\s,.:;!?·-]|$)/);
+  if (exact) return exact[1].replace(/\s+/g, ' ').trim();
+  let base = (source.split(/[,\n\r]/)[0] || source)
+    .replace(/\s*(출금\s*불가|출금\s*거부|피해\s*회복|피해\s*대응|형사고소|민사\s*대응|대응\s*방법|방법|절차).*$/i, '')
+    .replace(/\s*(게시글|안내|정리)\s*$/i, '')
+    .trim();
+  if (!base) base = '사기 피해';
+  if (/사칭\s*사기$/i.test(base)) return base;
+  if (/사기$/i.test(base)) base = base.replace(/\s*사기$/i, '').trim();
+  return `${base} 사칭 사기`.replace(/\s+/g, ' ').trim();
+}
+
+function insertAtCursor(text) {
+  const el = $('body');
+  const start = el.selectionStart || 0;
+  const end = el.selectionEnd || 0;
+  const before = el.value.slice(0, start);
+  const after = el.value.slice(end);
+  const prefix = before && !before.endsWith('\n') ? '\n' : '';
+  const suffix = after && !after.startsWith('\n') ? '\n' : '';
+  el.value = `${before}${prefix}${text}${suffix}${after}`;
+  const next = start + prefix.length + text.length;
+  el.focus();
+  el.setSelectionRange(next, next);
+}
+
+function insertHeading(level) {
+  insertAtCursor(`${'#'.repeat(level)} 소제목`);
+}
+
+function insertBullet() {
+  insertAtCursor('- 목록 항목');
+}
+
+function insertParagraphBreak() {
+  insertAtCursor('\n');
+}
+
+function insertBodyImage() {
+  const url = $('bodyImageUrl').value.trim();
+  const alt = $('bodyImageAlt').value.trim() || '게시글 본문 이미지';
+  const caption = $('bodyImageCaption').value.trim();
+  if (!/^https?:\/\/[^\s"'<>]+$/i.test(url)) return show('본문 이미지 URL은 https:// 형식으로 입력해주세요.', false);
+  insertAtCursor(caption ? `![${alt}](${url} "${caption}")` : `![${alt}](${url})`);
+  $('bodyImageUrl').value = '';
+  $('bodyImageAlt').value = '';
+  $('bodyImageCaption').value = '';
 }
 
 function parseFaq(text) {

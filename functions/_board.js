@@ -30,14 +30,17 @@ export function boardDescription(post = {}) {
 }
 
 export function boardImageUrl(post = {}) {
-  const customImage = normalizeSpace(post.imageUrl) || normalizeSpace(post.thumbnailUrl);
-  if (customImage) return customImage;
   const slug = normalizeSlug(post.slug);
-  return slug ? `${BOARD_SITE_URL}/og/board-${encodeURIComponent(slug)}.webp?v=${OG_IMAGE_VERSION}` : DEFAULT_OG_IMAGE;
+  if (!slug) return DEFAULT_OG_IMAGE;
+  const revision = normalizeSpace(post.revision) || boardLastModified(post);
+  return `${BOARD_SITE_URL}/og/board-${encodeURIComponent(slug)}.webp?v=${OG_IMAGE_VERSION}&r=${encodeURIComponent(revision)}`;
 }
 
 export function boardOgText(post = {}) {
-  return normalizeSpace(post.ogText) || createBoardOgText(post.title || post.seoTitle || post.slug);
+  const explicit = normalizeSpace(post.ogText);
+  if (explicit) return ensureSachingSagi(explicit);
+  const source = normalizeSpace(post.title || post.seoTitle || post.slug);
+  return ensureSachingSagi(source);
 }
 
 export function boardPostCaseEntry(post = {}) {
@@ -117,7 +120,7 @@ export async function saveBoardPost(env, input = {}) {
 
   const originalSlug = normalizeSlug(input.originalSlug || input.currentSlug || input.oldSlug);
   const existing = originalSlug ? await getBoardPost(env, originalSlug) : null;
-  const post = normalizeBoardPost(input, existing || {});
+  const post = normalizeBoardPost(input, existing || {}, { touch: true });
 
   if (!post.title) throw new Error("제목을 입력해주세요.");
   if (!post.body) throw new Error("본문을 입력해주세요.");
@@ -158,25 +161,33 @@ export function normalizeBoardPost(input = {}, existing = {}, options = {}) {
   const slug = normalizeSlug(input.slug ?? existing.slug) || createBoardSlug(title);
   const body = normalizeTextBlock(input.body ?? existing.body);
   const excerpt = normalizeSpace(input.excerpt ?? existing.excerpt) || createExcerpt(body);
-  const imageUrl = normalizeSpace(input.imageUrl ?? existing.imageUrl ?? input.thumbnailUrl ?? existing.thumbnailUrl);
-  const thumbnailUrl = normalizeSpace(input.thumbnailUrl ?? existing.thumbnailUrl ?? imageUrl);
   const seoTitle = normalizeSpace(input.seoTitle ?? existing.seoTitle);
   const metaDescription = normalizeSpace(input.metaDescription ?? existing.metaDescription) || excerpt;
-  const ogText = normalizeSpace(input.ogText ?? existing.ogText) || createBoardOgText(title || seoTitle);
   const createdAt = normalizeDate(input.createdAt ?? existing.createdAt) || now;
-  const updatedAt = options.forIndex
-    ? (normalizeDate(input.updatedAt ?? existing.updatedAt) || createdAt)
-    : now;
+  const shouldTouch = options.touch === true;
+  const updatedAt = shouldTouch
+    ? now
+    : (normalizeDate(input.updatedAt ?? existing.updatedAt) || createdAt);
   const publishedAt = normalizeDate(input.publishedAt ?? existing.publishedAt) || createdAt;
+  const revision = shouldTouch
+    ? String(Date.now())
+    : (normalizeSpace(input.revision ?? existing.revision) || updatedAt || createdAt);
+  const ogText = boardOgText({ ogText: input.ogText ?? existing.ogText, title, seoTitle, slug });
+  const imageAlt = normalizeSpace(input.imageAlt ?? existing.imageAlt);
+  const imageCaption = normalizeSpace(input.imageCaption ?? existing.imageCaption);
+  const imageDescription = normalizeSpace(input.imageDescription ?? existing.imageDescription);
 
   const post = {
     slug,
     title,
     body,
     excerpt,
-    thumbnailUrl,
-    imageUrl,
+    thumbnailUrl: "",
+    imageUrl: "",
     ogText,
+    imageAlt,
+    imageCaption,
+    imageDescription,
     seoTitle,
     metaDescription,
     faq: normalizeFaq(input.faq ?? existing.faq),
@@ -185,7 +196,12 @@ export function normalizeBoardPost(input = {}, existing = {}, options = {}) {
     publishedAt,
     updatedAt,
     createdAt,
+    revision,
   };
+
+  const autoImageUrl = boardImageUrl(post);
+  post.thumbnailUrl = autoImageUrl;
+  post.imageUrl = autoImageUrl;
 
   if (input.id || existing.id) post.id = normalizeSpace(input.id ?? existing.id);
   return post;
@@ -196,9 +212,12 @@ export function boardIndexEntry(post = {}) {
     slug: post.slug || "",
     title: post.title || "",
     excerpt: post.excerpt || "",
-    thumbnailUrl: post.thumbnailUrl || "",
-    imageUrl: post.imageUrl || "",
-    ogText: post.ogText || "",
+    thumbnailUrl: boardImageUrl(post),
+    imageUrl: boardImageUrl(post),
+    ogText: boardOgText(post),
+    imageAlt: post.imageAlt || "",
+    imageCaption: post.imageCaption || "",
+    imageDescription: post.imageDescription || "",
     seoTitle: post.seoTitle || "",
     metaDescription: post.metaDescription || "",
     pinned: Boolean(post.pinned),
@@ -206,6 +225,7 @@ export function boardIndexEntry(post = {}) {
     publishedAt: post.publishedAt || "",
     updatedAt: post.updatedAt || "",
     createdAt: post.createdAt || "",
+    revision: post.revision || "",
     faq: normalizeFaq(post.faq),
   };
 }
@@ -254,25 +274,6 @@ export function createExcerpt(value = "", limit = 120) {
   const text = stripHtml(value).replace(/[#*_>`~\[\]()]/g, " ").replace(/\s+/g, " ").trim();
   if (!text) return "사기 피해 대응과 피해 회복 절차를 정리한 게시글입니다.";
   return text.length > limit ? `${text.slice(0, limit - 1)}…` : text;
-}
-
-export function createBoardOgText(value = "") {
-  let text = normalizeSpace(value)
-    .replace(/[|｜].*$/, "")
-    .replace(/\s*[-:：]\s*(피해|대응|방법|절차|가이드|정리|상담|회복|구제).*/u, "")
-    .trim();
-
-  const scamMatch = text.match(/^(.{2,42}?(?:사칭\s*사기|투자\s*사기|보이스피싱|피싱|사기))/u);
-  if (scamMatch) text = scamMatch[1].trim();
-  else text = text.split(/[,\n]/)[0].trim();
-
-  text = text
-    .replace(/\s*(피해\s*)?(회복|대응|방법|절차|가이드|상담|구제|총정리).*$/u, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (text && !/(사기|피싱|스캠|scam)/i.test(text)) text = `${text} 사칭 사기`;
-  return text.slice(0, 44).trim();
 }
 
 function normalizeFaq(value) {
@@ -332,6 +333,22 @@ function normalizeSpace(value = "") {
 
 function normalizeTextBlock(value = "") {
   return String(value || "").replace(/\r\n/g, "\n").trim();
+}
+
+function ensureSachingSagi(value = "") {
+  const source = normalizeSpace(value).replace(/[|｜]/g, " ");
+  const exact = source.match(/^(.{1,42}?사칭\s*사기)(?:[\s,.:;!?·\-]|$)/);
+  if (exact) return normalizeSpace(exact[1]);
+
+  let base = source.split(/[,\n\r]/)[0] || source;
+  base = base
+    .replace(/\s*(출금\s*불가|출금\s*거부|피해\s*회복|피해\s*대응|형사고소|민사\s*대응|대응\s*방법|방법|절차).*$/i, "")
+    .replace(/\s*(게시글|안내|정리)\s*$/i, "")
+    .trim();
+  if (!base) base = "사기 피해";
+  if (/사칭\s*사기$/i.test(base)) return normalizeSpace(base);
+  if (/사기$/i.test(base)) base = base.replace(/\s*사기$/i, "").trim();
+  return `${base} 사칭 사기`.replace(/\s+/g, " ").trim();
 }
 
 function stripHtml(value = "") {

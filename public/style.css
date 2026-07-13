@@ -227,6 +227,27 @@ a{color:inherit;text-decoration:none}
   box-shadow:0 4px 24px rgba(0,0,0,.12);
 }
 
+.hero-thumb-wrap{
+  width:min(640px,100%);
+  margin:18px auto 0;
+  text-align:center;
+}
+
+.hero-thumb-wrap .hero-thumb{
+  margin:0 auto;
+}
+
+.hero-thumb-caption{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+
+.domain-a .hero-thumb-caption{
+  color:rgba(255,255,255,.72);
+}
+
 .summary{
   max-width:880px;
   margin:20px auto 0;

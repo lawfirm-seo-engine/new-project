@@ -7,7 +7,7 @@ import webpEncodeWasm from "@jsquash/webp/codec/enc/webp_enc.wasm";
 import { defaultOptions as webpDefaultOptions } from "@jsquash/webp/meta.js";
 import { initEmscriptenModule } from "@jsquash/webp/utils.js";
 import { OG_IMAGE_VERSION } from "../_seo.js";
-import { BOARD_POST_KEY_PREFIX, boardOgText } from "../_board.js";
+import { boardOgText, getBoardPost } from "../_board.js";
 
 const FONT_KV_KEY = "og:font:pretendard-black-v1";
 const FONT_CDN_URL =
@@ -265,9 +265,11 @@ export async function onRequest(context) {
     return templateImageResponse(url, method, format, "LANDING");
   }
 
-  const cacheKey = `og:img:v${OG_IMAGE_VERSION}:${format}:${rawSlug}`;
+  const previewTitle = cleanTitle(url.searchParams.get("t") || "");
+  const revision = url.searchParams.get("r") || "";
+  const cacheKey = previewTitle ? "" : `og:img:v${OG_IMAGE_VERSION}:${format}:${rawSlug}:${revision}`;
   try {
-    const cached = await env.CASES?.get?.(cacheKey, { type: "arrayBuffer" });
+    const cached = cacheKey ? await env.CASES?.get?.(cacheKey, { type: "arrayBuffer" }) : null;
     if (cached && cached.byteLength > 1000) {
       return new Response(method === "HEAD" ? null : cached, {
         status: 200,
@@ -276,25 +278,28 @@ export async function onRequest(context) {
     }
   } catch (_) {}
 
-  let title = humanizeSlug(slug);
+  let title = previewTitle || humanizeSlug(slug);
   try {
-    const raw = isPowerlink
+    if (previewTitle) {
+      title = previewTitle;
+    } else if (isBoard) {
+      const post = await getBoardPost(env, slug);
+      if (post) title = cleanTitle(boardOgText(post));
+    } else {
+      const raw = isPowerlink
       ? await env.CASES?.get?.(`powerlink:${slug}`)
-      : isBoard
-        ? await env.CASES?.get?.(`${BOARD_POST_KEY_PREFIX}${slug}`)
       : await env.CASES?.get?.(`case:${slug}`);
-    if (raw) {
-      const data = JSON.parse(raw);
-      title = cleanTitle(isBoard
-        ? boardOgText(data)
-        : (
+      if (raw) {
+        const data = JSON.parse(raw);
+        title = cleanTitle(
           data.ogText ||
           data.title ||
           data.h1 ||
           data.caseName ||
           data.name ||
-          title
-        ));
+          title,
+        );
+      }
     }
   } catch (_) {}
 
@@ -318,7 +323,7 @@ export async function onRequest(context) {
       ? renderedImage.asPng()
       : await encodeWebp(renderedImage);
 
-    const cachePut = env.CASES?.put?.(cacheKey, image.buffer, { expirationTtl: IMG_CACHE_TTL });
+    const cachePut = cacheKey ? env.CASES?.put?.(cacheKey, image.buffer, { expirationTtl: IMG_CACHE_TTL }) : null;
     if (context.waitUntil && cachePut) {
       context.waitUntil(cachePut.catch(() => {}));
     }

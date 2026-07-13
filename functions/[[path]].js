@@ -698,7 +698,7 @@ function renderBoardListPage(group, posts = [], url) {
     const desc = boardDescription(post);
     return `<article class="board-card">
   <a href="${esc(boardPostUrl(post.slug))}">
-    <img src="${esc(image)}" alt="${esc(postTitle)} 대표 이미지" loading="lazy">
+    <img src="${esc(image)}" alt="${esc(postTitle)} 대표 이미지" loading="lazy" decoding="async">
     <span class="board-card-body">
       <strong>${esc(postTitle)}${post.pinned ? '<em>고정</em>' : ''}</strong>
       <small>발행 ${esc(post.publishedAt || post.createdAt || "")} · 수정 ${esc(boardLastModified(post))}</small>
@@ -754,6 +754,9 @@ function renderBoardPostPage(group, post) {
   const title = boardTitle(post);
   const description = boardDescription(post);
   const ogImage = boardImageUrl(post);
+  const imageAlt = normalizeSpace(post.imageAlt) || `${title} 대표 이미지`;
+  const imageCaption = normalizeSpace(post.imageCaption) || imageAlt;
+  const imageDescription = normalizeSpace(post.imageDescription) || description;
   const publishedDate = post.publishedAt || post.createdAt || BOARD_REFRESHED_AT;
   const modifiedDate = boardLastModified(post);
   const faq = Array.isArray(post.faq) ? post.faq : [];
@@ -792,7 +795,9 @@ function renderBoardPostPage(group, post) {
       contentUrl: ogImage,
       width: OG_IMAGE_WIDTH,
       height: OG_IMAGE_HEIGHT,
-      caption: `${title} 대표 이미지`,
+      name: imageAlt,
+      caption: imageCaption,
+      description: imageDescription,
       representativeOfPage: true,
     },
     {
@@ -819,7 +824,7 @@ function renderBoardPostPage(group, post) {
 
   const schema = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }, null, 2);
   const imageBlock = ogImage
-    ? `<figure class="board-hero-image"><img src="${esc(ogImage)}" alt="${esc(title)} 대표 이미지"><figcaption>${esc(title)} 대표 이미지</figcaption></figure>`
+    ? `<figure class="board-hero-image"><img src="${esc(ogImage)}" alt="${esc(imageAlt)}"><figcaption>${esc(imageCaption)}</figcaption></figure>`
     : "";
   const faqBlock = faq.length
     ? `<section class="article-block faq" id="faq-list"><h2>FAQ</h2>${faqHtml(faq, "")}</section>`
@@ -839,7 +844,7 @@ ${faqBlock}
     ogDescription: esc(description),
     ogImage: esc(ogImage),
     siteName: esc(group.siteName),
-    headExtra: boardHeadExtra({ canonical, ogImage, imageAlt: `${title} 대표 이미지`, description, publishedDate, modifiedDate }),
+    headExtra: boardHeadExtra({ canonical, ogImage, imageAlt, imageCaption, imageDescription, description, publishedDate, modifiedDate }),
     schema,
     bodyClass: `${group.bodyClass} board-page board-post-page`,
     tone: "통합 허브 게시글",
@@ -861,7 +866,7 @@ ${faqBlock}
   });
 }
 
-function boardHeadExtra({ canonical, ogImage, imageAlt, description, publishedDate = "", modifiedDate = "" }) {
+function boardHeadExtra({ canonical, ogImage, imageAlt, imageCaption = "", imageDescription = "", description, publishedDate = "", modifiedDate = "" }) {
   const imageType = detectImageType(ogImage);
   return [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
@@ -884,6 +889,8 @@ function boardHeadExtra({ canonical, ogImage, imageAlt, description, publishedDa
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
     `<link rel="image_src" href="${esc(ogImage)}">`,
     `<meta itemprop="image" content="${esc(ogImage)}">`,
+    imageCaption ? `<meta name="image:caption" content="${esc(imageCaption)}">` : "",
+    imageDescription ? `<meta name="image:description" content="${esc(imageDescription)}">` : "",
     publishedDate ? `<meta property="article:published_time" content="${publishedDate}T00:00:00+09:00">` : "",
     modifiedDate ? `<meta property="article:modified_time" content="${modifiedDate}T00:00:00+09:00">` : "",
   ].filter(Boolean).join("\n  ");
@@ -909,6 +916,9 @@ function boardInlineStyle() {
 .board-hero-image{margin:0 0 18px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}
 .board-hero-image img{display:block;width:100%;max-height:520px;object-fit:cover}
 .board-hero-image figcaption{padding:10px 14px;color:#748196;font-size:.82rem}
+.content-image{margin:18px 0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}
+.content-image img{display:block;width:100%;height:auto;max-height:720px;object-fit:contain;background:#f8fafc}
+.content-image figcaption{padding:9px 13px;color:#748196;font-size:.82rem;line-height:1.5}
 .board-back a{font-weight:800;color:#1f4fd8;text-decoration:none}
 @media(max-width:760px){.board-grid{grid-template-columns:1fr}.board-card a{grid-template-columns:104px 1fr;min-height:104px}.board-card img{width:104px;height:104px}.board-search{flex-direction:column}.board-search button{height:42px}}
 </style>`;
@@ -959,19 +969,19 @@ function renderManualArticle(body = "") {
       continue;
     }
 
-    const h2 = line.match(/^##\s+(.+)/);
-    if (h2) {
+    const image = parseMarkdownImage(line);
+    if (image) {
       flushParagraph();
       flushList();
-      html.push(`<h2>${esc(h2[1])}</h2>`);
+      html.push(renderContentImage(image));
       continue;
     }
 
-    const h3 = line.match(/^###\s+(.+)/);
-    if (h3) {
+    const heading = parseManualHeading(line);
+    if (heading) {
       flushParagraph();
       flushList();
-      html.push(`<h3>${esc(h3[1])}</h3>`);
+      html.push(`<h${heading.level}>${esc(heading.text)}</h${heading.level}>`);
       continue;
     }
 
@@ -990,6 +1000,37 @@ function renderManualArticle(body = "") {
   flushList();
 
   return html.length ? html.join("\n") : "<p>원고가 입력되지 않았습니다.</p>";
+}
+
+function parseMarkdownImage(line = "") {
+  const match = String(line || "").match(/^!\[([^\]]*)\]\((\S+?)(?:\s+["'](.+?)["'])?\)$/);
+  if (!match) return null;
+  const src = safeContentImageUrl(match[2]);
+  if (!src) return null;
+  return {
+    alt: match[1] || "게시글 본문 이미지",
+    src,
+    caption: match[3] || match[1] || "",
+  };
+}
+
+function safeContentImageUrl(value = "") {
+  const url = String(value || "").trim();
+  if (/^https?:\/\/[^\s"'<>]+$/i.test(url)) return url;
+  if (/^\/assets\/[A-Za-z0-9._~/%-]+\.(?:png|jpe?g|webp|gif|avif|svg)$/i.test(url)) return url;
+  return "";
+}
+
+function renderContentImage(image) {
+  return `<figure class="content-image"><img src="${esc(image.src)}" alt="${esc(image.alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">${image.caption ? `<figcaption>${esc(image.caption)}</figcaption>` : ""}</figure>`;
+}
+
+function parseManualHeading(line = "") {
+  const explicit = String(line || "").match(/^H([234])[\s:.)-]*(.+)$/i);
+  if (explicit) return { level: Number(explicit[1]), text: explicit[2].trim() };
+  const markdown = String(line || "").match(/^(#{2,4})\s+(.+)$/);
+  if (markdown) return { level: markdown[1].length, text: markdown[2].trim() };
+  return null;
 }
 
 function createPowerlinkConsultForm(landing) {
@@ -1139,6 +1180,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const fallbackCanonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const canonical = canonicalForLanding(landing, group, fallbackCanonical);
   const ogImage = caseOgImageUrl(caseData.slug || "landing", group.siteUrl);
+  const ogImagePng = ogImageFormatUrl(ogImage, "png");
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate);
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
@@ -1180,14 +1222,16 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     `<link rel="alternate" type="application/rss+xml" title="${esc(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
+    `<link rel="prefetch" href="${esc(ogImagePng)}" as="image">`,
     `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:type" content="${ogImageType}">`,
     `<meta property="og:image:width" content="${ogImageWidth}">`,
     `<meta property="og:image:height" content="${ogImageHeight}">`,
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
-    `<link rel="image_src" href="${esc(ogImage)}">`,
+    `<link rel="image_src" href="${esc(ogImagePng)}">`,
     `<meta itemprop="image" content="${esc(ogImage)}">`,
+    `<meta itemprop="thumbnailUrl" content="${esc(ogImagePng)}">`,
     emitImageMeta ? `<meta name="image:alt" content="${esc(imageAlt)}">` : "",
     emitImageMeta ? `<meta name="image:caption" content="${esc(imageCaption)}">` : "",
     emitImageMeta ? `<meta name="image:description" content="${esc(imageDescription)}">` : "",
@@ -1249,6 +1293,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
         "@id": `${canonical}#primaryimage`,
         url: ogImage,
         contentUrl: ogImage,
+        thumbnailUrl: ogImagePng,
         width: Number(ogImageWidth),
         height: Number(ogImageHeight),
         caption: imageCaption,
@@ -1334,7 +1379,12 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     ],
   }, null, 2);
 
-  const ogThumbnail = "";
+  const ogThumbnail = createRepresentativeImageMarkup({
+    webpUrl: ogImage,
+    fallbackUrl: ogImagePng,
+    alt: imageAlt,
+    caption: imageCaption,
+  });
 
   const content = isManualLandingCase(caseData)
     ? createRecoveryManualContent(landing, group, caseData)
@@ -1388,6 +1438,19 @@ function cleanStandardLandingText(value = "") {
     .replace(/증거 묶음/g, "증거 자료");
 }
 
+function ogImageFormatUrl(value = "", format = "webp") {
+  return String(value || "").replace(/\.(webp|png)(\?)/i, `.${format}$2`);
+}
+
+function createRepresentativeImageMarkup({ webpUrl = "", fallbackUrl = "", alt = "", caption = "" } = {}) {
+  const img = fallbackUrl || webpUrl;
+  if (!img) return "";
+  const source = webpUrl && webpUrl !== img
+    ? `<source srcset="${esc(webpUrl)}" type="image/webp">`
+    : "";
+  return `<figure class="hero-thumb-wrap"><picture>${source}<img class="hero-thumb" src="${esc(img)}" alt="${esc(alt || caption || "대표 이미지")}" width="${OG_IMAGE_WIDTH}" height="${OG_IMAGE_HEIGHT}" loading="eager" fetchpriority="high" decoding="async"></picture>${caption ? `<figcaption class="hero-thumb-caption">${esc(caption)}</figcaption>` : ""}</figure>`;
+}
+
 function createFallbackLanding(caseData, group, key) {
   const caseName = caseData.caseName || "";
   const base = primaryCaseKeyword(caseName);
@@ -1433,6 +1496,7 @@ const MANUAL_BODY_STYLE = `<style>
 .manual-body>h2{counter-increment:ms;margin-top:1.6em;padding-top:.8em;border-top:1px solid #e8edf4;font-size:1.05em}
 .manual-body>h2::before{content:counter(ms)". ";color:#8a96a8;font-weight:700;font-size:.9em}
 .manual-body>h3{margin-top:.9em;font-size:.97em;color:#263244}
+.manual-body>h4{margin-top:.75em;font-size:.92em;color:#4b5563}
 .manual-body>p{margin:.5em 0;line-height:1.8}
 .manual-body>ul{padding-left:1.4em}
 .manual-body>ul li{margin:.25em 0}
@@ -1462,11 +1526,9 @@ function renderManualBodyArray(items) {
   for (const raw of items) {
     const p = normalizeManualBodyText(String(raw || "").trim());
     if (!p) continue;
-    const h2 = p.match(/^##\s+(.+)/);
-    const h3 = p.match(/^###\s+(.+)/);
+    const heading = parseManualHeading(p);
     const li = p.match(/^[✔☐]\s+(.+)/);
-    if (h2) { flushList(); parts.push(`<h2>${esc(h2[1])}</h2>`); }
-    else if (h3) { flushList(); parts.push(`<h3>${esc(h3[1])}</h3>`); }
+    if (heading) { flushList(); parts.push(`<h${heading.level}>${esc(heading.text)}</h${heading.level}>`); }
     else if (li) { listBuf.push(li[1]); }
     else { flushList(); parts.push(`<p>${esc(p)}</p>`); }
   }
@@ -1497,7 +1559,7 @@ function renderManualArticleParts(input) {
   function pushHeading(level, text) {
     flushParagraph();
     flushList();
-    const tag = level === "h3" ? "h3" : "h2";
+    const tag = level === "h4" ? "h4" : level === "h3" ? "h3" : "h2";
     if (tag === "h2") hasH2 = true;
     parts.push(`<${tag}>${esc(text)}</${tag}>`);
   }
@@ -1511,9 +1573,25 @@ function renderManualArticleParts(input) {
       continue;
     }
 
+    const image = parseMarkdownImage(line);
+    if (image) {
+      flushParagraph();
+      flushList();
+      parts.push(renderContentImage(image));
+      previousBlank = false;
+      continue;
+    }
+
+    const explicitManualHeading = parseManualHeading(line);
+    if (explicitManualHeading) {
+      pushHeading(`h${explicitManualHeading.level}`, explicitManualHeading.text);
+      previousBlank = false;
+      continue;
+    }
+
     const explicit = line.match(/^(#{1,4})\s+(.+)/);
     if (explicit) {
-      pushHeading(explicit[1].length >= 3 ? "h3" : "h2", explicit[2]);
+      pushHeading(explicit[1].length >= 4 ? "h4" : explicit[1].length >= 3 ? "h3" : "h2", explicit[2]);
       previousBlank = false;
       continue;
     }
