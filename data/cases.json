@@ -45849,7 +45849,8 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "noindex": true
   },
   {
     "slug": "mobilelex",
