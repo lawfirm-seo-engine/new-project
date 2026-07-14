@@ -15746,7 +15746,8 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "noindex": true
   },
   {
     "slug": "jisutujasuigyeonguso",
