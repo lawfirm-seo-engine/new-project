@@ -32,6 +32,7 @@ import {
   standardPageTitle,
   standardResponseSections,
   standardSubtitle,
+  standardVictimCases,
 } from "./_standardLanding.js";
 import {
   BOARD_HOST,
@@ -1369,6 +1370,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
           { "@type": "HowToStep", position: 4, name: "추가 요구 메시지 보존", text: "세금·보증금·인증비 등 추가 입금 요구 메시지를 보존합니다." },
         ],
       },
+      { ...ORGANIZATION },
       { ...PERSON_ATTORNEY },
     ],
   }, null, 2);
@@ -1429,7 +1431,10 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
 function cleanStandardLandingText(value = "") {
   return String(value || "")
     .replace(/계좌 단서/g, "계좌 정보")
-    .replace(/증거 묶음/g, "증거 자료");
+    .replace(/증거 묶음/g, "증거 자료")
+    .replace(/인증비 요청를/g, "인증비 요청을")
+    .replace(/인증비 요청로/g, "인증비 요청으로")
+    .replace(/송금 요청로/g, "송금 요청으로");
 }
 
 function createRepresentativeImageMarkup({ imageUrl = "", alt = "", caption = "" } = {}) {
@@ -1811,8 +1816,7 @@ function createStandardLandingContent(landing, group, caseData, relatedCases = [
   const siteName = esc(group.siteName);
   const method = standardMethodTemplate(typeKey);
   const responseSections = standardResponseSections();
-  const replacementContext = createReplacementContext(rawCaseName);
-  const victimCases = renderVictimCasesForLanding(landing, { ...group, key: "a" }, caseData, replacementContext);
+  const victimCases = standardVictimCases(typeKey);
   const faq = renderFaqForLanding(landing, { ...group, key: "a" }, caseData);
   const memoSection = renderOperatorMemos(caseData);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
@@ -2736,31 +2740,11 @@ function pageTemplate(d) {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const ORGANIZATION = {
-  "@type": ["Organization", "LegalService"],
+  "@type": "Organization",
   "@id": "https://gnlaw-criminal.co.kr/#organization",
   name: "법무법인 선린",
-  legalName: "법무법인 선린",
-  alternateName: "선린 법무법인",
-  url: "https://gnlaw-criminal.co.kr/",
-  telephone: "02-6348-0406",
+  url: "https://gnlaw-criminal.co.kr",
   logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo.png" },
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "반포대로 108 양원빌딩 4층",
-    addressLocality: "서초구",
-    addressRegion: "서울특별시",
-    addressCountry: "KR",
-  },
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      telephone: "02-6348-0406",
-      contactType: "customer service",
-      availableLanguage: "Korean",
-    },
-  ],
-  sameAs: [],
-  knowsAbout: ["금융사기", "사기죄 형사고소", "피해금 회수", "가압류", "손해배상청구", "사기 피해 대응"],
 };
 
 const PERSON_ATTORNEY = {

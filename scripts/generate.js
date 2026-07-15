@@ -13,6 +13,10 @@ import {
   isCaseAllowedForGroup,
   landingUrlForItem,
 } from "../functions/_seo.js";
+import {
+  normalizeFraudTypeKey,
+  standardVictimCases,
+} from "../functions/_standardLanding.js";
 
 const root = process.cwd();
 const dataPath = path.join(root, "data", "cases.json");
@@ -567,7 +571,9 @@ function createLandingContent(landing, group, caseItem) {
     const _rawCaseName = caseItem.caseName || caseItem.name || "";
     const _replacementContext = createReplacementContext(_rawCaseName);
     const _body = renderBodyForLanding(landing, group, caseItem).map((item) => reduceCaseNameText(item, _rawCaseName, false, _replacementContext));
-    const _victimCases = renderVictimCasesForLanding(landing, group, caseItem, _replacementContext);
+    const _victimCases = !isManualLandingItem(caseItem) && (group.landingKey || group.key) === "a"
+      ? standardVictimCases(normalizeFraudTypeKey(caseItem.fraudType || caseItem.scamType, caseItem))
+      : renderVictimCasesForLanding(landing, group, caseItem, _replacementContext);
     const _faq = renderFaqForLanding(landing, group, caseItem);
     const _introBody = _body.slice(0, 3);
     const _methodBody = _body.slice(3, 8);

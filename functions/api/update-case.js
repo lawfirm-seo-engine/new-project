@@ -1,4 +1,5 @@
 const EDITABLE_LANDING_FIELDS = ["body", "victimCases", "suspiciousCompanies", "faq", "h1", "title", "description"];
+const FRAUD_TYPE_KEYS = new Set(["stock-project", "institution-exchange", "team-mission", "live-dating", "refund-reward"]);
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -65,6 +66,13 @@ export async function onRequestPost(context) {
       const newSummary = String(value || "").trim().slice(0, 300);
       if (!newSummary) return json({ ok: false, message: "요약 내용 필수" }, 400);
       cases[idx].summary = newSummary;
+      cases[idx].updatedAt = now;
+
+    } else if (action === "set-fraud-type") {
+      const nextType = String(value || "").trim();
+      if (!FRAUD_TYPE_KEYS.has(nextType)) return json({ ok: false, message: "유효하지 않은 유형입니다." }, 400);
+      if (String(cases[idx].createdBy || "").trim()) return json({ ok: false, message: "일반 랜딩만 유형을 변경할 수 있습니다." }, 400);
+      cases[idx].fraudType = nextType;
       cases[idx].updatedAt = now;
 
     } else if (action === "set-noindex") {

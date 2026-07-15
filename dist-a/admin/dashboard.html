@@ -19,6 +19,8 @@
     .type-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:800}
     .tc{background:#e8f0fe;color:#1f4fd8}
     .tp{background:#fef3e8;color:#b35d0b}
+    .type-cell{display:flex;flex-direction:column;gap:6px;min-width:168px}
+    .type-select{width:100%;height:31px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#263244;font-size:12px;font-weight:700}
     /* section */
     .section{margin-bottom:32px}
     .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
@@ -95,6 +97,13 @@
   ];
 
   const PL_SITE = 'https://gnlaw-criminal.co.kr';
+  const FRAUD_TYPE_OPTIONS = [
+    { key:'stock-project', label:'주식 리딩방·투자 프로젝트' },
+    { key:'institution-exchange', label:'증권사·은행·거래소 사칭' },
+    { key:'team-mission', label:'팀미션·부업·영상 시청' },
+    { key:'live-dating', label:'라이브 방송·만남 플랫폼' },
+    { key:'refund-reward', label:'환불·보상금 지급 사칭' },
+  ];
   let allEntries = [];
   let filteredEntries = [];
   let currentPage = 1;
@@ -117,6 +126,7 @@
         memo: c.memo || false,
         noindex: c.noindex || false,
         createdBy: c.createdBy || '',
+        fraudType: c.fraudType || c.scamType || '',
       })),
       ...pls.map(p => ({
         type: 'pl',
@@ -172,9 +182,7 @@
     document.getElementById('tbody').innerHTML = pageEntries.map((e, i) => {
       const globalNo = start + i + 1;
       const isPl = e.type === 'pl';
-      const typeBadge = isPl
-        ? '<span class="type-badge tp">파워링크</span>'
-        : '<span class="type-badge tc">사건</span>';
+      const typeBadge = renderTypeCell(e);
       const noindexBadge = (!isPl && e.noindex) ? '<span class="noindex-badge">NOINDEX</span>' : '';
       const nameCell = `<div class="name-cell"><strong>${esc(e.name)}${noindexBadge}</strong><span class="slug">${esc(e.slug)}</span></div>`;
 
@@ -218,6 +226,28 @@
   function domainSuffix(label) {
     const map = { A:'litigation', B:'settlement', C:'result', D:'review', E:'issue', lA:'legal-action', lB:'recovery', lC:'solution', lD:'report', lE:'incident' };
     return map[label] || '';
+  }
+
+  function renderTypeCell(e) {
+    if (e.type === 'pl') return '<span class="type-badge tp">파워링크</span>';
+    if (e.createdBy) return '<span class="type-badge tc">수동 랜딩</span>';
+    const current = e.fraudType || inferFraudType(e);
+    const options = FRAUD_TYPE_OPTIONS.map(opt =>
+      `<option value="${opt.key}"${opt.key === current ? ' selected' : ''}>${esc(opt.label)}</option>`
+    ).join('');
+    return `<div class="type-cell">
+      <span class="type-badge tc">일반 랜딩</span>
+      <select class="type-select" onchange="updateFraudType('${esc(e.slug)}', this.value)">${options}</select>
+    </div>`;
+  }
+
+  function inferFraudType(e) {
+    const text = `${e.slug || ''} ${e.name || ''}`.toLowerCase();
+    if (/(refund|hwanbul|bosang|lotto|roddo|toto|proto|환불|보상)/i.test(text)) return 'refund-reward';
+    if (/(live|dating|romance|broadcast|hwanjeon|point|casino|라이브|만남|환전)/i.test(text)) return 'live-dating';
+    if (/(shop|shopping|mission|review|alba|bueob|market|mart|store|mall|ticket|syoping|gumae|쇼핑|미션|부업|리뷰)/i.test(text)) return 'team-mission';
+    if (/(exchange|coin|token|staking|future|futures|hts|mts|ipo|거래소|코인|가상자산|선물)/i.test(text)) return 'institution-exchange';
+    return 'stock-project';
   }
 
   function filterEntries() {
@@ -265,6 +295,31 @@
       if (data.ok) alert('썸네일이 저장되었습니다. 다음 빌드에 반영됩니다.');
       else alert('저장 실패: ' + (data.message || ''));
     } catch (e) { alert('오류: ' + e.message); }
+  }
+
+  async function updateFraudType(slug, value) {
+    const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
+    const previous = entry ? entry.fraudType : '';
+    try {
+      const res = await fetch('/api/update-case', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({slug, action:'set-fraud-type', value})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        if (entry) entry.fraudType = value;
+        alert('유형 분류가 저장되었습니다. 해당 유형 템플릿 원고로 렌더링됩니다.');
+      } else {
+        if (entry) entry.fraudType = previous;
+        filterEntries();
+        alert('저장 실패: ' + (data.message || '알 수 없는 오류'));
+      }
+    } catch (e) {
+      if (entry) entry.fraudType = previous;
+      filterEntries();
+      alert('오류: ' + e.message);
+    }
   }
 
   async function syncKvToGithub() {
