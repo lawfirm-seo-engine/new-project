@@ -65822,7 +65822,7 @@
     "caseName": "amundi.shop 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-09",
-    "updatedAt": "2026-07-09",
+    "updatedAt": "2026-07-16",
     "thumbnailUrl": "",
     "landingViews": 503,
     "reports": 11,
@@ -65837,7 +65837,8 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "fraudType": "stock-project"
   },
   {
     "slug": "pinkwavelive-com",
