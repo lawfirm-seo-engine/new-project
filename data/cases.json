@@ -65111,7 +65111,7 @@
     "caseName": "Nubank 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-09",
-    "updatedAt": "2026-07-16",
+    "updatedAt": "2026-07-09",
     "thumbnailUrl": "",
     "landingViews": 3819,
     "reports": 27,
@@ -65126,8 +65126,7 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": "",
-    "fraudType": "institution-exchange"
+    "createdBy": ""
   },
   {
     "slug": "yukeusyab",
@@ -65156,7 +65155,7 @@
     "caseName": "크립토펠라즈 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-09",
-    "updatedAt": "2026-07-09",
+    "updatedAt": "2026-07-16",
     "thumbnailUrl": "",
     "landingViews": 3280,
     "reports": 12,
@@ -65171,7 +65170,8 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "fraudType": "institution-exchange"
   },
   {
     "slug": "rideoseutujageurub",
