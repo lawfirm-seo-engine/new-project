@@ -19601,7 +19601,7 @@
     "caseName": "카리스 사기",
     "category": "형사대응",
     "createdAt": "2026-06-22",
-    "updatedAt": "2026-07-20",
+    "updatedAt": "2026-06-22",
     "thumbnailUrl": "",
     "landingViews": 1834,
     "reports": 18,
@@ -19623,7 +19623,7 @@
     "caseName": "karis 사기",
     "category": "형사대응",
     "createdAt": "2026-06-22",
-    "updatedAt": "2026-06-22",
+    "updatedAt": "2026-07-20",
     "thumbnailUrl": "",
     "landingViews": 3866,
     "reports": 30,
@@ -19635,7 +19635,10 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "searchHidden": true,
+    "hideFromListing": true,
+    "noindex": true
   },
   {
     "slug": "peuraimworres",
