@@ -15748,22 +15748,11 @@
     ],
     "memo": "",
     "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "",
-    "landings": {
-      "a": {
-        "victimCases": [
-          "텔레그램 리딩방에서 아이건설넷 사기 관련 투자 정보를 받고 입금을 진행했습니다. 단기간에 수익이 발생했다는 화면을 확인했으나 출금 신청 후 본인 인증비 안내를 받았습니다. 입금 영수증과 담당자 연락처를 정리한 뒤 상담을 접수했습니다.",
-          "아이건설넷 사기 관련 유튜브 광고를 통해 투자방에 가입했습니다. 초기 소액 수익 후 VIP 프로젝트를 권유받아 고액을 입금했으나 이후 연락이 두절됐습니다. 광고 URL과 대화 내용, 이체 영수증을 보존한 후 피해 신고를 진행했습니다.",
-          "인스타그램 DM으로 아이건설넷 사기 관련 투자 제안을 반복 수신했습니다. 소액 투자 후 수익이 표시됐으나 출금 불가 상태가 됐습니다. DM 내용 전체를 캡처해 증거로 보존하고 금융감독원에 신고했습니다.",
-          "네이버 카페에서 아이건설넷 사기 투자 정보를 접하고 별도 채널로 연결됐습니다. 전문 투자 상담사로 소개된 담당자와 상담 후 투자했으나 수익 지급 시점에 연락이 차단됐습니다. 카페 게시글, 상담 내용, 계좌 정보를 정리해 신고했습니다.",
-          "아이건설넷 사기 관련 공식 사이트처럼 보이는 곳에서 계좌 개설 후 입금을 진행했습니다. 수익이 표시됐으나 출금 시도 후 사이트 자체가 폐쇄됐습니다. 사이트 화면 캡처, 입금 내역, 담당자 연락처를 보존한 뒤 사이버 수사대에 신고했습니다."
-        ]
-      }
-    },
-    "searchHidden": true,
-    "hideFromListing": true
+    "fraudType": ""
   },
   {
     "slug": "jisutujasuigyeonguso",
@@ -19614,9 +19603,12 @@
       "증거보존"
     ],
     "memo": "",
-    "searchHidden": true,
+    "noindex": true,
     "hideFromListing": true,
-    "noindex": true
+    "searchHidden": true,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
   },
   {
     "slug": "karis",
@@ -19636,9 +19628,12 @@
       "증거보존"
     ],
     "memo": "",
-    "searchHidden": true,
+    "noindex": true,
     "hideFromListing": true,
-    "noindex": true
+    "searchHidden": true,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
   },
   {
     "slug": "peuraimworres",
@@ -21491,11 +21486,11 @@
     ],
     "memo": "",
     "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "",
-    "searchHidden": true,
-    "hideFromListing": true
+    "fraudType": ""
   },
   {
     "slug": "snarpet",
@@ -80986,5 +80981,30 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "team-mission"
+  },
+  {
+    "slug": "eijeonteu-yeonsanryeog-godohwa-598-peurraen",
+    "caseName": "에이전트 연산력 고도화 598% 플랜 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-20",
+    "updatedAt": "2026-07-20",
+    "thumbnailUrl": "",
+    "landingViews": 3195,
+    "reports": 10,
+    "summary": "에이전트 연산력 고도화 598% 플랜 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "에이전트",
+      "연산력",
+      "고도화",
+      "598%",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
   }
 ]
