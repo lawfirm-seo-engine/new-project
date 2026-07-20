@@ -124,6 +124,8 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "유효하지 않은 action" }, 400);
     }
 
+    await mergeVisibilityStateFromKv(env, cases, slug, action);
+
     const updateRes = await fetch(
       `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
       {
@@ -207,6 +209,40 @@ function updateCaseTitle(item, title) {
 
 function toBoolean(value) {
   return value === true || value === "true" || value === 1 || value === "1";
+}
+
+async function mergeVisibilityStateFromKv(env, cases, currentSlug, action) {
+  if (!env.CASES) return;
+  const idxRaw = await env.CASES.get("cases:index");
+  if (!idxRaw) return;
+
+  let indexArr;
+  try {
+    indexArr = JSON.parse(idxRaw);
+  } catch {
+    return;
+  }
+  if (!Array.isArray(indexArr)) return;
+
+  const kvBySlug = new Map(indexArr.filter((item) => item?.slug).map((item) => [item.slug, item]));
+  for (const item of cases) {
+    if (!item?.slug) continue;
+    const kvEntry = kvBySlug.get(item.slug);
+    if (!kvEntry) continue;
+
+    const isCurrent = item.slug === currentSlug;
+    const keepCurrentSearchHidden = isCurrent && action === "set-search-hidden";
+    const keepCurrentNoindex = isCurrent && (action === "set-search-hidden" || action === "set-noindex");
+
+    if (!keepCurrentSearchHidden) {
+      if (Object.prototype.hasOwnProperty.call(kvEntry, "searchHidden")) item.searchHidden = kvEntry.searchHidden === true;
+      if (Object.prototype.hasOwnProperty.call(kvEntry, "hideFromListing")) item.hideFromListing = kvEntry.hideFromListing === true;
+    }
+    if (!keepCurrentNoindex && Object.prototype.hasOwnProperty.call(kvEntry, "noindex")) {
+      item.noindex = kvEntry.noindex === true;
+    }
+    if (item.searchHidden || item.hideFromListing) item.noindex = true;
+  }
 }
 
 function githubEnv(env) {
