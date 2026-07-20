@@ -33,6 +33,8 @@ export async function onRequestPost(context) {
       if (!cases[idx].landings) cases[idx].landings = {};
       if (!cases[idx].landings[groupKey]) cases[idx].landings[groupKey] = {};
       cases[idx].landings[groupKey][field] = value;
+      if (field === "title") cases[idx].landings[groupKey].ogTitle = value;
+      if (field === "description") cases[idx].landings[groupKey].ogDescription = value;
       cases[idx].updatedAt = now;
 
     } else if (action === "sync-from-github") {
@@ -56,10 +58,10 @@ export async function onRequestPost(context) {
       cases[idx].landings = value;
       cases[idx].updatedAt = now;
 
-    } else if (action === "rename") {
+    } else if (action === "rename" || action === "update-title") {
       const newName = String(value || "").trim();
       if (!newName) return json({ ok: false, message: "새 사건명 필수" }, 400);
-      cases[idx].caseName = newName;
+      updateCaseTitle(cases[idx], newName);
       cases[idx].updatedAt = now;
 
     } else if (action === "update-summary") {
@@ -76,7 +78,15 @@ export async function onRequestPost(context) {
       cases[idx].updatedAt = now;
 
     } else if (action === "set-noindex") {
-      cases[idx].noindex = value === true || value === "true" || value === 1;
+      cases[idx].noindex = toBoolean(value);
+      cases[idx].updatedAt = now;
+
+    } else if (action === "set-search-hidden") {
+      const hidden = toBoolean(value);
+      cases[idx].searchHidden = hidden;
+      cases[idx].hideFromListing = hidden;
+      cases[idx].noindex = hidden;
+      cases[idx].updatedAt = now;
 
     } else if (action === "update-memo") {
       cases[idx].memo = String(value || "").trim();
@@ -136,7 +146,7 @@ export async function onRequestPost(context) {
     // KV 업데이트 — rename 시 기존 KV의 landings 보존
     if (env.CASES) {
       let kvEntry = cases[idx];
-      if (action === "rename" || action === "update-summary" || action === "set-noindex" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
+      if (action === "rename" || action === "update-title" || action === "update-summary" || action === "set-noindex" || action === "set-search-hidden" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
         const existing = await env.CASES.get(`case:${slug}`);
         if (existing) {
           const existingParsed = JSON.parse(existing);
@@ -145,6 +155,9 @@ export async function onRequestPost(context) {
             kvEntry.landings = existingParsed.landings;
           }
         }
+      }
+      if (action === "rename" || action === "update-title") {
+        updateCaseTitle(kvEntry, cases[idx].caseName);
       }
       await env.CASES.put(`case:${slug}`, JSON.stringify(kvEntry));
       const idxRaw = await env.CASES.get("cases:index");
@@ -170,6 +183,8 @@ function buildIndexEntry(c) {
     thumbnailUrl: c.thumbnailUrl || "", landingViews: c.landingViews || 0,
     reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
     noindex: c.noindex || false,
+    hideFromListing: c.hideFromListing || false,
+    searchHidden: c.searchHidden || false,
     targetGroups: c.targetGroups || [],
     createdBy: c.createdBy || "",
     fraudType: c.fraudType || "",
@@ -177,6 +192,21 @@ function buildIndexEntry(c) {
     ...(c.publicPath ? { publicPath: c.publicPath } : {}),
     ...(c.listingUrl ? { listingUrl: c.listingUrl } : {}),
   };
+}
+
+function updateCaseTitle(item, title) {
+  item.caseName = title;
+  if (!item.landings || typeof item.landings !== "object") return;
+  for (const landing of Object.values(item.landings)) {
+    if (!landing || typeof landing !== "object") continue;
+    landing.title = title;
+    landing.h1 = title;
+    landing.ogTitle = title;
+  }
+}
+
+function toBoolean(value) {
+  return value === true || value === "true" || value === 1 || value === "1";
 }
 
 function githubEnv(env) {

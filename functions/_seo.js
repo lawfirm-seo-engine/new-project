@@ -108,6 +108,9 @@ export function getLanding(item = {}, group = {}) {
 
 export function isCaseAllowedForGroup(item = {}, group = {}) {
   const lk = group.landingKey || group.key;
+  if (item.hideFromListing || item.searchHidden) {
+    return false;
+  }
   if (!isStandardLandingAllowedForGroup(item, group)) {
     return false;
   }

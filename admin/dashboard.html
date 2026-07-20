@@ -40,6 +40,7 @@
     .name-cell .slug{color:#8a96a8;font-size:11px}
     .loading{text-align:center;padding:36px;color:#8a96a8}
     .noindex-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;background:#fde8e8;color:#c0392b;margin-left:4px;vertical-align:middle}
+    .search-hidden-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;background:#ece8ff;color:#5b43d6;margin-left:4px;vertical-align:middle}
     .pg-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:14px 0}
     .pg-btn{min-width:36px;height:32px;padding:0 10px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#263244;font-size:13px;font-weight:700;cursor:pointer}
     .pg-btn:hover{background:#f0f4fa}
@@ -125,6 +126,8 @@
         updatedAt: c.updatedAt || '',
         memo: c.memo || false,
         noindex: c.noindex || false,
+        hideFromListing: c.hideFromListing || false,
+        searchHidden: c.searchHidden || c.hideFromListing || false,
         createdBy: c.createdBy || '',
         fraudType: c.fraudType || c.scamType || '',
       })),
@@ -184,7 +187,9 @@
       const isPl = e.type === 'pl';
       const typeBadge = renderTypeCell(e);
       const noindexBadge = (!isPl && e.noindex) ? '<span class="noindex-badge">NOINDEX</span>' : '';
-      const nameCell = `<div class="name-cell"><strong>${esc(e.name)}${noindexBadge}</strong><span class="slug">${esc(e.slug)}</span></div>`;
+      const hidden = !isPl && (e.searchHidden || e.hideFromListing);
+      const hiddenBadge = hidden ? '<span class="search-hidden-badge">검색숨김</span>' : '';
+      const nameCell = `<div class="name-cell"><strong>${esc(e.name)}${noindexBadge}${hiddenBadge}</strong><span class="slug">${esc(e.slug)}</span></div>`;
 
       let actions;
       if (isPl) {
@@ -202,11 +207,15 @@
         ).map(d => `<a href="${d.url}/${d.prefix}/${encodeURIComponent(e.slug)}-${domainSuffix(d.label)}/" target="_blank">${d.label}</a>`).join('');
         const niLabel = e.noindex ? 'noindex 해제' : 'noindex';
         const niStyle = e.noindex ? 'background:#8a96a8' : 'background:#c0392b';
+        const hiddenLabel = hidden ? '검색 숨김 해제' : '검색 숨김';
+        const hiddenStyle = hidden ? 'background:#8a96a8' : 'background:#5b43d6';
         actions = `
           <a href="/admin/edit.html?slug=${encodeURIComponent(e.slug)}">편집</a>
+          <button class="btn sm" style="background:#1f4fd8;color:#fff" onclick="editLandingTitle('${encodeURIComponent(e.slug)}')">제목 수정</button>
           <a href="#" onclick="setThumbnail('${esc(e.slug)}');return false;">썸네일</a>
           ${domainLinks}
           <button class="btn sm" style="${niStyle};color:#fff" onclick="toggleNoindex('${esc(e.slug)}',${e.noindex})">${niLabel}</button>
+          <button class="btn sm" style="${hiddenStyle};color:#fff" onclick="toggleSearchHidden('${encodeURIComponent(e.slug)}',${hidden})">${hiddenLabel}</button>
           <button class="btn danger sm" onclick="deleteCase('${esc(e.slug)}','${esc(e.name)}')">삭제</button>`;
       }
 
@@ -348,6 +357,28 @@
     finally { btn.disabled = false; btn.textContent = '템플릿 일괄 적용'; }
   }
 
+  async function editLandingTitle(encodedSlug) {
+    const slug = decodeURIComponent(encodedSlug);
+    const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
+    const currentTitle = entry ? entry.name : '';
+    const nextTitle = prompt('새 랜딩페이지 제목을 입력하세요:', currentTitle);
+    if (nextTitle === null) return;
+    const value = nextTitle.trim();
+    if (!value) { alert('제목은 비울 수 없습니다.'); return; }
+    try {
+      const res = await fetch('/api/update-case', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug, action:'update-title', value}) });
+      const data = await res.json();
+      if (data.ok) {
+        if (entry) {
+          entry.name = (data.updatedCase && data.updatedCase.caseName) || value;
+          entry.updatedAt = (data.updatedCase && data.updatedCase.updatedAt) || entry.updatedAt;
+        }
+        filterEntries();
+        alert('랜딩페이지 제목이 저장되었습니다.');
+      } else { alert('실패: ' + (data.message || '')); }
+    } catch (e) { alert('오류: ' + e.message); }
+  }
+
   async function toggleNoindex(slug, currentValue) {
     const newValue = !currentValue;
     const label = newValue ? 'noindex로 설정' : 'noindex 해제';
@@ -358,6 +389,28 @@
       if (data.ok) {
         const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
         if (entry) entry.noindex = newValue;
+        filterEntries();
+      } else { alert('실패: ' + (data.message || '')); }
+    } catch (e) { alert('오류: ' + e.message); }
+  }
+
+  async function toggleSearchHidden(encodedSlug, currentValue) {
+    const slug = decodeURIComponent(encodedSlug);
+    const newValue = !currentValue;
+    const label = newValue ? '검색 숨김' : '검색 숨김 해제';
+    if (!confirm(`"${slug}" 페이지를 ${label}하시겠습니까?\n\n검색 숨김 상태에서는 홈, 오늘 추가/갱신된 목록, 사이트맵, RSS에서 제외되고 페이지에는 noindex가 적용됩니다.`)) return;
+    try {
+      const res = await fetch('/api/update-case', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug, action:'set-search-hidden', value:newValue}) });
+      const data = await res.json();
+      if (data.ok) {
+        const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
+        const updated = data.updatedCase || {};
+        if (entry) {
+          entry.searchHidden = typeof updated.searchHidden === 'boolean' ? updated.searchHidden : newValue;
+          entry.hideFromListing = typeof updated.hideFromListing === 'boolean' ? updated.hideFromListing : newValue;
+          entry.noindex = typeof updated.noindex === 'boolean' ? updated.noindex : newValue;
+          entry.updatedAt = updated.updatedAt || entry.updatedAt;
+        }
         filterEntries();
       } else { alert('실패: ' + (data.message || '')); }
     } catch (e) { alert('오류: ' + e.message); }

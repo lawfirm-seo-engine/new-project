@@ -61,6 +61,8 @@ function buildIndexEntry(c) {
     tags: c.tags || [],
     memo: c.memo || "",
     noindex: c.noindex || false,
+    hideFromListing: c.hideFromListing || false,
+    searchHidden: c.searchHidden || false,
     targetGroups: Array.isArray(c.targetGroups) ? c.targetGroups : [],
     createdBy: c.createdBy || "",
     ...(c.listingPath ? { listingPath: c.listingPath } : {}),
