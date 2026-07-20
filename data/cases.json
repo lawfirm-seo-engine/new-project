@@ -15734,7 +15734,7 @@
     "caseName": "아이건설넷 사기",
     "category": "형사대응",
     "createdAt": "2026-06-21",
-    "updatedAt": "2026-06-21",
+    "updatedAt": "2026-07-20",
     "thumbnailUrl": "",
     "landingViews": 5835,
     "reports": 15,
@@ -15750,7 +15750,12 @@
     "noindex": true,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": ""
+    "fraudType": "",
+    "landings": {
+      "a": {
+        "h1": "아설다섯 사기 형사고소"
+      }
+    }
   },
   {
     "slug": "jisutujasuigyeonguso",
