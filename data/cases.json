@@ -9880,7 +9880,7 @@
     "caseName": "이열본사 사칭 사기 비상장주식",
     "category": "형사대응",
     "createdAt": "2026-06-15",
-    "updatedAt": "2026-06-15",
+    "updatedAt": "2026-07-21",
     "thumbnailUrl": "",
     "landingViews": 972,
     "reports": 5,
@@ -9894,7 +9894,8 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "noindex": true
   },
   {
     "slug": "buuicheosgeoreum",
@@ -32036,7 +32037,7 @@
     "caseName": "이열 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-29",
-    "updatedAt": "2026-07-21",
+    "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
     "landingViews": 7206,
     "reports": 24,
