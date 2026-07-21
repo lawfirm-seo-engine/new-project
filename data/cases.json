@@ -18062,7 +18062,7 @@
     "caseName": "주식회사 이열 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-22",
-    "updatedAt": "2026-07-21",
+    "updatedAt": "2026-06-25",
     "thumbnailUrl": "",
     "landingViews": 6839,
     "reports": 15,
@@ -20712,7 +20712,7 @@
     "caseName": "프라임파트너스 사기",
     "category": "형사대응",
     "createdAt": "2026-06-23",
-    "updatedAt": "2026-06-23",
+    "updatedAt": "2026-07-21",
     "thumbnailUrl": "",
     "landingViews": 1400,
     "reports": 27,
@@ -20724,7 +20724,12 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "landings": {
+      "a": {
+        "h1": "프라임파트너스 사칭 사기 형사고소"
+      }
+    }
   },
   {
     "slug": "neskeurraegseu-tekeunorreoji",
