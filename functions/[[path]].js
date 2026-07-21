@@ -1034,6 +1034,47 @@ function parseManualHeading(line = "") {
   return null;
 }
 
+function consultPhoneConfirmScript() {
+  return `
+    function escapeConsultPhone(value) {
+      return String(value || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+    function confirmConsultPhone(form, phone) {
+      return new Promise(function(resolve) {
+        var previous = document.getElementById('consultPhoneConfirm');
+        if (previous) previous.remove();
+        var overlay = document.createElement('div');
+        overlay.id = 'consultPhoneConfirm';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,16,28,.52);';
+        overlay.innerHTML = '<div style="width:min(420px,100%);background:#fff;color:#172033;border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,.28);padding:22px 20px;font-family:system-ui,sans-serif;text-align:center;">'
+          + '<div style="font-size:18px;font-weight:800;margin-bottom:12px;">✔ 입력하신 연락처가 맞습니까?</div>'
+          + '<div style="font-size:22px;font-weight:900;letter-spacing:.02em;margin:8px 0 18px;word-break:break-all;">' + escapeConsultPhone(phone) + '</div>'
+          + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">'
+          + '<button type="button" data-action="edit" style="height:42px;padding:0 18px;border:1px solid #cfd8e6;border-radius:7px;background:#fff;color:#263244;font-weight:800;cursor:pointer;">수정하기</button>'
+          + '<button type="button" data-action="submit" style="height:42px;padding:0 18px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-weight:900;cursor:pointer;">그대로 상담 접수</button>'
+          + '</div></div>';
+        var escHandler;
+        function finish(ok) {
+          document.removeEventListener('keydown', escHandler);
+          overlay.remove();
+          resolve(ok);
+        }
+        escHandler = function(ev) { if (ev.key === 'Escape') finish(false); };
+        overlay.addEventListener('click', function(ev) {
+          if (ev.target === overlay || ev.target.dataset.action === 'edit') finish(false);
+          if (ev.target.dataset.action === 'submit') finish(true);
+        });
+        document.addEventListener('keydown', escHandler);
+        document.body.appendChild(overlay);
+        var submitBtn = overlay.querySelector('[data-action="submit"]');
+        if (submitBtn) submitBtn.focus();
+      });
+    }
+  `;
+}
+
 function createPowerlinkConsultForm(landing) {
   const caseNameJson = JSON.stringify(landing.title || "파워링크 랜딩");
   const domainJson = JSON.stringify("파워링크 랜딩");
@@ -1042,14 +1083,21 @@ function createPowerlinkConsultForm(landing) {
   <p>${esc(landing.ctaText || "입금 내역, 대화 캡처, 사이트 주소를 남겨주시면 담당자가 확인 후 연락드립니다.")}</p>
   <form class="consult-form" id="consultForm">
     <input type="text" name="cname" placeholder="이름" required autocomplete="name">
-    <input type="tel" name="phone" placeholder="연락처 (010-xxxx-xxxx)" required autocomplete="tel">
+    <input type="tel" name="phone" placeholder="010-1234-5678" required autocomplete="tel">
     <input type="text" name="amount" placeholder="대략적인 피해금액" required>
     <button type="submit">${esc(landing.ctaLabel || "상담 접수")}</button>
   </form>
   <p class="consult-msg" id="consultMsg"></p>
   <script>
+    ${consultPhoneConfirmScript()}
     document.getElementById('consultForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      var submittedPhone = String(((this.phone || this.sphone) || {}).value || '').trim();
+      if (!(await confirmConsultPhone(this, submittedPhone))) {
+        var phoneInput = this.phone || this.sphone;
+        if (phoneInput) phoneInput.focus();
+        return;
+      }
       var btn = this.querySelector('button');
       var msg = document.getElementById('consultMsg');
       var label = btn.textContent;
@@ -1080,15 +1128,22 @@ function createPowerlinkFloatingWidgets(landing) {
   <span class="sticky-title">긴급 상담 ｜ 02-6348-0406</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
-    <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
+    <input type="tel" name="sphone" placeholder="010-1234-5678" required autocomplete="tel">
     <input type="text" name="samount" placeholder="대략적인 피해금액" required>
     <button type="submit">${esc(landing.ctaLabel || "상담 접수")}</button>
   </form>
   <span id="stickyMsg" class="sticky-msg"></span>
 </div>
 <script>
+  ${consultPhoneConfirmScript()}
   document.getElementById('stickyConsultForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    var submittedPhone = String(((this.phone || this.sphone) || {}).value || '').trim();
+    if (!(await confirmConsultPhone(this, submittedPhone))) {
+      var phoneInput = this.phone || this.sphone;
+      if (phoneInput) phoneInput.focus();
+      return;
+    }
     var btn = this.querySelector('button'); var msg = document.getElementById('stickyMsg'); var label = btn.textContent;
     btn.disabled = true; btn.textContent = '접수 중...';
     msg.textContent = ''; msg.className = 'sticky-msg';
@@ -2618,14 +2673,21 @@ function createConsultForm(cn, siteName) {
   <p>추가 입금 요구를 받았거나 출금이 막혔다면 지금 자료를 남겨주세요. 상담 접수 후 전화 또는 카톡으로 입금 내역, 대화 캡처, 계좌 정보를 확인해 초기 대응 방향을 안내합니다.</p>
   <form class="consult-form" id="consultForm">
     <input type="text" name="cname" placeholder="이름" required autocomplete="name">
-    <input type="tel" name="phone" placeholder="연락처 (010-xxxx-xxxx)" required autocomplete="tel">
+    <input type="tel" name="phone" placeholder="010-1234-5678" required autocomplete="tel">
     <input type="text" name="amount" placeholder="${amountPlaceholder}" required>
     <button type="submit">상담 접수</button>
   </form>
   <p class="consult-msg" id="consultMsg"></p>
   <script>
+    ${consultPhoneConfirmScript()}
     document.getElementById('consultForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      var submittedPhone = String(((this.phone || this.sphone) || {}).value || '').trim();
+      if (!(await confirmConsultPhone(this, submittedPhone))) {
+        var phoneInput = this.phone || this.sphone;
+        if (phoneInput) phoneInput.focus();
+        return;
+      }
       var btn = this.querySelector('button');
       var msg = document.getElementById('consultMsg');
       btn.disabled = true; btn.textContent = '접수 중...';
@@ -2654,15 +2716,22 @@ function createFloatingWidgets(cn, siteName, slug) {
   <span class="sticky-title">${stickyTitle} ｜ 02-6348-0406</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
-    <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
+    <input type="tel" name="sphone" placeholder="010-1234-5678" required autocomplete="tel">
     <input type="text" name="samount" placeholder="${amountPlaceholder}" required>
     <button type="submit">확인 요청</button>
   </form>
   <span id="stickyMsg" class="sticky-msg"></span>
 </div>
 <script>
+  ${consultPhoneConfirmScript()}
   document.getElementById('stickyConsultForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    var submittedPhone = String(((this.phone || this.sphone) || {}).value || '').trim();
+    if (!(await confirmConsultPhone(this, submittedPhone))) {
+      var phoneInput = this.phone || this.sphone;
+      if (phoneInput) phoneInput.focus();
+      return;
+    }
     var btn = this.querySelector('button'); var msg = document.getElementById('stickyMsg');
     btn.disabled = true; btn.textContent = '접수 중...';
     msg.textContent = ''; msg.className = 'sticky-msg';
