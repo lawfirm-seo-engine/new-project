@@ -9895,6 +9895,8 @@
       "증거보존"
     ],
     "memo": "",
+    "searchHidden": true,
+    "hideFromListing": true,
     "noindex": true
   },
   {
