@@ -9880,7 +9880,7 @@
     "caseName": "이열본사 사칭 사기 비상장주식",
     "category": "형사대응",
     "createdAt": "2026-06-15",
-    "updatedAt": "2026-06-15",
+    "updatedAt": "2026-07-21",
     "thumbnailUrl": "",
     "landingViews": 972,
     "reports": 5,
@@ -9895,9 +9895,12 @@
       "증거보존"
     ],
     "memo": "",
-    "searchHidden": true,
+    "noindex": true,
     "hideFromListing": true,
-    "noindex": true
+    "searchHidden": true,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
   },
   {
     "slug": "buuicheosgeoreum",
@@ -18062,7 +18065,7 @@
     "caseName": "주식회사 이열 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-22",
-    "updatedAt": "2026-06-25",
+    "updatedAt": "2026-07-21",
     "thumbnailUrl": "",
     "landingViews": 6839,
     "reports": 15,
@@ -18077,10 +18080,11 @@
     ],
     "memo": "",
     "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
     "targetGroups": [],
     "createdBy": "",
-    "searchHidden": true,
-    "hideFromListing": true
+    "fraudType": ""
   },
   {
     "slug": "maeiruigijun",
@@ -20725,9 +20729,12 @@
       "증거보존"
     ],
     "memo": "",
-    "searchHidden": false,
+    "noindex": false,
     "hideFromListing": false,
-    "noindex": false
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
   },
   {
     "slug": "neskeurraegseu-tekeunorreoji",
@@ -32044,7 +32051,7 @@
     "caseName": "이열 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-29",
-    "updatedAt": "2026-06-29",
+    "updatedAt": "2026-07-21",
     "thumbnailUrl": "",
     "landingViews": 7206,
     "reports": 24,
@@ -32058,11 +32065,12 @@
       "증거보존"
     ],
     "memo": "",
+    "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
     "targetGroups": [],
     "createdBy": "",
-    "searchHidden": true,
-    "hideFromListing": true,
-    "noindex": true
+    "fraudType": ""
   },
   {
     "slug": "jegseuteg",
@@ -81591,5 +81599,29 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "team-mission"
+  },
+  {
+    "slug": "sonamuinbeseuteumeonteu",
+    "caseName": "소나무인베스트먼트 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-21",
+    "updatedAt": "2026-07-21",
+    "thumbnailUrl": "",
+    "landingViews": 6306,
+    "reports": 21,
+    "summary": "소나무인베스트먼트 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "소나무인베스트먼트",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
   }
 ]
