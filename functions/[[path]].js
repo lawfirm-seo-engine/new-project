@@ -98,7 +98,7 @@ const GROUPS = {
     siteUrl: "https://gnlaw-case.co.kr",
   },
   "gnlaw-center.co.kr": {
-    key: "e", pathPrefix: "case", urlSlugSuffix: "issue", bodyClass: "domain-e",
+    key: "e", pathPrefix: "case", urlSlugSuffix: "issue", bodyClass: "domain-e center-site",
     siteName: "사기피해 통합 허브", shortName: "전체 허브",
     intent: "전체 사건 허브 · 유형별 연결 · 관련 사건", tone: "통합 탐색",
     ctaTitle: "유형별 대응 보기",
@@ -751,7 +751,7 @@ function renderBoardListPage(group, posts = [], url) {
     ctaText: "현재 피해 상황을 기준으로 필요한 대응 경로를 확인합니다.",
     ctaLabel: "상담 접수",
     footerLinks: "",
-    headerCall: "",
+    headerCall: createCenterHeaderNav(group),
     bodyScripts: "",
   });
 }
@@ -870,7 +870,7 @@ ${faqBlock}
     ctaText: "현재 피해 상황을 기준으로 필요한 대응 경로를 확인합니다.",
     ctaLabel: "상담 접수",
     footerLinks: "",
-    headerCall: "",
+    headerCall: createCenterHeaderNav(group),
     bodyScripts: "",
   });
 }
@@ -1176,6 +1176,18 @@ function logScanScriptForSite(siteUrl = "") {
   return String(siteUrl).replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
     ? LOGSCAN_SCRIPT
     : "";
+}
+
+function createCenterHeaderNav(group = {}) {
+  const siteUrl = String(group.siteUrl || "").replace(/\/$/, "");
+  if (siteUrl !== "https://gnlaw-center.co.kr") return "";
+  return `<nav class="center-nav" aria-label="주요 메뉴">
+    <a href="/">홈</a>
+    <a href="/case/">진행사건</a>
+    <a href="/board/">게시판</a>
+    <a href="https://cafe.naver.com/gnlawfintech" target="_blank" rel="noopener noreferrer">네이버카페</a>
+    <a class="center-nav-call" href="tel:0263480406">상담문의</a>
+  </nav>`;
 }
 
 // ─── Rendering ────────────────────────────────────────────────────────────────
@@ -1485,7 +1497,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     ctaText: esc(group.ctaText),
     ctaLabel: esc(group.ctaLabel),
     footerLinks,
-    headerCall: "",
+    headerCall: createCenterHeaderNav(group),
     bodyScripts: logScanScriptForSite(group.siteUrl),
   });
   return useManualTitle ? renderedHtml : cleanStandardLandingText(renderedHtml);

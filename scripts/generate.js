@@ -159,7 +159,7 @@ const groups = [
     siteUrl: "https://gnlaw-center.co.kr",
     pathPrefix: "case",
     urlSlugSuffix: "issue",
-    bodyClass: "domain-e",
+    bodyClass: "domain-e center-site",
     siteName: "사기피해 통합 허브",
     shortName: "전체 허브",
     label: "전체 허브형",
@@ -1767,6 +1767,17 @@ function createHubContent(group) {
 })();
 </script>`;
 
+  if (isCenterBoardSite(group)) {
+    return createCenterBoardHubContent(group, {
+      groupCases,
+      totalReports,
+      todayCases,
+      todayReports,
+      rows,
+      dynScript,
+    });
+  }
+
   return `
     <section class="hub-stats-section">
       <div class="hub-stats">
@@ -1795,6 +1806,75 @@ function createHubContent(group) {
       </div>
       <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
       ${rows}
+    </section>
+    <div id="pgWrap" class="pg-wrap"></div>
+    ${dynScript}`;
+}
+
+function isCenterBoardSite(group) {
+  return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-center.co.kr";
+}
+
+function createCenterHeaderNav(group) {
+  if (!isCenterBoardSite(group)) return "";
+  return `<nav class="center-nav" aria-label="주요 메뉴">
+    <a href="/">홈</a>
+    <a href="/case/">진행사건</a>
+    <a href="/board/">게시판</a>
+    <a href="https://cafe.naver.com/gnlawfintech" target="_blank" rel="noopener noreferrer">네이버카페</a>
+    <a class="center-nav-call" href="tel:0263480406">상담문의</a>
+  </nav>`;
+}
+
+function createCenterBoardHubContent(group, { groupCases, totalReports, todayCases, todayReports, rows, dynScript }) {
+  return `
+    <section class="center-archive-top" aria-label="진행사건 아카이브 안내">
+      <div>
+        <p class="center-kicker">FINANCIAL FRAUD CASE ARCHIVE</p>
+        <h2>진행사건을 게시판 형태로 정리했습니다.</h2>
+        <p>업체명, 플랫폼명, 리딩방명, 앱 이름을 기준으로 등록된 사건을 검색하고 현재 URL 그대로 상세 내용을 확인할 수 있습니다.</p>
+      </div>
+      <div class="center-check-card">
+        <strong>운영 기준</strong>
+        <span>기존 사건 URL 유지</span>
+        <span>게시판형 목록 노출</span>
+        <span>사건명 기반 검색</span>
+      </div>
+    </section>
+
+    <section class="center-board-stats" aria-label="사건 통계">
+      <div>
+        <span>등록 사건</span>
+        <strong id="statTotal">${groupCases.length.toLocaleString("ko-KR")}</strong>
+        <em id="statTodayCount">오늘 추가 +${todayCases}</em>
+      </div>
+      <div>
+        <span>누적 접수</span>
+        <strong id="statReports">${totalReports.toLocaleString("ko-KR")}</strong>
+        <em id="statTodayReports">오늘 추가 +${todayReports}</em>
+      </div>
+    </section>
+
+    <section class="center-type-strip" aria-label="주요 사건 유형">
+      <span>팀미션·부업 사기</span>
+      <span>주식리딩방·투자 사기</span>
+      <span>코인·거래소 사칭</span>
+      <span>방송환전·포인트 사기</span>
+    </section>
+
+    <div class="case-search-wrap center-search-wrap">
+      <input id="case-search" type="search" class="case-search" placeholder="업체명 또는 사건명 검색" autocomplete="off">
+      <button class="search-btn" type="button">검색</button>
+    </div>
+
+    <section id="case-board" class="case-table-wrap center-board-table" aria-label="${escapeHtml(group.tableTitle)}">
+      <div class="case-table-title">
+        <p class="center-kicker">CASE LIST</p>
+        <h2>전체 진행사건</h2>
+        <p class="case-table-lead">등록된 사건은 기존 상세 URL을 유지합니다. 목록에서 사건명을 선택하면 해당 사건 페이지로 이동합니다.</p>
+      </div>
+      <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
+      ${rows || `<p class="center-empty">등록된 사건을 불러오는 중입니다.</p>`}
     </section>
     <div id="pgWrap" class="pg-wrap"></div>
     ${dynScript}`;
@@ -2243,7 +2323,7 @@ for (const group of groups) {
     ogThumbnail: "",
     summary: "",
     content: createHubContent(group),
-    headerCall: "",
+    headerCall: createCenterHeaderNav(group),
     floatingWidgets: createHubFloatingWidgets(group),
     pageKind: "hub-page",
   });
@@ -2268,7 +2348,7 @@ for (const group of groups) {
     summary: escapeHtml(categoryDescription),
     breadcrumb: createCategoryBreadcrumb(group),
     content: createCategoryContent(group),
-    headerCall: "",
+    headerCall: createCenterHeaderNav(group),
     floatingWidgets: createHubFloatingWidgets(group),
     pageKind: "hub-page category-page",
   });
@@ -2325,7 +2405,7 @@ Sitemap: ${group.siteUrl}/sitemap.xml
     summary: escapeHtml(privacyDesc),
     breadcrumb: "",
     content: createPrivacyPolicyContent(),
-    headerCall: "",
+    headerCall: createCenterHeaderNav(group),
     floatingWidgets: createHubFloatingWidgets(group),
     pageKind: "privacy-policy-page hub-page",
     tone: "개인정보 보호",
