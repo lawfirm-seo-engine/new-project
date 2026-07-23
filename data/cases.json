@@ -18524,7 +18524,7 @@
     "caseName": "이스트웨스트뱅크 사기",
     "category": "형사대응",
     "createdAt": "2026-06-22",
-    "updatedAt": "2026-06-22",
+    "updatedAt": "2026-07-23",
     "thumbnailUrl": "",
     "landingViews": 4816,
     "reports": 29,
@@ -18536,7 +18536,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1784789240223,
+        "text": "EWBCXMAX, 이스트 웨스트 뱅코프(East West Bancorp), 유수진, 김혜정을 사칭한 사기를 주의하시기 바랍니다.",
+        "createdAt": "2026-07-23 15:47"
+      }
+    ]
   },
   {
     "slug": "azstm",
