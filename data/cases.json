@@ -6519,6 +6519,33 @@
     "memo": ""
   },
   {
+    "slug": "jh-one",
+    "caseName": "JH ONE 사기 어플",
+    "category": "형사대응",
+    "createdAt": "2026-06-11",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 3101,
+    "reports": 27,
+    "summary": "JH ONE 사기 어플 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "JH",
+      "ONE",
+      "사기",
+      "어플",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "jeromakes-eopeur",
     "caseName": "제로마켓 어플 사칭 사기",
     "category": "형사대응",
@@ -6643,30 +6670,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "jh-one",
-    "caseName": "JH ONE 사기 어플",
-    "category": "형사대응",
-    "createdAt": "2026-06-11",
-    "updatedAt": "2026-06-11",
-    "thumbnailUrl": "",
-    "landingViews": 3101,
-    "reports": 27,
-    "summary": "JH ONE 사기 어플 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "JH",
-      "ONE",
-      "사기",
-      "어플",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "searchHidden": false,
-    "hideFromListing": false,
-    "noindex": false
   },
   {
     "slug": "jeongsujin",
@@ -18026,6 +18029,31 @@
     "memo": ""
   },
   {
+    "slug": "iseuteuweseuteubaengkeu",
+    "caseName": "이스트웨스트뱅크 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-22",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 4816,
+    "reports": 29,
+    "summary": "이스트웨스트뱅크 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "이스트웨스트뱅크",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "jusighoesa-iyeor",
     "caseName": "주식회사 이열 사칭 사기",
     "category": "형사대응",
@@ -18521,31 +18549,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "iseuteuweseuteubaengkeu",
-    "caseName": "이스트웨스트뱅크 사기",
-    "category": "형사대응",
-    "createdAt": "2026-06-22",
-    "updatedAt": "2026-07-23",
-    "thumbnailUrl": "",
-    "landingViews": 4816,
-    "reports": 29,
-    "summary": "이스트웨스트뱅크 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "이스트웨스트뱅크",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "azstm",
@@ -52068,15 +52071,12 @@
       "증거보존"
     ],
     "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "memos": [
-      {
-        "id": 1784789900098,
-        "text": "Velion은 Velocity Clearing(벨로시티 클리어링), 강병태 대표를 사칭한 사기로 주의 바랍니다.",
-        "createdAt": "2026-07-23 15:58"
-      }
-    ]
+    "fraudType": ""
   },
   {
     "slug": "kis-edge-pro",
@@ -59114,6 +59114,32 @@
     "createdBy": ""
   },
   {
+    "slug": "rideoseutujageurub",
+    "caseName": "리더스투자그룹 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-09",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 4440,
+    "reports": 8,
+    "summary": "리더스투자그룹 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 정보, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "리더스투자그룹",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "dbjeunggwon",
     "caseName": "DB증권 사칭 사기",
     "category": "형사대응",
@@ -65292,32 +65318,6 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": ""
-  },
-  {
-    "slug": "rideoseutujageurub",
-    "caseName": "리더스투자그룹 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-07-09",
-    "updatedAt": "2026-07-23",
-    "thumbnailUrl": "",
-    "landingViews": 4440,
-    "reports": 8,
-    "summary": "리더스투자그룹 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 정보, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "리더스투자그룹",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "lumykoin",
@@ -83570,5 +83570,51 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
+  },
+  {
+    "slug": "한화투자증권-사칭-사기-리딩-투자사기-투자사기-피해-해결-방법",
+    "caseName": "한화투자증권 사칭 사기 리딩 투자사기 투자사기 피해 해결 방법",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 3107,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "dogbitmarket",
+    "caseName": "DogbitMarket 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 2910,
+    "reports": 14,
+    "summary": "DogbitMarket 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "DogbitMarket",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
   }
 ]
