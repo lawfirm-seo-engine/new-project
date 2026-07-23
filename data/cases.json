@@ -66854,7 +66854,7 @@
     "caseName": "유수진 전문가 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-09",
-    "updatedAt": "2026-07-23",
+    "updatedAt": "2026-07-09",
     "thumbnailUrl": "",
     "landingViews": 2463,
     "reports": 23,
@@ -66871,13 +66871,16 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": "",
-    "memos": [
+    "comments": [
       {
-        "id": 1784792045543,
-        "text": "유수진을 사칭한 내통장플러스프로젝트, EWBCPRO, EWBCXMAX, 이스트 웨스트 뱅코프(East West Bancorp), 시타델증권 등 사기 피해가 발생하고 있으니 주의 바랍니다.",
-        "createdAt": "2026-07-23 16:34"
+        "id": 1784792075006,
+        "text": "EWBCXMAX 유수진 사칭 사기 상담에 필요한 자료 무엇을 준비해야 하나요?",
+        "createdAt": "2026-07-23"
       }
-    ]
+    ],
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "andmarkets",
