@@ -15,6 +15,7 @@ import {
 } from "../functions/_seo.js";
 import {
   normalizeFraudTypeKey,
+  standardMetaDescription,
   standardVictimCases,
 } from "../functions/_standardLanding.js";
 
@@ -411,7 +412,7 @@ function createFallbackLanding(caseItem, group) {
   const oldSuffixFBGen = group.siteUrl === "https://gnlaw-criminal.co.kr" && OLD_URL_FB_GEN[slug];
   const fbSlugSuffix = isAllDomainsNoSuffixGen ? "" : isExceptFB ? "" : oldSuffixFBGen ? `-${oldSuffixFBGen}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const canonical = `${group.siteUrl}/${group.pathPrefix}/${slug}${fbSlugSuffix}/`;
-  const description = `${dispName} 관련 ${group.descriptionSuffix}`;
+  const description = standardMetaDescription(caseName);
   const faq = makeFallbackFaq(landingKey);
 
   return {

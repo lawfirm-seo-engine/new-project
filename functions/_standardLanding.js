@@ -35,7 +35,7 @@ export function standardSubtitle(caseName = "") {
 
 export function standardMetaDescription(caseName = "") {
   const keyword = standardCaseKeyword(caseName);
-  return `${keyword} 출금 거부 및 추가 입금 요구로 피해가 의심되나요? ${keyword}의 주요 수법과 피해금을 돌려받을 수 있는지? 형사고소 및 민사 대응 절차, 초기 대응 방법까지 실제 상담 사례를 바탕으로 안내합니다.`;
+  return `${keyword} 출금 거부 및 추가 입금 요구로 피해가 의심되나요? ${keyword} 피해금을 돌려받을 수 있는지? 형사고소 및 민사 대응 절차, 주요 수법까지 실제 상담 사례를 바탕으로 02-6348-0406 24시간 안내합니다.`;
 }
 
 export function normalizeFraudTypeKey(value = "", fallbackSource = {}) {
