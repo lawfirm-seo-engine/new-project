@@ -17466,7 +17466,7 @@
     "caseName": "MTZ-MAX 사기",
     "category": "형사대응",
     "createdAt": "2026-06-21",
-    "updatedAt": "2026-06-21",
+    "updatedAt": "2026-07-23",
     "thumbnailUrl": "",
     "landingViews": 5267,
     "reports": 22,
@@ -17479,7 +17479,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1784785979898,
+        "text": "김현유 대표 및 이혜민 비서를 사칭한 네이버 밴드 주식 사기를 조심하시기 바랍니다.",
+        "createdAt": "2026-07-23 14:52"
+      }
+    ]
   },
   {
     "slug": "gimhyeonyu-daepyo",
