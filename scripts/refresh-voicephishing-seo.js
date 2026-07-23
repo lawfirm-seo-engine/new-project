@@ -40,7 +40,7 @@ for (let index = 0; index < cases.length; index += 1) {
     canonical: `${SITE_URL}/criminal/${encodeURIComponent(item.slug)}-legal-action/`,
     ogTitle: title,
     ogDescription: description,
-    ogImage: caseOgImageUrl(item.slug, SITE_URL),
+    ogImage: caseOgImageUrl(item.slug, SITE_URL, "png"),
     h1,
     imageAlt: `${lawyerKeyword} ${action} 피해 회복 상담`,
     imageCaption: `${region} 보이스피싱 피해자의 ${action}와 민형사 대응 안내`,

@@ -3,16 +3,17 @@
 
 import {
   OG_IMAGE_HEIGHT,
-  OG_IMAGE_VERSION,
   OG_IMAGE_WIDTH,
   RSS_LIMIT,
   RECENT_SITEMAP_DAYS,
   RECENT_SITEMAP_LIMIT,
+  SEO_STABILIZED_AT,
   buildLandingUrl,
   buildRssXml,
   buildSitemapIndexXml,
   buildSitemapXml,
-  caseOgImageUrl,
+  caseOgPngImageUrl,
+  caseOgWebpImageUrl,
   getRecentCases,
   groupForHost as getSeoGroupForHost,
   loadCases as loadSeoCases,
@@ -450,7 +451,8 @@ function renderPowerlinkLanding(landing) {
   const robots = normalizePowerlinkRobots(landing.robots);
   const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = landing.updatedAt || publishedDate;
-  const ogImage = powerlinkOgImageUrl(slug || "landing");
+  const ogImage = powerlinkOgImageUrl(slug || "landing", "png");
+  const displayOgImage = powerlinkOgImageUrl(slug || "landing", "webp");
   const imageAlt = landing.imageAlt || title;
   const imageCaption = landing.imageCaption || imageAlt;
   const imageDescription = landing.imageDescription || description;
@@ -462,6 +464,7 @@ function renderPowerlinkLanding(landing) {
     name: imageAlt,
     caption: imageCaption,
     description: imageDescription,
+    encodingFormat: "image/png",
   };
   const schema = JSON.stringify({
     "@context": "https://schema.org",
@@ -534,12 +537,13 @@ function renderPowerlinkLanding(landing) {
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${esc(title)}">`,
     `<meta name="twitter:description" content="${esc(description)}">`,
-    `<link rel="prefetch" href="${ogImage}" as="image">`,
+    `<link rel="prefetch" href="${displayOgImage}" as="image" type="image/webp">`,
+    `<link rel="prefetch" href="${ogImage}" as="image" type="image/png">`,
     `<meta name="twitter:image" content="${ogImage}">`,
     `<meta property="og:image:secure_url" content="${ogImage}">`,
     `<meta name="twitter:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
-    `<meta property="og:image:type" content="image/webp">`,
+    `<meta property="og:image:type" content="image/png">`,
     `<meta property="og:image:width" content="${OG_IMAGE_WIDTH}">`,
     `<meta property="og:image:height" content="${OG_IMAGE_HEIGHT}">`,
     `<link rel="image_src" href="${ogImage}">`,
@@ -646,7 +650,8 @@ function renderBoardListPage(group, posts = [], url) {
       const haystack = [post.title, post.slug, post.excerpt, post.metaDescription].join(" ").toLowerCase();
       return haystack.includes(query.toLowerCase());
     });
-  const ogImage = boardImageUrl({});
+  const ogImage = boardImageUrl({}, "png");
+  const displayOgImage = boardImageUrl({}, "webp");
   const itemList = visiblePosts.map((post, index) => ({
     "@type": "ListItem",
     position: index + 1,
@@ -675,6 +680,7 @@ function renderBoardListPage(group, posts = [], url) {
         contentUrl: ogImage,
         width: OG_IMAGE_WIDTH,
         height: OG_IMAGE_HEIGHT,
+        encodingFormat: "image/png",
         representativeOfPage: true,
       },
       {
@@ -728,7 +734,7 @@ function renderBoardListPage(group, posts = [], url) {
     ogDescription: esc(description),
     ogImage: esc(ogImage),
     siteName: esc(group.siteName),
-    headExtra: boardHeadExtra({ canonical, ogImage, imageAlt: `${title} 대표 이미지`, description }),
+    headExtra: boardHeadExtra({ canonical, ogImage, displayOgImage, imageAlt: `${title} 대표 이미지`, description }),
     schema,
     bodyClass: `${group.bodyClass} board-page`,
     tone: "통합 허브 게시판",
@@ -754,7 +760,8 @@ function renderBoardPostPage(group, post) {
   const canonical = boardPostUrl(post.slug);
   const title = boardTitle(post);
   const description = boardDescription(post);
-  const ogImage = boardImageUrl(post);
+  const ogImage = boardImageUrl(post, "png");
+  const displayOgImage = boardImageUrl(post, "webp");
   const imageAlt = normalizeSpace(post.imageAlt) || `${title} 대표 이미지`;
   const imageCaption = normalizeSpace(post.imageCaption) || imageAlt;
   const imageDescription = normalizeSpace(post.imageDescription) || description;
@@ -799,6 +806,7 @@ function renderBoardPostPage(group, post) {
       name: imageAlt,
       caption: imageCaption,
       description: imageDescription,
+      encodingFormat: "image/png",
       representativeOfPage: true,
     },
     {
@@ -825,7 +833,7 @@ function renderBoardPostPage(group, post) {
 
   const schema = JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph }, null, 2);
   const imageBlock = ogImage
-    ? `<figure class="board-hero-image"><img src="${esc(ogImage)}" alt="${esc(imageAlt)}"><figcaption>${esc(imageCaption)}</figcaption></figure>`
+    ? `<figure class="board-hero-image"><picture><source srcset="${esc(displayOgImage)}" type="image/webp"><img src="${esc(ogImage)}" alt="${esc(imageAlt)}"></picture><figcaption>${esc(imageCaption)}</figcaption></figure>`
     : "";
   const faqBlock = faq.length
     ? `<section class="article-block faq" id="faq-list"><h2>FAQ</h2>${faqHtml(faq, "")}</section>`
@@ -845,7 +853,7 @@ ${faqBlock}
     ogDescription: esc(description),
     ogImage: esc(ogImage),
     siteName: esc(group.siteName),
-    headExtra: boardHeadExtra({ canonical, ogImage, imageAlt, imageCaption, imageDescription, description, publishedDate, modifiedDate }),
+    headExtra: boardHeadExtra({ canonical, ogImage, displayOgImage, imageAlt, imageCaption, imageDescription, description, publishedDate, modifiedDate }),
     schema,
     bodyClass: `${group.bodyClass} board-page board-post-page`,
     tone: "통합 허브 게시글",
@@ -867,8 +875,7 @@ ${faqBlock}
   });
 }
 
-function boardHeadExtra({ canonical, ogImage, imageAlt, imageCaption = "", imageDescription = "", description, publishedDate = "", modifiedDate = "" }) {
-  const imageType = detectImageType(ogImage);
+function boardHeadExtra({ canonical, ogImage, displayOgImage = "", imageAlt, imageCaption = "", imageDescription = "", description, publishedDate = "", modifiedDate = "" }) {
   return [
     `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">`,
     `<meta name="NaverBot" content="All">`,
@@ -878,10 +885,11 @@ function boardHeadExtra({ canonical, ogImage, imageAlt, imageCaption = "", image
     `<link rel="alternate" hreflang="ko" href="${esc(canonical)}">`,
     `<link rel="alternate" type="application/rss+xml" title="사기피해 통합 허브 RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
-    `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
+    displayOgImage ? `<link rel="prefetch" href="${esc(displayOgImage)}" as="image" type="image/webp">` : "",
+    `<link rel="prefetch" href="${esc(ogImage)}" as="image" type="image/png">`,
     `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
-    `<meta property="og:image:type" content="${imageType}">`,
+    `<meta property="og:image:type" content="image/png">`,
     `<meta property="og:image:width" content="${OG_IMAGE_WIDTH}">`,
     `<meta property="og:image:height" content="${OG_IMAGE_HEIGHT}">`,
     `<meta name="twitter:card" content="summary_large_image">`,
@@ -1231,9 +1239,10 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const urlSuffix = isAllDomainsNoSuffix ? "" : isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const fallbackCanonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const canonical = canonicalForLanding(landing, group, fallbackCanonical);
-  const ogImage = caseOgImageUrl(caseData.slug || "landing", group.siteUrl);
+  const ogImage = caseOgPngImageUrl(caseData.slug || "landing", group.siteUrl);
+  const displayOgImage = caseOgWebpImageUrl(caseData.slug || "landing", group.siteUrl);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
-  const modifiedDate = latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), "2026-07-13");
+  const modifiedDate = latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), SEO_STABILIZED_AT);
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
   const keyword = searchKeyword(rawCaseName);
@@ -1249,11 +1258,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const imageDescription = imageMeta.description;
   const emitImageMeta = imageMeta.emit;
 
-  const ogImageType = /\.webp(?:$|\?)/i.test(ogImage)
-    ? "image/webp"
-    : /\.jpe?g(?:$|\?)/i.test(ogImage)
-      ? "image/jpeg"
-      : "image/png";
+  const ogImageType = "image/png";
   const ogImageWidth = String(OG_IMAGE_WIDTH);
   const ogImageHeight = String(OG_IMAGE_HEIGHT);
   const robotsMeta = caseData.noindex
@@ -1272,7 +1277,8 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${esc(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
-    `<link rel="prefetch" href="${esc(ogImage)}" as="image">`,
+    `<link rel="prefetch" href="${esc(displayOgImage)}" as="image" type="image/webp">`,
+    `<link rel="prefetch" href="${esc(ogImage)}" as="image" type="image/png">`,
     `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
     `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
     `<meta property="og:image:type" content="${ogImageType}">`,
@@ -1347,6 +1353,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
         width: Number(ogImageWidth),
         height: Number(ogImageHeight),
         caption: imageCaption,
+        encodingFormat: "image/png",
         ...(emitImageMeta ? { description: imageDescription } : {}),
         inLanguage: "ko-KR",
         representativeOfPage: true,
@@ -1431,7 +1438,8 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   }, null, 2);
 
   const ogThumbnail = createRepresentativeImageMarkup({
-    imageUrl: ogImage,
+    imageUrl: displayOgImage,
+    fallbackImageUrl: ogImage,
     alt: imageAlt,
     caption: imageCaption,
   });
@@ -1492,9 +1500,13 @@ function cleanStandardLandingText(value = "") {
     .replace(/송금 요청로/g, "송금 요청으로");
 }
 
-function createRepresentativeImageMarkup({ imageUrl = "", alt = "", caption = "" } = {}) {
+function createRepresentativeImageMarkup({ imageUrl = "", fallbackImageUrl = "", alt = "", caption = "" } = {}) {
   if (!imageUrl) return "";
-  return `<figure class="hero-thumb-wrap"><img class="hero-thumb" src="${esc(imageUrl)}" alt="${esc(alt || caption || "대표 이미지")}" width="${OG_IMAGE_WIDTH}" height="${OG_IMAGE_HEIGHT}" loading="eager" fetchpriority="high" decoding="async">${caption ? `<figcaption class="hero-thumb-caption">${esc(caption)}</figcaption>` : ""}</figure>`;
+  const fallback = fallbackImageUrl || imageUrl;
+  const source = fallback !== imageUrl
+    ? `<source srcset="${esc(imageUrl)}" type="image/webp">`
+    : "";
+  return `<figure class="hero-thumb-wrap"><picture>${source}<img class="hero-thumb" src="${esc(fallback)}" alt="${esc(alt || caption || "대표 이미지")}" width="${OG_IMAGE_WIDTH}" height="${OG_IMAGE_HEIGHT}" loading="eager" fetchpriority="high" decoding="async"></picture>${caption ? `<figcaption class="hero-thumb-caption">${esc(caption)}</figcaption>` : ""}</figure>`;
 }
 
 function createFallbackLanding(caseData, group, key) {
@@ -1529,7 +1541,7 @@ function createFallbackLanding(caseData, group, key) {
     canonical,
     ogTitle: title,
     ogDescription: description,
-    ogImage: caseOgImageUrl(caseData.slug || "landing", group.siteUrl),
+    ogImage: caseOgPngImageUrl(caseData.slug || "landing", group.siteUrl),
     h1: groupPageH1(caseName, key),
     body: fallbackBody(base, key),
     victimCases: fallbackVictimCases(key),

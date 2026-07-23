@@ -226,7 +226,8 @@ function buildIndexEntry(c) {
 async function warmLandingCaches(slug) {
   await Promise.allSettled(
     GROUPS.filter((g) => (g.landingKey || g.key) === "a").flatMap((group) => [
-      fetch(caseOgImageUrl(slug, group.siteUrl), { method: "GET" }),
+      fetch(caseOgImageUrl(slug, group.siteUrl, "png"), { method: "GET" }),
+      fetch(caseOgImageUrl(slug, group.siteUrl, "webp"), { method: "GET" }),
       fetch(buildLandingUrl(group, slug), { method: "GET" }),
     ]),
   );

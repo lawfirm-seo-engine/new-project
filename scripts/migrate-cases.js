@@ -89,7 +89,7 @@ console.log(`[OK] migrated ${migrated} cases`);
 
 function createLandingData({ caseName, slug, category, summary, group, updatedAt }) {
   const canonical = buildLandingUrl(group, slug);
-  const ogImage = caseOgImageUrl(slug || "landing", group.siteUrl);
+  const ogImage = caseOgImageUrl(slug || "landing", group.siteUrl, "png");
   const title = `${caseName} ${group.label} 대응 안내`;
   const description = `${caseName} 관련 ${group.intent} 검색 의도에 맞춘 피해 대응 정보입니다.`;
   const h1 = `${caseName} ${group.label} 대응`;

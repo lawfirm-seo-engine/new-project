@@ -8,7 +8,8 @@ import {
   buildRssXml,
   buildSitemapIndexXml,
   buildSitemapXml,
-  caseOgImageUrl,
+  caseOgPngImageUrl,
+  caseOgWebpImageUrl,
   getRecentCases,
   isCaseAllowedForGroup,
   landingUrlForItem,
@@ -421,7 +422,7 @@ function createFallbackLanding(caseItem, group) {
     canonical,
     ogTitle: pageTitle,
     ogDescription: description,
-    ogImage: caseOgImageUrl(slug || "landing", group.siteUrl),
+    ogImage: caseOgPngImageUrl(slug || "landing", group.siteUrl),
     h1: pageH1,
     body: [
       caseItem.summary || `${dispName} 피해 구조와 대응 방법을 정리한 안내입니다.`,
@@ -1340,7 +1341,16 @@ function formatDate(value) {
 
 function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = "" }) {
   const slug = caseItem?.slug ? encodeURIComponent(caseItem.slug) : "";
-  const ogImage = isHub ? `${group.siteUrl}/assets/og-template.webp` : landing?.ogImage;
+  const ogImage = isHub
+    ? `${group.siteUrl}/assets/og-template.png`
+    : caseItem?.slug
+      ? caseOgPngImageUrl(caseItem.slug, group.siteUrl)
+      : landing?.ogImage;
+  const displayOgImage = isHub
+    ? `${group.siteUrl}/assets/og-template.webp`
+    : caseItem?.slug
+      ? caseOgWebpImageUrl(caseItem.slug, group.siteUrl)
+      : "";
   const ogImageType = /\.webp(?:$|\?)/i.test(ogImage || "")
     ? "image/webp"
     : /\.jpe?g(?:$|\?)/i.test(ogImage || "")
@@ -1365,7 +1375,8 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
 
   if (slug) {
     links.push(`<link rel="prefetch" href="https://gnlaw-center.co.kr/case/${slug}/">`);
-    links.push(`<link rel="prefetch" href="${landing.ogImage}" as="image">`);
+    if (displayOgImage) links.push(`<link rel="prefetch" href="${escapeHtml(displayOgImage)}" as="image" type="image/webp">`);
+    if (ogImage) links.push(`<link rel="prefetch" href="${escapeHtml(ogImage)}" as="image" type="image/png">`);
   }
 
   if (ogImage) {
@@ -2211,7 +2222,7 @@ for (const group of groups) {
     canonical: `${group.siteUrl}/`,
     ogTitle: escapeHtml(hubTitle),
     ogDescription: escapeHtml(hubDescription),
-    ogImage: `${group.siteUrl}/assets/og-template.webp`,
+    ogImage: `${group.siteUrl}/assets/og-template.png`,
     headExtra: createHeadExtra({ group, isHub: true }),
     schema: JSON.stringify({
       "@context": "https://schema.org",
@@ -2249,7 +2260,7 @@ for (const group of groups) {
     canonical: categoryCanonical,
     ogTitle: escapeHtml(categoryTitle),
     ogDescription: escapeHtml(categoryDescription),
-    ogImage: `${group.siteUrl}/assets/og-template.webp`,
+    ogImage: `${group.siteUrl}/assets/og-template.png`,
     headExtra: createHeadExtra({ group, isHub: true }),
     schema: createCategorySchema(group, categoryTitle, categoryDescription, categoryCanonical),
     h1: escapeHtml(categoryTitle),

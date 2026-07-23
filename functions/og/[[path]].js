@@ -101,7 +101,7 @@ async function encodeWebp(renderedImage) {
     renderedImage.height,
     {
       ...webpDefaultOptions,
-      quality: 86,
+      quality: 90,
       method: 5,
       alpha_quality: 100,
       use_sharp_yuv: 1,
@@ -175,8 +175,46 @@ function splitTitle(title) {
   return [chars.slice(0, best).join(""), chars.slice(best).join("")];
 }
 
-function buildSvg(title, templateHref) {
+function hashString(value = "") {
+  let hash = 2166136261;
+  for (let i = 0; i < String(value).length; i += 1) {
+    hash ^= String(value).charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+const ACCENT_PALETTE = [
+  ["#1f3a5f", "#c99430", "#f5d782"],
+  ["#17433a", "#d08b2e", "#f1c75f"],
+  ["#3b2f52", "#b96f50", "#f4be8a"],
+  ["#4a2c36", "#c78a3b", "#f3cf78"],
+  ["#24324a", "#8f9f4e", "#d6df8a"],
+  ["#2f4156", "#b06f35", "#e8b96c"],
+];
+
+function variantForImage(title = "", seed = "") {
+  const hash = hashString(`${seed}|${title}`);
+  const [base, accent, stripe] = ACCENT_PALETTE[hash % ACCENT_PALETTE.length];
+  return {
+    base,
+    accent,
+    stripe,
+    code: hash.toString(36).toUpperCase().slice(0, 5).padEnd(5, "0"),
+    bandOpacity: 0.76 + ((hash >>> 4) % 12) / 100,
+    stripeOffset: (hash % 32) - 16,
+  };
+}
+
+function shortTitle(title = "", max = 28) {
+  const chars = [...cleanTitle(title)];
+  return chars.length > max ? `${chars.slice(0, max).join("")}...` : chars.join("");
+}
+
+function buildSvg(title, templateHref, seed = "") {
   const lines = splitTitle(title);
+  const variant = variantForImage(title, seed);
+  const topLabel = shortTitle(title);
   const maxUnits = Math.max(...lines.map(textUnits), 1);
   const fontSize = lines.length > 1
     ? Math.min(86, Math.max(58, Math.floor(920 / maxUnits)))
@@ -192,11 +230,26 @@ function buildSvg(title, templateHref) {
     <stop offset="52%" stop-color="#f0b430"/>
     <stop offset="100%" stop-color="#c97912"/>
   </linearGradient>
+  <linearGradient id="caseAccent" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="${variant.base}"/>
+    <stop offset="68%" stop-color="${variant.accent}"/>
+    <stop offset="100%" stop-color="${variant.stripe}"/>
+  </linearGradient>
+  <pattern id="casePattern" patternUnits="userSpaceOnUse" width="96" height="96" patternTransform="rotate(-18 ${variant.stripeOffset} 0)">
+    <path d="M0 24H96M0 72H96" stroke="${variant.stripe}" stroke-width="7" opacity="0.38"/>
+  </pattern>
   <filter id="textShadow" x="-12%" y="-22%" width="124%" height="144%">
     <feDropShadow dx="0" dy="4" stdDeviation="1.8" flood-color="#000000" flood-opacity="0.86"/>
   </filter>
 </defs>
 <image href="${templateHref}" x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" preserveAspectRatio="xMidYMid slice"/>
+<rect x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" fill="${variant.base}" opacity="0.075"/>
+<rect x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" fill="url(#casePattern)" opacity="0.09"/>
+<path d="M0 0H1254V150H0Z" fill="url(#caseAccent)" opacity="${variant.bandOpacity.toFixed(2)}"/>
+<rect x="44" y="37" width="156" height="76" rx="0" fill="#ffffff" opacity="0.92"/>
+<text x="122" y="77" font-family="Pretendard,sans-serif" font-size="24" font-weight="900" letter-spacing="0" fill="${variant.base}" text-anchor="middle" dominant-baseline="middle">CASE</text>
+<text x="122" y="101" font-family="Pretendard,sans-serif" font-size="20" font-weight="900" letter-spacing="0" fill="${variant.accent}" text-anchor="middle" dominant-baseline="middle">${variant.code}</text>
+<text x="234" y="77" font-family="Pretendard,sans-serif" font-size="42" font-weight="900" letter-spacing="0" fill="#fff8df" text-anchor="start" dominant-baseline="middle" filter="url(#textShadow)">${escSvg(topLabel)}</text>
 ${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="900" letter-spacing="0" fill="url(#goldText)" stroke="#120800" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" text-rendering="geometricPrecision" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
 </svg>`;
 }
@@ -307,7 +360,7 @@ export async function onRequest(context) {
     await ensureInit(env);
 
     const templateHref = await getTemplateDataUri(url.origin);
-    const svg = buildSvg(title, templateHref);
+    const svg = buildSvg(title, templateHref, rawSlug);
     const resvg = new Resvg(svg, {
       shapeRendering: 2,
       textRendering: 1,

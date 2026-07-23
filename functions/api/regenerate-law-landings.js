@@ -183,7 +183,7 @@ function createLandingData({ caseName, slug, group }) {
     canonical,
     ogTitle: title,
     ogDescription: description,
-    ogImage: caseOgImageUrl(slug || "landing", group.siteUrl),
+    ogImage: caseOgImageUrl(slug || "landing", group.siteUrl, "png"),
     h1: groupPageH1(caseName, group.key),
     body,
     victimCases,

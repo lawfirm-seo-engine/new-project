@@ -7,7 +7,13 @@ export const BOARD_INDEX_KEY = "center-board:index";
 export const BOARD_POST_KEY_PREFIX = "center-board:post:";
 export const BOARD_REFRESHED_AT = "2026-07-11";
 
-const DEFAULT_OG_IMAGE = `${BOARD_SITE_URL}/assets/og-template.webp`;
+function ogImageExtension(format = "webp") {
+  return String(format || "").toLowerCase() === "png" ? "png" : "webp";
+}
+
+function defaultOgImage(format = "webp") {
+  return `${BOARD_SITE_URL}/assets/og-template.${ogImageExtension(format)}`;
+}
 
 export function isBoardHost(host = "") {
   return String(host || "").toLowerCase() === BOARD_HOST;
@@ -29,11 +35,12 @@ export function boardDescription(post = {}) {
   return normalizeSpace(post.metaDescription) || normalizeSpace(post.excerpt) || createExcerpt(post.body, 150);
 }
 
-export function boardImageUrl(post = {}) {
+export function boardImageUrl(post = {}, format = "webp") {
   const slug = normalizeSlug(post.slug);
-  if (!slug) return DEFAULT_OG_IMAGE;
+  const ext = ogImageExtension(format);
+  if (!slug) return defaultOgImage(ext);
   const revision = normalizeSpace(post.revision) || boardLastModified(post);
-  return `${BOARD_SITE_URL}/og/board-${encodeURIComponent(slug)}.webp?v=${OG_IMAGE_VERSION}&r=${encodeURIComponent(revision)}`;
+  return `${BOARD_SITE_URL}/og/board-${encodeURIComponent(slug)}.${ext}?v=${OG_IMAGE_VERSION}&r=${encodeURIComponent(revision)}`;
 }
 
 export function boardOgText(post = {}) {

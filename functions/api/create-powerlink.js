@@ -228,7 +228,8 @@ function today() {
 
 async function warmPowerlinkCache(slug) {
   await Promise.allSettled([
-    fetch(powerlinkOgImageUrl(slug), { method: "GET" }),
+    fetch(powerlinkOgImageUrl(slug, "png"), { method: "GET" }),
+    fetch(powerlinkOgImageUrl(slug, "webp"), { method: "GET" }),
     fetch(`${SITE_URL}/powerlink/${encodeURIComponent(slug)}/`, { method: "GET" }),
   ]);
 }

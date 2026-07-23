@@ -73,7 +73,8 @@ export async function onRequestOptions() {
 async function warmBoardPost(post) {
   await Promise.allSettled([
     fetch(boardPostUrl(post.slug), { method: "GET" }),
-    fetch(boardImageUrl(post), { method: "GET" }),
+    fetch(boardImageUrl(post, "png"), { method: "GET" }),
+    fetch(boardImageUrl(post, "webp"), { method: "GET" }),
   ]);
 }
 

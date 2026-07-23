@@ -108,7 +108,7 @@ export async function onRequestPost(context) {
       canonical: buildLandingUrl(LC_GROUP, slug),
       ogTitle: title,
       ogDescription: summary,
-      ogImage: caseOgImageUrl(slug, LC_SITE_URL),
+      ogImage: caseOgImageUrl(slug, LC_SITE_URL, "png"),
       h1: title,
       ...(imageAlt         ? { imageAlt }         : {}),
       ...(imageCaption     ? { imageCaption }     : {}),
@@ -306,7 +306,8 @@ async function saveCasesToGitHub(env, list, message) {
 
 async function warmLcCache(slug) {
   await Promise.allSettled([
-    fetch(caseOgImageUrl(slug, LC_SITE_URL), { method: "GET" }),
+    fetch(caseOgImageUrl(slug, LC_SITE_URL, "png"), { method: "GET" }),
+    fetch(caseOgImageUrl(slug, LC_SITE_URL, "webp"), { method: "GET" }),
     fetch(buildLandingUrl(LC_GROUP, slug), { method: "GET" }),
   ]);
 }

@@ -57,7 +57,7 @@ function buildPowerlinkEntries(powerlinks) {
     .map((item) => {
       const loc = escapeXml(`https://${POWERLINK_HOST}/powerlink/${encodeURIComponent(item.slug)}/`);
       const lastmod = escapeXml(item.updatedAt || item.createdAt || today);
-      const imgLoc = escapeXml(powerlinkOgImageUrl(item.slug));
+      const imgLoc = escapeXml(powerlinkOgImageUrl(item.slug, "png"));
       const imgTitle = escapeXml(item.title || item.slug);
       return `  <url><loc>${loc}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority><image:image><image:loc>${imgLoc}</image:loc><image:title>${imgTitle}</image:title></image:image></url>`;
     })

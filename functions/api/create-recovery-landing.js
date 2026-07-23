@@ -46,7 +46,7 @@ export async function onRequestPost(context) {
       canonical: buildLandingUrl(RECOVERY_GROUP, slug),
       ogTitle: title,
       ogDescription: summary,
-      ogImage: caseOgImageUrl(slug, RECOVERY_SITE_URL),
+      ogImage: caseOgImageUrl(slug, RECOVERY_SITE_URL, "png"),
       h1,
       ...(imageAlt ? { imageAlt } : {}),
       ...(imageCaption ? { imageCaption } : {}),
@@ -310,7 +310,8 @@ function today() {
 
 async function warmRecoveryCache(slug) {
   await Promise.allSettled([
-    fetch(caseOgImageUrl(slug, RECOVERY_SITE_URL), { method: "GET" }),
+    fetch(caseOgImageUrl(slug, RECOVERY_SITE_URL, "png"), { method: "GET" }),
+    fetch(caseOgImageUrl(slug, RECOVERY_SITE_URL, "webp"), { method: "GET" }),
     fetch(buildLandingUrl(RECOVERY_GROUP, slug), { method: "GET" }),
   ]);
 }

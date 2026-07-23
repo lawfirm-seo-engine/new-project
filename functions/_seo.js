@@ -11,17 +11,31 @@ export const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
 export const RECENT_SITEMAP_DAYS = 14;
 export const RECENT_SITEMAP_LIMIT = 300;
 export const RSS_LIMIT = 120;
-export const SEO_STABILIZED_AT = "2026-07-13";
-export const OG_IMAGE_VERSION = "20260713a1";
+export const SEO_STABILIZED_AT = "2026-07-23";
+export const OG_IMAGE_VERSION = "20260723a1";
 export const OG_IMAGE_WIDTH = 1254;
 export const OG_IMAGE_HEIGHT = 1254;
 
-export function caseOgImageUrl(slug = "landing", siteUrl = "https://gnlaw-criminal.co.kr") {
-  return `${trimSiteUrl(siteUrl)}/og/${encodeURIComponent(slug || "landing")}.webp?v=${OG_IMAGE_VERSION}`;
+function ogImageExtension(format = "webp") {
+  return String(format || "").toLowerCase() === "png" ? "png" : "webp";
 }
 
-export function powerlinkOgImageUrl(slug = "landing") {
-  return `https://gnlaw-criminal.co.kr/og/powerlink-${encodeURIComponent(slug || "landing")}.webp?v=${OG_IMAGE_VERSION}`;
+export function caseOgImageUrl(slug = "landing", siteUrl = "https://gnlaw-criminal.co.kr", format = "webp") {
+  const ext = ogImageExtension(format);
+  return `${trimSiteUrl(siteUrl)}/og/${encodeURIComponent(slug || "landing")}.${ext}?v=${OG_IMAGE_VERSION}`;
+}
+
+export function caseOgPngImageUrl(slug = "landing", siteUrl = "https://gnlaw-criminal.co.kr") {
+  return caseOgImageUrl(slug, siteUrl, "png");
+}
+
+export function caseOgWebpImageUrl(slug = "landing", siteUrl = "https://gnlaw-criminal.co.kr") {
+  return caseOgImageUrl(slug, siteUrl, "webp");
+}
+
+export function powerlinkOgImageUrl(slug = "landing", format = "webp") {
+  const ext = ogImageExtension(format);
+  return `https://gnlaw-criminal.co.kr/og/powerlink-${encodeURIComponent(slug || "landing")}.${ext}?v=${OG_IMAGE_VERSION}`;
 }
 
 export const GROUPS = [
@@ -171,7 +185,7 @@ export function buildSitemapXml(group, cases = [], options = {}) {
       const priority = options.recent ? "1.0" : "0.9";
       const changefreq = options.recent ? "hourly" : "daily";
       const loc = escapeXml(landingUrlForItem(group, item));
-      const imgLoc = escapeXml(caseOgImageUrl(item.slug, base));
+      const imgLoc = escapeXml(caseOgPngImageUrl(item.slug, base));
       const imgTitle = escapeXml(item.caseName || item.slug);
       return `  <url><loc>${loc}</loc><lastmod>${escapeXml(lastmod)}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority><image:image><image:loc>${imgLoc}</image:loc><image:title>${imgTitle}</image:title></image:image></url>`;
     });
