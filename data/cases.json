@@ -83038,5 +83038,51 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
+  },
+  {
+    "slug": "염승환-사칭-사기-리딩-투자사기-어떤-절차로-진행될까",
+    "caseName": "염승환 사칭 사기 리딩 투자사기 어떤 절차로 진행될까?",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 2696,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "keipiemtekeu",
+    "caseName": "케이피엠테크 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 4963,
+    "reports": 33,
+    "summary": "케이피엠테크 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "케이피엠테크",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
   }
 ]
