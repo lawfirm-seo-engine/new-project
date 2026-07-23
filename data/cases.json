@@ -6707,6 +6707,33 @@
     "memo": ""
   },
   {
+    "slug": "namujeunggwon",
+    "caseName": "나무증권 사기 사칭 리딩방",
+    "category": "형사대응",
+    "createdAt": "2026-06-12",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 6833,
+    "reports": 10,
+    "summary": "나무증권 사기 사칭 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "나무증권",
+      "사기",
+      "사칭",
+      "리딩방",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "dbaxis",
     "caseName": "DBAXIS 사칭 사기",
     "category": "형사대응",
@@ -6745,30 +6772,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "namujeunggwon",
-    "caseName": "나무증권 사기 사칭 리딩방",
-    "category": "형사대응",
-    "createdAt": "2026-06-12",
-    "updatedAt": "2026-06-12",
-    "thumbnailUrl": "",
-    "landingViews": 6833,
-    "reports": 10,
-    "summary": "나무증권 사기 사칭 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "나무증권",
-      "사기",
-      "사칭",
-      "리딩방",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "searchHidden": false,
-    "hideFromListing": false,
-    "noindex": false
   },
   {
     "slug": "coctrading",
@@ -65293,15 +65296,12 @@
       "증거보존"
     ],
     "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "memos": [
-      {
-        "id": 1784788983530,
-        "text": "리더스투자그룹을 사칭한 리더스인베스트먼트를 주의하시기 바랍니다.",
-        "createdAt": "2026-07-23 15:43"
-      }
-    ]
+    "fraudType": ""
   },
   {
     "slug": "lumykoin",
@@ -83287,6 +83287,190 @@
     "summary": "채움파트너스 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
     "tags": [
       "채움파트너스",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "institution-exchange"
+  },
+  {
+    "slug": "ls-plus-사칭-사기-리딩-투자사기-사기-피해-회복-가능성은",
+    "caseName": "LS Plus 사칭 사기 리딩 투자사기 사기 피해 회복 가능성은?",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 1338,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "beurrubetibi",
+    "caseName": "블루베티비 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 7884,
+    "reports": 21,
+    "summary": "블루베티비 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "블루베티비",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
+  },
+  {
+    "slug": "cmkt-사기-사칭-사기-리딩-투자사기-투자사기-당했다면-이렇게-대응하세요",
+    "caseName": "CMKT 사기 사칭 사기 리딩 투자사기 투자사기 당했다면 이렇게 대응하세요",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 6795,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "kdfbd",
+    "caseName": "kdfbd 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 2865,
+    "reports": 14,
+    "summary": "kdfbd 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "kdfbd",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "institution-exchange"
+  },
+  {
+    "slug": "azstm-사칭-사기-리딩-투자사기-피해금-회복의-골든타임",
+    "caseName": "AZSTM 사칭 사기 리딩 투자사기 피해금 회복의 골든타임",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 1665,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "rideoseuinbeseuteumeonteu",
+    "caseName": "리더스인베스트먼트 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 2118,
+    "reports": 23,
+    "summary": "리더스인베스트먼트 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "리더스인베스트먼트",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "프로젝트-사칭-사기-리딩-투자사기-반드시-확인해야-할-대응법",
+    "caseName": "프로젝트 사칭 사기 리딩 투자사기 반드시 확인해야 할 대응법",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 6228,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "bibitten",
+    "caseName": "bibitten 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 379,
+    "reports": 11,
+    "summary": "bibitten 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "bibitten",
       "사칭",
       "사기",
       "사기피해",
