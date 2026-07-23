@@ -8921,7 +8921,7 @@
     "caseName": "염승환 사기 한화투자증권",
     "category": "형사대응",
     "createdAt": "2026-06-15",
-    "updatedAt": "2026-07-23",
+    "updatedAt": "2026-06-15",
     "thumbnailUrl": "",
     "landingViews": 2614,
     "reports": 31,
@@ -8935,13 +8935,16 @@
       "증거보존"
     ],
     "memo": "",
-    "memos": [
+    "comments": [
       {
-        "id": 1784792415631,
-        "text": "케이피엠테크, spv전략연계프로젝트, 한화투자증권, hwiner 사기이니 조심하시기 바랍니다.",
-        "createdAt": "2026-07-23 16:40"
+        "id": 1784792423929,
+        "text": "hwiner 어플이 사기어플이 맞나요? 돈을 투자했습니다. 확인 부탁드려요",
+        "createdAt": "2026-07-23"
       }
-    ]
+    ],
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "fwpirukeomeoseu",
