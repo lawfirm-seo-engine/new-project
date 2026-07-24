@@ -3461,7 +3461,7 @@
     "caseName": "EWBCPRO 사기 리딩방",
     "category": "형사대응",
     "createdAt": "2026-06-01",
-    "updatedAt": "2026-06-01",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 157,
     "reports": 26,
@@ -3474,7 +3474,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1784872509512,
+        "text": "EWBCPRO와 EWBCXMAX는 이스트 웨스트 뱅코프(East West Bancorp)를 사칭한 리딩방 사기로 주의가 필요합니다.",
+        "createdAt": "2026-07-24 14:55"
+      }
+    ]
   },
   {
     "slug": "reverie-sagi-gasangjasan-georae",
@@ -30466,7 +30473,7 @@
     "caseName": "EWBCXMAX 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-29",
-    "updatedAt": "2026-07-24",
+    "updatedAt": "2026-06-29",
     "thumbnailUrl": "",
     "landingViews": 7354,
     "reports": 28,
@@ -30482,13 +30489,9 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": "",
-    "memos": [
-      {
-        "id": 1784872429617,
-        "text": "EWBCXMAX는 이스트 웨스트 뱅코프(East West Bancorp)를 사칭, EWBCPRO 어플 사기를 주의 바랍니다.",
-        "createdAt": "2026-07-24 14:53"
-      }
-    ]
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "huimangnanumso",
