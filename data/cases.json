@@ -34889,7 +34889,7 @@
     "caseName": "ICMarketsGlobal 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-02",
-    "updatedAt": "2026-07-02",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 2018,
     "reports": 9,
@@ -34904,7 +34904,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1784867197534,
+        "text": "icmarketsglobal은 icmarketb, ebaymall-qp.shop을 주의 바랍니다. 실제 거래가 없는 사이트 입니다.",
+        "createdAt": "2026-07-24 13:26"
+      }
+    ]
   },
   {
     "slug": "movieroypost",
