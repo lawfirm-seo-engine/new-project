@@ -7086,7 +7086,7 @@
     "caseName": "이스트 웨스트 뱅코프 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-12",
-    "updatedAt": "2026-06-12",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 7149,
     "reports": 27,
@@ -7100,7 +7100,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1784872290367,
+        "text": "EWBCXMAX, 이스트웨스트뱅코프(East West Bancorp), EWBCPRO 사칭, 네이버 밴드 투자 리딩방 사기 피해 주의 바랍니다.",
+        "createdAt": "2026-07-24 14:51"
+      }
+    ]
   },
   {
     "slug": "vip888-maeirseongjang",
