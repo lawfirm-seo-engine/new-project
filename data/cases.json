@@ -86429,6 +86429,13 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1784877924796,
+        "text": "HRP증권과 유수진을 사칭한 행복노후플랜660% 사기 피해 제보가 들어오고 있으니 주의 바랍니다.",
+        "createdAt": "2026-07-24 16:25"
+      }
+    ]
   }
 ]
