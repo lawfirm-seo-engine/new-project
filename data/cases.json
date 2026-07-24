@@ -58479,7 +58479,7 @@
     "caseName": "Robeco 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-08",
-    "updatedAt": "2026-07-08",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 5761,
     "reports": 13,
@@ -58494,7 +58494,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1784863930259,
+        "text": "ROBECO 사칭 사기는 RIAMC Min 어플을 통한 한기철 교수 사칭으로 주의가 필요합니다.",
+        "createdAt": "2026-07-24 12:32"
+      }
+    ]
   },
   {
     "slug": "je4gi-gigwantujahyeobryeogpeurojegteu",
