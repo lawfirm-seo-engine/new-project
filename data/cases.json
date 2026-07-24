@@ -29219,7 +29219,7 @@
     "caseName": "UP QIB 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-27",
-    "updatedAt": "2026-06-27",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 4833,
     "reports": 22,
@@ -29235,7 +29235,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1784877501172,
+        "text": "UPSTOX, UP QIB는 UPSTOCK 업스톡 사칭으로 구글스토어 앱 설치와 사기에 주의 바랍니다.",
+        "createdAt": "2026-07-24 16:18"
+      }
+    ]
   },
   {
     "slug": "epiphany",
