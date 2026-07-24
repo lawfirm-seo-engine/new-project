@@ -7928,7 +7928,7 @@
     "caseName": "시타델증권 사기 증권사",
     "category": "형사대응",
     "createdAt": "2026-06-13",
-    "updatedAt": "2026-06-13",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 5266,
     "reports": 7,
@@ -7941,7 +7941,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1784872897210,
+        "text": "시타델증권 사칭 사기 com.M77med.bitlayer와 CIT PRO 어플 사기를 주의 바랍니다.",
+        "createdAt": "2026-07-24 15:01"
+      }
+    ]
   },
   {
     "slug": "merroraibeu",
