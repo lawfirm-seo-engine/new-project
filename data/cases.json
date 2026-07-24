@@ -3475,13 +3475,12 @@
       "증거보존"
     ],
     "memo": "",
-    "memos": [
-      {
-        "id": 1784872509512,
-        "text": "EWBCPRO와 EWBCXMAX는 이스트 웨스트 뱅코프(East West Bancorp)를 사칭한 리딩방 사기로 주의가 필요합니다.",
-        "createdAt": "2026-07-24 14:55"
-      }
-    ]
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
   },
   {
     "slug": "reverie-sagi-gasangjasan-georae",
@@ -7093,7 +7092,7 @@
     "caseName": "이스트 웨스트 뱅코프 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-12",
-    "updatedAt": "2026-06-12",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 7149,
     "reports": 27,
@@ -7108,9 +7107,12 @@
       "증거보존"
     ],
     "memo": "",
-    "searchHidden": false,
+    "noindex": false,
     "hideFromListing": false,
-    "noindex": false
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
   },
   {
     "slug": "vip888-maeirseongjang",
@@ -30473,7 +30475,7 @@
     "caseName": "EWBCXMAX 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-29",
-    "updatedAt": "2026-06-29",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 7354,
     "reports": 28,
@@ -30487,11 +30489,12 @@
       "증거보존"
     ],
     "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "searchHidden": false,
-    "hideFromListing": false,
-    "noindex": false
+    "fraudType": ""
   },
   {
     "slug": "huimangnanumso",
@@ -85526,5 +85529,54 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
+  },
+  {
+    "slug": "east-west-bancorp",
+    "caseName": "East West Bancorp 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-24",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 2658,
+    "reports": 30,
+    "summary": "East West Bancorp 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "East",
+      "West",
+      "Bancorp",
+      "사칭",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "institution-exchange"
+  },
+  {
+    "slug": "trendyol",
+    "caseName": "Trendyol 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-24",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 5215,
+    "reports": 24,
+    "summary": "Trendyol 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "Trendyol",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
   }
 ]
