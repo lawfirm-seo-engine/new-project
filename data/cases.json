@@ -83331,7 +83331,7 @@
     "caseName": "VIP12 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-23",
-    "updatedAt": "2026-07-23",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 4960,
     "reports": 29,
@@ -83348,7 +83348,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1784876911535,
+        "text": "VIP12 A12 밴드방 사기, 출금 정지와 추가 입금은 사기이니 주의 바랍니다.",
+        "createdAt": "2026-07-24 16:08"
+      }
+    ]
   },
   {
     "slug": "chaeumpateuneoseu",
