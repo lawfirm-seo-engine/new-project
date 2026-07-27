@@ -3396,6 +3396,58 @@
     "memo": ""
   },
   {
+    "slug": "ewbcpro-sagi-ridingbang",
+    "caseName": "EWBCPRO 사기 리딩방",
+    "category": "형사대응",
+    "createdAt": "2026-06-01",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 157,
+    "reports": 26,
+    "summary": "EWBCPRO 사기 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "EWBCPRO",
+      "사기",
+      "리딩방",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
+    "slug": "culturecapital-sagi-haeoeseonmur",
+    "caseName": "CultureCapital 사기 해외선물",
+    "category": "형사대응",
+    "createdAt": "2026-06-01",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 4005,
+    "reports": 6,
+    "summary": "CultureCapital 사기 해외선물 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "CultureCapital",
+      "사기",
+      "해외선물",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "tuhon-sagi-ridingbang",
     "caseName": "tuhon 사기 리딩방",
     "category": "형사대응",
@@ -3455,32 +3507,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "ewbcpro-sagi-ridingbang",
-    "caseName": "EWBCPRO 사기 리딩방",
-    "category": "형사대응",
-    "createdAt": "2026-06-01",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 157,
-    "reports": 26,
-    "summary": "EWBCPRO 사기 리딩방 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "EWBCPRO",
-      "사기",
-      "리딩방",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "reverie-sagi-gasangjasan-georae",
@@ -3852,32 +3878,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "culturecapital-sagi-haeoeseonmur",
-    "caseName": "CultureCapital 사기 해외선물",
-    "category": "형사대응",
-    "createdAt": "2026-06-01",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 4005,
-    "reports": 6,
-    "summary": "CultureCapital 사기 해외선물 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "CultureCapital",
-      "사기",
-      "해외선물",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "dabargold-com-sagi-tuja",
@@ -6725,6 +6725,33 @@
     "memo": ""
   },
   {
+    "slug": "iseuteu-weseuteu-baengkopeu",
+    "caseName": "이스트 웨스트 뱅코프 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-12",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 7149,
+    "reports": 27,
+    "summary": "이스트 웨스트 뱅코프 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "이스트",
+      "웨스트",
+      "뱅코프",
+      "사칭",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "namujeunggwon",
     "caseName": "나무증권 사기 사칭 리딩방",
     "category": "형사대응",
@@ -7092,33 +7119,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "iseuteu-weseuteu-baengkopeu",
-    "caseName": "이스트 웨스트 뱅코프 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-06-12",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 7149,
-    "reports": 27,
-    "summary": "이스트 웨스트 뱅코프 사칭 사기 관련 사기 피해 의심 사건으로, 입금 경위와 대화 내용, 계좌 정보, 사이트 주소를 정리해 피해 구조와 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "이스트",
-      "웨스트",
-      "뱅코프",
-      "사칭",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "vip888-maeirseongjang",
@@ -7729,6 +7729,32 @@
     "memo": ""
   },
   {
+    "slug": "sitaderjeunggwon",
+    "caseName": "시타델증권 사기 증권사",
+    "category": "형사대응",
+    "createdAt": "2026-06-13",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 5266,
+    "reports": 7,
+    "summary": "시타델증권 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "시타델증권",
+      "사기",
+      "증권사",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "nuritueo",
     "caseName": "누리투어 사기 팀미션",
     "category": "형사대응",
@@ -7928,32 +7954,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "sitaderjeunggwon",
-    "caseName": "시타델증권 사기 증권사",
-    "category": "형사대응",
-    "createdAt": "2026-06-13",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 5266,
-    "reports": 7,
-    "summary": "시타델증권 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "시타델증권",
-      "사기",
-      "증권사",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "merroraibeu",
@@ -13554,6 +13554,33 @@
     "memo": ""
   },
   {
+    "slug": "tmeofo",
+    "caseName": "TMEOFO 사기 ETF 데이트레이딩",
+    "category": "형사대응",
+    "createdAt": "2026-06-19",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 1715,
+    "reports": 33,
+    "summary": "TMEOFO 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "TMEOFO",
+      "사기",
+      "ETF",
+      "데이트레이딩",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "d-b-c",
     "caseName": "D.B.C 사기",
     "category": "형사대응",
@@ -14516,33 +14543,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "tmeofo",
-    "caseName": "TMEOFO 사기 ETF 데이트레이딩",
-    "category": "형사대응",
-    "createdAt": "2026-06-19",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 1715,
-    "reports": 33,
-    "summary": "TMEOFO 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "TMEOFO",
-      "사기",
-      "ETF",
-      "데이트레이딩",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "hicham-elaziz",
@@ -18065,6 +18065,31 @@
     "memo": ""
   },
   {
+    "slug": "hlhoulihana",
+    "caseName": "hlhoulihana 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-22",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 5073,
+    "reports": 4,
+    "summary": "hlhoulihana 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "hlhoulihana",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "iseuteuweseuteubaengkeu",
     "caseName": "이스트웨스트뱅크 사기",
     "category": "형사대응",
@@ -19760,31 +19785,6 @@
       "증거보존"
     ],
     "memo": ""
-  },
-  {
-    "slug": "hlhoulihana",
-    "caseName": "hlhoulihana 사기",
-    "category": "형사대응",
-    "createdAt": "2026-06-22",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 5073,
-    "reports": 4,
-    "summary": "hlhoulihana 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "hlhoulihana",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "find-love",
@@ -29110,6 +29110,33 @@
     "createdBy": ""
   },
   {
+    "slug": "up-qib",
+    "caseName": "UP QIB 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 4833,
+    "reports": 22,
+    "summary": "UP QIB 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "UP",
+      "QIB",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "runokobeumakes",
     "caseName": "루노코브마켓 사칭 사기",
     "category": "형사대응",
@@ -29219,33 +29246,6 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": ""
-  },
-  {
-    "slug": "up-qib",
-    "caseName": "UP QIB 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-06-27",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 4833,
-    "reports": 22,
-    "summary": "UP QIB 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "UP",
-      "QIB",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "epiphany",
@@ -30333,6 +30333,32 @@
     "createdBy": ""
   },
   {
+    "slug": "ewbcxmax",
+    "caseName": "EWBCXMAX 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-29",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 7354,
+    "reports": 28,
+    "summary": "EWBCXMAX 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "EWBCXMAX",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "iyeor",
     "caseName": "이열 사칭 사기",
     "category": "형사대응",
@@ -30491,32 +30517,6 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": ""
-  },
-  {
-    "slug": "ewbcxmax",
-    "caseName": "EWBCXMAX 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-06-29",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 7354,
-    "reports": 28,
-    "summary": "EWBCXMAX 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "EWBCXMAX",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "huimangnanumso",
@@ -33891,6 +33891,32 @@
     "createdBy": ""
   },
   {
+    "slug": "icmarketsglobal",
+    "caseName": "ICMarketsGlobal 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-02",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 2018,
+    "reports": 9,
+    "summary": "ICMarketsGlobal 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "ICMarketsGlobal",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "한국산업은행-지급정지-사유와-대응-은평변호사",
     "caseName": "한국산업은행 지급정지 사유와 대응, 은평변호사",
     "category": "지급정지 랜딩",
@@ -34923,32 +34949,6 @@
     "createdBy": ""
   },
   {
-    "slug": "icmarketsglobal",
-    "caseName": "ICMarketsGlobal 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-07-02",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 2018,
-    "reports": 9,
-    "summary": "ICMarketsGlobal 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "ICMarketsGlobal",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
-  },
-  {
     "slug": "movieroypost",
     "caseName": "movieroypost 사칭 사기",
     "category": "형사대응",
@@ -35084,6 +35084,32 @@
     "createdBy": ""
   },
   {
+    "slug": "uribom",
+    "caseName": "우리봄 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-03",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 1196,
+    "reports": 12,
+    "summary": "우리봄 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "우리봄",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "cryptobinder",
     "caseName": "Cryptobinder 사칭 사기",
     "category": "형사대응",
@@ -35193,32 +35219,6 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": ""
-  },
-  {
-    "slug": "uribom",
-    "caseName": "우리봄 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-07-03",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 1196,
-    "reports": 12,
-    "summary": "우리봄 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "우리봄",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": true,
-    "hideFromListing": true,
-    "searchHidden": true,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "ohyeog-daepyo",
@@ -46023,6 +46023,60 @@
     "createdBy": "tujasagi-manual"
   },
   {
+    "slug": "apex-ascend-peurojegteu",
+    "caseName": "APEX Ascend 프로젝트 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-07",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 4958,
+    "reports": 34,
+    "summary": "APEX Ascend 프로젝트 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "APEX",
+      "Ascend",
+      "프로젝트",
+      "사칭",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
+    "slug": "velion-eopeur",
+    "caseName": "Velion 어플 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-07",
+    "updatedAt": "2026-07-23",
+    "thumbnailUrl": "",
+    "landingViews": 7271,
+    "reports": 14,
+    "summary": "Velion 어플 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "Velion",
+      "어플",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": ""
+  },
+  {
     "slug": "해운대보이스피싱변호사-출금정지-어떻게-진행해야-할까",
     "caseName": "해운대보이스피싱변호사, 출금정지 어떻게 진행해야 할까?",
     "category": "보이스피싱 랜딩",
@@ -51769,33 +51823,6 @@
     "createdBy": ""
   },
   {
-    "slug": "apex-ascend-peurojegteu",
-    "caseName": "APEX Ascend 프로젝트 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-07-07",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 4958,
-    "reports": 34,
-    "summary": "APEX Ascend 프로젝트 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "APEX",
-      "Ascend",
-      "프로젝트",
-      "사칭",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
-  },
-  {
     "slug": "samseongjeunggwon",
     "caseName": "삼성증권 사칭 사기",
     "category": "형사대응",
@@ -52111,33 +52138,6 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": ""
-  },
-  {
-    "slug": "velion-eopeur",
-    "caseName": "Velion 어플 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-07-07",
-    "updatedAt": "2026-07-23",
-    "thumbnailUrl": "",
-    "landingViews": 7271,
-    "reports": 14,
-    "summary": "Velion 어플 사칭 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "Velion",
-      "어플",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": ""
   },
   {
     "slug": "kis-edge-pro",
@@ -82772,6 +82772,54 @@
     "createdBy": "jipjeong-manual"
   },
   {
+    "slug": "한화투자증권-사칭-사기-리딩-투자사기-투자사기-피해-해결-방법",
+    "caseName": "한화투자증권 사칭 사기 리딩 투자사기 투자사기 피해 해결 방법",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-27",
+    "thumbnailUrl": "",
+    "landingViews": 3107,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "vip12",
+    "caseName": "VIP12 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-23",
+    "updatedAt": "2026-07-24",
+    "thumbnailUrl": "",
+    "landingViews": 4960,
+    "reports": 29,
+    "summary": "VIP12 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "VIP12",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
     "slug": "je15gipeondeupeurojegteu",
     "caseName": "제15기펀드프로젝트 사칭 사기",
     "category": "형사대응",
@@ -83337,32 +83385,6 @@
     "fraudType": "team-mission"
   },
   {
-    "slug": "vip12",
-    "caseName": "VIP12 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-07-23",
-    "updatedAt": "2026-07-24",
-    "thumbnailUrl": "",
-    "landingViews": 4960,
-    "reports": 29,
-    "summary": "VIP12 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
-    "tags": [
-      "VIP12",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": "stock-project"
-  },
-  {
     "slug": "chaeumpateuneoseu",
     "caseName": "채움파트너스 사칭 사기",
     "category": "형사대응",
@@ -83641,28 +83663,6 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
-  },
-  {
-    "slug": "한화투자증권-사칭-사기-리딩-투자사기-투자사기-피해-해결-방법",
-    "caseName": "한화투자증권 사칭 사기 리딩 투자사기 투자사기 피해 해결 방법",
-    "category": "투자사기 랜딩",
-    "createdAt": "2026-07-23",
-    "updatedAt": "2026-07-23",
-    "thumbnailUrl": "",
-    "landingViews": 3107,
-    "reports": 0,
-    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
-    "tags": [
-      "투자사기",
-      "피해구제",
-      "사기피해"
-    ],
-    "memo": "",
-    "noindex": false,
-    "targetGroups": [
-      "lc"
-    ],
-    "createdBy": "tujasagi-manual"
   },
   {
     "slug": "dogbitmarket",
@@ -86578,13 +86578,75 @@
     "fraudType": "team-mission"
   },
   {
-    "slug": "애널리스트-사칭-사기-리딩-투자사기-회복-성공률을-높이는-비결",
-    "caseName": "애널리스트 사칭 사기 리딩 투자사기 회복 성공률을 높이는 비결",
+    "slug": "증권사-사칭-사기-리딩-투자사기-골든타임을-놓치지-마세요",
+    "caseName": "증권사 사칭 사기 리딩 투자사기 골든타임을 놓치지 마세요",
     "category": "투자사기 랜딩",
-    "createdBy": "tujasagi-manual",
+    "createdAt": "2026-07-27",
+    "updatedAt": "2026-07-27",
+    "thumbnailUrl": "",
+    "landingViews": 3194,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
     "targetGroups": [
       "lc"
     ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "전문가-사칭-사기-리딩-투자사기-신속한-조치가-답입니다",
+    "caseName": "전문가 사칭 사기 리딩 투자사기 신속한 조치가 답입니다",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-27",
+    "updatedAt": "2026-07-27",
+    "thumbnailUrl": "",
+    "landingViews": 5327,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "네이버-밴드-사칭-사기-리딩-투자사기-실질적인-해결-방안을-소개합니다",
+    "caseName": "네이버 밴드 사칭 사기 리딩 투자사기 실질적인 해결 방안을 소개합니다",
+    "category": "투자사기 랜딩",
+    "createdAt": "2026-07-27",
+    "updatedAt": "2026-07-27",
+    "thumbnailUrl": "",
+    "landingViews": 583,
+    "reports": 0,
+    "summary": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
+    "tags": [
+      "투자사기",
+      "피해구제",
+      "사기피해"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "애널리스트-사칭-사기-리딩-투자사기-회복-성공률을-높이는-비결",
+    "caseName": "애널리스트 사칭 사기 리딩 투자사기 회복 성공률을 높이는 비결",
+    "category": "투자사기 랜딩",
     "createdAt": "2026-07-27",
     "updatedAt": "2026-07-27",
     "thumbnailUrl": "",
@@ -86596,68 +86658,35 @@
       "피해구제",
       "사기피해"
     ],
-    "landings": {
-      "lc": {
-        "title": "애널리스트 사칭 사기 리딩 투자사기 회복 성공률을 높이는 비결",
-        "description": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
-        "canonical": "https://사기피해구제센터.kr/results/%EC%95%A0%EB%84%90%EB%A6%AC%EC%8A%A4%ED%8A%B8-%EC%82%AC%EC%B9%AD-%EC%82%AC%EA%B8%B0-%EB%A6%AC%EB%94%A9-%ED%88%AC%EC%9E%90%EC%82%AC%EA%B8%B0-%ED%9A%8C%EB%B3%B5-%EC%84%B1%EA%B3%B5%EB%A5%A0%EC%9D%84-%EB%86%92%EC%9D%B4%EB%8A%94-%EB%B9%84%EA%B2%B0-solution/",
-        "ogTitle": "애널리스트 사칭 사기 리딩 투자사기 회복 성공률을 높이는 비결",
-        "ogDescription": "투자사기변호사 상담은 투자사기 피해 직후 형사고소 가능성, 계좌 지급정지, 피해금 회수 경로를 빠르게 확인하는 과정이 중요합니다. 서울 지역 피해 대응 절차를 안내합니다.",
-        "ogImage": "https://사기피해구제센터.kr/og/%EC%95%A0%EB%84%90%EB%A6%AC%EC%8A%A4%ED%8A%B8-%EC%82%AC%EC%B9%AD-%EC%82%AC%EA%B8%B0-%EB%A6%AC%EB%94%A9-%ED%88%AC%EC%9E%90%EC%82%AC%EA%B8%B0-%ED%9A%8C%EB%B3%B5-%EC%84%B1%EA%B3%B5%EB%A5%A0%EC%9D%84-%EB%86%92%EC%9D%B4%EB%8A%94-%EB%B9%84%EA%B2%B0.png?v=20260723a1",
-        "h1": "애널리스트 사칭 사기 리딩 투자사기 회복 성공률을 높이는 비결",
-        "imageAlt": "투자사기변호사 투자사기 피해 대응",
-        "imageCaption": "투자사기변호사가 안내하는 투자사기 피해구제 절차와 피해금 회수 대응",
-        "imageDescription": "투자사기변호사 상담을 통해 투자사기 피해 직후 필요한 형사고소, 계좌추적, 피해금 회수 가능성을 정리한 법률 정보 이미지입니다.",
-        "body": [
-          "애널리스트 사칭 사기 리딩 투자사기 회복 성공률을 높이는 비결",
-          "## 투자사기 피해 현황",
-          "투자사기는 리딩방, 주식·선물옵션 투자 플랫폼, 가상자산 거래소, SNS 투자 그룹 등 다양한 경로를 통해 발생하고 있습니다. 처음에는 소액 수익을 보여주며 신뢰를 형성한 뒤 고액 투자를 유도하고, 출금 요청 단계에서 세금·수수료·보증금 명목으로 추가 납입을 요구하는 패턴이 반복됩니다.",
-          "서울 지역에서 투자사기변호사 상담을 받는 경우, 피해 금액과 상관없이 초기 대응 속도가 회수 가능성을 크게 좌우합니다.",
-          "## 투자사기 주요 유형",
-          "다음 유형에 해당한다면 즉시 법률 검토를 받는 것이 중요합니다.",
-          "✔ 리딩방·유료 투자 정보 구독 후 고액 손실 또는 출금 불가",
-          "✔ 해외 거래소·불법 플랫폼을 통한 코인·선물옵션 투자 손실",
-          "✔ SNS 지인 소개 투자 그룹에서 원금 보장·확정 수익 약속 후 먹튀",
-          "✔ 가짜 투자 앱 또는 조작된 수익 화면을 통한 입금 유도",
-          "✔ 출금 시 세금·보증금·수수료 명목 추가 요구 후 잠적",
-          "✔ 투자 자문사·자산운용사 사칭 후 계약서·수익 확인서 위조",
-          "## 초기 대응 체크리스트",
-          "피해 직후 아래 사항을 먼저 정리하면 법률 검토와 수사기관 신고 절차가 빠르게 진행됩니다.",
-          "✔ 입금 내역 전체 (계좌이체 확인증, 가상자산 전송 내역)",
-          "✔ 대화 내용 캡처 (카카오톡·텔레그램·라인 등)",
-          "✔ 투자 플랫폼 또는 앱 화면 캡처 (수익 화면, 출금 오류 화면)",
-          "✔ 상대방 연락처, 계좌번호, 사이트 주소, 지갑 주소",
-          "✔ 계약서·투자 확인서·수익 배당 안내 문서 (있는 경우)",
-          "원본 자료는 삭제하지 말고 그대로 보존해야 합니다. 수정하거나 캡처 후 원본을 삭제하면 이후 증거 능력이 약화될 수 있습니다.",
-          "## 법적 대응 경로",
-          "투자사기 피해는 형사와 민사를 병행 검토하는 것이 효과적입니다.",
-          "**형사 고소**: 경찰청 고소장 접수. 계좌 지급정지·동결 요청과 연계해 진행하면 회수 가능성을 높일 수 있습니다.",
-          "**민사 소송**: 상대방 특정이 가능한 경우 가압류·손해배상청구 소송 검토. 수사 결과와 병행해 진행하면 판결 후 강제집행 속도를 높일 수 있습니다.",
-          "**금융당국 신고**: 금융감독원 불법금융신고센터 신고. 불법 플랫폼 차단 및 추가 피해 방지에 기여합니다.",
-          "서울 지역 투자사기변호사 상담에서는 피해 유형 분류, 상대방 특정 가능성 검토, 증거 보전 순서, 수사기관 신고 방향을 함께 안내합니다.",
-          "## 계좌 지급정지 및 피해금 회수",
-          "피해 발생 직후 상대방 계좌에 자금이 남아 있을 가능성이 가장 높습니다. 빠른 지급정지 신청이 회수의 핵심입니다.",
-          "금융기관에 전기통신금융사기 피해 신고를 접수하면 지급정지 절차가 시작됩니다. 이미 이체된 경우에도 수취 계좌 추적과 수사 협조를 통해 자금 흐름을 파악할 수 있습니다.",
-          "가상자산 피해의 경우 블록체인 추적 분석(체인 분석)과 거래소 계정 동결 신청을 병행하는 방식으로 대응합니다.",
-          "## 핵심 정리",
-          "애널리스트 사칭 사기 리딩 투자사기 회복 성공률을 높이는 비결 페이지에서는 서울 지역 투자사기변호사 상담을 통해 피해 유형 분석, 증거 보전 방법, 형사·민사 대응 경로, 계좌 지급정지 절차를 안내합니다.",
-          "투자사기 피해는 시간이 지날수록 회수 가능성이 낮아집니다. 입금 내역과 대화 내용을 정리한 뒤 법률 상담을 먼저 받아보는 것이 가장 중요한 첫 단계입니다.",
-          "## 자주 묻는 질문 (FAQ)",
-          "### Q1. 투자사기 피해 금액이 작아도 신고해야 하나요?",
-          "소액이라도 신고하는 것이 중요합니다. 동일한 조직에 의한 피해자가 여럿일 경우 공동 피해자 집단으로 수사가 진행되어 검거 가능성이 높아지고 회수 가능성도 커집니다.",
-          "### Q2. 입금한 계좌가 타인 명의라면 어떻게 하나요?",
-          "대포통장일 가능성이 높습니다. 수사기관이 계좌 추적을 통해 실제 조직원을 특정하는 과정을 거칩니다. 계좌 정보와 입금 내역을 함께 신고하면 수사 진행에 도움이 됩니다.",
-          "### Q3. 가상자산으로 입금했는데 회수가 가능한가요?",
-          "블록체인 특성상 거래 기록이 남으므로 체인 분석을 통해 자금 흐름을 추적할 수 있습니다. 국내 거래소를 경유한 경우 동결 신청이 가능한 경우도 있습니다.",
-          "### Q4. 해외 사이트인데 신고가 가능한가요?",
-          "국내 수사기관에 신고 가능합니다. 인터폴 공조 수사나 외국 수사기관 협력을 통해 진행하는 사례도 있습니다. 국내 피해자 수가 많을수록 수사 가능성이 높아집니다.",
-          "### Q5. 투자 계약서에 서명했으면 피해 주장이 어려운가요?",
-          "계약서가 존재해도 사기죄 성립은 가능합니다. 상대방이 처음부터 이행 의사 없이 계약을 체결했거나 허위 사실을 고지한 경우 계약서의 존재가 사기 입증을 막지 않습니다."
-        ],
-        "victimCases": [],
-        "suspiciousCompanies": [],
-        "faq": []
-      }
-    }
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "lc"
+    ],
+    "createdBy": "tujasagi-manual"
+  },
+  {
+    "slug": "cltpro",
+    "caseName": "CLTPRO 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-07-27",
+    "updatedAt": "2026-07-27",
+    "thumbnailUrl": "",
+    "landingViews": 578,
+    "reports": 30,
+    "summary": "CLTPRO 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "CLTPRO",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
   }
 ]
