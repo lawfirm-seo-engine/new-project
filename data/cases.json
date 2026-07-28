@@ -85102,7 +85102,7 @@
     "caseName": "KS자산운용 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-24",
-    "updatedAt": "2026-07-24",
+    "updatedAt": "2026-07-28",
     "thumbnailUrl": "",
     "landingViews": 1785,
     "reports": 23,
@@ -85116,10 +85116,12 @@
       "증거보존"
     ],
     "memo": "",
-    "noindex": false,
+    "noindex": true,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "institution-exchange"
+    "fraudType": "institution-exchange",
+    "searchHidden": true,
+    "hideFromListing": true
   },
   {
     "slug": "igeunsong",
@@ -86723,7 +86725,7 @@
     "caseName": "KS자산관리 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-27",
-    "updatedAt": "2026-07-28",
+    "updatedAt": "2026-07-27",
     "thumbnailUrl": "",
     "landingViews": 4622,
     "reports": 29,
