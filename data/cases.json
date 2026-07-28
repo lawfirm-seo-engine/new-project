@@ -22686,7 +22686,7 @@
     "caseName": "둘코르 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-24",
-    "updatedAt": "2026-07-08",
+    "updatedAt": "2026-07-28",
     "thumbnailUrl": "",
     "landingViews": 3765,
     "reports": 10,
@@ -22699,9 +22699,11 @@
       "증거보존"
     ],
     "memo": "",
-    "noindex": false,
+    "noindex": true,
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "searchHidden": true,
+    "hideFromListing": true
   },
   {
     "slug": "riorabion",
@@ -87038,7 +87040,8 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   },
   {
     "slug": "나무증권-사칭-사기-리딩-투자사기-피해-회복의-가능성을-높여드립니다",
@@ -87121,7 +87124,8 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   },
   {
     "slug": "nh투자증권-사칭-사기-리딩-투자사기-빠르게-움직여야-하는-이유",
@@ -87204,6 +87208,7 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   }
 ]
