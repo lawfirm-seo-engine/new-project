@@ -86697,7 +86697,7 @@
     "caseName": "케이에스자산관리 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-27",
-    "updatedAt": "2026-07-28",
+    "updatedAt": "2026-07-27",
     "thumbnailUrl": "",
     "landingViews": 4203,
     "reports": 29,
@@ -86723,7 +86723,7 @@
     "caseName": "KS자산관리 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-27",
-    "updatedAt": "2026-07-27",
+    "updatedAt": "2026-07-28",
     "thumbnailUrl": "",
     "landingViews": 4622,
     "reports": 29,
@@ -86737,10 +86737,12 @@
       "증거보존"
     ],
     "memo": "",
-    "noindex": false,
+    "noindex": true,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "searchHidden": true,
+    "hideFromListing": true
   },
   {
     "slug": "seutyudio-tete",
