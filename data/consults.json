@@ -1213,5 +1213,14 @@
     "caseName": "if(now()=sysdate(),sleep(15),0)",
     "domain": "피해금 추적 법률센터",
     "createdAt": "2026. 7. 29. 오후 3:52:59"
+  },
+  {
+    "id": 1785307991139,
+    "name": "jJQaBOcg",
+    "phone": "555-666-0606",
+    "amount": "1",
+    "caseName": "피해금 추적 법률센터0'XOR(if(now()=sysdate(),sleep(15),0))XOR'Z",
+    "domain": "피해금 추적 법률센터",
+    "createdAt": "2026. 7. 29. 오후 3:53:10"
   }
 ]
