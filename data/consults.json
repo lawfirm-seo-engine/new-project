@@ -1330,5 +1330,14 @@
     "caseName": "@@bADb5",
     "domain": "피해금 추적 법률센터",
     "createdAt": "2026. 7. 29. 오후 3:54:49"
+  },
+  {
+    "id": 1785308092847,
+    "name": "jJQaBOcg",
+    "phone": "555-666-0606",
+    "amount": "1",
+    "caseName": "(select 198766*667891 from DUAL)",
+    "domain": "피해금 추적 법률센터",
+    "createdAt": "2026. 7. 29. 오후 3:54:52"
   }
 ]
