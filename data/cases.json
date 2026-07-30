@@ -30973,7 +30973,7 @@
     "caseName": "미국경제정복하기 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-29",
-    "updatedAt": "2026-06-29",
+    "updatedAt": "2026-07-30",
     "thumbnailUrl": "",
     "landingViews": 4575,
     "reports": 4,
@@ -30988,7 +30988,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1785384826882,
+        "text": "원웨이, oneway MTS 어플. 미국경제정복하기 텔레그램방 사기를 주의하시기 바랍니다.",
+        "createdAt": "2026-07-30 13:13"
+      }
+    ]
   },
   {
     "slug": "lancetv-net",
