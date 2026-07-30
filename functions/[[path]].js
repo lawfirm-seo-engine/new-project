@@ -104,7 +104,7 @@ const GROUPS = {
     ctaTitle: "금융사기 피해 대응 상담",
     ctaText: "입금 내역, 대화 내용, 사이트 주소, 앱 화면을 기준으로 현재 가능한 법적 조치와 피해 회복 가능성을 검토합니다.",
     ctaLabel: "상담 안내", ogType: "article",
-    descriptionSuffix: "금융사기, 투자사기, 리딩방 사기, 코인 사기 피해 대응 정보를 사건별로 연결합니다.",
+    descriptionSuffix: "법무법인 선린 핀테크센터가 금융사기 피해 회복을 위한 민형사 대응과 증거 보존, 절차 안내를 제공합니다.",
     naverVerification: "11d695d7d711ce5e50abbe85ae49a60242a37e70",
     siteUrl: "https://gnlaw-center.co.kr",
   },
@@ -1191,10 +1191,15 @@ function createCenterHeaderNav(group = {}) {
   const siteUrl = String(group.siteUrl || "").replace(/\/$/, "");
   if (siteUrl !== "https://gnlaw-center.co.kr") return "";
   return `<nav class="center-nav" aria-label="주요 메뉴">
-    <a href="/">홈</a>
-    <a href="/case/">진행사건</a>
-    <a href="/board/">게시판</a>
-    <a href="https://cafe.naver.com/gnlawfintech" target="_blank" rel="noopener noreferrer">네이버카페</a>
+    <div class="center-nav-group">
+      <a class="center-nav-parent" href="/#sunlin-intro">선린소개</a>
+      <div class="center-nav-sub" aria-label="선린소개 하위 메뉴">
+        <a href="/#greeting">인사말</a>
+        <a href="/#members">선린의 구성원</a>
+      </div>
+    </div>
+    <a href="/#practice">업무분야</a>
+    <a href="/board/">진행사건</a>
     <a class="center-nav-call" href="tel:0263480406">상담문의</a>
   </nav>`;
 }

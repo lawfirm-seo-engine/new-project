@@ -163,14 +163,14 @@ const groups = [
     bodyClass: "domain-e center-site center-fintech",
     siteName: "법무법인 선린 핀테크센터",
     shortName: "핀테크센터",
-    label: "전체 허브형",
-    intent: "금융사기 피해 대응 · 사건 유형 분류 · 법률 조치",
+    label: "핀테크센터",
+    intent: "금융사기 피해 회복 · 민형사 대응 · 2차 피해 예방",
     ogType: "website",
     titleSuffix: "금융사기 피해 대응",
-    descriptionSuffix: "금융사기, 투자사기, 리딩방 사기, 코인 사기 피해 대응 정보를 사건별로 연결합니다.",
+    descriptionSuffix: "법무법인 선린 핀테크센터가 금융사기 피해 회복을 위한 민형사 대응과 증거 보존, 절차 안내를 제공합니다.",
     ogSuffix: "금융사기 피해 대응",
-    hubTitle: "법무법인 선린 핀테크센터 금융사기 피해 대응",
-    hubLead: "업체명, 도메인, 리딩방명, 앱과 입금 경로를 기준으로 피해 구조를 정리하고 형사고소, 민사 회수, 증거 보존 방향을 연결합니다.",
+    hubTitle: "법무법인 선린 핀테크센터",
+    hubLead: "주식 리딩방, 증권사·은행 사칭, 코인·거래소, 팀미션·부업, 라이브 방송·데이트 플랫폼, 환불·보상 사칭 피해를 민형사 절차로 검토합니다.",
     tone: "FINANCIAL FRAUD RESPONSE",
     ctaTitle: "금융사기 피해 대응 상담",
     ctaText: "입금 내역, 대화 내용, 사이트 주소, 앱 화면을 기준으로 현재 가능한 법적 조치와 피해 회복 가능성을 검토합니다.",
@@ -1829,66 +1829,131 @@ function centerFintechHeadExtra(group) {
 function createCenterHeaderNav(group) {
   if (!isCenterBoardSite(group)) return "";
   return `<nav class="center-nav" aria-label="주요 메뉴">
-    <a href="/">홈</a>
-    <a href="/case/">진행사건</a>
-    <a href="/board/">게시판</a>
-    <a href="https://cafe.naver.com/gnlawfintech" target="_blank" rel="noopener noreferrer">네이버카페</a>
+    <div class="center-nav-group">
+      <a class="center-nav-parent" href="/#sunlin-intro">선린소개</a>
+      <div class="center-nav-sub" aria-label="선린소개 하위 메뉴">
+        <a href="/#greeting">인사말</a>
+        <a href="/#members">선린의 구성원</a>
+      </div>
+    </div>
+    <a href="/#practice">업무분야</a>
+    <a href="/board/">진행사건</a>
     <a class="center-nav-call" href="tel:0263480406">상담문의</a>
   </nav>`;
 }
 
-function createCenterBoardHubContent(group, { groupCases, totalReports, todayCases, todayReports, rows, dynScript }) {
+function createCenterBoardHubContent(group) {
+  const practiceAreas = [
+    {
+      title: "주식 리딩방·투자 프로젝트 사칭형",
+      description: "고수익 리딩방, 비상장주식, 프로젝트 투자 명목으로 입금을 유도한 뒤 출금 거부와 추가 입금을 요구하는 피해를 검토합니다.",
+      points: ["권유자·입금 계좌·대화방 증거 정리", "형사고소와 민사 회수 가능성 동시 판단"],
+    },
+    {
+      title: "증권사·은행 사칭형",
+      description: "증권사, 은행, 금융기관 직원을 사칭해 계좌 개설, 인증, 수수료 납부를 요구한 사건의 자금 흐름과 책임 소재를 확인합니다.",
+      points: ["사칭 자료와 안내 링크 보존", "계좌 지급정지와 피해 회복 절차 점검"],
+    },
+    {
+      title: "코인·거래소 사칭형",
+      description: "가짜 거래소, 코인 예치, 선물·마진 투자 플랫폼을 앞세워 입금을 반복시키거나 출금을 막는 구조를 분석합니다.",
+      points: ["거래소 주소·앱 화면·지갑 내역 확보", "운영자 특정과 수사 협조 자료 구성"],
+    },
+    {
+      title: "팀미션·부업·영상시청 사기형",
+      description: "간단한 미션 수행, 구매대행, 영상 시청 보상, 정산금 지급을 이유로 보증금과 세금을 요구하는 피해를 다룹니다.",
+      points: ["미션방 대화와 정산표 대조", "추가 입금 요구 차단과 법적 대응 순서 안내"],
+    },
+    {
+      title: "라이브 방송·만남·데이트 플랫폼 사칭형",
+      description: "라이브 방송 환전, 포인트 출금, 만남·데이트 앱 정산을 빌미로 인증비와 환전 수수료를 요구한 사건을 정리합니다.",
+      points: ["플랫폼 화면과 상대 계정 자료 보존", "기망 경위와 피해 금액 특정"],
+    },
+    {
+      title: "환불·보상금 지급 사칭형",
+      description: "기존 피해금을 돌려주겠다며 보상금, 환불 수수료, 세금 명목으로 다시 입금을 요구하는 2차 피해를 차단합니다.",
+      points: ["기존 피해와 추가 요구 분리 검토", "2차 피해 예방과 고소 자료 보강"],
+    },
+  ];
+
+  const members = [
+    {
+      name: "김상수 대표 변호사",
+      description: "법무법인 선린 대표 변호사로 금융·경제범죄 피해 대응과 사건 전략 수립을 이끕니다.",
+    },
+    {
+      name: "안형준 대표 변호사",
+      description: "부장검사 출신의 형사 사건 경험을 바탕으로 고소 절차와 수사 대응 방향을 검토합니다.",
+    },
+    {
+      name: "전강진 변호사",
+      description: "평택지청장 출신 변호사로 복잡한 자금 흐름과 다수 피해자 사건의 민형사 쟁점을 점검합니다.",
+    },
+    {
+      name: "김세은 파트너 변호사",
+      description: "대한변협 인증 형사법·가사법 전문 변호사로 피해 회복 절차와 민사 쟁점을 함께 검토합니다.",
+    },
+    {
+      name: "한두희 변호사",
+      description: "사기 피해 사건의 자료 정리, 사실관계 구성, 형사·민사 절차 진행을 지원합니다.",
+    },
+  ];
+
   return `
-    <section class="center-archive-top" aria-label="진행사건 아카이브 안내">
+    <section id="sunlin-intro" class="center-intro-section" aria-label="법무법인 선린 핀테크센터 소개">
+      <div id="greeting" class="center-greeting">
+        <p class="center-kicker">SUNLIN FINTECH CENTER</p>
+        <h2>금융사기 피해자의 권리 회복을 위한 법무법인 선린 핀테크센터입니다.</h2>
+        <p>법무법인 선린 핀테크센터는 사기 피해를 입은 의뢰인의 입금 경위, 대화 기록, 플랫폼 화면, 계좌 흐름을 기준으로 형사고소와 민사상 회수 가능성을 함께 검토합니다.</p>
+        <p>피해 유형이 빠르게 바뀌는 금융사기 사건에서는 초기 증거 보존과 2차 피해 차단이 중요합니다. 선린은 사건의 구조를 법률 쟁점으로 정리하고 필요한 절차를 단계별로 안내합니다.</p>
+      </div>
+      <div class="center-office-note">
+        <strong>초기 상담 기준</strong>
+        <span>입금 내역, 대화방, 사이트 주소, 앱 화면 증거 정리</span>
+        <span>지급정지, 형사고소, 민사 절차의 우선순위 검토</span>
+        <span>환불·보상 사칭 등 2차 피해 차단 안내</span>
+      </div>
+    </section>
+
+    <section id="practice" class="center-practice-section" aria-label="핀테크센터 업무분야">
+      <div class="center-section-head">
+        <p class="center-kicker">PRACTICE AREAS</p>
+        <h2>금융사기 6개 영역을 중심으로 피해 구조를 법률 절차에 맞게 정리합니다.</h2>
+        <p>각 사건은 명칭이 달라도 권유 방식, 입금 경로, 출금 거부 사유, 추가 입금 요구 방식이 다릅니다. 핀테크센터는 유형별로 증거와 절차를 나누어 대응합니다.</p>
+      </div>
+      <div class="center-practice-grid">
+        ${practiceAreas.map((area) => `<article class="center-practice-card">
+          <h3>${escapeHtml(area.title)}</h3>
+          <p>${escapeHtml(area.description)}</p>
+          <ul>
+            ${area.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+          </ul>
+        </article>`).join("\n")}
+      </div>
+    </section>
+
+    <section id="members" class="center-member-section" aria-label="선린의 구성원">
+      <div class="center-section-head">
+        <p class="center-kicker">SUNLIN MEMBERS</p>
+        <h2>사기 피해 사건의 형사·민사 쟁점을 함께 검토하는 구성원</h2>
+        <p>법무법인 선린의 형사·민사 사건 수행 경험을 핀테크센터 업무에 접목해 피해자의 권리 구제 절차를 점검합니다.</p>
+      </div>
+      <div class="center-member-grid">
+        ${members.map((member) => `<article class="center-member-card">
+          <strong>${escapeHtml(member.name)}</strong>
+          <p>${escapeHtml(member.description)}</p>
+        </article>`).join("\n")}
+      </div>
+    </section>
+
+    <section class="center-progress-section" aria-label="진행사건 안내">
       <div>
-        <p class="center-kicker">FINANCIAL FRAUD RESPONSE</p>
-        <h2>금융사기 피해 대응은 사건 유형을 정확히 나누는 것에서 시작됩니다.</h2>
-        <p>법무법인 선린 핀테크센터는 업체명, 도메인, 리딩방명, 앱과 입금 경로를 기준으로 피해 구조를 정리하고 초기 대응 방향을 안내합니다.</p>
+        <p class="center-kicker">CASE STATUS</p>
+        <h2>진행 중인 사건은 별도 페이지에서 확인합니다.</h2>
+        <p>메인 화면은 핀테크센터 소개와 업무분야 중심으로 운영하고, 기존 사건 페이지는 진행사건 메뉴에서 확인할 수 있도록 분리했습니다.</p>
       </div>
-      <div class="center-check-card">
-        <strong>상담 전 핵심 확인</strong>
-        <span>금융·투자사기 유형별 사건 정리</span>
-        <span>도메인·상호·리딩방명 기반 피해 사례 분석</span>
-        <span>상담 전 자료 준비와 초기 대응 안내</span>
-      </div>
-    </section>
-
-    <section class="center-board-stats" aria-label="사건 통계">
-      <div>
-        <span>등록 사건</span>
-        <strong id="statTotal">${groupCases.length.toLocaleString("ko-KR")}</strong>
-        <em id="statTodayCount">오늘 추가 +${todayCases}</em>
-      </div>
-      <div>
-        <span>누적 접수</span>
-        <strong id="statReports">${totalReports.toLocaleString("ko-KR")}</strong>
-        <em id="statTodayReports">오늘 추가 +${todayReports}</em>
-      </div>
-    </section>
-
-    <section class="center-type-strip" aria-label="주요 사건 유형">
-      <span>팀미션·부업 사기</span>
-      <span>주식리딩방·투자 사기</span>
-      <span>코인·거래소 사칭</span>
-      <span>방송환전·포인트 사기</span>
-    </section>
-
-    <div class="case-search-wrap center-search-wrap">
-      <input id="case-search" type="search" class="case-search" placeholder="업체명 또는 사건명 검색" autocomplete="off">
-      <button class="search-btn" type="button">검색</button>
-    </div>
-
-    <section id="case-board" class="case-table-wrap center-board-table" aria-label="${escapeHtml(group.tableTitle)}">
-      <div class="case-table-title">
-        <p class="center-kicker">CASE LIST</p>
-        <h2>전체 진행사건</h2>
-        <p class="case-table-lead">등록된 사건은 기존 상세 URL을 유지합니다. 목록에서 사건명을 선택하면 해당 사건 페이지로 이동합니다.</p>
-      </div>
-      <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
-      ${rows || `<p class="center-empty">등록된 사건을 불러오는 중입니다.</p>`}
-    </section>
-    <div id="pgWrap" class="pg-wrap"></div>
-    ${dynScript}`;
+      <a class="center-progress-button" href="/board/">진행사건 보기</a>
+    </section>`;
 }
 
 function createCategoryContent(group) {
@@ -2105,7 +2170,7 @@ function statusLabel(key, seed = key) {
 }
 
 function buildPage(template, group, data) {
-  return softenRepeatedContextTerms(replaceAllPlaceholders(template, {
+  let html = softenRepeatedContextTerms(replaceAllPlaceholders(template, {
     bodyClass: group.bodyClass,
     siteName: escapeHtml(group.siteName),
     shortName: escapeHtml(group.shortName),
@@ -2120,6 +2185,10 @@ function buildPage(template, group, data) {
     ogType: group.ogType,
     ...data,
   }));
+  if (data.omitConsultCta) {
+    html = html.replace(/\s*<section id="consult" class="cta">[\s\S]*?<\/section>\s*(?=<\/main>)/, "\n  ");
+  }
+  return html;
 }
 
 function createFooterLinks(group) {
@@ -2341,6 +2410,7 @@ for (const group of groups) {
     headerCall: createCenterHeaderNav(group),
     floatingWidgets: createHubFloatingWidgets(group),
     pageKind: "hub-page",
+    omitConsultCta: isCenterBoardSite(group),
   });
 
   await fs.outputFile(path.join(group.outDir, "index.html"), hubHtml);
