@@ -98,13 +98,13 @@ const GROUPS = {
     siteUrl: "https://gnlaw-case.co.kr",
   },
   "gnlaw-center.co.kr": {
-    key: "e", pathPrefix: "case", urlSlugSuffix: "issue", bodyClass: "domain-e center-site",
-    siteName: "사기피해 통합 허브", shortName: "전체 허브",
-    intent: "전체 사건 허브 · 유형별 연결 · 관련 사건", tone: "통합 탐색",
-    ctaTitle: "유형별 대응 보기",
-    ctaText: "하나의 사건을 법적 대응, 회수 절차, 사례, 정보 요약 관점으로 나누어 확인할 수 있습니다.",
-    ctaLabel: "관련 정보 확인", ogType: "article",
-    descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
+    key: "e", pathPrefix: "case", urlSlugSuffix: "issue", bodyClass: "domain-e center-site center-fintech",
+    siteName: "법무법인 선린 핀테크센터", shortName: "핀테크센터",
+    intent: "금융사기 피해 대응 · 사건 유형 분류 · 법률 조치", tone: "FINANCIAL FRAUD RESPONSE",
+    ctaTitle: "금융사기 피해 대응 상담",
+    ctaText: "입금 내역, 대화 내용, 사이트 주소, 앱 화면을 기준으로 현재 가능한 법적 조치와 피해 회복 가능성을 검토합니다.",
+    ctaLabel: "상담 안내", ogType: "article",
+    descriptionSuffix: "금융사기, 투자사기, 리딩방 사기, 코인 사기 피해 대응 정보를 사건별로 연결합니다.",
     naverVerification: "11d695d7d711ce5e50abbe85ae49a60242a37e70",
     siteUrl: "https://gnlaw-center.co.kr",
   },
@@ -186,6 +186,14 @@ const CANONICAL_SITE_URL_BY_HOST = {
 
 for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
   if (GROUPS[host]) GROUPS[host].siteUrl = siteUrl;
+}
+
+function centerFintechHeadLinks(group) {
+  if (!group || String(group.siteUrl || "").replace(/\/$/, "") !== "https://gnlaw-center.co.kr") return [];
+  return [
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp">`,
+    `<link rel="stylesheet" href="/assets/center-fintech/style.css">`,
+  ];
 }
 
 const CROSS_LINKS = [
@@ -885,6 +893,7 @@ function boardHeadExtra({ canonical, ogImage, displayOgImage = "", imageAlt, ima
     `<link rel="alternate" hreflang="ko" href="${esc(canonical)}">`,
     `<link rel="alternate" type="application/rss+xml" title="사기피해 통합 허브 RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
+    ...centerFintechHeadLinks(GROUPS["gnlaw-center.co.kr"]),
     displayOgImage ? `<link rel="prefetch" href="${esc(displayOgImage)}" as="image" type="image/webp">` : "",
     `<link rel="prefetch" href="${esc(ogImage)}" as="image" type="image/png">`,
     `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,
@@ -1289,6 +1298,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     `<meta name="theme-color" content="${themeColor(group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${esc(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
+    ...centerFintechHeadLinks(group),
     `<link rel="prefetch" href="${esc(displayOgImage)}" as="image" type="image/webp">`,
     `<link rel="prefetch" href="${esc(ogImage)}" as="image" type="image/png">`,
     `<meta property="og:image:secure_url" content="${esc(ogImage)}">`,

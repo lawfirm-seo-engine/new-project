@@ -23,6 +23,7 @@ import {
 const root = process.cwd();
 const dataPath = path.join(root, "data", "cases.json");
 const publicDir = path.join(root, "public");
+const centerFintechAssetsDir = path.join(root, "center-fintech-assets");
 const templatesDir = path.join(root, "templates");
 
 const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -159,22 +160,22 @@ const groups = [
     siteUrl: "https://gnlaw-center.co.kr",
     pathPrefix: "case",
     urlSlugSuffix: "issue",
-    bodyClass: "domain-e center-site",
-    siteName: "사기피해 통합 허브",
-    shortName: "전체 허브",
+    bodyClass: "domain-e center-site center-fintech",
+    siteName: "법무법인 선린 핀테크센터",
+    shortName: "핀테크센터",
     label: "전체 허브형",
-    intent: "전체 사건 허브 · 유형별 연결 · 관련 사건",
+    intent: "금융사기 피해 대응 · 사건 유형 분류 · 법률 조치",
     ogType: "website",
-    titleSuffix: "전체 허브",
-    descriptionSuffix: "전체 사건 허브에서 형사, 민사, 성공사례, 사건정보를 사건별로 연결합니다.",
-    ogSuffix: "전체 허브",
-    hubTitle: "법무법인 선린 사기피해 전체 사건 리스트",
-    hubLead: "같은 사건을 형사고소, 민사소송, 성공사례, 정보 브리핑 관점으로 연결해 검색 의도별 진입 경로를 제공합니다.",
-    tone: "통합 탐색",
-    ctaTitle: "유형별 대응 보기",
-    ctaText: "하나의 사건을 법적 대응, 회수 절차, 사례, 정보 요약 관점으로 나누어 확인할 수 있습니다.",
-    ctaLabel: "관련 정보 확인",
-    tableTitle: "전체 사건 진행 현황",
+    titleSuffix: "금융사기 피해 대응",
+    descriptionSuffix: "금융사기, 투자사기, 리딩방 사기, 코인 사기 피해 대응 정보를 사건별로 연결합니다.",
+    ogSuffix: "금융사기 피해 대응",
+    hubTitle: "법무법인 선린 핀테크센터 금융사기 피해 대응",
+    hubLead: "업체명, 도메인, 리딩방명, 앱과 입금 경로를 기준으로 피해 구조를 정리하고 형사고소, 민사 회수, 증거 보존 방향을 연결합니다.",
+    tone: "FINANCIAL FRAUD RESPONSE",
+    ctaTitle: "금융사기 피해 대응 상담",
+    ctaText: "입금 내역, 대화 내용, 사이트 주소, 앱 화면을 기준으로 현재 가능한 법적 조치와 피해 회복 가능성을 검토합니다.",
+    ctaLabel: "상담 안내",
+    tableTitle: "금융사기 사건 진행 현황",
     naverVerification: "11d695d7d711ce5e50abbe85ae49a60242a37e70",
   },
   // ── law-* 도메인 ────────────────────────────────────────────────────────────
@@ -1372,6 +1373,8 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="preload" as="image" href="/assets/og-template.webp">`,
   ];
+  const centerHeadExtra = centerFintechHeadExtra(group);
+  if (centerHeadExtra) links.push(centerHeadExtra);
 
   if (slug) {
     links.push(`<link rel="prefetch" href="https://gnlaw-center.co.kr/case/${slug}/">`);
@@ -1815,6 +1818,14 @@ function isCenterBoardSite(group) {
   return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-center.co.kr";
 }
 
+function centerFintechHeadExtra(group) {
+  if (!isCenterBoardSite(group)) return "";
+  return [
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp">`,
+    `<link rel="stylesheet" href="/assets/center-fintech/style.css">`,
+  ].join("\n");
+}
+
 function createCenterHeaderNav(group) {
   if (!isCenterBoardSite(group)) return "";
   return `<nav class="center-nav" aria-label="주요 메뉴">
@@ -1830,15 +1841,15 @@ function createCenterBoardHubContent(group, { groupCases, totalReports, todayCas
   return `
     <section class="center-archive-top" aria-label="진행사건 아카이브 안내">
       <div>
-        <p class="center-kicker">FINANCIAL FRAUD CASE ARCHIVE</p>
-        <h2>진행사건을 게시판 형태로 정리했습니다.</h2>
-        <p>업체명, 플랫폼명, 리딩방명, 앱 이름을 기준으로 등록된 사건을 검색하고 현재 URL 그대로 상세 내용을 확인할 수 있습니다.</p>
+        <p class="center-kicker">FINANCIAL FRAUD RESPONSE</p>
+        <h2>금융사기 피해 대응은 사건 유형을 정확히 나누는 것에서 시작됩니다.</h2>
+        <p>법무법인 선린 핀테크센터는 업체명, 도메인, 리딩방명, 앱과 입금 경로를 기준으로 피해 구조를 정리하고 초기 대응 방향을 안내합니다.</p>
       </div>
       <div class="center-check-card">
-        <strong>운영 기준</strong>
-        <span>기존 사건 URL 유지</span>
-        <span>게시판형 목록 노출</span>
-        <span>사건명 기반 검색</span>
+        <strong>상담 전 핵심 확인</strong>
+        <span>금융·투자사기 유형별 사건 정리</span>
+        <span>도메인·상호·리딩방명 기반 피해 사례 분석</span>
+        <span>상담 전 자료 준비와 초기 대응 안내</span>
       </div>
     </section>
 
@@ -2290,6 +2301,10 @@ for (const group of groups) {
     }
   }
 
+  if (isCenterBoardSite(group) && await fs.pathExists(centerFintechAssetsDir)) {
+    await fs.copy(centerFintechAssetsDir, path.join(group.outDir, "assets", "center-fintech"));
+  }
+
   if (group.key === "a") {
     await fs.copy(path.join(root, "admin"), path.join(root, "dist-a", "admin"));
   }
@@ -2392,7 +2407,7 @@ Sitemap: ${group.siteUrl}/sitemap.xml
     ogTitle: escapeHtml(privacyTitle),
     ogDescription: escapeHtml(privacyDesc),
     ogImage: `${group.siteUrl}/assets/og-template.png`,
-    headExtra: "",
+    headExtra: centerFintechHeadExtra(group),
     schema: JSON.stringify({
       "@context": "https://schema.org",
       "@graph": [
