@@ -8275,7 +8275,10 @@
         "text": "엘리트프라임프로젝트는 토스증권, 나무증권 등 증권사를 사칭한 사기입니다. 피해 발생하지 않도록 주의 바랍니다.",
         "createdAt": "2026-07-31 17:23"
       }
-    ]
+    ],
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "bdvdx-cc",
@@ -22221,7 +22224,7 @@
     "caseName": "제14기수익프로젝트 사기",
     "category": "형사대응",
     "createdAt": "2026-06-23",
-    "updatedAt": "2026-06-23",
+    "updatedAt": "2026-07-31",
     "thumbnailUrl": "",
     "landingViews": 4612,
     "reports": 16,
@@ -22233,7 +22236,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785486376749,
+        "text": "제14기수익프로젝트는 엘리트프라임프로젝트와 나무증권을 사칭한 사기로 피해가 없도록 주의 바랍니다.",
+        "createdAt": "2026-07-31 17:26"
+      }
+    ]
   },
   {
     "slug": "boggwon-jeongbo-saching",
