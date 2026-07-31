@@ -8256,7 +8256,7 @@
     "caseName": "엘리트프라임프로젝트 사기",
     "category": "형사대응",
     "createdAt": "2026-06-14",
-    "updatedAt": "2026-06-14",
+    "updatedAt": "2026-07-31",
     "thumbnailUrl": "",
     "landingViews": 3989,
     "reports": 16,
@@ -8268,7 +8268,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785486202778,
+        "text": "엘리트프라임프로젝트는 토스증권, 나무증권 등 증권사를 사칭한 사기입니다. 피해 발생하지 않도록 주의 바랍니다.",
+        "createdAt": "2026-07-31 17:23"
+      }
+    ]
   },
   {
     "slug": "bdvdx-cc",
@@ -84195,7 +84202,7 @@
     "caseName": "CapDyn 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-24",
-    "updatedAt": "2026-07-31",
+    "updatedAt": "2026-07-24",
     "thumbnailUrl": "",
     "landingViews": 1416,
     "reports": 28,
@@ -84210,11 +84217,11 @@
     ],
     "memo": "",
     "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "searchHidden": false,
+    "hideFromListing": false
   },
   {
     "slug": "bitpie-wallet",
@@ -90130,30 +90137,5 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "institution-exchange"
-  },
-  {
-    "slug": "jangyeojin-maenijeo",
-    "caseName": "장여진 매니저 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-07-31",
-    "updatedAt": "2026-07-31",
-    "thumbnailUrl": "",
-    "landingViews": 2517,
-    "reports": 10,
-    "summary": "장여진 매니저 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
-    "tags": [
-      "장여진",
-      "매니저",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": "stock-project"
   }
 ]
