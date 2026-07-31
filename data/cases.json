@@ -40904,7 +40904,7 @@
     "caseName": "몽수세미샵 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-03",
-    "updatedAt": "2026-07-03",
+    "updatedAt": "2026-07-31",
     "thumbnailUrl": "",
     "landingViews": 6648,
     "reports": 10,
@@ -40919,7 +40919,10 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "searchHidden": true,
+    "hideFromListing": true,
+    "noindex": true
   },
   {
     "slug": "ss-shop-net",
