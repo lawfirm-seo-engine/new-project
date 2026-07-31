@@ -43028,7 +43028,7 @@
     "caseName": "LS PLUS 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-04",
-    "updatedAt": "2026-07-04",
+    "updatedAt": "2026-07-31",
     "thumbnailUrl": "",
     "landingViews": 7543,
     "reports": 28,
@@ -43044,7 +43044,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1785486753557,
+        "text": "LS PLUS는 LS 증권 전용 어플을 사칭한 사기로 피해가 없도록 주의 바랍니다.",
+        "createdAt": "2026-07-31 17:32"
+      }
+    ]
   },
   {
     "slug": "spc-invest-com",
