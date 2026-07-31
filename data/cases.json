@@ -84195,7 +84195,7 @@
     "caseName": "CapDyn 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-24",
-    "updatedAt": "2026-07-24",
+    "updatedAt": "2026-07-31",
     "thumbnailUrl": "",
     "landingViews": 1416,
     "reports": 28,
@@ -84212,7 +84212,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1785485947866,
+        "text": "CapDyn 어플은 Capital Dynamics, 데이비드 정 교수를 사칭한 사기로 피해가 없도록 주의 바랍니다.",
+        "createdAt": "2026-07-31 17:19"
+      }
+    ]
   },
   {
     "slug": "bitpie-wallet",
