@@ -570,7 +570,7 @@ function renderPowerlinkLanding(landing) {
     `<meta name="image:alt" content="${esc(imageAlt)}">`,
     `<meta name="image:caption" content="${esc(imageCaption)}">`,
     `<meta name="image:description" content="${esc(imageDescription)}">`,
-    googleAdsHeadTagForLanding("https://gnlaw-criminal.co.kr"),
+    googleAdsHeadTagForSite("https://gnlaw-criminal.co.kr"),
   ].join("\n  ");
 
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${esc(slug)}',type:'powerlink'})}).catch(function(){});})();</script>`;
@@ -1199,7 +1199,7 @@ function logScanScriptForSite(siteUrl = "") {
     : "";
 }
 
-function googleAdsHeadTagForLanding(groupOrSiteUrl) {
+function googleAdsHeadTagForSite(groupOrSiteUrl) {
   const siteUrl = typeof groupOrSiteUrl === "string"
     ? groupOrSiteUrl
     : groupOrSiteUrl?.siteUrl;
@@ -1360,7 +1360,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     ...articleTags.map((tag) => `<meta property="article:tag" content="${esc(tag)}">`),
     `<meta name="author" content="법무법인 선린">`,
     keyword ? `<meta name="keywords" content="${esc(keyword)}">` : "",
-    googleAdsHeadTagForLanding(group),
+    googleAdsHeadTagForSite(group),
   ].filter(Boolean).join("\n  ");
 
   const caseKeywordForSchema = primaryCaseKeyword(rawCaseName) || rawCaseName;

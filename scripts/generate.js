@@ -1385,7 +1385,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   ];
   const centerHeadExtra = centerFintechHeadExtra(group);
   if (centerHeadExtra) links.push(centerHeadExtra);
-  const googleAdsTag = googleAdsHeadTagForLanding(group, { isHub });
+  const googleAdsTag = googleAdsHeadTagForSite(group);
   if (googleAdsTag) links.push(googleAdsTag);
 
   if (slug) {
@@ -1425,9 +1425,9 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   return links.join("\n  ");
 }
 
-function googleAdsHeadTagForLanding(group, { isHub = false } = {}) {
+function googleAdsHeadTagForSite(group) {
   const siteUrl = String(group?.siteUrl || "").replace(/\/$/, "");
-  return !isHub && siteUrl === "https://gnlaw-criminal.co.kr"
+  return siteUrl === "https://gnlaw-criminal.co.kr"
     ? GOOGLE_ADS_HEAD_TAG
     : "";
 }
@@ -2496,7 +2496,7 @@ Sitemap: ${group.siteUrl}/sitemap.xml
     ogTitle: escapeHtml(privacyTitle),
     ogDescription: escapeHtml(privacyDesc),
     ogImage: `${group.siteUrl}/assets/og-template.png`,
-    headExtra: centerFintechHeadExtra(group),
+    headExtra: [centerFintechHeadExtra(group), googleAdsHeadTagForSite(group)].filter(Boolean).join("\n"),
     schema: JSON.stringify({
       "@context": "https://schema.org",
       "@graph": [
