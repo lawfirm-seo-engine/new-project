@@ -10,6 +10,12 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
+  if (url.hostname === "www.gnlaw-criminal.co.kr") {
+    url.hostname = "gnlaw-criminal.co.kr";
+    url.protocol = "https:";
+    return Response.redirect(url.toString(), 301);
+  }
+
   if (url.pathname === "/admin/login" && request.method === "POST") {
     return handleLogin(request, env);
   }
