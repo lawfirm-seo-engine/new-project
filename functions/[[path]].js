@@ -52,6 +52,17 @@ import {
   sortBoardPosts,
 } from "./_board.js";
 
+const GOOGLE_ADS_TAG_ID = "AW-18361990390";
+const GOOGLE_ADS_HEAD_TAG = `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_TAG_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '${GOOGLE_ADS_TAG_ID}');
+</script>`;
+
 const GROUPS = {
   "gnlaw-criminal.co.kr": {
     key: "a", pathPrefix: "prosecute", urlSlugSuffix: "litigation", bodyClass: "domain-a",
@@ -559,6 +570,7 @@ function renderPowerlinkLanding(landing) {
     `<meta name="image:alt" content="${esc(imageAlt)}">`,
     `<meta name="image:caption" content="${esc(imageCaption)}">`,
     `<meta name="image:description" content="${esc(imageDescription)}">`,
+    googleAdsHeadTagForLanding("https://gnlaw-criminal.co.kr"),
   ].join("\n  ");
 
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${esc(slug)}',type:'powerlink'})}).catch(function(){});})();</script>`;
@@ -1187,6 +1199,15 @@ function logScanScriptForSite(siteUrl = "") {
     : "";
 }
 
+function googleAdsHeadTagForLanding(groupOrSiteUrl) {
+  const siteUrl = typeof groupOrSiteUrl === "string"
+    ? groupOrSiteUrl
+    : groupOrSiteUrl?.siteUrl;
+  return String(siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
+    ? GOOGLE_ADS_HEAD_TAG
+    : "";
+}
+
 function createCenterHeaderNav(group = {}) {
   const siteUrl = String(group.siteUrl || "").replace(/\/$/, "");
   if (siteUrl !== "https://gnlaw-center.co.kr") return "";
@@ -1339,6 +1360,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     ...articleTags.map((tag) => `<meta property="article:tag" content="${esc(tag)}">`),
     `<meta name="author" content="법무법인 선린">`,
     keyword ? `<meta name="keywords" content="${esc(keyword)}">` : "",
+    googleAdsHeadTagForLanding(group),
   ].filter(Boolean).join("\n  ");
 
   const caseKeywordForSchema = primaryCaseKeyword(rawCaseName) || rawCaseName;

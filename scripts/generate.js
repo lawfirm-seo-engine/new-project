@@ -33,6 +33,16 @@ const HOME_FRESH_LIST_LIMIT = 10;
 const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
 <!-- End LogScan Code -->`;
+const GOOGLE_ADS_TAG_ID = "AW-18361990390";
+const GOOGLE_ADS_HEAD_TAG = `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_TAG_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '${GOOGLE_ADS_TAG_ID}');
+</script>`;
 
 const ORGANIZATION = {
   "@type": "Organization",
@@ -1375,6 +1385,8 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   ];
   const centerHeadExtra = centerFintechHeadExtra(group);
   if (centerHeadExtra) links.push(centerHeadExtra);
+  const googleAdsTag = googleAdsHeadTagForLanding(group, { isHub });
+  if (googleAdsTag) links.push(googleAdsTag);
 
   if (slug) {
     links.push(`<link rel="prefetch" href="https://gnlaw-center.co.kr/case/${slug}/">`);
@@ -1411,6 +1423,13 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   }
 
   return links.join("\n  ");
+}
+
+function googleAdsHeadTagForLanding(group, { isHub = false } = {}) {
+  const siteUrl = String(group?.siteUrl || "").replace(/\/$/, "");
+  return !isHub && siteUrl === "https://gnlaw-criminal.co.kr"
+    ? GOOGLE_ADS_HEAD_TAG
+    : "";
 }
 
 function themeColor(key) {
