@@ -3400,7 +3400,7 @@
     "caseName": "EWBCPRO 사기 리딩방",
     "category": "형사대응",
     "createdAt": "2026-06-01",
-    "updatedAt": "2026-07-24",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 157,
     "reports": 26,
@@ -3419,7 +3419,14 @@
     "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": ""
+    "fraudType": "",
+    "memos": [
+      {
+        "id": 1785820639815,
+        "text": "EWBCPRO와 시타델증권, 전경남 교수를 사칭한 사기도 사건 접수 중 입니다.",
+        "createdAt": "2026-08-04 14:17"
+      }
+    ]
   },
   {
     "slug": "culturecapital-sagi-haeoeseonmur",
