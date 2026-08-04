@@ -30960,7 +30960,7 @@
     "caseName": "헤븐컴퍼니 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-29",
-    "updatedAt": "2026-06-29",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 3206,
     "reports": 20,
@@ -30975,7 +30975,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1785831634848,
+        "text": "헤븐컴퍼니, heavenly, 헤븐리, 해외선물, 주식리딩방, 코인거래소 사칭 사기를 주의하시기 바랍니다.",
+        "createdAt": "2026-08-04 17:20"
+      }
+    ]
   },
   {
     "slug": "hrpproject",
@@ -42989,7 +42996,7 @@
     "caseName": "부국에셋BEST 아이스버그 작전 프로젝트 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-04",
-    "updatedAt": "2026-08-04",
+    "updatedAt": "2026-07-04",
     "thumbnailUrl": "",
     "landingViews": 996,
     "reports": 5,
@@ -43006,13 +43013,9 @@
     "memo": "",
     "targetGroups": [],
     "createdBy": "",
-    "memos": [
-      {
-        "id": 1785831447417,
-        "text": "부국에셋BEST는 부국증권을 사칭한 사기로 A307 밴드방, 아이스버그 작전 프로젝트, ICEBURG 리딩방을 주의하시기 바랍니다.",
-        "createdAt": "2026-08-04 17:17"
-      }
-    ]
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "518-chong-suig-peurojegteu",
