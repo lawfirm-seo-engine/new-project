@@ -25,6 +25,7 @@ export async function onRequestPost(context) {
 
     const now = new Date().toISOString().slice(0, 10);
     const nowKst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace("T", " ").slice(0, 16);
+    const existingKvCase = await loadKvCase(env, slug);
 
     if (action === "update-landing" && groupKey && field) {
       if (!EDITABLE_LANDING_FIELDS.includes(field)) {
@@ -89,18 +90,15 @@ export async function onRequestPost(context) {
       cases[idx].updatedAt = now;
 
     } else if (action === "update-memo") {
-      cases[idx].memo = String(value || "").trim();
+      if (!String(value || "").trim()) return json({ ok: false, message: "메모 내용 필수" }, 400);
+      mergeOperatorMemoState(cases[idx], existingKvCase);
+      appendOperatorMemo(cases[idx], value, nowKst);
       cases[idx].updatedAt = now;
 
     } else if (action === "add-memo") {
-      const text = String(value || "").trim();
-      if (!text) return json({ ok: false, message: "메모 내용 필수" }, 400);
-      if (!Array.isArray(cases[idx].memos)) cases[idx].memos = [];
-      cases[idx].memos.push({
-        id: Date.now(),
-        text,
-        createdAt: nowKst,
-      });
+      if (!String(value || "").trim()) return json({ ok: false, message: "메모 내용 필수" }, 400);
+      mergeOperatorMemoState(cases[idx], existingKvCase);
+      appendOperatorMemo(cases[idx], value, nowKst);
       cases[idx].updatedAt = now;
 
     } else if (action === "update-thumbnail") {
@@ -146,15 +144,18 @@ export async function onRequestPost(context) {
     }
 
     // KV 업데이트 — rename 시 기존 KV의 landings 보존
+    let responseCase = cases[idx];
     if (env.CASES) {
       let kvEntry = cases[idx];
       if (action === "rename" || action === "update-title" || action === "update-summary" || action === "set-noindex" || action === "set-search-hidden" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
-        const existing = await env.CASES.get(`case:${slug}`);
-        if (existing) {
-          const existingParsed = JSON.parse(existing);
+        if (existingKvCase) {
+          const existingParsed = existingKvCase;
           kvEntry = { ...existingParsed, ...cases[idx] };
           if (existingParsed.landings && !cases[idx].landings) {
             kvEntry.landings = existingParsed.landings;
+          }
+          if (action === "update-memo" || action === "add-memo") {
+            mergeOperatorMemoState(kvEntry, existingParsed);
           }
         }
       }
@@ -162,6 +163,7 @@ export async function onRequestPost(context) {
         updateCaseTitle(kvEntry, cases[idx].caseName);
       }
       await env.CASES.put(`case:${slug}`, JSON.stringify(kvEntry));
+      responseCase = kvEntry;
       const idxRaw = await env.CASES.get("cases:index");
       if (idxRaw) {
         const indexArr = JSON.parse(idxRaw);
@@ -172,10 +174,61 @@ export async function onRequestPost(context) {
       }
     }
 
-    return json({ ok: true, updatedCase: cases[idx] });
+    return json({ ok: true, updatedCase: responseCase });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+async function loadKvCase(env, slug) {
+  if (!env.CASES) return null;
+  const raw = await env.CASES.get(`case:${slug}`);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function appendOperatorMemo(item, value, createdAt) {
+  const text = String(value || "").trim();
+  if (!Array.isArray(item.memos)) item.memos = [];
+  item.memos.push({
+    id: Date.now(),
+    text,
+    createdAt,
+  });
+}
+
+function mergeOperatorMemoState(target = {}, source = {}) {
+  if (!source || typeof source !== "object") return target;
+  if (!String(target.memo || "").trim() && String(source.memo || "").trim()) {
+    target.memo = String(source.memo).trim();
+  }
+
+  const merged = [];
+  const seen = new Set();
+  function add(entry) {
+    const text = typeof entry === "string" ? entry : entry?.text;
+    const clean = String(text || "").trim();
+    if (!clean) return;
+    const createdAt = typeof entry === "object" && entry?.createdAt ? String(entry.createdAt).trim() : "";
+    const id = typeof entry === "object" && entry?.id ? entry.id : "";
+    const key = id || (createdAt ? `${createdAt}\n${clean}` : clean);
+    if (seen.has(key)) return;
+    seen.add(key);
+    merged.push({
+      ...(id ? { id } : {}),
+      text: clean,
+      ...(createdAt ? { createdAt } : {}),
+    });
+  }
+
+  if (Array.isArray(source.memos)) source.memos.forEach(add);
+  if (Array.isArray(target.memos)) target.memos.forEach(add);
+  if (merged.length) target.memos = merged;
+  return target;
 }
 
 function buildIndexEntry(c) {

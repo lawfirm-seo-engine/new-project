@@ -1814,7 +1814,8 @@ function collectOperatorMemos(caseData = {}) {
     const clean = String(text || "").trim();
     if (!clean) return;
     const createdAt = typeof item === "object" && item?.createdAt ? String(item.createdAt).trim() : "";
-    const key = clean;
+    const id = typeof item === "object" && item?.id ? item.id : "";
+    const key = id || (createdAt ? `${createdAt}\n${clean}` : clean);
     if (seen.has(key)) return;
     seen.add(key);
     entries.push({ text: clean, createdAt });

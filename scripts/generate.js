@@ -631,6 +631,34 @@ function consultationLabelsForGroup(group = {}) {
   return { stickyTitle: "추가 입금 전 긴급 점검", amountPlaceholder: "대략적인 피해금액" };
 }
 
+function collectOperatorMemos(caseItem = {}) {
+  const entries = [];
+  const seen = new Set();
+  function addEntry(item) {
+    const text = typeof item === "string" ? item : item?.text;
+    const clean = String(text || "").trim();
+    if (!clean) return;
+    const createdAt = typeof item === "object" && item?.createdAt ? String(item.createdAt).trim() : "";
+    const id = typeof item === "object" && item?.id ? item.id : "";
+    const key = id || (createdAt ? `${createdAt}\n${clean}` : clean);
+    if (seen.has(key)) return;
+    seen.add(key);
+    entries.push({ text: clean, createdAt });
+  }
+  if (caseItem.memo) addEntry({ text: caseItem.memo });
+  if (Array.isArray(caseItem.memos)) caseItem.memos.forEach(addEntry);
+  return entries;
+}
+
+function renderOperatorMemos(caseItem, heading = "운영 안내") {
+  const entries = collectOperatorMemos(caseItem);
+  if (!entries.length) return "";
+  const items = entries.map((entry) =>
+    `<div class="memo-item"><p>${escapeHtml(entry.text)}</p>${entry.createdAt ? `<time>${escapeHtml(entry.createdAt)}</time>` : ""}</div>`
+  ).join("\n");
+  return `<section class="article-block memo-section"><h2>${escapeHtml(heading)}</h2>${items}</section>`;
+}
+
 function createLandingContent(landing, group, caseItem) {
   {
     const _keyword = escapeHtml(seoCaseKeyword(caseItem.caseName || caseItem.name || ""));
@@ -638,9 +666,7 @@ function createLandingContent(landing, group, caseItem) {
     const _widgets = createFloatingWidgets(caseItem, group);
     const _slug = escapeHtml(caseItem.slug);
     const _trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${_slug}'})}).catch(function(){});})();</script>`;
-    const _memoSection = caseItem.memo
-      ? `<section class="article-block memo-section"><h2>운영 안내</h2><p>${escapeHtml(caseItem.memo)}</p></section>`
-      : "";
+    const _memoSection = renderOperatorMemos(caseItem);
     const _rawCaseName = caseItem.caseName || caseItem.name || "";
     const _replacementContext = createReplacementContext(_rawCaseName);
     const _body = renderBodyForLanding(landing, group, caseItem).map((item) => reduceCaseNameText(item, _rawCaseName, false, _replacementContext));
@@ -672,9 +698,7 @@ function createLandingContent(landing, group, caseItem) {
   const widgets = createFloatingWidgets(caseItem, group);
   const slug = escapeHtml(caseItem.slug);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
-  const memoSection = caseItem.memo
-    ? `<section class="article-block memo-section"><h2>운영자 안내</h2><p>${escapeHtml(caseItem.memo)}</p></section>`
-    : "";
+  const memoSection = renderOperatorMemos(caseItem, "운영자 안내");
 
   const rawCaseName = caseItem.caseName || caseItem.name || "";
   const body = renderBodyForLanding(landing, group, caseItem);

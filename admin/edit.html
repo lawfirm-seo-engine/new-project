@@ -248,9 +248,12 @@
     function addMemo(item) {
       const text = typeof item === 'string' ? item : item?.text;
       const clean = String(text || '').trim();
-      if (!clean || seen.has(clean)) return;
-      seen.add(clean);
-      list.push({ text: clean, createdAt: typeof item === 'object' ? (item.createdAt || '') : '' });
+      const createdAt = typeof item === 'object' ? (item.createdAt || '') : '';
+      const id = typeof item === 'object' ? (item.id || '') : '';
+      const key = id || (createdAt ? `${createdAt}\n${clean}` : clean);
+      if (!clean || seen.has(key)) return;
+      seen.add(key);
+      list.push({ text: clean, createdAt });
     }
     if (caseData?.memo) addMemo({ text: caseData.memo });
     if (Array.isArray(caseData?.memos)) {
