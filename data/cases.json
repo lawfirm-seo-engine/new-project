@@ -25233,7 +25233,7 @@
     "caseName": "SKTBAST 사기",
     "category": "형사대응",
     "createdAt": "2026-06-24",
-    "updatedAt": "2026-06-24",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 3906,
     "reports": 34,
@@ -25245,7 +25245,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785812437208,
+        "text": "SKTBAST는 SKTINV증권을 사칭한 어플입니다. \n마키나락스 공모주, AI 자동매매를 표방한 사기로 염승환, 최성민 교수 등 유명인을 사칭한 리딩방을 통해 피해자를 모집합니다. \n재계승진회 리딩방도 주의가 필요합니다.",
+        "createdAt": "2026-08-04 12:00"
+      }
+    ]
   },
   {
     "slug": "qasxwm",
