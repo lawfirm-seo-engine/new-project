@@ -92130,6 +92130,13 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1785812881084,
+        "text": "bcnexus는 BX Nexus, BX Nexus Max, 채성우 교수를 사칭한 사기입니다. 피해 없도록 주의 바랍니다.",
+        "createdAt": "2026-08-04 12:08"
+      }
+    ]
   }
 ]
