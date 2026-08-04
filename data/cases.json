@@ -68579,7 +68579,7 @@
     "caseName": "DB AIgoUltra 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-09",
-    "updatedAt": "2026-07-09",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 4016,
     "reports": 11,
@@ -68595,7 +68595,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1785832219050,
+        "text": "DB Algo Ultra는 DB AlgoPro 어플 등으로 DB증권을 사칭하고 있습니다.\nA8 드림이그니션, 미래트렌드리더, 강현기, 임윤희 등을 사칭한 주식리딩방 사기를 주의하시기 바랍니다.",
+        "createdAt": "2026-08-04 17:30"
+      }
+    ]
   },
   {
     "slug": "dbjasan",
