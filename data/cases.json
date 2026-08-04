@@ -93039,7 +93039,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "team-mission"
+    "fraudType": "team-mission",
+    "memos": [
+      {
+        "id": 1785855257032,
+        "text": "수공예프로젝트, NoulTalk 사기 어플 사건이 접수 되었습니다. 어플을 통해 신뢰를 형성 하는 부업 알바 팀미션 사기의 전형적인 유형입니다.\n누울톡 사기 어플로 인한 피해 없도록 주의 바랍니다.",
+        "createdAt": "2026-08-04 23:54"
+      }
+    ]
   },
   {
     "slug": "nuurtog",
