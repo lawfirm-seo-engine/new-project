@@ -6864,7 +6864,7 @@
     "caseName": "searchalba.com 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-06-12",
-    "updatedAt": "2026-06-12",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 1160,
     "reports": 10,
@@ -6877,7 +6877,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785830802178,
+        "text": "SEARCHALBA, 옴니채널 재택 부업 사칭 사기를 주의하시기 바랍니다.",
+        "createdAt": "2026-08-04 17:06"
+      }
+    ]
   },
   {
     "slug": "omnichaeneor",
@@ -10505,7 +10512,10 @@
         "text": "현재 주식리딩방 사기 사건 접수 현황입니다. \n아젤리아, 공수교대, AZSTM, Azalea\n아람투자그룹, 아람자산운용\n미래부자프로젝트, IBK투자증권\n나무증권, 엘리트프라임 프로젝트\nSyntekabio, 체슬리투자자문, 제로투원프로젝트\nmtz-max, Meritzhub, MTZ-PLUS, 메리츠증권\n스나이퍼매매, KB증권\n각 증권사를 사칭한 전용 어플과 염승환, 최성호, 강현기 등 유명인을 사칭한 형태입니다.\n주식리딩방사기는 계속 업데이트 예정이니 주의 바랍니다.",
         "createdAt": "2026-08-04 17:03"
       }
-    ]
+    ],
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "ai-network",
