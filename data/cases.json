@@ -30982,7 +30982,10 @@
         "text": "헤븐컴퍼니, heavenly, 헤븐리, 해외선물, 주식리딩방, 코인거래소 사칭 사기를 주의하시기 바랍니다.",
         "createdAt": "2026-08-04 17:20"
       }
-    ]
+    ],
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "hrpproject",
@@ -59198,7 +59201,7 @@
     "caseName": "K-AGENT AI프로젝트 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-08",
-    "updatedAt": "2026-07-08",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 6836,
     "reports": 24,
@@ -59214,7 +59217,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1785831847195,
+        "text": "K-AGENT AI 프로젝트는 우리투자증권, 홍춘욱을 사칭한 주식리딩방사기 입니다. 사기 피해 없도록 주의 바랍니다.",
+        "createdAt": "2026-08-04 17:24"
+      }
+    ]
   },
   {
     "slug": "noseu-seuta",
