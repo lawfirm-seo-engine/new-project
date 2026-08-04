@@ -41138,7 +41138,7 @@
     "caseName": "PaladeumClub 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-03",
-    "updatedAt": "2026-07-03",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 4193,
     "reports": 4,
@@ -41153,7 +41153,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1785821903640,
+        "text": "PaladeumClubPLB는 코인 사칭 리딩방 사기 입니다. 조작된 수익률과 환급 약속만 믿고 추가 입금하게 되면 피해액만 커지게 됩니다.",
+        "createdAt": "2026-08-04 14:38"
+      }
+    ]
   },
   {
     "slug": "hanseonghui",
