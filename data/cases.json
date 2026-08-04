@@ -8084,7 +8084,7 @@
     "caseName": "엘리트프라임프로젝트 사기",
     "category": "형사대응",
     "createdAt": "2026-06-14",
-    "updatedAt": "2026-07-31",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 3989,
     "reports": 16,
@@ -8102,7 +8102,19 @@
     "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": ""
+    "fraudType": "",
+    "memos": [
+      {
+        "id": 1785486202778,
+        "text": "엘리트프라임프로젝트는 토스증권, 나무증권 등 증권사를 사칭한 사기입니다. 피해 발생하지 않도록 주의 바랍니다.",
+        "createdAt": "2026-07-31 17:23"
+      },
+      {
+        "id": 1785852554210,
+        "text": "IPO 공모주, 엘리트프라임13기, 700% 수익프로젝트 주식리딩방 사기 사건이 접수되고 있으니 주의 바랍니다.",
+        "createdAt": "2026-08-04 23:09"
+      }
+    ]
   },
   {
     "slug": "piseupiseuseutyudio",
@@ -45329,7 +45341,10 @@
         "text": "흐르는 독서실은 AQR Ultra 사기 어플과 AQR 자산운용, John Liew(존 리우)대표를 사칭한 주식리딩방이니 주의 바랍니다.",
         "createdAt": "2026-08-04 23:02"
       }
-    ]
+    ],
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "jangdaeseong-isa",
