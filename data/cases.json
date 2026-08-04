@@ -9975,7 +9975,7 @@
     "caseName": "MBK MAX 사기 어플",
     "category": "형사대응",
     "createdAt": "2026-06-15",
-    "updatedAt": "2026-06-15",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 6671,
     "reports": 19,
@@ -9989,7 +9989,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785813120960,
+        "text": "MBK MAX는 리딩방사기를 위한 어플입니다. 피해 발생하지 않도록 주의 바랍니다.",
+        "createdAt": "2026-08-04 12:12"
+      }
+    ]
   },
   {
     "slug": "princi",
