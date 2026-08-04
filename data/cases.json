@@ -42719,7 +42719,7 @@
     "caseName": "LS스마트스트렛프로젝트 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-04",
-    "updatedAt": "2026-07-04",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 3237,
     "reports": 5,
@@ -42734,7 +42734,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1785820966821,
+        "text": "LS스마트스트렛프로젝트는 LS증권과 염승환을 사칭한 사기 입니다. 피해 없도록 주의 바랍니다.",
+        "createdAt": "2026-08-04 14:22"
+      }
+    ]
   },
   {
     "slug": "eclipse-project",
