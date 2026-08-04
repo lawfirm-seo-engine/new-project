@@ -6756,7 +6756,7 @@
     "caseName": "나무증권 사기 사칭 리딩방",
     "category": "형사대응",
     "createdAt": "2026-06-12",
-    "updatedAt": "2026-07-23",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 6833,
     "reports": 10,
@@ -6776,7 +6776,19 @@
     "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": ""
+    "fraudType": "",
+    "memos": [
+      {
+        "id": 1784788836732,
+        "text": "나무증권을 사칭한 kdfbd 사기를 주의하시기 바랍니다.",
+        "createdAt": "2026-07-23 15:40"
+      },
+      {
+        "id": 1785851215363,
+        "text": "나무증권 사기는 제15기펀드프로젝트 리딩방과 존리 대표를 사칭한 엘리트프라임프로젝트 주식리딩방 사기 등이 사건 접수되고 있습니다.\n추가 사기 피해 사건이 발생하지 않도록 주의 바랍니다.",
+        "createdAt": "2026-08-04 22:46"
+      }
+    ]
   },
   {
     "slug": "dbaxis",
