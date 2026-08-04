@@ -83934,7 +83934,7 @@
     "caseName": "액트투벤처스 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-23",
-    "updatedAt": "2026-07-23",
+    "updatedAt": "2026-08-04",
     "thumbnailUrl": "",
     "landingViews": 1030,
     "reports": 21,
@@ -83951,7 +83951,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1785851854018,
+        "text": "액트투벤처스는 김현유 대표를 사칭하여 블록딜, 기관 물량, IPO 공모주, 배당을 사칭한 유형으로 제3기수익프로젝트 주식리딩방 사기를 주의하시기 바랍니다.",
+        "createdAt": "2026-08-04 22:57"
+      }
+    ]
   },
   {
     "slug": "db-algo-ultra",
