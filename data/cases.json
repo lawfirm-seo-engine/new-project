@@ -90199,7 +90199,7 @@
     "caseName": "Capital Dynamics 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-31",
-    "updatedAt": "2026-07-31",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 6373,
     "reports": 32,
@@ -90217,7 +90217,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "institution-exchange"
+    "fraudType": "institution-exchange",
+    "memos": [
+      {
+        "id": 1785917072926,
+        "text": "Capital Dynamics는 368%수익목표프로젝트 사기 리딩방을 통해 피해자를 모집중 입니다. 캐피탈 다이나믹스, CapDyn 어플을 주의 바랍니다.",
+        "createdAt": "2026-08-05 17:04"
+      }
+    ]
   },
   {
     "slug": "jangyeojin-maenijeo",
