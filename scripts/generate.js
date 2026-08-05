@@ -1534,14 +1534,27 @@ function isManualLandingItem(item = {}) {
   ].includes(item.createdBy);
 }
 
-function landingDisplayName(item = {}) {
-  const raw = item.caseName || item.name || "";
-  return isManualLandingItem(item) ? String(raw || "").trim() : normalizeCaseName(raw);
+function hasReadingroomLandingItem(item = {}) {
+  return item.hasReadingroomLanding === true ||
+    item.createdBy === "readingroom-manual" ||
+    item.landings?.ld?.createdBy === "readingroom-manual";
 }
 
-function landingDisplayTitle(item = {}, suffix = "") {
-  const name = landingDisplayName(item);
-  return isManualLandingItem(item) || !suffix ? name : `${name} ${suffix}`;
+function isManualLandingItemForGroup(item = {}, group = {}) {
+  const lk = group.landingKey || group.key;
+  return isManualLandingItem(item) || (lk === "ld" && hasReadingroomLandingItem(item));
+}
+
+function landingDisplayName(item = {}, group = {}) {
+  const lk = group.landingKey || group.key;
+  const landing = lk === "ld" && hasReadingroomLandingItem(item) ? getLanding(item, group) : {};
+  const raw = landing.title || landing.h1 || item.caseName || item.name || "";
+  return isManualLandingItemForGroup(item, group) ? String(raw || "").trim() : normalizeCaseName(raw);
+}
+
+function landingDisplayTitle(item = {}, suffix = "", group = {}) {
+  const name = landingDisplayName(item, group);
+  return isManualLandingItemForGroup(item, group) || !suffix ? name : `${name} ${suffix}`;
 }
 
 function createHubFloatingWidgets(group) {
@@ -1624,8 +1637,8 @@ function createHubContent(group) {
         </a>`;
     }
     const item = entry.data;
-    const caseNameRaw = landingDisplayName(item);
-    const displayTitleRaw = landingDisplayTitle(item, suffix);
+    const caseNameRaw = landingDisplayName(item, group);
+    const displayTitleRaw = landingDisplayTitle(item, suffix, group);
     const caseName = escapeHtml(caseNameRaw);
     const displayTitle = escapeHtml(displayTitleRaw);
     const url = buildRelativeLandingPath(group, item);
@@ -1657,7 +1670,8 @@ function createHubContent(group) {
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-  function manual(c){return !!c&&['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual','readingroom-manual','board-manual'].indexOf(c.createdBy)>=0;}
+  function hasLdLanding(c){return !!c&&(c.hasReadingroomLanding===true||c.createdBy==='readingroom-manual'||(c.landings&&c.landings.ld&&c.landings.ld.createdBy==='readingroom-manual'));}
+  function manual(c){return !!c&&(['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual','readingroom-manual','board-manual'].indexOf(c.createdBy)>=0||(TARGET_KEY==='ld'&&hasLdLanding(c)));}
   function normName(n,c){if(manual(c))return String(n||'').trim();var s=String(n||'').trim();if(/사기$/.test(s))return s;var clean=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(clean)?clean:clean+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
   function landingPath(slug){var extra=ALL_NO_SUFFIX_SLUGS[slug]?'':NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
@@ -1666,11 +1680,13 @@ function createHubContent(group) {
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
   var HIDE_FROM_LISTING={"baidogseu-georaeso-litigation-noindex":1,"bydoxe-litigation-noidex":1};
-  function allowed(c){if(!c)return false;if(c.hideFromListing||c.searchHidden||HIDE_FROM_LISTING[c.slug])return false;if(!c.createdBy&&TARGET_KEY!=='a')return false;if(TARGET_KEY==='c'&&c.createdBy!=='recovery-manual'&&c.createdBy!=='jipjeong-manual')return false;if(TARGET_KEY==='la'&&c.createdBy!=='voicephishing-manual')return false;if(TARGET_KEY==='lc'&&c.createdBy!=='tujasagi-manual')return false;if(TARGET_KEY==='ld'&&c.createdBy!=='readingroom-manual')return false;if(TARGET_KEY==='le'&&c.createdBy!=='chaemubu-manual')return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
+  function allowed(c){if(!c)return false;if(c.hideFromListing||c.searchHidden||HIDE_FROM_LISTING[c.slug])return false;if(TARGET_KEY==='ld')return hasLdLanding(c);if(!c.createdBy&&TARGET_KEY!=='a')return false;if(TARGET_KEY==='c'&&c.createdBy!=='recovery-manual'&&c.createdBy!=='jipjeong-manual')return false;if(TARGET_KEY==='la'&&c.createdBy!=='voicephishing-manual')return false;if(TARGET_KEY==='lc'&&c.createdBy!=='tujasagi-manual')return false;if(TARGET_KEY==='le'&&c.createdBy!=='chaemubu-manual')return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
+  function ldLanding(c){return c&&c.landings&&c.landings.ld?c.landings.ld:null;}
   function freshLink(item,noMap){
-    var cn=normName(item.caseName||item.name||'',item);
+    var landing=TARGET_KEY==='ld'?ldLanding(item):null;
+    var cn=normName((landing&&(landing.title||landing.h1))||item.caseName||item.name||'',item);
     var dt=manual(item)||!SUFFIX?cn:cn+' '+SUFFIX;
-    var summary=compact(item.summary||'');
+    var summary=compact((landing&&landing.description)||item.summary||'');
     var search=[cn,dt,item.slug,summary,item.createdAt,item.updatedAt].filter(Boolean).join(' ');
     return '<a class="fresh-landing-link" href="'+itemPath(item)+'" data-title="'+attr(cn)+'" data-slug="'+attr(item.slug)+'" data-search="'+attr(search)+'">'
       +'<span class="fresh-landing-no">No. '+(noMap[item.slug]||'')+'</span>'
@@ -2103,8 +2119,8 @@ function createFreshLandingSection(group, sortedCases, caseNoMap, suffix, option
     }
     const item = entry.data;
     const landing = getLanding(item, group);
-    const cleanName = landingDisplayName(item);
-    const displayTitleRaw = landingDisplayTitle(item, suffix);
+    const cleanName = landingDisplayName(item, group);
+    const displayTitleRaw = landingDisplayTitle(item, suffix, group);
     const displayTitle = escapeHtml(displayTitleRaw);
     const summaryRaw = compactText(landing.description || item.summary || group.hubLead || "");
     const summary = escapeHtml(summaryRaw.slice(0, 135));

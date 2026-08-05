@@ -100,9 +100,7 @@ export async function onRequestPost(context) {
     const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300) || generatedMeta.imageDescription;
 
     const existing = await loadExisting(env, slug);
-    if (existing && existing.createdBy !== CREATED_BY) {
-      return json({ ok: false, message: "이미 다른 방식으로 생성된 slug입니다. 다른 slug를 입력하세요." }, 409);
-    }
+    const isOwnReadingroomCase = !existing || existing.createdBy === CREATED_BY;
 
     const now = today();
     const landing = {
@@ -120,22 +118,24 @@ export async function onRequestPost(context) {
       victimCases: [],
       suspiciousCompanies: [],
       faq: [],
+      createdBy: CREATED_BY,
+      targetGroups: TARGET_GROUPS,
     };
 
     const item = {
       ...(existing || {}),
       slug,
-      caseName: title,
-      category: "주식리딩방사기 랜딩",
-      createdBy: CREATED_BY,
-      targetGroups: TARGET_GROUPS,
+      caseName: isOwnReadingroomCase ? title : existing.caseName,
+      category: isOwnReadingroomCase ? "주식리딩방사기 랜딩" : existing.category,
+      createdBy: isOwnReadingroomCase ? CREATED_BY : existing.createdBy,
+      targetGroups: isOwnReadingroomCase ? TARGET_GROUPS : (existing.targetGroups || []),
       createdAt: existing?.createdAt || now,
       updatedAt: now,
       thumbnailUrl: existing?.thumbnailUrl || "",
       landingViews: Number.isInteger(existing?.landingViews) ? existing.landingViews : randomInt(140, 8000, slug),
       reports: Number.isInteger(existing?.reports) ? existing.reports : 0,
-      summary,
-      tags: ["주식리딩방사기", "코인리딩방사기", "출금거부", "피해금회수", "법무법인선린"],
+      summary: isOwnReadingroomCase ? summary : existing.summary,
+      tags: isOwnReadingroomCase ? ["주식리딩방사기", "코인리딩방사기", "출금거부", "피해금회수", "법무법인선린"] : (existing.tags || []),
       landings: { ...(existing?.landings || {}), ld: landing },
     };
 
@@ -235,6 +235,17 @@ function upsertIndex(index, item) {
 }
 
 function buildIndexEntry(item) {
+  const ldLanding = item.landings?.ld;
+  const readingroomLanding = item.createdBy === CREATED_BY || ldLanding?.createdBy === CREATED_BY
+    ? {
+        createdBy: CREATED_BY,
+        title: ldLanding?.title || item.caseName || "",
+        h1: ldLanding?.h1 || ldLanding?.title || item.caseName || "",
+        description: ldLanding?.description || item.summary || "",
+        canonical: ldLanding?.canonical || buildLandingUrl(LD_GROUP, item.slug),
+      }
+    : null;
+
   return {
     slug: item.slug,
     caseName: item.caseName || "",
@@ -252,6 +263,7 @@ function buildIndexEntry(item) {
     searchHidden: item.searchHidden || false,
     targetGroups: item.targetGroups || [],
     createdBy: item.createdBy || "",
+    ...(readingroomLanding ? { hasReadingroomLanding: true, landings: { ld: readingroomLanding } } : {}),
   };
 }
 

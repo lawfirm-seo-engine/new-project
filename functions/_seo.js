@@ -120,10 +120,21 @@ export function getLanding(item = {}, group = {}) {
   return item.landings?.[landingKey] || item.landings?.[group.key] || {};
 }
 
+function hasReadingroomLanding(item = {}) {
+  return item.hasReadingroomLanding === true ||
+    item.createdBy === "readingroom-manual" ||
+    item.landings?.ld?.createdBy === "readingroom-manual";
+}
+
 export function isCaseAllowedForGroup(item = {}, group = {}) {
   const lk = group.landingKey || group.key;
   if (item.hideFromListing || item.searchHidden) {
     return false;
+  }
+  // 리딩방피해회수센터.kr(lk="ld")는 같은 slug의 기존 criminal 사건을 참조하되,
+  // ld 전용 랜딩이 붙은 경우에만 노출한다.
+  if (lk === "ld") {
+    return hasReadingroomLanding(item);
   }
   if (!isStandardLandingAllowedForGroup(item, group)) {
     return false;
@@ -140,10 +151,6 @@ export function isCaseAllowedForGroup(item = {}, group = {}) {
   }
   // 사기피해구제센터.kr(lk="lc")는 tujasagi-manual 전용
   if (lk === "lc" && item.createdBy !== "tujasagi-manual") {
-    return false;
-  }
-  // 리딩방피해회수센터.kr(lk="ld")는 readingroom-manual 전용
-  if (lk === "ld" && item.createdBy !== "readingroom-manual") {
     return false;
   }
   // 투자사기대응센터.kr(lk="le")는 chaemubu-manual 전용

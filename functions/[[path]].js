@@ -410,7 +410,7 @@ export async function onRequest(context) {
     return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
   }
 
-  const relatedCases = !isManualLandingCase(caseData) && isStandardLandingCase(caseData)
+  const relatedCases = !isManualLandingForGroup(caseData, group) && isStandardLandingCase(caseData)
     ? await loadSeoCases(env).catch(() => [])
     : [];
   const html = renderLanding(caseData, group, url.origin, relatedCases);
@@ -1241,6 +1241,9 @@ function createCenterHeaderNav(group = {}) {
 
 function isCaseAllowedForGroup(caseData = {}, group = {}) {
   const lk = group.landingKey || group.key;
+  if (lk === "ld") {
+    return hasReadingroomLanding(caseData);
+  }
   if (!isStandardLandingAllowedForGroup(caseData, group)) {
     return false;
   }
@@ -1248,7 +1251,6 @@ function isCaseAllowedForGroup(caseData = {}, group = {}) {
     c: ["recovery-manual", "jipjeong-manual"],
     la: ["voicephishing-manual"],
     lc: ["tujasagi-manual"],
-    ld: ["readingroom-manual"],
     le: ["chaemubu-manual"],
   }[lk];
   if (allowedCreatedBy && !allowedCreatedBy.includes(caseData.createdBy)) {
@@ -1257,6 +1259,12 @@ function isCaseAllowedForGroup(caseData = {}, group = {}) {
   const targets = Array.isArray(caseData.targetGroups) ? caseData.targetGroups.filter(Boolean) : [];
   if (!targets.length) return true;
   return targets.includes(lk);
+}
+
+function hasReadingroomLanding(caseData = {}) {
+  return caseData.hasReadingroomLanding === true ||
+    caseData.createdBy === "readingroom-manual" ||
+    caseData.landings?.ld?.createdBy === "readingroom-manual";
 }
 
 function isManualLandingCase(caseData = {}) {
@@ -1271,6 +1279,11 @@ function isManualLandingCase(caseData = {}) {
   ].includes(caseData.createdBy);
 }
 
+function isManualLandingForGroup(caseData = {}, group = {}) {
+  const lk = group.landingKey || group.key;
+  return isManualLandingCase(caseData) || (lk === "ld" && hasReadingroomLanding(caseData));
+}
+
 function canonicalForLanding(landing = {}, group = {}, fallback = "") {
   return fallback;
 }
@@ -1279,7 +1292,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const lk = group.landingKey ?? group.key;
   const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
   const rawCaseName = caseData.caseName || "";
-  const useManualTitle = isManualLandingCase(caseData);
+  const useManualTitle = isManualLandingForGroup(caseData, group);
   const useStandardTemplate = !useManualTitle && isStandardLandingCase(caseData) && lk === "a";
   const pageTitle = useManualTitle
     ? (landing.title || groupPageTitle(rawCaseName, lk))
