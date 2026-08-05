@@ -81206,7 +81206,7 @@
     "caseName": "에이전트 연산력 고도화 598% 플랜 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-20",
-    "updatedAt": "2026-07-20",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 3195,
     "reports": 10,
@@ -81224,7 +81224,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1785917732970,
+        "text": "598% 연산력 고도화 플랜은 DB Algo Ultra, DB증권을 사칭한 사기 리딩방 입니다. 피해 발생 없도록 주의 바랍니다.",
+        "createdAt": "2026-08-05 17:15"
+      }
+    ]
   },
   {
     "slug": "진도-주식리딩방투자사기변호사-무료상담-비용-변호사비-더-큰-피해를-막는-방법",
