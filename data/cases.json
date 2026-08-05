@@ -25190,7 +25190,7 @@
     "caseName": "GIC MIN 사기",
     "category": "형사대응",
     "createdAt": "2026-06-24",
-    "updatedAt": "2026-06-24",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 7288,
     "reports": 9,
@@ -25203,7 +25203,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785917977168,
+        "text": "GIC MIN는 트루인베스트먼트를 사칭한 주식리딩방 사기로 사건 제보 및 상담 접수 중 입니다.",
+        "createdAt": "2026-08-05 17:19"
+      }
+    ]
   },
   {
     "slug": "gubonjin-aeneorriseuteu-saching",
@@ -81206,7 +81213,7 @@
     "caseName": "에이전트 연산력 고도화 598% 플랜 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-20",
-    "updatedAt": "2026-08-05",
+    "updatedAt": "2026-07-20",
     "thumbnailUrl": "",
     "landingViews": 3195,
     "reports": 10,
@@ -81222,11 +81229,11 @@
     ],
     "memo": "",
     "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "searchHidden": false,
+    "hideFromListing": false
   },
   {
     "slug": "진도-주식리딩방투자사기변호사-무료상담-비용-변호사비-더-큰-피해를-막는-방법",
@@ -95054,29 +95061,5 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
-  },
-  {
-    "slug": "gbgeoraejeunggwon",
-    "caseName": "GB거래증권 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-08-05",
-    "updatedAt": "2026-08-05",
-    "thumbnailUrl": "",
-    "landingViews": 5602,
-    "reports": 17,
-    "summary": "GB거래증권 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
-    "tags": [
-      "GB거래증권",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": "institution-exchange"
   }
 ]
