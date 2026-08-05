@@ -42842,7 +42842,7 @@
     "caseName": "고성장잠재종목프로젝트 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-04",
-    "updatedAt": "2026-07-04",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 5594,
     "reports": 34,
@@ -42857,7 +42857,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1785941610734,
+        "text": "고성장잠재종목프로젝트는 이정명 대표 강하린 매니저를 사칭한 선봉 AI퀀트아카데미 리딩방 사기와 연계되어 있으니 주의 바랍니다.",
+        "createdAt": "2026-08-05 23:53"
+      }
+    ]
   },
   {
     "slug": "ihaemin-biseo",
