@@ -85737,7 +85737,7 @@
     "caseName": "Megan Farrell 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-24",
-    "updatedAt": "2026-07-24",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 7090,
     "reports": 18,
@@ -85755,7 +85755,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1785916237728,
+        "text": "Megan Farrell은 iOfAVQ 사기 어플, 권상민 교수, 김수진 신도아 매니저를 사칭한 탑스타 주식 그룹 H-10 리딩방 사기 형태입니다.",
+        "createdAt": "2026-08-05 16:50"
+      }
+    ]
   },
   {
     "slug": "yudeogjin-bonbujang",
