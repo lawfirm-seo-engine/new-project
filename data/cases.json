@@ -13327,7 +13327,7 @@
     "caseName": "YS EXCHANGE 사기",
     "category": "형사대응",
     "createdAt": "2026-06-18",
-    "updatedAt": "2026-06-18",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 7586,
     "reports": 16,
@@ -13340,7 +13340,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785915687334,
+        "text": "YS Exchange는 VIP부의 클럽A04 리딩방으로 피해자를 모집 중입니다.\n오재준, 박재승, 김사현 대표를 사칭하고 있는 해외선물 사기 접수중으로 피해 없도록 주의 바랍니다.",
+        "createdAt": "2026-08-05 16:41"
+      }
+    ]
   },
   {
     "slug": "ysinvest11-kr-com",
