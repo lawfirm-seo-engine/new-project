@@ -47,7 +47,7 @@ export const GROUPS = [
   { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", key: "la", landingKey: "la", prefix: "criminal", suffix: "legal-action", label: "법적조치", siteUrl: "https://금융사기대응센터.kr" },
   { host: "xn--jj0b77gmsoyyfbet54ddvg2ma.kr", key: "lb", landingKey: "lb", prefix: "litigation", suffix: "recovery", label: "피해회복", siteUrl: "https://금융피해대응센터.kr" },
   { host: "xn--2e0bno217bsqa58yp8nd1g2ma.kr", key: "lc", landingKey: "lc", prefix: "results", suffix: "solution", label: "해결사례", siteUrl: "https://사기피해구제센터.kr" },
-  { host: "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", key: "ld", landingKey: "ld", prefix: "insights", suffix: "report", label: "피해정보", siteUrl: "https://리딩방피해회수센터.kr" },
+  { host: "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr", key: "ld", landingKey: "ld", prefix: "insights", suffix: "report", label: "주식리딩방사기", siteUrl: "https://리딩방피해회수센터.kr" },
   { host: "xn--ok0b84g7tosqai7vyka788co0b.kr", key: "le", landingKey: "le", prefix: "incidents", suffix: "incident", label: "진행현황", siteUrl: "https://투자사기대응센터.kr" },
 ];
 
@@ -142,6 +142,10 @@ export function isCaseAllowedForGroup(item = {}, group = {}) {
   if (lk === "lc" && item.createdBy !== "tujasagi-manual") {
     return false;
   }
+  // 리딩방피해회수센터.kr(lk="ld")는 readingroom-manual 전용
+  if (lk === "ld" && item.createdBy !== "readingroom-manual") {
+    return false;
+  }
   // 투자사기대응센터.kr(lk="le")는 chaemubu-manual 전용
   if (lk === "le" && item.createdBy !== "chaemubu-manual") {
     return false;
@@ -218,7 +222,7 @@ const RSS_TITLE_SUFFIXES = {
   la: "법적조치",
   lb: "피해회복",
   lc: "해결사례",
-  ld: "피해정보",
+  ld: "주식리딩방사기",
   le: "진행현황",
 };
 

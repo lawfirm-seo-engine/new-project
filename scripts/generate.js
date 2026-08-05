@@ -288,21 +288,21 @@ const groups = [
     pathPrefix: "insights",
     urlSlugSuffix: "report",
     bodyClass: "domain-d",
-    siteName: "피해 구조 브리핑",
-    shortName: "피해 구조 브리핑",
-    label: "정보형",
-    intent: "사건 개요 · 대응 방법 · 정보 요약",
+    siteName: "주식리딩방사기 센터",
+    shortName: "주식리딩방사기 센터",
+    label: "주식리딩방사기",
+    intent: "주식 리딩방 · 코인 리딩방 · 출금거부 · 피해금 회수",
     ogType: "article",
-    titleSuffix: "사건 정보",
-    descriptionSuffix: "사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
-    ogSuffix: "사건 정보",
-    hubTitle: "법무법인 선린 금융사기 피해 사건 정보 리스트",
-    hubLead: "사건 개요와 피해 패턴을 브리핑 형식으로 정리해 피해 구조와 대응 방법을 신속하게 파악합니다.",
-    tone: "정보 요약",
-    ctaTitle: "사건 구조 확인",
-    ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
-    ctaLabel: "정보 확인",
-    tableTitle: "사건 접수 현황",
+    titleSuffix: "주식리딩방사기 피해 회수",
+    descriptionSuffix: "주식 리딩방 사기와 코인 리딩방 피해, 출금거부, 추가입금 요구, 계좌·지갑 추적과 민형사 대응 절차를 정리합니다.",
+    ogSuffix: "주식리딩방사기 피해 회수",
+    hubTitle: "주식리딩방사기 센터",
+    hubLead: "주식·코인 리딩방 피해자가 출금거부, 추가입금 요구, 가짜 거래소·HTS 정황을 빠르게 확인하고 민형사 회수 절차를 검토할 수 있도록 사건별 정보를 정리합니다.",
+    tone: "리딩방 피해 회수 브리핑",
+    ctaTitle: "리딩방 피해 회수 가능성 검토",
+    ctaText: "입금 내역, 리딩방 대화, 거래소·HTS 화면, 출금거부 메시지를 기준으로 형사고소와 민사 회수 절차를 함께 검토합니다.",
+    ctaLabel: "피해 자료 검토",
+    tableTitle: "리딩방 피해 접수 현황",
     naverVerification: "0db0c459d08dff08e7655a88835072c34790fb75",
   },
   {
@@ -1489,7 +1489,7 @@ function breadcrumbLabel(groupOrKey) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "피해정보",
+    ld: "주식리딩방사기",
     le: "진행현황",
   }[key] || "사건현황";
 }
@@ -1518,7 +1518,7 @@ const HUB_SUFFIX = {
   la: "법적조치",
   lb: "피해회복",
   lc: "해결사례",
-  ld: "피해정보",
+  ld: "주식리딩방사기",
   le: "진행현황",
 };
 
@@ -1529,6 +1529,7 @@ function isManualLandingItem(item = {}) {
     "voicephishing-manual",
     "chaemubu-manual",
     "tujasagi-manual",
+    "readingroom-manual",
     "board-manual",
   ].includes(item.createdBy);
 }
@@ -1656,7 +1657,7 @@ function createHubContent(group) {
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-  function manual(c){return !!c&&['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual','board-manual'].indexOf(c.createdBy)>=0;}
+  function manual(c){return !!c&&['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual','readingroom-manual','board-manual'].indexOf(c.createdBy)>=0;}
   function normName(n,c){if(manual(c))return String(n||'').trim();var s=String(n||'').trim();if(/사기$/.test(s))return s;var clean=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(clean)?clean:clean+' 사칭 사기';}
   function seededH(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
   function landingPath(slug){var extra=ALL_NO_SUFFIX_SLUGS[slug]?'':NO_SUFFIX_SLUGS[slug]&&GKEY==='a'?'':OLD_URL_SUFFIX[slug]&&GKEY==='a'?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';return'/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';}
@@ -1665,7 +1666,7 @@ function createHubContent(group) {
   function todayKst(){return new Date(Date.now()+9*60*60*1000).toISOString().slice(0,10);}
   function compact(s){return String(s||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();}
   var HIDE_FROM_LISTING={"baidogseu-georaeso-litigation-noindex":1,"bydoxe-litigation-noidex":1};
-  function allowed(c){if(!c)return false;if(c.hideFromListing||c.searchHidden||HIDE_FROM_LISTING[c.slug])return false;if(!c.createdBy&&TARGET_KEY!=='a')return false;if(TARGET_KEY==='c'&&c.createdBy!=='recovery-manual'&&c.createdBy!=='jipjeong-manual')return false;if(TARGET_KEY==='la'&&c.createdBy!=='voicephishing-manual')return false;if(TARGET_KEY==='lc'&&c.createdBy!=='tujasagi-manual')return false;if(TARGET_KEY==='le'&&c.createdBy!=='chaemubu-manual')return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
+  function allowed(c){if(!c)return false;if(c.hideFromListing||c.searchHidden||HIDE_FROM_LISTING[c.slug])return false;if(!c.createdBy&&TARGET_KEY!=='a')return false;if(TARGET_KEY==='c'&&c.createdBy!=='recovery-manual'&&c.createdBy!=='jipjeong-manual')return false;if(TARGET_KEY==='la'&&c.createdBy!=='voicephishing-manual')return false;if(TARGET_KEY==='lc'&&c.createdBy!=='tujasagi-manual')return false;if(TARGET_KEY==='ld'&&c.createdBy!=='readingroom-manual')return false;if(TARGET_KEY==='le'&&c.createdBy!=='chaemubu-manual')return false;var t=Array.isArray(c.targetGroups)?c.targetGroups:[];return !t.length||t.indexOf(TARGET_KEY)>=0;}
   function freshLink(item,noMap){
     var cn=normName(item.caseName||item.name||'',item);
     var dt=manual(item)||!SUFFIX?cn:cn+' '+SUFFIX;
@@ -2180,7 +2181,7 @@ function groupPageTitle(name, groupKey) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "피해정보",
+    ld: "주식리딩방사기",
     le: "진행현황",
   };
   return joinSeoPhrase(base, suffixes[groupKey] || "형사고소");

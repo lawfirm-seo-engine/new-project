@@ -171,12 +171,12 @@ const GROUPS = {
   "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr": {
     key: "d", pathPrefix: "insights", urlSlugSuffix: "report", bodyClass: "domain-d",
     landingKey: "ld",
-    siteName: "피해 구조 브리핑", shortName: "피해 구조 브리핑",
-    intent: "사건 개요 · 대응 방법 · 정보 요약", tone: "정보 요약",
-    ctaTitle: "사건 구조 확인",
-    ctaText: "사건 개요, 피해 패턴, 증거 보존 순서를 먼저 파악한 뒤 필요한 절차를 선택합니다.",
-    ctaLabel: "정보 확인", ogType: "article",
-    descriptionSuffix: "사건 개요, 피해 구조, 대응 방법을 정보성 문체로 정리합니다.",
+    siteName: "주식리딩방사기 센터", shortName: "주식리딩방사기 센터",
+    intent: "주식 리딩방 · 코인 리딩방 · 출금거부 · 피해금 회수", tone: "리딩방 피해 회수 브리핑",
+    ctaTitle: "리딩방 피해 회수 가능성 검토",
+    ctaText: "입금 내역, 리딩방 대화, 거래소·HTS 화면, 출금거부 메시지를 기준으로 형사고소와 민사 회수 절차를 함께 검토합니다.",
+    ctaLabel: "피해 자료 검토", ogType: "article",
+    descriptionSuffix: "주식 리딩방 사기와 코인 리딩방 피해, 출금거부, 추가입금 요구, 계좌·지갑 추적과 민형사 대응 절차를 정리합니다.",
     naverVerification: "0db0c459d08dff08e7655a88835072c34790fb75",
     siteUrl: "https://리딩방피해회수센터.kr",
   },
@@ -1248,6 +1248,7 @@ function isCaseAllowedForGroup(caseData = {}, group = {}) {
     c: ["recovery-manual", "jipjeong-manual"],
     la: ["voicephishing-manual"],
     lc: ["tujasagi-manual"],
+    ld: ["readingroom-manual"],
     le: ["chaemubu-manual"],
   }[lk];
   if (allowedCreatedBy && !allowedCreatedBy.includes(caseData.createdBy)) {
@@ -1265,6 +1266,7 @@ function isManualLandingCase(caseData = {}) {
     "voicephishing-manual",
     "chaemubu-manual",
     "tujasagi-manual",
+    "readingroom-manual",
     "board-manual",
   ].includes(caseData.createdBy);
 }
@@ -1590,7 +1592,7 @@ function createFallbackLanding(caseData, group, key) {
     la: "금융피해 신고 절차, 형사고소, 계좌 추적, 지급정지 방법을 금융피해 사례 기준으로 정리합니다.",
     lb: "피해금 회수 전략, 민사소송, 가압류, 부당이득반환 절차와 단계별 회수 경로를 정리합니다.",
     lc: "실제 회수 사례 아카이브에서 유사 사건의 대응 흐름, 회수 결과, 증거 활용 방식을 비교합니다.",
-    ld: "사건 개요, 피해 패턴, 즉시 대응 방법, 증거 보존 순서를 브리핑 형식으로 정리합니다.",
+    ld: "주식·코인 리딩방 피해, 출금거부, 추가입금 요구, 증거 보존과 피해금 회수 검토 절차를 정리합니다.",
     le: "피해 대응 허브에서 형사, 민사, 사례, 브리핑을 사건별로 연결하고 대응 경로를 통합합니다.",
   };
   const title = groupPageTitle(caseName, key);
@@ -2150,7 +2152,7 @@ function lawLandingLabel(key) {
     la: "금융피해 형사고소",
     lb: "피해금 회수 전략",
     lc: "실제 회수 사례",
-    ld: "피해 구조 브리핑",
+    ld: "주식리딩방사기",
     le: "피해 대응 허브",
   }[key] || "금융피해 대응";
 }
@@ -2255,7 +2257,7 @@ function buildLawFaq(landing, group, caseData) {
       { question: "피해자가 여러 명인 경우 공동으로 대응할 수 있나요?", answer: "동일 계좌나 유사 URL로 피해를 입은 사람이 여럿이면 피해 입증 자료를 합산해 수사 협조와 민사 청구를 함께 진행할 수 있습니다. 자료 공유 전 신원 확인은 필요합니다." },
     ],
     ld: [
-      { question: `${caseName} 피해 구조 브리핑은 어떤 정보를 정리하나요?`, answer: "접근 채널, 입금 명목, 출금 거부, 추가 입금 요구, 증거 보존 순서를 정리합니다. 피해자가 바로 확인해야 할 행동 순서를 중심으로 안내합니다." },
+      { question: `${caseName} 주식리딩방사기 정보는 어떤 내용을 정리하나요?`, answer: "접근 채널, 입금 명목, 출금 거부, 추가 입금 요구, 증거 보존 순서를 정리합니다. 피해자가 바로 확인해야 할 행동 순서를 중심으로 안내합니다." },
       { question: "추가 입금 요구를 받았는데 어떻게 대응해야 하나요?", answer: "추가 입금은 즉시 중단해야 합니다. 세금, 보증금, 인증비 명목의 요구는 피해를 키우는 전형적인 패턴입니다. 현재 요구 메시지와 기존 대화를 함께 캡처해 보존한 뒤 상담 접수로 상황을 확인하세요." },
       { question: "단순 투자 실패와 사기는 어떻게 구분하나요?", answer: "허위 수익 화면, 담당자 사칭, 출금 제한, 세금 선납 요구, 계좌 변경이 함께 나타나면 단순 손실보다 사기 정황으로 볼 수 있습니다." },
       { question: "피해 당한 뒤 가장 먼저 해야 할 일이 무엇인가요?", answer: "추가 입금을 즉시 중단하고, 대화 캡처·입금 영수증·계좌번호·사이트 주소·담당자 프로필을 삭제 없이 보존해야 합니다. 플랫폼이 사라지기 전에 화면 기록을 남기면 이후 신고와 상담에 도움이 됩니다." },
@@ -2363,7 +2365,7 @@ function createLawAuthoritySections(key, caseData) {
       steps: [
         ["01", "사건 확인", "사건명, 입금 계좌, 담당자, 피해 시점을 확인합니다."],
         ["02", "목적 분류", "처벌, 회수, 사례 확인, 정보 탐색 중 현재 목적을 나눕니다."],
-        ["03", "경로 이동", "형사고소, 민사 회수, 성공사례, 피해 구조 브리핑으로 연결합니다."],
+        ["03", "경로 이동", "형사고소, 민사 회수, 성공사례, 주식리딩방사기 정보로 연결합니다."],
         ["04", "상담 접수", "자료가 부족하면 전화 또는 카톡으로 먼저 증거 상태를 점검합니다."],
       ],
       compareTitle: "대응 경로 선택 비교",
@@ -2950,7 +2952,7 @@ function groupPageTitle(name, key) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "피해정보",
+    ld: "주식리딩방사기",
     le: "진행현황",
   };
   return joinSeoPhrase(base, suffixes[key] || "형사고소");
@@ -3002,7 +3004,7 @@ function breadcrumbLabel(groupOrKey) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "피해정보",
+    ld: "주식리딩방사기",
     le: "진행현황",
   }[key] || "사건현황";
 }
