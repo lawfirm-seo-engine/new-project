@@ -22542,7 +22542,7 @@
     "caseName": "Dtfoundation 사기",
     "category": "형사대응",
     "createdAt": "2026-06-23",
-    "updatedAt": "2026-06-23",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 3238,
     "reports": 33,
@@ -22554,7 +22554,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785938683328,
+        "text": "Dtfoundation 투자 사기 사건 접수 중 입니다. 추가 입금 요구중 이라면 바로 상담 접수 바랍니다.",
+        "createdAt": "2026-08-05 23:04"
+      }
+    ]
   },
   {
     "slug": "seogwangrisingeliteproject",
