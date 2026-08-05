@@ -6147,7 +6147,7 @@
     "caseName": "CMEBITETF 사기 어플",
     "category": "형사대응",
     "createdAt": "2026-06-01",
-    "updatedAt": "2026-06-01",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 3422,
     "reports": 21,
@@ -6160,7 +6160,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785918811133,
+        "text": "CMEBITETF는 CME, 비트코인 ETF 거래소를 사칭한 사기를 위한 어플로 피해 발생 하지 않도록 주의 바랍니다.",
+        "createdAt": "2026-08-05 17:33"
+      }
+    ]
   },
   {
     "slug": "ium-net-sagi-georaeso-saiteu",
