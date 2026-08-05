@@ -13479,7 +13479,7 @@
     "caseName": "ValmePorte 사기 어플",
     "category": "형사대응",
     "createdAt": "2026-06-18",
-    "updatedAt": "2026-06-18",
+    "updatedAt": "2026-08-05",
     "thumbnailUrl": "",
     "landingViews": 360,
     "reports": 23,
@@ -13492,7 +13492,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785935391442,
+        "text": "ValmePorte 사칭 사기로 접수되는 유형은 zentara, BNOOM, zentara.gcypex.xyz, b2026m.vip으로 해외선물, 리딩방을 주의 하시기 바랍니다.",
+        "createdAt": "2026-08-05 22:09"
+      }
+    ]
   },
   {
     "slug": "ls-tuhon",
