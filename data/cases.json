@@ -8381,7 +8381,7 @@
     "caseName": "주식리딩방 사기",
     "category": "형사대응",
     "createdAt": "2026-06-15",
-    "updatedAt": "2026-08-05",
+    "updatedAt": "2026-08-06",
     "thumbnailUrl": "",
     "landingViews": 6197,
     "reports": 15,
@@ -8399,7 +8399,24 @@
     "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": ""
+    "fraudType": "",
+    "memos": [
+      {
+        "id": 1785830614734,
+        "text": "현재 주식리딩방 사기 사건 접수 현황입니다. \n아젤리아, 공수교대, AZSTM, Azalea\n아람투자그룹, 아람자산운용\n미래부자프로젝트, IBK투자증권\n나무증권, 엘리트프라임 프로젝트\nSyntekabio, 체슬리투자자문, 제로투원프로젝트\nmtz-max, Meritzhub, MTZ-PLUS, 메리츠증권\n스나이퍼매매, KB증권\n각 증권사를 사칭한 전용 어플과 염승환, 최성호, 강현기 등 유명인을 사칭한 형태입니다.\n주식리딩방사기는 계속 업데이트 예정이니 주의 바랍니다.",
+        "createdAt": "2026-08-04 17:03"
+      },
+      {
+        "id": 1785913977664,
+        "text": "ibkhd min은 사기 어플입니다. 지급정지가 될 수 있으니 주의 바랍니다.",
+        "createdAt": "2026-08-05 16:12"
+      },
+      {
+        "id": 1786000911807,
+        "text": "사건 접수되고 있는 주식리딩방 현황 입니다.\n재산관리클래스, SWL-VIP, 골드러시 프로젝트, 얼라인파트너스자산운용, 월가스터디룸, A8비전 싱크탱크",
+        "createdAt": "2026-08-06 16:21"
+      }
+    ]
   },
   {
     "slug": "mbk-max",
