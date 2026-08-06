@@ -211,13 +211,15 @@ for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
   if (GROUPS[host]) GROUPS[host].siteUrl = siteUrl;
 }
 
+const CENTER_FINTECH_STYLE_VERSION = "20260806-hero-rolling";
+
 function centerFintechHeadLinks(group) {
   if (!group || String(group.siteUrl || "").replace(/\/$/, "") !== "https://gnlaw-center.co.kr") return [];
   return [
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp">`,
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp">`,
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp">`,
-    `<link rel="stylesheet" href="/assets/center-fintech/style.css">`,
+    `<link rel="stylesheet" href="/assets/center-fintech/style.css?v=${CENTER_FINTECH_STYLE_VERSION}">`,
   ];
 }
 

@@ -1890,13 +1890,15 @@ function isCenterBoardSite(group) {
   return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-center.co.kr";
 }
 
+const CENTER_FINTECH_STYLE_VERSION = "20260806-hero-rolling";
+
 function centerFintechHeadExtra(group) {
   if (!isCenterBoardSite(group)) return "";
   return [
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp">`,
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp">`,
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp">`,
-    `<link rel="stylesheet" href="/assets/center-fintech/style.css">`,
+    `<link rel="stylesheet" href="/assets/center-fintech/style.css?v=${CENTER_FINTECH_STYLE_VERSION}">`,
   ].join("\n");
 }
 
@@ -1935,8 +1937,31 @@ function createCenterMainHeroSlider() {
     },
   ];
 
+  const criticalStyle = `<style data-center-hero-critical>
+    .center-site.center-fintech.hub-page .hero{position:relative;width:100%;height:420px;min-height:420px;overflow:hidden;padding:0;background:#0f172a;}
+    .center-site.center-fintech.hub-page .hero::after{display:none;}
+    .center-site.center-fintech.hub-page .hero>.eyebrow,.center-site.center-fintech.hub-page .hero>h1,.center-site.center-fintech.hub-page .hero>.summary{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;border:0;clip:rect(0 0 0 0);}
+    .center-main-hero,.center-main-hero .hero-slide{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;}
+    .center-main-hero .hero-slide{opacity:0;transition:opacity 1.3s ease-in-out;pointer-events:none;}
+    .center-main-hero .hero-slide.active{z-index:1;opacity:1;pointer-events:auto;}
+    .center-main-hero .hero-slide img{width:100%;height:420px;object-fit:cover;transform:scale(1);}
+    .center-main-hero .hero-slide.active img{animation:centerHeroZoom 8.5s ease-out forwards;}
+    .center-main-hero .hero-overlay{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.42);}
+    .center-main-hero .hero-text{position:absolute;top:50%;left:10%;z-index:5;max-width:640px;color:#fff;transform:translateY(-50%);}
+    .center-main-hero .hero-title{margin:0 0 12px;color:#fff;font-size:36px;font-weight:800;line-height:1.25;letter-spacing:0;opacity:0;transform:translateY(40px);}
+    .center-main-hero .hero-desc{margin:0;color:rgba(255,255,255,.92);font-size:17px;line-height:1.7;opacity:0;transform:translateY(40px);}
+    .center-main-hero .hero-slide.active .hero-title{animation:centerTextUp .9s ease forwards;}
+    .center-main-hero .hero-slide.active .hero-desc{animation:centerTextUp .9s ease .45s forwards;}
+    .center-main-hero .hero-dots{position:absolute;bottom:22px;left:50%;z-index:6;display:flex;gap:8px;transform:translateX(-50%);}
+    .center-main-hero .hero-dots button{width:30px;height:4px;padding:0;border:0;background:rgba(255,255,255,.5);cursor:pointer;}
+    .center-main-hero .hero-dots button.active{background:#2e86c1;}
+    @keyframes centerHeroZoom{from{transform:scale(1);}to{transform:scale(1.16);}}
+    @keyframes centerTextUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:768px){.center-site.center-fintech.hub-page .hero{height:300px;min-height:300px;}.center-main-hero .hero-slide img{height:300px;}.center-main-hero .hero-title{font-size:24px;}.center-main-hero .hero-desc{font-size:14px;}}
+  </style>`;
+
   const slideMarkup = slides.map((slide, i) => `<div class="hero-slide${i === 0 ? " active" : ""}">
-      <img src="${slide.image}" alt="${escapeHtml(slide.title)}" width="1920" height="1080"${i === 0 ? ' fetchpriority="high" loading="eager"' : ' loading="lazy"'}>
+      <img src="${slide.image}" alt="${escapeHtml(slide.title)}"${i === 0 ? ' fetchpriority="high" loading="eager"' : ' loading="lazy"'}>
       <div class="hero-overlay"></div>
       <div class="hero-text">
         <h2 class="hero-title">${escapeHtml(slide.title)}</h2>
@@ -1946,7 +1971,7 @@ function createCenterMainHeroSlider() {
 
   const dotMarkup = slides.map((_, i) => `<button type="button" class="${i === 0 ? "active" : ""}" aria-label="${i + 1}번째 메인 이미지 보기"></button>`).join("");
 
-  return `<div class="center-main-hero" data-center-hero>
+  return `${criticalStyle}<div class="center-main-hero" data-center-hero>
     ${slideMarkup}
     <div class="hero-dots">${dotMarkup}</div>
   </div>
