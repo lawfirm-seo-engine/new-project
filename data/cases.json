@@ -18855,7 +18855,7 @@
     "caseName": "이민석의 주식연구소 사기",
     "category": "형사대응",
     "createdAt": "2026-06-22",
-    "updatedAt": "2026-06-22",
+    "updatedAt": "2026-08-06",
     "thumbnailUrl": "",
     "landingViews": 313,
     "reports": 9,
@@ -18868,7 +18868,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1785998575236,
+        "text": "이민석주식연구소를 사칭한 제미나이 인베스트 사기 사건이 접수되고 있습니다. 피해 발생에 주의하시기 바랍니다.",
+        "createdAt": "2026-08-06 15:42"
+      }
+    ]
   },
   {
     "slug": "iminseog-saching",
