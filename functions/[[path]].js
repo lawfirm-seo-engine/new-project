@@ -215,6 +215,8 @@ function centerFintechHeadLinks(group) {
   if (!group || String(group.siteUrl || "").replace(/\/$/, "") !== "https://gnlaw-center.co.kr") return [];
   return [
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp">`,
     `<link rel="stylesheet" href="/assets/center-fintech/style.css">`,
   ];
 }

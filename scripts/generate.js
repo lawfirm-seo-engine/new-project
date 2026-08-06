@@ -1843,7 +1843,7 @@ function createHubContent(group) {
 </script>`;
 
   if (isCenterBoardSite(group)) {
-    return createCenterBoardHubContent(group, {
+    return createCenterFintechHomeContent(group, {
       groupCases,
       totalReports,
       todayCases,
@@ -1894,6 +1894,8 @@ function centerFintechHeadExtra(group) {
   if (!isCenterBoardSite(group)) return "";
   return [
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp">`,
     `<link rel="stylesheet" href="/assets/center-fintech/style.css">`,
   ].join("\n");
 }
@@ -1912,6 +1914,236 @@ function createCenterHeaderNav(group) {
     <a href="/board/">진행사건</a>
     <a class="center-nav-call" href="tel:0263480406">상담문의</a>
   </nav>`;
+}
+
+function createCenterMainHeroSlider() {
+  const slides = [
+    {
+      image: "/assets/center-fintech/main-slide-01-q90.webp",
+      title: "금융 투자 사기 피해자를 위한 사건 진행",
+      desc: "법무법인 선린 핀테크센터는 투자사기, 부업사기, 가상자산 사기 등 사건에서 의뢰인의 권리 보호와 피해 회복을 위해 조력합니다.",
+    },
+    {
+      image: "/assets/center-fintech/main-slide-02-q90.webp",
+      title: "Digital Finance",
+      desc: "가상자산을 사칭한 사기 사건은 블록체인 기반 기술 이해를 통해 자산을 추적하고 동결, 몰수, 추징 종결까지 검토합니다.",
+    },
+    {
+      image: "/assets/center-fintech/main-slide-03-q90.webp",
+      title: "법무법인 선린 핀테크센터",
+      desc: "풍부한 사건 경험으로 맞춤 전략을 수립하고 수행하는 법무법인 선린 핀테크센터가 고도의 전문성을 바탕으로 신뢰를 제공합니다.",
+    },
+  ];
+
+  const slideMarkup = slides.map((slide, i) => `<div class="hero-slide${i === 0 ? " active" : ""}">
+      <img src="${slide.image}" alt="${escapeHtml(slide.title)}" width="1920" height="1080"${i === 0 ? ' fetchpriority="high" loading="eager"' : ' loading="lazy"'}>
+      <div class="hero-overlay"></div>
+      <div class="hero-text">
+        <h2 class="hero-title">${escapeHtml(slide.title)}</h2>
+        <p class="hero-desc">${escapeHtml(slide.desc)}</p>
+      </div>
+    </div>`).join("\n");
+
+  const dotMarkup = slides.map((_, i) => `<button type="button" class="${i === 0 ? "active" : ""}" aria-label="${i + 1}번째 메인 이미지 보기"></button>`).join("");
+
+  return `<div class="center-main-hero" data-center-hero>
+    ${slideMarkup}
+    <div class="hero-dots">${dotMarkup}</div>
+  </div>
+  <script>
+  (function(){
+    var root=document.querySelector('[data-center-hero]');
+    if(!root)return;
+    var slides=[].slice.call(root.querySelectorAll('.hero-slide'));
+    var dots=[].slice.call(root.querySelectorAll('.hero-dots button'));
+    if(!slides.length)return;
+    var index=0;
+    var timer=null;
+    function show(next){
+      index=(next+slides.length)%slides.length;
+      slides.forEach(function(slide,i){slide.classList.toggle('active',i===index);});
+      dots.forEach(function(dot,i){dot.classList.toggle('active',i===index);});
+    }
+    function start(){
+      if(timer)clearInterval(timer);
+      timer=setInterval(function(){show(index+1);},8500);
+    }
+    dots.forEach(function(dot,i){
+      dot.addEventListener('click',function(){show(i);start();});
+    });
+    start();
+  })();
+  </script>`;
+}
+
+function createCenterFintechHomeContent(group, stats = {}) {
+  const trustPoints = [
+    "금융·투자사기 유형별 사건 정리",
+    "도메인·상호·리딩방명 기반 피해 사례 분석",
+    "상담 전 자료 준비와 초기 대응 안내",
+  ];
+
+  const caseCategories = [
+    {
+      title: "주식 리딩방·투자 프로젝트 사칭형",
+      description: "공모주, 비상장주식, 투자 프로젝트, 전문가 리딩방을 내세워 입금을 유도한 사건을 검토합니다.",
+      href: "/board/",
+      keywords: ["리딩방", "공모주", "비상장", "투자 프로젝트"],
+    },
+    {
+      title: "증권사·은행 사칭형",
+      description: "금융기관 임직원, 공식 앱, 인증 절차를 사칭하며 계좌 개설이나 추가 예치금을 요구한 흐름을 정리합니다.",
+      href: "/board/",
+      keywords: ["증권사 사칭", "은행 사칭", "인증비", "계좌"],
+    },
+    {
+      title: "코인·거래소 사칭형",
+      description: "가짜 거래소, 월렛, 스테이킹, 선물거래 화면을 통해 출금을 막거나 추가 납입을 요구한 사건을 분류합니다.",
+      href: "/board/",
+      keywords: ["코인", "거래소", "월렛", "스테이킹"],
+    },
+    {
+      title: "팀미션·부업·영상시청 사기형",
+      description: "쇼핑몰 주문대행, 팀미션, 리뷰 작성, 영상 시청 보상을 이유로 보증금과 정산금을 요구한 사례를 확인합니다.",
+      href: "/board/",
+      keywords: ["팀미션", "부업", "쇼핑몰", "영상시청"],
+    },
+    {
+      title: "라이브 방송·만남·데이트 플랫폼 사칭형",
+      description: "방송 환전, 포인트 정산, 만남 플랫폼 인증비 등 관계 형성을 이용해 금전 요구가 이어진 사건을 다룹니다.",
+      href: "/board/",
+      keywords: ["라이브 방송", "만남", "데이트", "환전"],
+    },
+    {
+      title: "환불·보상금 지급 사칭형",
+      description: "피해금을 돌려주겠다며 수수료, 세금, 보증금을 다시 요구하는 2차 피해 구조를 차단합니다.",
+      href: "/board/",
+      keywords: ["환불", "보상금", "수수료", "2차 피해"],
+    },
+  ];
+
+  const responseSteps = [
+    {
+      title: "입금·대화 자료 확보",
+      body: "계좌, 지갑주소, 거래소 화면, 카카오톡·텔레그램 대화 내역을 먼저 보존합니다.",
+    },
+    {
+      title: "사칭 구조와 피해 경로 분석",
+      body: "업체명, 도메인, 앱, 리딩방, 환전 요구 흐름을 나누어 사건의 핵심 쟁점을 정리합니다.",
+    },
+    {
+      title: "법적 조치 방향 설계",
+      body: "지급정지, 형사 고소, 민사 보전, 플랫폼 신고 등 가능한 대응 순서를 검토합니다.",
+    },
+  ];
+
+  const members = [
+    {
+      name: "김상수 대표변호사",
+      description: "법무법인 선린 대표변호사로 금융·경제범죄 피해 대응과 사건 전략 수립을 이끕니다.",
+    },
+    {
+      name: "안형준 대표변호사",
+      description: "부장검사 출신의 형사 사건 경험을 바탕으로 고소 절차와 수사 대응 방향을 검토합니다.",
+    },
+    {
+      name: "전강진 변호사",
+      description: "지청장 출신 변호사로 복잡한 자금 흐름과 다수 피해자 사건의 형사·민사 쟁점을 점검합니다.",
+    },
+    {
+      name: "형사·민사 대응팀",
+      description: "자료 정리, 사실관계 구성, 고소·보전·회수 절차를 사건 유형에 맞게 지원합니다.",
+    },
+  ];
+
+  const totalCases = Number(stats.groupCases?.length || 0).toLocaleString("ko-KR");
+  const todayCases = Number(stats.todayCases || 0).toLocaleString("ko-KR");
+
+  return `
+    <section class="center-fintech-overview" aria-label="핀테크센터 개요">
+      <div>
+        <p class="center-fintech-eyebrow">FINANCIAL FRAUD RESPONSE</p>
+        <h2>금융사기 피해 대응은 사건 유형을 정확히 나누는 것에서 시작됩니다.</h2>
+        <p>법무법인 선린 핀테크센터는 업체명, 도메인, 리딩방명, 앱과 입금 경로를 기준으로 피해 구조를 정리하고 초기 대응 방향을 안내합니다.</p>
+      </div>
+      <div class="center-fintech-checklist">
+        <strong>상담 전 핵심 확인</strong>
+        <ul>
+          ${trustPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+        </ul>
+        <div>
+          <a href="#practice">업무분야 보기</a>
+          <a href="/board/">진행사건 보기</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="practice" class="center-fintech-types" aria-label="핀테크센터 업무분야">
+      <div class="center-fintech-section-head">
+        <p>CASE TYPES</p>
+        <h2>주요 사건 유형</h2>
+      </div>
+      <div class="center-fintech-type-grid">
+        ${caseCategories.map((category) => `<a class="center-fintech-type-card" href="${category.href}">
+          <h3>${escapeHtml(category.title)}</h3>
+          <p>${escapeHtml(category.description)}</p>
+          <span>${category.keywords.map((keyword) => `<em>${escapeHtml(keyword)}</em>`).join("")}</span>
+        </a>`).join("\n")}
+      </div>
+    </section>
+
+    <section class="center-fintech-flow" aria-label="대응 흐름">
+      <div>
+        <p class="center-fintech-eyebrow">RESPONSE FLOW</p>
+        <h2>자료 보존부터 조치 방향까지 순서가 중요합니다.</h2>
+        <p>사기 조직은 사이트, 앱, 계좌, 대화방을 빠르게 바꾸기 때문에 초기에 남아 있는 증거를 기준으로 대응 순서를 정리해야 합니다.</p>
+      </div>
+      <div class="center-fintech-flow-grid">
+        ${responseSteps.map((step, i) => `<article class="center-fintech-flow-card">
+          <span>${i + 1}</span>
+          <h3>${escapeHtml(step.title)}</h3>
+          <p>${escapeHtml(step.body)}</p>
+        </article>`).join("\n")}
+      </div>
+    </section>
+
+    <section id="sunlin-intro" class="center-intro-section" aria-label="법무법인 선린 소개">
+      <div id="greeting" class="center-greeting">
+        <p class="center-kicker">SUNLIN FINTECH CENTER</p>
+        <h2>금융사기 피해자의 권리 회복을 위한 법무법인 선린 핀테크센터입니다.</h2>
+        <p>법무법인 선린 핀테크센터는 의뢰인의 입금 경위, 대화 기록, 플랫폼 화면, 계좌 흐름을 기준으로 형사고소와 민사상 회수 가능성을 함께 검토합니다.</p>
+        <p>피해 유형이 빠르게 바뀌는 금융사기 사건에서는 초기 증거 보존과 2차 피해 차단이 중요합니다. 선린은 사건의 구조를 법률 쟁점으로 정리하고 필요한 절차를 단계별로 안내합니다.</p>
+      </div>
+      <div class="center-office-note">
+        <strong>초기 검토 기준</strong>
+        <span>입금 내역, 대화방, 사이트 주소, 앱 화면 증거 정리</span>
+        <span>지급정지, 형사고소, 민사 절차의 우선순위 검토</span>
+        <span>환불·보상 사칭 등 2차 피해 차단 안내</span>
+      </div>
+    </section>
+
+    <section id="members" class="center-member-section" aria-label="선린의 구성원">
+      <div class="center-section-head">
+        <p class="center-kicker">SUNLIN MEMBERS</p>
+        <h2>형사·민사 쟁점을 함께 검토하는 구성원</h2>
+        <p>법무법인 선린의 사건 수행 경험을 핀테크센터 업무에 접목해 피해자의 권리 구제 절차를 점검합니다.</p>
+      </div>
+      <div class="center-member-grid">
+        ${members.map((member) => `<article class="center-member-card">
+          <strong>${escapeHtml(member.name)}</strong>
+          <p>${escapeHtml(member.description)}</p>
+        </article>`).join("\n")}
+      </div>
+    </section>
+
+    <section class="center-progress-section" aria-label="진행사건 안내">
+      <div>
+        <p class="center-kicker">CASE STATUS</p>
+        <h2>진행 중인 사건은 별도 메뉴에서 확인합니다.</h2>
+        <p>메인 화면은 핀테크센터 소개와 업무분야 중심으로 운영하고, 기존 사건 페이지는 진행사건 메뉴에서 분리해 확인할 수 있습니다. 현재 ${totalCases}개 사건이 정리되어 있으며 오늘 추가·갱신된 항목은 ${todayCases}개입니다.</p>
+      </div>
+      <a class="center-progress-button" href="/board/">진행사건 보기</a>
+    </section>`;
 }
 
 function createCenterBoardHubContent(group) {
@@ -2478,11 +2710,11 @@ for (const group of groups) {
       ],
     }),
     h1: escapeHtml(hubTitle),
-    ogThumbnail: "",
+    ogThumbnail: isCenterBoardSite(group) ? createCenterMainHeroSlider() : "",
     summary: "",
     content: createHubContent(group),
     headerCall: createCenterHeaderNav(group),
-    floatingWidgets: createHubFloatingWidgets(group),
+    floatingWidgets: isCenterBoardSite(group) ? "" : createHubFloatingWidgets(group),
     pageKind: "hub-page",
     omitConsultCta: isCenterBoardSite(group),
   });
