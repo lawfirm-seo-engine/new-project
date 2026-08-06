@@ -250,7 +250,7 @@
 
 .center-fintech-type-grid{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:18px;
   margin-top:28px;
 }
@@ -561,7 +561,7 @@
   color:#047857;
 }
 
-.center-site.center-fintech.hub-page .hero{
+.center-site.center-fintech.home-page .hero{
   min-height:560px;
   display:flex;
   flex-direction:column;
@@ -575,7 +575,7 @@
     url("/assets/center-fintech/main-slide-01-q90.webp") center center / cover no-repeat;
 }
 
-.center-site.center-fintech.hub-page .hero h1{
+.center-site.center-fintech.home-page .hero h1{
   width:min(1200px,100%);
   max-width:1200px;
   color:#ffffff;
@@ -584,13 +584,13 @@
   text-shadow:0 4px 18px rgba(0,0,0,.34);
 }
 
-.center-site.center-fintech.hub-page .hero .eyebrow{
+.center-site.center-fintech.home-page .hero .eyebrow{
   width:min(1200px,100%);
   color:#a7f3d0;
   text-align:left;
 }
 
-.center-site.center-fintech.hub-page .page-shell{
+.center-site.center-fintech.home-page .page-shell{
   width:100%;
   max-width:none;
   margin:0;
@@ -1048,12 +1048,12 @@
 }
 
 @media(max-width:900px){
-  .center-site.center-fintech.hub-page .hero{
+  .center-site.center-fintech.home-page .hero{
     min-height:500px;
     padding:96px 20px 78px;
   }
 
-  .center-site.center-fintech.hub-page .hero h1{
+  .center-site.center-fintech.home-page .hero h1{
     font-size:42px;
   }
 
@@ -1123,13 +1123,13 @@
 }
 
 @media(max-width:640px){
-  .center-site.center-fintech.hub-page .hero{
+  .center-site.center-fintech.home-page .hero{
     min-height:440px;
     padding:84px 18px 62px;
     background-position:60% center;
   }
 
-  .center-site.center-fintech.hub-page .hero h1,
+  .center-site.center-fintech.home-page .hero h1,
   .center-site.center-fintech.landing-page .hero h1,
   .center-site.center-fintech.board-page .hero h1{
     font-size:30px;
@@ -1180,7 +1180,7 @@
   }
 }
 
-.center-site.center-fintech.hub-page .hero{
+.center-site.center-fintech.home-page .hero{
   position:relative;
   display:block;
   width:100%;
@@ -1191,13 +1191,13 @@
   background:#0f172a;
 }
 
-.center-site.center-fintech.hub-page .hero::after{
+.center-site.center-fintech.home-page .hero::after{
   display:none;
 }
 
-.center-site.center-fintech.hub-page .hero > .eyebrow,
-.center-site.center-fintech.hub-page .hero > h1,
-.center-site.center-fintech.hub-page .hero > .summary{
+.center-site.center-fintech.home-page .hero > .eyebrow,
+.center-site.center-fintech.home-page .hero > h1,
+.center-site.center-fintech.home-page .hero > .summary{
   position:absolute;
   width:1px;
   height:1px;
@@ -1310,9 +1310,9 @@
   background:#2e86c1;
 }
 
-.center-site.center-fintech.hub-page .cta,
-.center-site.center-fintech.hub-page .floating-contact,
-.center-site.center-fintech.hub-page .sticky-bar{
+.center-site.center-fintech.home-page .cta,
+.center-site.center-fintech.home-page .floating-contact,
+.center-site.center-fintech.home-page .sticky-bar{
   display:none !important;
 }
 
@@ -1334,7 +1334,7 @@
 }
 
 @media(max-width:768px){
-  .center-site.center-fintech.hub-page .hero{
+  .center-site.center-fintech.home-page .hero{
     height:300px;
     min-height:300px;
   }

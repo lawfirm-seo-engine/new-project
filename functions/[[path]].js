@@ -211,7 +211,7 @@ for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
   if (GROUPS[host]) GROUPS[host].siteUrl = siteUrl;
 }
 
-const CENTER_FINTECH_STYLE_VERSION = "20260806-hero-rolling";
+const CENTER_FINTECH_STYLE_VERSION = "20260806-center-layout";
 
 function centerFintechHeadLinks(group) {
   if (!group || String(group.siteUrl || "").replace(/\/$/, "") !== "https://gnlaw-center.co.kr") return [];
@@ -1229,10 +1229,10 @@ function createCenterHeaderNav(group = {}) {
   if (siteUrl !== "https://gnlaw-center.co.kr") return "";
   return `<nav class="center-nav" aria-label="주요 메뉴">
     <div class="center-nav-group">
-      <a class="center-nav-parent" href="/#sunlin-intro">선린소개</a>
+      <a class="center-nav-parent" href="/about/greeting/">선린소개</a>
       <div class="center-nav-sub" aria-label="선린소개 하위 메뉴">
-        <a href="/#greeting">인사말</a>
-        <a href="/#members">선린의 구성원</a>
+        <a href="/about/greeting/">인사말</a>
+        <a href="/about/members/">선린의 구성원</a>
       </div>
     </div>
     <a href="/#practice">업무분야</a>

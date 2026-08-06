@@ -1890,7 +1890,7 @@ function isCenterBoardSite(group) {
   return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-center.co.kr";
 }
 
-const CENTER_FINTECH_STYLE_VERSION = "20260806-hero-rolling";
+const CENTER_FINTECH_STYLE_VERSION = "20260806-center-layout";
 
 function centerFintechHeadExtra(group) {
   if (!isCenterBoardSite(group)) return "";
@@ -1906,10 +1906,10 @@ function createCenterHeaderNav(group) {
   if (!isCenterBoardSite(group)) return "";
   return `<nav class="center-nav" aria-label="주요 메뉴">
     <div class="center-nav-group">
-      <a class="center-nav-parent" href="/#sunlin-intro">선린소개</a>
+      <a class="center-nav-parent" href="/about/greeting/">선린소개</a>
       <div class="center-nav-sub" aria-label="선린소개 하위 메뉴">
-        <a href="/#greeting">인사말</a>
-        <a href="/#members">선린의 구성원</a>
+        <a href="/about/greeting/">인사말</a>
+        <a href="/about/members/">선린의 구성원</a>
       </div>
     </div>
     <a href="/#practice">업무분야</a>
@@ -1938,9 +1938,9 @@ function createCenterMainHeroSlider() {
   ];
 
   const criticalStyle = `<style data-center-hero-critical>
-    .center-site.center-fintech.hub-page .hero{position:relative;width:100%;height:420px;min-height:420px;overflow:hidden;padding:0;background:#0f172a;}
-    .center-site.center-fintech.hub-page .hero::after{display:none;}
-    .center-site.center-fintech.hub-page .hero>.eyebrow,.center-site.center-fintech.hub-page .hero>h1,.center-site.center-fintech.hub-page .hero>.summary{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;border:0;clip:rect(0 0 0 0);}
+    .center-site.center-fintech.home-page .hero{position:relative;width:100%;height:420px;min-height:420px;overflow:hidden;padding:0;background:#0f172a;}
+    .center-site.center-fintech.home-page .hero::after{display:none;}
+    .center-site.center-fintech.home-page .hero>.eyebrow,.center-site.center-fintech.home-page .hero>h1,.center-site.center-fintech.home-page .hero>.summary{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;border:0;clip:rect(0 0 0 0);}
     .center-main-hero,.center-main-hero .hero-slide{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;}
     .center-main-hero .hero-slide{opacity:0;transition:opacity 1.3s ease-in-out;pointer-events:none;}
     .center-main-hero .hero-slide.active{z-index:1;opacity:1;pointer-events:auto;}
@@ -1957,7 +1957,7 @@ function createCenterMainHeroSlider() {
     .center-main-hero .hero-dots button.active{background:#2e86c1;}
     @keyframes centerHeroZoom{from{transform:scale(1);}to{transform:scale(1.16);}}
     @keyframes centerTextUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
-    @media(max-width:768px){.center-site.center-fintech.hub-page .hero{height:300px;min-height:300px;}.center-main-hero .hero-slide img{height:300px;}.center-main-hero .hero-title{font-size:24px;}.center-main-hero .hero-desc{font-size:14px;}}
+    @media(max-width:768px){.center-site.center-fintech.home-page .hero{height:300px;min-height:300px;}.center-main-hero .hero-slide img{height:300px;}.center-main-hero .hero-title{font-size:24px;}.center-main-hero .hero-desc{font-size:14px;}}
   </style>`;
 
   const slideMarkup = slides.map((slide, i) => `<div class="hero-slide${i === 0 ? " active" : ""}">
@@ -2169,6 +2169,129 @@ function createCenterFintechHomeContent(group, stats = {}) {
       </div>
       <a class="center-progress-button" href="/board/">진행사건 보기</a>
     </section>`;
+}
+
+function createCenterGreetingContent() {
+  return `
+    <section id="sunlin-intro" class="center-intro-section center-about-detail" aria-label="법무법인 선린 핀테크센터 인사말">
+      <div id="greeting" class="center-greeting">
+        <p class="center-kicker">GREETING</p>
+        <h2>금융사기 피해자의 권리 회복을 위한 법무법인 선린 핀테크센터입니다.</h2>
+        <p>법무법인 선린 핀테크센터는 의뢰인의 입금 경위, 대화 기록, 플랫폼 화면, 계좌 흐름을 기준으로 형사고소와 민사상 회수 가능성을 함께 검토합니다.</p>
+        <p>피해 유형이 빠르게 바뀌는 금융사기 사건에서는 초기 증거 보존과 2차 피해 차단이 중요합니다. 선린은 사건의 구조를 법률 쟁점으로 정리하고 필요한 절차를 단계별로 안내합니다.</p>
+      </div>
+      <div class="center-office-note">
+        <strong>초기 검토 기준</strong>
+        <span>입금 내역, 대화방, 사이트 주소, 앱 화면 증거 정리</span>
+        <span>지급정지, 형사고소, 민사 절차의 우선순위 검토</span>
+        <span>환불·보상 사칭 등 2차 피해 차단 안내</span>
+      </div>
+    </section>`;
+}
+
+function createCenterMembersContent() {
+  const members = [
+    {
+      name: "김상수 대표변호사",
+      description: "법무법인 선린 대표변호사로 금융·경제범죄 피해 대응과 사건 전략 수립을 이끕니다.",
+    },
+    {
+      name: "안형준 대표변호사",
+      description: "부장검사 출신의 형사 사건 경험을 바탕으로 고소 절차와 수사 대응 방향을 검토합니다.",
+    },
+    {
+      name: "전강진 변호사",
+      description: "지청장 출신 변호사로 복잡한 자금 흐름과 다수 피해자 사건의 형사·민사 쟁점을 점검합니다.",
+    },
+    {
+      name: "형사·민사 대응팀",
+      description: "자료 정리, 사실관계 구성, 고소·보전·회수 절차를 사건 유형에 맞게 지원합니다.",
+    },
+  ];
+
+  return `
+    <section id="members" class="center-member-section center-about-detail" aria-label="선린의 구성원">
+      <div class="center-section-head">
+        <p class="center-kicker">SUNLIN MEMBERS</p>
+        <h2>형사·민사 쟁점을 함께 검토하는 구성원</h2>
+        <p>법무법인 선린의 사건 수행 경험을 핀테크센터 업무에 접목해 피해자의 권리 구제 절차를 점검합니다.</p>
+      </div>
+      <div class="center-member-grid">
+        ${members.map((member) => `<article class="center-member-card">
+          <strong>${escapeHtml(member.name)}</strong>
+          <p>${escapeHtml(member.description)}</p>
+        </article>`).join("\n")}
+      </div>
+    </section>`;
+}
+
+function createCenterAboutBreadcrumb(group, currentLabel) {
+  return `<nav class="breadcrumb" aria-label="breadcrumb">
+    <a href="${group.siteUrl}/">홈</a>
+    <a href="${group.siteUrl}/about/greeting/">선린소개</a>
+    <strong>${escapeHtml(currentLabel)}</strong>
+  </nav>`;
+}
+
+function createCenterAboutSchema(group, title, description, canonical) {
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        name: title,
+        url: canonical,
+        inLanguage: "ko-KR",
+        description,
+        dateModified: today,
+        publisher: ORGANIZATION,
+      },
+      ORGANIZATION,
+    ],
+  });
+}
+
+async function writeCenterAboutPages(template, group) {
+  if (!isCenterBoardSite(group)) return;
+  const pages = [
+    {
+      slug: "greeting",
+      label: "인사말",
+      title: "법무법인 선린 핀테크센터 인사말",
+      description: "법무법인 선린 핀테크센터가 금융사기 피해자의 권리 회복과 2차 피해 예방을 위해 사건을 검토하는 기준을 안내합니다.",
+      content: createCenterGreetingContent(),
+    },
+    {
+      slug: "members",
+      label: "선린의 구성원",
+      title: "법무법인 선린 핀테크센터 구성원",
+      description: "금융사기 피해 사건의 형사·민사 쟁점을 함께 검토하는 법무법인 선린 핀테크센터 구성원을 소개합니다.",
+      content: createCenterMembersContent(),
+    },
+  ];
+
+  for (const page of pages) {
+    const canonical = `${group.siteUrl}/about/${page.slug}/`;
+    const html = buildPage(template, group, {
+      title: escapeHtml(`${page.title} | ${group.siteName}`),
+      description: escapeHtml(page.description),
+      canonical,
+      ogTitle: escapeHtml(page.title),
+      ogDescription: escapeHtml(page.description),
+      ogImage: `${group.siteUrl}/assets/og-template.png`,
+      headExtra: createHeadExtra({ group, isHub: true }),
+      schema: createCenterAboutSchema(group, page.title, page.description, canonical),
+      h1: escapeHtml(page.title),
+      ogThumbnail: "",
+      summary: escapeHtml(page.description),
+      breadcrumb: createCenterAboutBreadcrumb(group, page.label),
+      content: page.content,
+      headerCall: createCenterHeaderNav(group),
+      floatingWidgets: createHubFloatingWidgets(group),
+      pageKind: "hub-page center-about-page",
+    });
+    await fs.outputFile(path.join(group.outDir, "about", page.slug, "index.html"), html);
+  }
 }
 
 function createCenterBoardHubContent(group) {
@@ -2519,6 +2642,11 @@ function buildPage(template, group, data) {
   if (data.omitConsultCta) {
     html = html.replace(/\s*<section id="consult" class="cta">[\s\S]*?<\/section>\s*(?=<\/main>)/, "\n  ");
   }
+  if (data.omitCenterHomeAbout) {
+    html = html
+      .replace(/\s*<section id="sunlin-intro" class="center-intro-section"[\s\S]*?<\/section>\s*(?=<section id="members")/, "\n")
+      .replace(/\s*<section id="members" class="center-member-section"[\s\S]*?<\/section>\s*(?=<section class="center-progress-section")/, "\n");
+  }
   return html;
 }
 
@@ -2740,11 +2868,13 @@ for (const group of groups) {
     content: createHubContent(group),
     headerCall: createCenterHeaderNav(group),
     floatingWidgets: isCenterBoardSite(group) ? "" : createHubFloatingWidgets(group),
-    pageKind: "hub-page",
+    pageKind: isCenterBoardSite(group) ? "hub-page home-page" : "hub-page",
     omitConsultCta: isCenterBoardSite(group),
+    omitCenterHomeAbout: isCenterBoardSite(group),
   });
 
   await fs.outputFile(path.join(group.outDir, "index.html"), hubHtml);
+  await writeCenterAboutPages(template, group);
 
   const category = breadcrumbLabel(group);
   const categoryTitle = `${group.siteName} ${category} ${FRESH_LIST_LABEL}`;
