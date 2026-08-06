@@ -759,7 +759,8 @@ function renderBoardListPage(group, posts = [], url) {
   </form>
   <div class="board-count">${visiblePosts.length}개 게시글</div>
   <div class="board-grid">${cards}</div>
-</section>`;
+</section>
+${createBoardConsultCta(group, title, "board")}`;
 
   return pageTemplate({
     title: esc(`${title} | 법무법인 선린`),
@@ -878,7 +879,8 @@ function renderBoardPostPage(group, post) {
 ${imageBlock}
 <section class="article-block manual-body board-post-body">${renderManualArticle(post.body)}</section>
 ${faqBlock}
-<section class="article-block board-back"><a href="/board/">게시글 목록으로 돌아가기</a></section>`;
+<section class="article-block board-back"><a href="/board/">게시글 목록으로 돌아가기</a></section>
+${createBoardConsultCta(group, title, post.slug)}`;
 
   return pageTemplate({
     title: esc(`${title} | 법무법인 선린`),
@@ -940,6 +942,15 @@ function boardHeadExtra({ canonical, ogImage, displayOgImage = "", imageAlt, ima
     publishedDate ? `<meta property="article:published_time" content="${publishedDate}T00:00:00+09:00">` : "",
     modifiedDate ? `<meta property="article:modified_time" content="${modifiedDate}T00:00:00+09:00">` : "",
   ].filter(Boolean).join("\n  ");
+}
+
+function createBoardConsultCta(group, title = "", slug = "board") {
+  const cn = esc(normalizeSpace(title) || "진행사건");
+  const siteName = esc(group.siteName || "법무법인 선린");
+  return [
+    createConsultForm(cn, siteName),
+    createFloatingWidgets(cn, siteName, esc(slug || "board")),
+  ].join("\n");
 }
 
 function boardInlineStyle() {
