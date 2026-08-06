@@ -1181,7 +1181,7 @@
     "caseName": "기프투데이 사칭 사기 부업",
     "category": "형사대응",
     "createdAt": "2026-05-28",
-    "updatedAt": "2026-05-28",
+    "updatedAt": "2026-08-06",
     "thumbnailUrl": "",
     "landingViews": 3351,
     "reports": 28,
@@ -1195,7 +1195,10 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "searchHidden": true,
+    "hideFromListing": true,
+    "noindex": true
   },
   {
     "slug": "noryunibeoseu-sagi-bueob",
