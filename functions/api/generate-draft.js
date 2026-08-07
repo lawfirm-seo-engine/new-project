@@ -144,7 +144,7 @@ export async function onRequestPost(context) {
         landings: generated.landings,
       },
       review: {
-        status: duplicateCheck.block ? "blocked" : duplicateCheck.warn ? "warning" : "pass",
+        status: duplicateCheck.warn ? "warning" : "pass",
         duplicateCheck,
         categoryReason: explainCategory(),
         notes: generated.reviewNotes,
@@ -185,11 +185,9 @@ async function createRuleBasedData({ caseName, slug, fraudType, duplicateCheck, 
   const summary = createSummary(caseName, fraudType);
   const tags = createTags(caseName);
   const reviewNotes = [
-    duplicateCheck.block
-      ? "동일하거나 매우 유사한 사건이 있어 저장을 차단해야 합니다."
-      : duplicateCheck.warn
-        ? "유사 사건이 있어 기존 사건과 별도 사건인지 확인해야 합니다."
-        : "중복 위험은 낮습니다.",
+    duplicateCheck.warn
+      ? "유사 후보를 참고해 기존 사건과 별도 사건인지 운영자가 판단할 수 있도록 표시합니다."
+      : "중복 위험은 낮습니다.",
     "사건명 검색 의도 기준으로 SEO 원고를 생성했습니다.",
   ];
   const templates = env ? await readTemplates(env) : {};
@@ -811,7 +809,7 @@ function findDuplicateRisks(caseName, slug, cases) {
     .slice(0, 5);
 
   return {
-    block: matches.some((item) => item.exactSlug || item.exactAlias || item.score >= 0.9),
+    block: false,
     warn: matches.some((item) => item.containsAlias || item.brandOverlap || item.score >= 0.7),
     matches,
   };

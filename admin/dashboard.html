@@ -176,10 +176,26 @@
       .filter(item => item && item.length >= 2))];
   }
 
+  function strongSearchAliases(value = "") {
+    const raw = normalizeSearchText(value);
+    const roman = normalizeSearchText(hangulToRomanSearch(value));
+    return [...new Set([raw, compactSearchText(raw), roman, compactSearchText(roman)]
+      .filter(item => item && item.length >= 3))];
+  }
+
+  function canUseShortBrandFallback(query = "") {
+    const compacted = compactSearchText(normalizeSearchText(query));
+    return /^[a-z0-9]{2,4}$/.test(compacted);
+  }
+
   function matchesSearchText(haystack, query) {
-    const needles = searchAliases(query).filter(item => item.length >= 2);
+    const value = String(query || "").trim();
+    const needles = searchAliases(value).filter(item => item.length >= 2);
     if (!needles.length) return true;
     const hay = searchAliases(haystack).join(" ");
+    const strongNeedles = strongSearchAliases(value);
+    if (strongNeedles.some(needle => hay.includes(needle))) return true;
+    if (strongNeedles.length && !canUseShortBrandFallback(value)) return false;
     return needles.some(needle => hay.includes(needle));
   }
 

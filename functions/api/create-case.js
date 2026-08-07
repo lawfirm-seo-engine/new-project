@@ -1,6 +1,5 @@
 import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl } from "../_seo.js";
 import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
-import { compareCaseIdentity } from "../_searchNormalize.js";
 import { normalizeFraudTypeKey } from "../_standardLanding.js";
 
 const DEFAULT_CATEGORY = "형사대응";
@@ -54,15 +53,6 @@ export async function onRequestPost(context) {
 
       const idxRaw = await env.CASES.get("cases:index");
       const idx = await mergeIndexRepairCases(env, idxRaw ? JSON.parse(idxRaw) : []);
-      const similarCase = findTooSimilarCase({ caseName, slug, cases: idx });
-
-      if (similarCase) {
-        return json({
-          ok: false,
-          message: "유사하거나 중복된 사건이 감지되었습니다. 기존 사건과 별도 사건인지 확인해주세요.",
-          similarCase,
-        }, 409);
-      }
 
       await env.CASES.put(`case:${slug}`, JSON.stringify(newCase));
       idx.push(buildIndexEntry(newCase));
@@ -127,16 +117,6 @@ export async function onRequestPost(context) {
 
     if (cases.some((item) => item.slug === slug)) {
       return json({ ok: false, message: "이미 존재하는 slug입니다." }, 409);
-    }
-
-    const similarCase = findTooSimilarCase({ caseName, slug, cases });
-
-    if (similarCase) {
-      return json({
-        ok: false,
-        message: "유사하거나 중복된 사건이 감지되었습니다. 기존 사건과 별도 사건인지 확인해주세요.",
-        similarCase,
-      }, 409);
     }
 
     cases.push(newCase);
@@ -282,68 +262,6 @@ function hasRequiredLandingData(landings) {
       Array.isArray(item.faq) &&
       item.schema;
   });
-}
-
-function findTooSimilarCase({ caseName, slug, cases }) {
-  const incoming = { caseName, slug };
-
-  for (const item of cases) {
-    const existingName = String(item.caseName || item.name || item.title || "");
-    const existingSlug = String(item.slug || "");
-    const identity = compareCaseIdentity(incoming, item);
-
-    if (identity.exactSlug || identity.exactAlias || identity.score >= 0.9) {
-      return {
-        slug: existingSlug,
-        caseName: existingName,
-        score: Number(identity.score.toFixed(2)),
-      };
-    }
-  }
-
-  return null;
-}
-
-function similarity(a, b) {
-  if (!a || !b) return 0;
-  if (a === b) return 1;
-
-  const aSet = tokenSet(a);
-  const bSet = tokenSet(b);
-  const intersection = [...aSet].filter((item) => bSet.has(item)).length;
-  const union = new Set([...aSet, ...bSet]).size || 1;
-
-  return intersection / union;
-}
-
-function tokenSet(value) {
-  const compact = normalizeForCompare(value);
-  const chunks = compact.split(/[\s-]+/).filter(Boolean);
-  const grams = [];
-
-  for (const chunk of chunks) {
-    if (chunk.length <= 2) {
-      grams.push(chunk);
-      continue;
-    }
-
-    for (let index = 0; index < chunk.length - 1; index += 1) {
-      grams.push(chunk.slice(index, index + 2));
-    }
-  }
-
-  return new Set(grams);
-}
-
-function normalizeForCompare(value) {
-  return normalizeSpace(value)
-    .toLowerCase()
-    .replace(/https?:\/\//g, "")
-    .replace(/www\./g, "")
-    .replace(/\.(com|net|org|co|kr|vip|shop|site|store|io)/g, "")
-    .replace(/사기|사칭|피해|투자|리딩방|거래소|증권|주식|코인/g, "")
-    .replace(/[^a-z0-9가-힣\s-]/g, "")
-    .trim();
 }
 
 function randomInt(min, max, seed) {

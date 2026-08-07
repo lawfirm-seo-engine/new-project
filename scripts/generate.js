@@ -1770,10 +1770,24 @@ function createHubContent(group) {
       .concat(shortBrandAliases(plain),shortBrandAliases(romanPlain))
       .filter(function(item,pos,arr){return item&&item.length>=2&&arr.indexOf(item)===pos;});
   }
+  function strongAliasesSearch(value){
+    var raw=normSearch(value);
+    var roman=normSearch(romanSearch(value));
+    return [raw,compactSearchValue(raw),roman,compactSearchValue(roman)]
+      .filter(function(item,pos,arr){return item&&item.length>=3&&arr.indexOf(item)===pos;});
+  }
+  function canUseShortBrandFallback(query){
+    var compacted=compactSearchValue(normSearch(query));
+    return /^[a-z0-9]{2,4}$/.test(compacted);
+  }
   function matchesSearch(haystack,query){
-    var needles=aliasesSearch(query).filter(function(n){return n.length>=2;});
+    var q=String(query||'').trim();
+    var needles=aliasesSearch(q).filter(function(n){return n.length>=2;});
     if(!needles.length)return true;
     var hay=aliasesSearch(haystack).join(' ');
+    var strongNeedles=strongAliasesSearch(q);
+    if(strongNeedles.some(function(n){return hay.indexOf(n)>=0;}))return true;
+    if(strongNeedles.length&&!canUseShortBrandFallback(q))return false;
     return needles.some(function(n){return hay.indexOf(n)>=0;});
   }
   function setupSearch(){
