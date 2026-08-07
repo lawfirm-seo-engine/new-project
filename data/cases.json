@@ -28305,10 +28305,10 @@
   },
   {
     "slug": "jusigridingbang-danchebang",
-    "caseName": "주식리딩방 단체방 사기",
+    "caseName": "주식리딩방사기피해",
     "category": "형사대응",
     "createdAt": "2026-06-25",
-    "updatedAt": "2026-06-25",
+    "updatedAt": "2026-08-07",
     "thumbnailUrl": "",
     "landingViews": 1697,
     "reports": 20,
@@ -104511,7 +104511,8 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   },
   {
     "slug": "인천삼산경찰서-보이스피싱변호사-출금정지-상태-대응",
@@ -104605,7 +104606,8 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   },
   {
     "slug": "광주광산경찰서-보이스피싱변호사-출금정지-상태-대응",
@@ -104700,7 +104702,8 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   },
   {
     "slug": "대전유성경찰서-보이스피싱변호사-지급정지-대응-방법",
@@ -104795,7 +104798,8 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   },
   {
     "slug": "대전중부경찰서-보이스피싱변호사-지급정지-해결",
@@ -104890,7 +104894,8 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   },
   {
     "slug": "울산북부경찰서-보이스피싱변호사-출금정지-대응",
@@ -104985,6 +104990,7 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   }
 ]
