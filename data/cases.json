@@ -18696,7 +18696,7 @@
     "caseName": "AZSTM 사기",
     "category": "형사대응",
     "createdAt": "2026-06-22",
-    "updatedAt": "2026-06-22",
+    "updatedAt": "2026-08-07",
     "thumbnailUrl": "",
     "landingViews": 4607,
     "reports": 14,
@@ -18708,7 +18708,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1786081761003,
+        "text": "AZSTM는 아젤리아, 공수교대 리딩방을 사칭한 사기 어플이니 피해 발생하지 않도록 주의바랍니다.",
+        "createdAt": "2026-08-07 14:49"
+      }
+    ]
   },
   {
     "slug": "byeorgwadarsai102",
