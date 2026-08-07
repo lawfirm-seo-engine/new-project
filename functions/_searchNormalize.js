@@ -21,6 +21,13 @@ const SHORT_BRAND_STOPWORDS = new Set([
   "capital", "invest", "investment", "bank", "coin", "stock",
 ]);
 
+const CORE_STOPWORDS = new Set([
+  ...SHORT_BRAND_STOPWORDS,
+  "assets", "investments", "securities", "security", "finance", "financial", "fintech",
+  "trade", "trading", "market", "markets", "limited", "company", "partners", "partner",
+  "management", "holdings", "holding", "fund", "funds", "exchange", "securities",
+]);
+
 export function hangulToRoman(text = "") {
   let out = "";
   for (const ch of String(text || "")) {
@@ -123,21 +130,11 @@ function aliasesForCase(item = {}) {
 }
 
 function coreAliasesForCase(item = {}) {
-  return aliasesForCase(item)
-    .flatMap((value) => {
-      const stripped = stripGenericTerms(value);
-      const compacted = compact(stripped);
-      return [
-        stripped,
-        compacted,
-        ...stripped.split(/\s+/).filter(Boolean),
-      ];
-    })
-    .filter((value) => value.length >= 4);
+  return unique(caseValues(item).flatMap((value) => coreAliasesFromValue(value)));
 }
 
 function brandAliasesForCase(item = {}) {
-  return unique(aliasesForCase(item).flatMap((value) => shortBrandAliases(stripGenericTerms(value))));
+  return unique(caseValues(item).flatMap((value) => shortBrandAliases(stripGenericTerms(value))));
 }
 
 function shortBrandAliases(value = "") {
@@ -151,6 +148,50 @@ function shortBrandAliases(value = "") {
     const value = compact(token);
     return /^[a-z0-9]{3,}$/.test(value) && !SHORT_BRAND_STOPWORDS.has(value);
   }));
+}
+
+function coreAliasesFromValue(value = "") {
+  const variants = [
+    normalizeSearchText(value),
+    normalizeSearchText(hangulToRoman(value)),
+  ];
+  return unique(variants.flatMap((variant) => {
+    const tokens = stripGenericTerms(variant)
+      .split(/\s+/)
+      .map((token) => compact(token))
+      .filter(isMeaningfulCoreToken);
+    return [
+      ...tokens,
+      tokens.length >= 2 ? tokens.join(" ") : "",
+      tokens.length >= 2 ? tokens.join("") : "",
+    ];
+  })).filter((item) => item.length >= 3);
+}
+
+function isMeaningfulCoreToken(value = "") {
+  const token = compact(normalizeSearchText(value));
+  if (!token || CORE_STOPWORDS.has(token)) return false;
+  if (/^[a-z0-9]+$/.test(token)) return token.length >= 3;
+  return token.length >= 2;
+}
+
+function caseValues(item = {}) {
+  const values = [
+    item.slug,
+    item.caseName,
+    item.name,
+    item.title,
+    item.h1,
+    item.ogTitle,
+    ...(Array.isArray(item.tags) ? item.tags : []),
+  ];
+  if (item.landings && typeof item.landings === "object") {
+    Object.values(item.landings).forEach((landing) => {
+      if (!landing || typeof landing !== "object") return;
+      values.push(landing.title, landing.h1, landing.ogTitle);
+    });
+  }
+  return values.filter(Boolean);
 }
 
 function stripGenericTerms(value = "") {

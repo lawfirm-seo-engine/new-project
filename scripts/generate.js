@@ -2046,6 +2046,27 @@ function createCenterMainHeroSlider() {
   </script>`;
 }
 
+function createStaticHeaders() {
+  return `/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
+/admin/*
+  Cache-Control: no-cache
+
+/sitemap*.xml
+  Cache-Control: public, max-age=0, must-revalidate
+
+/rss.xml
+  Cache-Control: public, max-age=0, must-revalidate
+
+/robots.txt
+  Cache-Control: public, max-age=0, must-revalidate
+`;
+}
+
 function createCenterFintechHomeContent(group, stats = {}) {
   const trustPoints = [
     "금융·투자사기 유형별 사건 정리",
@@ -2917,6 +2938,7 @@ for (const group of groups) {
   });
 
   await fs.outputFile(path.join(group.outDir, "index.html"), hubHtml);
+  await fs.outputFile(path.join(group.outDir, "_headers"), createStaticHeaders());
   await writeCenterAboutPages(template, group);
 
   const category = breadcrumbLabel(group);

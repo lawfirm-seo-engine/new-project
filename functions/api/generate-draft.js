@@ -799,7 +799,7 @@ function findDuplicateRisks(caseName, slug, cases) {
         brandOverlap: identity.brandOverlap,
       };
     })
-    .filter((item) => item.exactSlug || item.exactAlias || item.containsAlias || item.brandOverlap || item.score >= 0.58)
+    .filter((item) => item.exactSlug || item.exactAlias || item.containsAlias || item.brandOverlap || item.score >= 0.7)
     .sort((a, b) =>
       Number(b.exactSlug) - Number(a.exactSlug) ||
       Number(b.exactAlias) - Number(a.exactAlias) ||
@@ -810,7 +810,7 @@ function findDuplicateRisks(caseName, slug, cases) {
     .slice(0, 5);
 
   return {
-    block: matches.some((item) => item.exactSlug || item.exactAlias || item.score >= 0.9),
+    block: matches.some((item) => item.exactSlug || item.exactAlias || item.brandOverlap || item.score >= 0.9),
     warn: matches.some((item) => item.containsAlias || item.brandOverlap || item.score >= 0.7),
     matches,
   };
