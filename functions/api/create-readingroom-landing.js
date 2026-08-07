@@ -4,6 +4,7 @@ import {
   buildLandingUrl,
   caseOgImageUrl,
 } from "../_seo.js";
+import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const LD_HOST = "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr";
@@ -80,7 +81,7 @@ export async function onRequestPost(context) {
     }
 
     const { caseKeyword, subject, channelType } = parseTitleParts(title);
-    const generatedBody = buildFromTemplate(title, caseKeyword, channelType);
+    const generatedBody = appendStockReadingroomCta(buildFromTemplate(title, caseKeyword, channelType));
     const generatedMeta = generateMeta(caseKeyword, channelType);
 
     if (isPreview) {
@@ -88,11 +89,11 @@ export async function onRequestPost(context) {
     }
 
     const rawBody = body.body;
-    const confirmedBody = Array.isArray(rawBody) && rawBody.length
+    const confirmedBody = appendStockReadingroomCta(Array.isArray(rawBody) && rawBody.length
       ? rawBody
       : typeof rawBody === "string" && rawBody.trim()
         ? rawBody.trim().split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
-        : generatedBody;
+        : generatedBody);
 
     const summary = normalizeSpace(body.summary).slice(0, 180) || generatedMeta.summary;
     const imageAlt = normalizeSpace(body.imageAlt).slice(0, 160) || generatedMeta.imageAlt;

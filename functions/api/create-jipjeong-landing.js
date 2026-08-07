@@ -4,6 +4,7 @@ import {
   buildLandingUrl,
   caseOgImageUrl,
 } from "../_seo.js";
+import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const RECOVERY_HOST = "gnlaw-recovery.co.kr";
@@ -129,16 +130,16 @@ export async function onRequestPost(context) {
     const newRegion = extractRegion(title);
     const newAction = extractAction(title, newBank);
 
-    const generatedBody = buildFromTemplate(newBank, newRegion, newAction);
+    const generatedBody = appendStockReadingroomCta(buildFromTemplate(newBank, newRegion, newAction));
 
     if (isPreview) {
       return json({ ok: true, body: generatedBody, bank: newBank, region: newRegion, action: newAction });
     }
 
     // ── 저장 단계 ──────────────────────────────────────────────────────────
-    const confirmedBody = Array.isArray(body.body) && body.body.length
+    const confirmedBody = appendStockReadingroomCta(Array.isArray(body.body) && body.body.length
       ? body.body
-      : generatedBody;
+      : generatedBody);
 
     const generatedMeta = generateMeta(newBank, newRegion, newAction);
     const imageAlt        = normalizeSpace(body.imageAlt).slice(0, 160) || generatedMeta.imageAlt;
