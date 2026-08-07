@@ -15,6 +15,12 @@ const GENERIC_TERMS = [
   "ppareun", "sangdam", "ganeung", "chulgeum", "geobu",
 ];
 
+const SHORT_BRAND_STOPWORDS = new Set([
+  "app", "pro", "vip", "hts", "mts", "fx", "tv", "kr", "com", "net", "org", "co",
+  "shop", "site", "store", "ltd", "inc", "llc", "corp", "group", "global", "asset",
+  "capital", "invest", "investment", "bank", "coin", "stock",
+]);
+
 export function hangulToRoman(text = "") {
   let out = "";
   for (const ch of String(text || "")) {
@@ -50,6 +56,8 @@ export function searchAliases(value = "") {
   const roman = normalizeSearchText(hangulToRoman(value));
   const withoutGeneric = stripGenericTerms(raw);
   const romanWithoutGeneric = stripGenericTerms(roman);
+  const shortCore = shortBrandAliases(withoutGeneric);
+  const romanShortCore = shortBrandAliases(romanWithoutGeneric);
   return unique([
     raw,
     compact(raw),
@@ -57,6 +65,8 @@ export function searchAliases(value = "") {
     compact(roman),
     ...[withoutGeneric, compact(withoutGeneric), romanWithoutGeneric, compact(romanWithoutGeneric)]
       .filter((item) => item && item.length >= 4),
+    ...shortCore,
+    ...romanShortCore,
   ].filter((item) => item && item.length >= 2));
 }
 
@@ -71,10 +81,17 @@ export function compareCaseIdentity(incoming = {}, existing = {}) {
   const existingCoreAliases = coreAliasesForCase(existing);
   const exactCore = hasStrongOverlap(incomingCoreAliases, existingCoreAliases);
   const containsCore = hasStrongContainment(incomingCoreAliases, existingCoreAliases);
+  const brandOverlap = hasBrandOverlap(brandAliasesForCase(incoming), brandAliasesForCase(existing));
   const containsAlias = hasStrongContainment(incomingAliases, existingAliases) && containsCore;
   const fuzzyScore = maxSimilarity(incomingAliases, existingAliases);
   const adjustedFuzzyScore = exactCore || containsCore ? fuzzyScore : Math.min(fuzzyScore, 0.69);
-  const score = exactSlug || exactAlias || exactCore ? 1 : containsAlias ? Math.max(0.92, adjustedFuzzyScore) : adjustedFuzzyScore;
+  const score = exactSlug || exactAlias || exactCore
+    ? 1
+    : containsAlias
+      ? Math.max(0.92, adjustedFuzzyScore)
+      : brandOverlap
+        ? Math.max(0.72, adjustedFuzzyScore)
+        : adjustedFuzzyScore;
   return {
     score,
     exactSlug,
@@ -82,6 +99,7 @@ export function compareCaseIdentity(incoming = {}, existing = {}) {
     exactCore,
     containsAlias,
     containsCore,
+    brandOverlap,
   };
 }
 
@@ -118,6 +136,23 @@ function coreAliasesForCase(item = {}) {
     .filter((value) => value.length >= 4);
 }
 
+function brandAliasesForCase(item = {}) {
+  return unique(aliasesForCase(item).flatMap((value) => shortBrandAliases(stripGenericTerms(value))));
+}
+
+function shortBrandAliases(value = "") {
+  const normalized = normalizeSearchText(value);
+  const tokens = [
+    normalized,
+    compact(normalized),
+    ...normalized.split(/\s+/).filter(Boolean),
+  ];
+  return unique(tokens.filter((token) => {
+    const value = compact(token);
+    return /^[a-z0-9]{3,}$/.test(value) && !SHORT_BRAND_STOPWORDS.has(value);
+  }));
+}
+
 function stripGenericTerms(value = "") {
   let result = normalizeSearchText(value);
   for (const term of GENERIC_TERMS) {
@@ -133,6 +168,11 @@ function compact(value = "") {
 function hasStrongOverlap(left = [], right = []) {
   const rightSet = new Set(right.filter((item) => item.length >= 4));
   return left.some((item) => item.length >= 4 && rightSet.has(item));
+}
+
+function hasBrandOverlap(left = [], right = []) {
+  const rightSet = new Set(right.filter((item) => item.length >= 3));
+  return left.some((item) => item.length >= 3 && rightSet.has(item));
 }
 
 function hasStrongContainment(left = [], right = []) {

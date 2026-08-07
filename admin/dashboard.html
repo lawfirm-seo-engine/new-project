@@ -118,6 +118,7 @@
     "\ud22c\uc790\uc99d\uad8c","\uc99d\uad8c","\ud22c\uc790","\ud53c\ud574\uae08","\ud68c\uc218","\ud574\uacb0","\ubc29\ubc95","\ub300\uc751",
     "saching","sagi","pihae","tujasagi","ridingbang","riding","jusig","coin","koin","georaeso","tujajeunggwon","jeunggwon","tuja","hoesu","haegyeol","bangbeob","daeeung"
   ];
+  const SEARCH_SHORT_BRAND_STOPWORDS = new Set(["app","pro","vip","hts","mts","fx","tv","kr","com","net","org","co","shop","site","store","ltd","inc","llc","corp","group","global","asset","capital","invest","investment","bank","coin","stock"]);
 
   function hangulToRomanSearch(text = "") {
     let out = "";
@@ -157,12 +158,21 @@
     return String(value || "").replace(/\s+/g, "");
   }
 
+  function shortBrandAliases(value = "") {
+    const normalized = normalizeSearchText(value);
+    const tokens = [normalized, compactSearchText(normalized), ...normalized.split(/\s+/).filter(Boolean)];
+    return [...new Set(tokens.filter(token => {
+      const compacted = compactSearchText(token);
+      return /^[a-z0-9]{3,}$/.test(compacted) && !SEARCH_SHORT_BRAND_STOPWORDS.has(compacted);
+    }))];
+  }
+
   function searchAliases(value = "") {
     const raw = normalizeSearchText(value);
     const roman = normalizeSearchText(hangulToRomanSearch(value));
     const plain = stripSearchGeneric(raw);
     const romanPlain = stripSearchGeneric(roman);
-    return [...new Set([raw, compactSearchText(raw), roman, compactSearchText(roman), ...[plain, compactSearchText(plain), romanPlain, compactSearchText(romanPlain)].filter(item => item && item.length >= 4)]
+    return [...new Set([raw, compactSearchText(raw), roman, compactSearchText(roman), ...[plain, compactSearchText(plain), romanPlain, compactSearchText(romanPlain)].filter(item => item && item.length >= 4), ...shortBrandAliases(plain), ...shortBrandAliases(romanPlain)]
       .filter(item => item && item.length >= 2))];
   }
 

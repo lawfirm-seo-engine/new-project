@@ -796,20 +796,22 @@ function findDuplicateRisks(caseName, slug, cases) {
         exactSlug: identity.exactSlug,
         exactAlias: identity.exactAlias,
         containsAlias: identity.containsAlias,
+        brandOverlap: identity.brandOverlap,
       };
     })
-    .filter((item) => item.exactSlug || item.exactAlias || item.containsAlias || item.score >= 0.58)
+    .filter((item) => item.exactSlug || item.exactAlias || item.containsAlias || item.brandOverlap || item.score >= 0.58)
     .sort((a, b) =>
       Number(b.exactSlug) - Number(a.exactSlug) ||
       Number(b.exactAlias) - Number(a.exactAlias) ||
       Number(b.containsAlias) - Number(a.containsAlias) ||
+      Number(b.brandOverlap) - Number(a.brandOverlap) ||
       b.score - a.score
     )
     .slice(0, 5);
 
   return {
     block: matches.some((item) => item.exactSlug || item.exactAlias || item.score >= 0.9),
-    warn: matches.some((item) => item.containsAlias || item.score >= 0.7),
+    warn: matches.some((item) => item.containsAlias || item.brandOverlap || item.score >= 0.7),
     matches,
   };
 }

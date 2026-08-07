@@ -291,7 +291,7 @@ function findTooSimilarCase({ caseName, slug, cases }) {
     const existingSlug = String(item.slug || "");
     const identity = compareCaseIdentity(incoming, item);
 
-    if (identity.exactSlug || identity.exactAlias || identity.score >= 0.9) {
+    if (identity.exactSlug || identity.exactAlias || identity.brandOverlap || identity.score >= 0.9) {
       return {
         slug: existingSlug,
         caseName: existingName,

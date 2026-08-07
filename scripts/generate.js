@@ -1725,6 +1725,7 @@ function createHubContent(group) {
     '\\ud22c\\uc790\\uc99d\\uad8c','\\uc99d\\uad8c','\\ud22c\\uc790','\\ud53c\\ud574\\uae08','\\ud68c\\uc218','\\ud574\\uacb0','\\ubc29\\ubc95','\\ub300\\uc751',
     'saching','sagi','pihae','tujasagi','ridingbang','riding','jusig','coin','koin','georaeso','tujajeunggwon','jeunggwon','tuja','hoesu','haegyeol','bangbeob','daeeung'
   ];
+  var SEARCH_SHORT_BRAND_STOPWORDS=['app','pro','vip','hts','mts','fx','tv','kr','com','net','org','co','shop','site','store','ltd','inc','llc','corp','group','global','asset','capital','invest','investment','bank','coin','stock'];
   function romanSearch(text){
     var out='';
     String(text||'').split('').forEach(function(ch){
@@ -1751,12 +1752,22 @@ function createHubContent(group) {
     return result.replace(/\\s+/g,' ').trim();
   }
   function compactSearchValue(value){return String(value||'').replace(/\\s+/g,'');}
+  function shortBrandAliases(value){
+    var normalized=normSearch(value);
+    var tokens=[normalized,compactSearchValue(normalized)].concat(normalized.split(/\\s+/).filter(Boolean));
+    return tokens.filter(function(token,pos,arr){
+      var compacted=compactSearchValue(token);
+      return /^[a-z0-9]{3,}$/.test(compacted)&&SEARCH_SHORT_BRAND_STOPWORDS.indexOf(compacted)<0&&arr.indexOf(token)===pos;
+    });
+  }
   function aliasesSearch(value){
     var raw=normSearch(value);
     var roman=normSearch(romanSearch(value));
     var plain=stripSearch(raw);
     var romanPlain=stripSearch(roman);
-    return [raw,compactSearchValue(raw),roman,compactSearchValue(roman)].concat([plain,compactSearchValue(plain),romanPlain,compactSearchValue(romanPlain)].filter(function(item){return item&&item.length>=4;}))
+    return [raw,compactSearchValue(raw),roman,compactSearchValue(roman)]
+      .concat([plain,compactSearchValue(plain),romanPlain,compactSearchValue(romanPlain)].filter(function(item){return item&&item.length>=4;}))
+      .concat(shortBrandAliases(plain),shortBrandAliases(romanPlain))
       .filter(function(item,pos,arr){return item&&item.length>=2&&arr.indexOf(item)===pos;});
   }
   function matchesSearch(haystack,query){
@@ -1768,8 +1779,12 @@ function createHubContent(group) {
   function setupSearch(){
     var inp=document.getElementById('case-search');
     if(!inp)return;
+    var currentValue=inp.value;
     var n=inp.cloneNode(true);inp.parentNode.replaceChild(n,inp);
-    n.addEventListener('input',function(){
+    n.value=currentValue;
+    var btn=document.querySelector('.search-btn');
+    if(btn){var nextBtn=btn.cloneNode(true);btn.parentNode.replaceChild(nextBtn,btn);btn=nextBtn;}
+    function applySearch(){
       var q=n.value.trim();
       var pgWrap=document.getElementById('pgWrap');
       if(q){
@@ -1782,7 +1797,12 @@ function createHubContent(group) {
         if(pgWrap)pgWrap.style.display='';
         _pg=1;setupPagination();
       }
-    });
+    }
+    n.addEventListener('input',applySearch);
+    n.addEventListener('search',applySearch);
+    n.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();applySearch();}});
+    if(btn)btn.addEventListener('click',applySearch);
+    window.__applyCaseSearch=applySearch;
   }
   setupSearch();
   setupPagination();
@@ -1858,7 +1878,11 @@ function createHubContent(group) {
       var trEl=document.getElementById('statTodayReports');
       if(trEl)trEl.textContent='오늘 추가 +'+todayRep;
       setupSearch();
-      _pg=1;setupPagination();
+      if(window.__applyCaseSearch&&document.getElementById('case-search')&&document.getElementById('case-search').value.trim()){
+        window.__applyCaseSearch();
+      }else{
+        _pg=1;setupPagination();
+      }
     }).catch(function(){});
 })();
 </script>`;
