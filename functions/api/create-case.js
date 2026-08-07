@@ -1,4 +1,5 @@
 import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl } from "../_seo.js";
+import { compareCaseIdentity } from "../_searchNormalize.js";
 import { normalizeFraudTypeKey } from "../_standardLanding.js";
 
 const DEFAULT_CATEGORY = "형사대응";
@@ -283,22 +284,18 @@ function hasRequiredLandingData(landings) {
 }
 
 function findTooSimilarCase({ caseName, slug, cases }) {
-  const normalizedName = normalizeForCompare(caseName);
-  const normalizedSlug = normalizeForCompare(slug);
+  const incoming = { caseName, slug };
 
   for (const item of cases) {
-    const existingName = String(item.caseName || item.name || "");
+    const existingName = String(item.caseName || item.name || item.title || "");
     const existingSlug = String(item.slug || "");
-    const score = Math.max(
-      similarity(normalizedName, normalizeForCompare(existingName)),
-      similarity(normalizedSlug, normalizeForCompare(existingSlug))
-    );
+    const identity = compareCaseIdentity(incoming, item);
 
-    if (score >= 0.9) {
+    if (identity.exactSlug || identity.exactAlias || identity.score >= 0.9) {
       return {
         slug: existingSlug,
         caseName: existingName,
-        score: Number(score.toFixed(2)),
+        score: Number(identity.score.toFixed(2)),
       };
     }
   }

@@ -1593,8 +1593,9 @@ function createHubContent(group) {
       const title = escapeHtml(pl.title || pl.h1 || pl.slug);
       const url = `/powerlink/${encodeURIComponent(pl.slug)}/`;
       const todayBadge = pl.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
+      const searchText = escapeHtml([pl.title, pl.h1, pl.slug, pl.description, "powerlink"].filter(Boolean).join(" "));
       return `
-        <a href="${url}" class="case-row pl-row" data-title="${title}" data-slug="${escapeHtml(pl.slug)}" data-type="pl" data-date="${escapeHtml(entry.date)}">
+        <a href="${url}" class="case-row pl-row" data-title="${title}" data-slug="${escapeHtml(pl.slug)}" data-search="${searchText}" data-type="pl" data-date="${escapeHtml(entry.date)}">
           <span class="case-no"><em class="pl-badge">파워링크</em></span>
           <span class="case-title-wrap">
             <strong class="case-title">${title}</strong>${todayBadge}
@@ -1611,8 +1612,9 @@ function createHubContent(group) {
     const displayTitle = escapeHtml(displayTitleRaw);
     const url = buildRelativeLandingPath(group, item);
     const todayBadge = item.createdAt === today ? '<em class="today-badge">TODAY</em>' : "";
+    const searchText = escapeHtml([caseNameRaw, displayTitleRaw, item.slug, item.summary, item.createdAt, item.updatedAt].filter(Boolean).join(" "));
     return `
-        <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}" data-date="${escapeHtml(entry.date)}">
+        <a href="${url}" class="case-row" data-title="${caseName}" data-slug="${escapeHtml(item.slug)}" data-search="${searchText}" data-date="${escapeHtml(entry.date)}">
           <span class="case-no">${caseNoMap.get(item.slug) ?? ""}</span>
           <span class="case-title-wrap">
             <strong class="case-title">${displayTitle}</strong>${todayBadge}
@@ -1715,15 +1717,66 @@ function createHubContent(group) {
     pgWrap.innerHTML=html;
   }
   window.goPage=function(p){_pg=p;setupPagination();window.scrollTo({top:0,behavior:'smooth'});};
+  var SEARCH_CHO=['g','gg','n','d','dd','r','m','b','bb','s','ss','','j','jj','ch','k','t','p','h'];
+  var SEARCH_JUNG=['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+  var SEARCH_JONG=['','g','gg','gs','n','nj','nh','d','r','rg','rm','rb','rs','rt','rp','rh','m','b','bs','s','ss','ng','j','ch','k','t','p','h'];
+  var SEARCH_GENERIC_TERMS=[
+    '\\uc0ac\\uce6d','\\uc0ac\\uae30','\\ud53c\\ud574','\\ud22c\\uc790\\uc0ac\\uae30','\\ub9ac\\ub529\\ubc29','\\ub9ac\\ub529','\\uc8fc\\uc2dd','\\ucf54\\uc778','\\uac70\\ub798\\uc18c',
+    '\\ud22c\\uc790\\uc99d\\uad8c','\\uc99d\\uad8c','\\ud22c\\uc790','\\ud53c\\ud574\\uae08','\\ud68c\\uc218','\\ud574\\uacb0','\\ubc29\\ubc95','\\ub300\\uc751',
+    'saching','sagi','pihae','tujasagi','ridingbang','riding','jusig','coin','koin','georaeso','tujajeunggwon','jeunggwon','tuja','hoesu','haegyeol','bangbeob','daeeung'
+  ];
+  function romanSearch(text){
+    var out='';
+    String(text||'').split('').forEach(function(ch){
+      var code=ch.charCodeAt(0);
+      if(code>=0xac00&&code<=0xd7a3){
+        var off=code-0xac00;
+        out+=SEARCH_CHO[Math.floor(off/28/21)]+SEARCH_JUNG[Math.floor(off/28)%21]+SEARCH_JONG[off%28];
+      }else{out+=ch;}
+    });
+    return out;
+  }
+  function normSearch(value){
+    return String(value||'').normalize('NFKC').toLowerCase()
+      .replace(/https?:\\/\\//g,' ')
+      .replace(/www\\./g,' ')
+      .replace(/\\.(com|net|org|co|kr|vip|shop|site|store|io)\\b/g,' ')
+      .replace(/[^0-9a-z\\uac00-\\ud7a3]+/gi,' ')
+      .replace(/\\s+/g,' ')
+      .trim();
+  }
+  function stripSearch(value){
+    var result=normSearch(value);
+    SEARCH_GENERIC_TERMS.forEach(function(term){result=result.split(term).join(' ');});
+    return result.replace(/\\s+/g,' ').trim();
+  }
+  function compactSearchValue(value){return String(value||'').replace(/\\s+/g,'');}
+  function aliasesSearch(value){
+    var raw=normSearch(value);
+    var roman=normSearch(romanSearch(value));
+    var plain=stripSearch(raw);
+    var romanPlain=stripSearch(roman);
+    return [raw,compactSearchValue(raw),roman,compactSearchValue(roman)].concat([plain,compactSearchValue(plain),romanPlain,compactSearchValue(romanPlain)].filter(function(item){return item&&item.length>=4;}))
+      .filter(function(item,pos,arr){return item&&item.length>=2&&arr.indexOf(item)===pos;});
+  }
+  function matchesSearch(haystack,query){
+    var needles=aliasesSearch(query).filter(function(n){return n.length>=2;});
+    if(!needles.length)return true;
+    var hay=aliasesSearch(haystack).join(' ');
+    return needles.some(function(n){return hay.indexOf(n)>=0;});
+  }
   function setupSearch(){
     var inp=document.getElementById('case-search');
     if(!inp)return;
     var n=inp.cloneNode(true);inp.parentNode.replaceChild(n,inp);
     n.addEventListener('input',function(){
-      var q=n.value.trim().toLowerCase();
+      var q=n.value.trim();
       var pgWrap=document.getElementById('pgWrap');
       if(q){
-        document.querySelectorAll('.case-row').forEach(function(r){r.style.display=r.dataset.title.toLowerCase().indexOf(q)>=0?'grid':'none';});
+        document.querySelectorAll('.case-row').forEach(function(r){
+          var hay=[r.dataset.title,r.dataset.slug,r.dataset.search,r.textContent].filter(Boolean).join(' ');
+          r.style.display=matchesSearch(hay,q)?'grid':'none';
+        });
         if(pgWrap)pgWrap.style.display='none';
       } else {
         if(pgWrap)pgWrap.style.display='';
@@ -1769,7 +1822,7 @@ function createHubContent(group) {
             var t=esc(pl.title||pl.h1||pl.slug||'');
             var b=document.createElement('a');
             b.href='/powerlink/'+encodeURIComponent(pl.slug)+'/';
-            b.className='case-row pl-row';b.dataset.title=t;b.dataset.slug=pl.slug;b.dataset.type='pl';b.dataset.date=entry._date;
+            b.className='case-row pl-row';b.dataset.title=t;b.dataset.slug=pl.slug;b.dataset.type='pl';b.dataset.date=entry._date;b.dataset.search=[pl.title,pl.h1,pl.slug,pl.description,'powerlink'].filter(Boolean).join(' ');
             b.innerHTML='<span class="case-no"><em class="pl-badge">파워링크</em></span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+t+'</strong><em class="today-badge">NEW</em></span>'
               +'<span class="case-status">파워링크</span>'
@@ -1782,7 +1835,7 @@ function createHubContent(group) {
             var dt=manual(item)||!SUFFIX?cn:cn+' '+SUFFIX;
             var a=document.createElement('a');
             a.href=itemPath(item);
-            a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;a.dataset.date=entry._date;
+            a.className='case-row';a.dataset.title=cn;a.dataset.slug=item.slug;a.dataset.date=entry._date;a.dataset.search=[cn,dt,item.slug,item.summary,item.createdAt,item.updatedAt].filter(Boolean).join(' ');
             a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
               +'<span class="case-status">'+esc(getStatus(item.slug,item.createdBy))+'</span>'

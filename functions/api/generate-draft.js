@@ -1,4 +1,5 @@
 import { caseOgImageUrl } from "../_seo.js";
+import { compareCaseIdentity } from "../_searchNormalize.js";
 import {
   normalizeFraudTypeKey,
   standardCaseKeyword,
@@ -782,24 +783,33 @@ function createTags(caseName) {
 }
 
 function findDuplicateRisks(caseName, slug, cases) {
-  const normalizedName = normalizeForCompare(caseName);
+  const incoming = { caseName, slug };
   const matches = cases
     .map((item) => {
-      const existingName = String(item.caseName || item.name || "");
+      const existingName = String(item.caseName || item.name || item.title || "");
       const existingSlug = String(item.slug || "");
-      const score = Math.max(
-        similarity(normalizedName, normalizeForCompare(existingName)),
-        similarity(normalizeForCompare(slug), normalizeForCompare(existingSlug)),
-      );
-      return { slug: existingSlug, caseName: existingName, score: Number(score.toFixed(2)), exactSlug: existingSlug === slug };
+      const identity = compareCaseIdentity(incoming, item);
+      return {
+        slug: existingSlug,
+        caseName: existingName,
+        score: Number(identity.score.toFixed(2)),
+        exactSlug: identity.exactSlug,
+        exactAlias: identity.exactAlias,
+        containsAlias: identity.containsAlias,
+      };
     })
-    .filter((item) => item.exactSlug || item.score >= 0.58)
-    .sort((a, b) => Number(b.exactSlug) - Number(a.exactSlug) || b.score - a.score)
+    .filter((item) => item.exactSlug || item.exactAlias || item.containsAlias || item.score >= 0.58)
+    .sort((a, b) =>
+      Number(b.exactSlug) - Number(a.exactSlug) ||
+      Number(b.exactAlias) - Number(a.exactAlias) ||
+      Number(b.containsAlias) - Number(a.containsAlias) ||
+      b.score - a.score
+    )
     .slice(0, 5);
 
   return {
-    block: matches.some((item) => item.exactSlug || item.score >= 0.9),
-    warn: matches.some((item) => item.score >= 0.7),
+    block: matches.some((item) => item.exactSlug || item.exactAlias || item.score >= 0.9),
+    warn: matches.some((item) => item.containsAlias || item.score >= 0.7),
     matches,
   };
 }

@@ -110,6 +110,74 @@
   let filteredEntries = [];
   let currentPage = 1;
   const PAGE_SIZE = 100;
+  const SEARCH_CHO = ["g","gg","n","d","dd","r","m","b","bb","s","ss","","j","jj","ch","k","t","p","h"];
+  const SEARCH_JUNG = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
+  const SEARCH_JONG = ["","g","gg","gs","n","nj","nh","d","r","rg","rm","rb","rs","rt","rp","rh","m","b","bs","s","ss","ng","j","ch","k","t","p","h"];
+  const SEARCH_GENERIC_TERMS = [
+    "\uc0ac\uce6d","\uc0ac\uae30","\ud53c\ud574","\ud22c\uc790\uc0ac\uae30","\ub9ac\ub529\ubc29","\ub9ac\ub529","\uc8fc\uc2dd","\ucf54\uc778","\uac70\ub798\uc18c",
+    "\ud22c\uc790\uc99d\uad8c","\uc99d\uad8c","\ud22c\uc790","\ud53c\ud574\uae08","\ud68c\uc218","\ud574\uacb0","\ubc29\ubc95","\ub300\uc751",
+    "saching","sagi","pihae","tujasagi","ridingbang","riding","jusig","coin","koin","georaeso","tujajeunggwon","jeunggwon","tuja","hoesu","haegyeol","bangbeob","daeeung"
+  ];
+
+  function hangulToRomanSearch(text = "") {
+    let out = "";
+    for (const ch of String(text || "")) {
+      const code = ch.charCodeAt(0);
+      if (code >= 0xac00 && code <= 0xd7a3) {
+        const off = code - 0xac00;
+        out += SEARCH_CHO[Math.floor(off / 28 / 21)] + SEARCH_JUNG[Math.floor(off / 28) % 21] + SEARCH_JONG[off % 28];
+      } else {
+        out += ch;
+      }
+    }
+    return out;
+  }
+
+  function normalizeSearchText(value = "") {
+    return String(value || "")
+      .normalize("NFKC")
+      .toLowerCase()
+      .replace(/https?:\/\//g, " ")
+      .replace(/www\./g, " ")
+      .replace(/\.(com|net|org|co|kr|vip|shop|site|store|io)\b/g, " ")
+      .replace(/[^0-9a-z\uac00-\ud7a3]+/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function stripSearchGeneric(value = "") {
+    let result = normalizeSearchText(value);
+    SEARCH_GENERIC_TERMS.forEach(term => {
+      result = result.split(term).join(" ");
+    });
+    return result.replace(/\s+/g, " ").trim();
+  }
+
+  function compactSearchText(value = "") {
+    return String(value || "").replace(/\s+/g, "");
+  }
+
+  function searchAliases(value = "") {
+    const raw = normalizeSearchText(value);
+    const roman = normalizeSearchText(hangulToRomanSearch(value));
+    const plain = stripSearchGeneric(raw);
+    const romanPlain = stripSearchGeneric(roman);
+    return [...new Set([raw, compactSearchText(raw), roman, compactSearchText(roman), ...[plain, compactSearchText(plain), romanPlain, compactSearchText(romanPlain)].filter(item => item && item.length >= 4)]
+      .filter(item => item && item.length >= 2))];
+  }
+
+  function matchesSearchText(haystack, query) {
+    const needles = searchAliases(query).filter(item => item.length >= 2);
+    if (!needles.length) return true;
+    const hay = searchAliases(haystack).join(" ");
+    return needles.some(needle => hay.includes(needle));
+  }
+
+  function entrySearchText(entry) {
+    return [entry.name, entry.slug, entry.createdBy, entry.fraudType, entry.createdAt, entry.updatedAt]
+      .filter(Boolean)
+      .join(" ");
+  }
 
   Promise.all([
     fetch('/api/get-cases').then(r => r.json()).catch(() => ({ ok: false })),
@@ -263,9 +331,9 @@
 
   function filterEntries() {
     currentPage = 1;
-    const q = document.getElementById('mainSearch').value.trim().toLowerCase();
+    const q = document.getElementById('mainSearch').value.trim();
     filteredEntries = q
-      ? allEntries.filter(e => e.name.toLowerCase().includes(q) || e.slug.toLowerCase().includes(q))
+      ? allEntries.filter(e => matchesSearchText(entrySearchText(e), q))
       : allEntries;
     renderEntries(filteredEntries);
   }
