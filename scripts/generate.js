@@ -33,28 +33,6 @@ const HOME_FRESH_LIST_LIMIT = 10;
 const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
 <!-- End LogScan Code -->`;
-const GOOGLE_ADS_TAG_ID = "AW-18361990390";
-const GOOGLE_ADS_HEAD_TAG = `<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_TAG_ID}"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', '${GOOGLE_ADS_TAG_ID}');
-</script>`;
-const GOOGLE_TAG_MANAGER_ID = "GTM-KS93SSTP";
-const GOOGLE_TAG_MANAGER_HEAD_TAG = `<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${GOOGLE_TAG_MANAGER_ID}');</script>
-<!-- End Google Tag Manager -->`;
-const GOOGLE_TAG_MANAGER_BODY_TAG = `<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${GOOGLE_TAG_MANAGER_ID}"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->`;
 
 const ORGANIZATION = {
   "@type": "Organization",
@@ -1421,9 +1399,6 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   ];
   const centerHeadExtra = centerFintechHeadExtra(group);
   if (centerHeadExtra) links.push(centerHeadExtra);
-  const googleAdsTag = googleAdsHeadTagForSite(group);
-  if (googleAdsTag) links.push(googleAdsTag);
-
   if (slug) {
     links.push(`<link rel="prefetch" href="https://gnlaw-center.co.kr/case/${slug}/">`);
     if (displayOgImage) links.push(`<link rel="prefetch" href="${escapeHtml(displayOgImage)}" as="image" type="image/webp">`);
@@ -1459,13 +1434,6 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
   }
 
   return links.join("\n  ");
-}
-
-function googleAdsHeadTagForSite(group) {
-  const siteUrl = String(group?.siteUrl || "").replace(/\/$/, "");
-  return siteUrl === "https://gnlaw-criminal.co.kr"
-    ? GOOGLE_ADS_HEAD_TAG
-    : "";
 }
 
 function themeColor(key) {
@@ -2623,8 +2591,6 @@ function statusLabel(key, seed = key) {
 
 function buildPage(template, group, data) {
   let html = softenRepeatedContextTerms(replaceAllPlaceholders(template, {
-    gtmHead: GOOGLE_TAG_MANAGER_HEAD_TAG,
-    gtmBody: GOOGLE_TAG_MANAGER_BODY_TAG,
     bodyClass: group.bodyClass,
     siteName: escapeHtml(group.siteName),
     shortName: escapeHtml(group.shortName),
@@ -2938,7 +2904,7 @@ Sitemap: ${group.siteUrl}/sitemap.xml
     ogTitle: escapeHtml(privacyTitle),
     ogDescription: escapeHtml(privacyDesc),
     ogImage: `${group.siteUrl}/assets/og-template.png`,
-    headExtra: [centerFintechHeadExtra(group), googleAdsHeadTagForSite(group)].filter(Boolean).join("\n"),
+    headExtra: centerFintechHeadExtra(group),
     schema: JSON.stringify({
       "@context": "https://schema.org",
       "@graph": [
