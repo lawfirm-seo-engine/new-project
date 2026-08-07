@@ -103,6 +103,35 @@
       color: #8a1f1f;
     }
 
+    .review-line {
+      margin: 0 0 6px;
+      line-height: 1.45;
+    }
+
+    .review-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .similar-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: inherit;
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .similar-link::after {
+      content: "편집";
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: rgba(31, 79, 216, .12);
+      color: #1f4fd8;
+      font-size: 11px;
+      text-decoration: none;
+    }
+
     .tabs {
       display: flex;
       flex-wrap: wrap;
@@ -439,23 +468,49 @@
       const status = data.review.status;
       reviewPanelEl.classList.add("is-visible");
       reviewStatusEl.className = `status ${status}`;
-      const sourceLabel = "✅ 원고 생성 완료";
-      reviewStatusEl.textContent = [
-        sourceLabel,
+      renderReviewStatus([
+        "✅ 원고 생성 완료",
         status === "blocked"
-          ? "저장 차단: 동일 또는 매우 유사한 사건이 있습니다."
+          ? "저장 차단: 이미 같은 slug가 존재합니다."
           : status === "warning"
-            ? "주의: 유사 사건이 있습니다. 기존 사건과 별도인지 확인하세요."
+            ? "참고: 유사 후보가 있습니다. 후보와 유사도만 확인한 뒤 생성 여부를 직접 판단하세요."
             : "통과: 중복 위험이 낮습니다.",
         ...(data.review.notes || []),
-        ...(data.review.duplicateCheck.matches || []).map((item) => `유사 후보: ${item.caseName || item.slug} / ${item.slug} / ${Math.round(item.score * 100)}%`),
-      ].join("\n");
+      ], data.review.duplicateCheck?.matches || []);
 
       activePreviewKey = "a";
       renderPreviewTabs();
       renderLandingEditor(activePreviewKey);
 
-      submitButtonEl.disabled = status === "blocked";
+      submitButtonEl.disabled = false;
+    }
+
+    function renderReviewStatus(lines, matches) {
+      reviewStatusEl.innerHTML = "";
+      lines.filter(Boolean).forEach((line) => {
+        const div = document.createElement("div");
+        div.className = "review-line";
+        div.textContent = line;
+        reviewStatusEl.appendChild(div);
+      });
+
+      matches.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "review-line";
+        const prefix = document.createElement("span");
+        prefix.textContent = "유사 후보: ";
+        if (!item.slug) {
+          div.textContent = `유사 후보: ${item.caseName || "-"} / - / ${Math.round(item.score * 100)}%`;
+          reviewStatusEl.appendChild(div);
+          return;
+        }
+        const link = document.createElement("a");
+        link.className = "similar-link";
+        link.href = `/admin/edit.html?slug=${encodeURIComponent(item.slug)}`;
+        link.textContent = `${item.caseName || item.slug} / ${item.slug} / ${Math.round(item.score * 100)}%`;
+        div.append(prefix, link);
+        reviewStatusEl.appendChild(div);
+      });
     }
 
     function renderPreviewTabs() {

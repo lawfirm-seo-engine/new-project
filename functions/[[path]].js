@@ -8,6 +8,7 @@ import {
   RECENT_SITEMAP_DAYS,
   RECENT_SITEMAP_LIMIT,
   SEO_STABILIZED_AT,
+  GROUPS as SEO_GROUPS,
   buildLandingUrl,
   buildRssXml,
   buildSitemapIndexXml,
@@ -35,6 +36,10 @@ import {
   standardSubtitle,
   standardVictimCases,
 } from "./_standardLanding.js";
+import {
+  appendStockReadingroomCta,
+  shouldAppendStockReadingroomCta,
+} from "./_stockReadingroomCta.js";
 import {
   BOARD_HOST,
   BOARD_REFRESHED_AT,
@@ -1834,10 +1839,13 @@ function createRecoveryManualContent(landing, group, caseData) {
   const slug = esc(caseData.slug);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
   const manualTitle = landing.h1 || landing.title || caseData.caseName || "";
-  const manualBody = Array.isArray(landing.body)
+  const rawManualBody = Array.isArray(landing.body)
     ? stripLeadingDuplicateManualTitle(landing.body, manualTitle)
     : landing.body;
-  const bodyHtml = Array.isArray(landing.body)
+  const manualBody = shouldAppendStockReadingroomCta(caseData)
+    ? appendStockReadingroomCta(rawManualBody)
+    : rawManualBody;
+  const bodyHtml = Array.isArray(manualBody)
     ? renderManualBodyArray(manualBody)
     : renderManualArticle(String(manualBody || ""));
   const memoSection = renderOperatorMemos(caseData);
@@ -1849,6 +1857,15 @@ function createRecoveryManualContent(landing, group, caseData) {
     createFloatingWidgets(cn, siteName, slug),
     trackScript,
   ].filter(Boolean).join("\n");
+}
+
+const LD_CROSSLINK_GROUP = SEO_GROUPS.find((g) => (g.landingKey || g.key) === "ld");
+
+function createReadingroomCrossLink(contentKey, caseData) {
+  if (contentKey === "ld") return "";
+  if (!LD_CROSSLINK_GROUP || !hasReadingroomLanding(caseData)) return "";
+  const url = esc(buildLandingUrl(LD_CROSSLINK_GROUP, caseData.slug));
+  return `<section class="article-block"><p><a href="${url}">주식·투자 리딩방 사기 피해 회수 절차 보기</a></p></section>`;
 }
 
 function createLandingContent(landing, group, caseData, relatedCases = []) {
@@ -1885,6 +1902,7 @@ function createLandingContent(landing, group, caseData, relatedCases = []) {
       `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
       _authoritySections,
       `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
+      createReadingroomCrossLink(_contentKey, caseData),
       createLiveReceiptStatus(caseData),
       createScamTypeSelfAnalysisSection(),
       renderComments(caseData),
@@ -1958,6 +1976,7 @@ function createStandardLandingContent(landing, group, caseData, relatedCases = [
     `<section class="article-block"><h2>${keyword} 피해 사례</h2>${list(victimCases)}</section>`,
     `<section class="article-block"><h2>${keyword} 대응 방법</h2>${responseHtml}${createEvidenceCheckSection()}</section>`,
     `<section class="article-block faq" id="faq-list"><h2>${keyword} FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`,
+    createReadingroomCrossLink(group.landingKey || group.key, caseData),
     createLiveReceiptStatus(caseData),
     createScamTypeSelfAnalysisSection(),
     createSameTypeLatestSection(caseData, group, relatedCases, typeKey),
@@ -2843,7 +2862,7 @@ function pageTemplate(d) {
 <body class="${d.bodyClass}">
   <header class="site-header">
     <a class="brand" href="/" aria-label="법무법인 선린 홈페이지">
-      <img src="/assets/logo.png" alt="법무법인 선린">
+      <img src="/assets/logo.png" alt="법무법인 선린" loading="lazy" decoding="async">
     </a>
     ${d.headerCall}
   </header>
@@ -2944,7 +2963,7 @@ function groupPageTitle(name, key) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "주식리딩방사기",
+    ld: "주식·코인·투자 리딩방사기",
     le: "진행현황",
   };
   return joinSeoPhrase(base, suffixes[key] || "형사고소");

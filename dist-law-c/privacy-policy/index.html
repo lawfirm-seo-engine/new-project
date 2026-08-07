@@ -14,7 +14,7 @@
   <meta property="og:site_name" content="실제 회수 사례 아카이브">
   <meta property="og:locale" content="ko_KR">
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"개인정보처리방침 | 실제 회수 사례 아카이브","url":"https://xn--2e0bno217bsqa58yp8nd1g2ma.kr/privacy-policy/","inLanguage":"ko-KR","description":"법무법인 선린의 개인정보 수집·이용·보호에 관한 방침입니다.","dateModified":"2026-07-11","publisher":{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}},{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"개인정보처리방침 | 실제 회수 사례 아카이브","url":"https://xn--2e0bno217bsqa58yp8nd1g2ma.kr/privacy-policy/","inLanguage":"ko-KR","description":"법무법인 선린의 개인정보 수집·이용·보호에 관한 방침입니다.","dateModified":"2026-08-07","publisher":{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}},{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}]}</script>
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body class="domain-c privacy-policy-page hub-page">
@@ -37,7 +37,7 @@
 
     <div class="page-shell">
       <article class="article-block privacy-policy-content">
-  <p class="policy-date">시행일: 2026년 1월 1일 &nbsp;|&nbsp; 최종 수정일: 2026-07-11</p>
+  <p class="policy-date">시행일: 2026년 1월 1일 &nbsp;|&nbsp; 최종 수정일: 2026-08-07</p>
   <p>법무법인 선린(이하 "법인")은 개인정보 보호법 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 다음과 같이 개인정보처리방침을 수립·공개합니다.</p>
 
   <h3>제1조 개인정보의 수집 및 이용 목적</h3>
@@ -179,15 +179,59 @@
   <span class="sticky-title">사기 피해 구제 상담 ｜ 02-6348-0406</span>
   <form class="sticky-form" id="stickyConsultForm">
     <input type="text" name="sname" placeholder="이름" required autocomplete="name">
-    <input type="tel" name="sphone" placeholder="연락처" required autocomplete="tel">
+    <input type="tel" name="sphone" placeholder="010-1234-5678" required autocomplete="tel">
     <input type="text" name="samount" placeholder="문의 내용" required>
     <button type="submit">확인 요청</button>
   </form>
   <span id="stickyMsg" class="sticky-msg"></span>
 </div>
 <script>
+  
+    function escapeConsultPhone(value) {
+      return String(value || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+    function confirmConsultPhone(form, phone) {
+      return new Promise(function(resolve) {
+        var previous = document.getElementById('consultPhoneConfirm');
+        if (previous) previous.remove();
+        var overlay = document.createElement('div');
+        overlay.id = 'consultPhoneConfirm';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,16,28,.52);';
+        overlay.innerHTML = '<div style="width:min(420px,100%);background:#fff;color:#172033;border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,.28);padding:22px 20px;font-family:system-ui,sans-serif;text-align:center;">'
+          + '<div style="font-size:18px;font-weight:800;margin-bottom:12px;">✔ 입력하신 연락처가 맞습니까?</div>'
+          + '<div style="font-size:22px;font-weight:900;letter-spacing:.02em;margin:8px 0 18px;word-break:break-all;">' + escapeConsultPhone(phone) + '</div>'
+          + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">'
+          + '<button type="button" data-action="edit" style="height:42px;padding:0 18px;border:1px solid #cfd8e6;border-radius:7px;background:#fff;color:#263244;font-weight:800;cursor:pointer;">수정하기</button>'
+          + '<button type="button" data-action="submit" style="height:42px;padding:0 18px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-weight:900;cursor:pointer;">그대로 상담 접수</button>'
+          + '</div></div>';
+        var escHandler;
+        function finish(ok) {
+          document.removeEventListener('keydown', escHandler);
+          overlay.remove();
+          resolve(ok);
+        }
+        escHandler = function(ev) { if (ev.key === 'Escape') finish(false); };
+        overlay.addEventListener('click', function(ev) {
+          if (ev.target === overlay || ev.target.dataset.action === 'edit') finish(false);
+          if (ev.target.dataset.action === 'submit') finish(true);
+        });
+        document.addEventListener('keydown', escHandler);
+        document.body.appendChild(overlay);
+        var submitBtn = overlay.querySelector('[data-action="submit"]');
+        if (submitBtn) submitBtn.focus();
+      });
+    }
+  
   document.getElementById('stickyConsultForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    var submittedPhone = String(((this.phone || this.sphone) || {}).value || '').trim();
+    if (!(await confirmConsultPhone(this, submittedPhone))) {
+      var phoneInput = this.phone || this.sphone;
+      if (phoneInput) phoneInput.focus();
+      return;
+    }
     var btn = this.querySelector('button'); var msg = document.getElementById('stickyMsg');
     btn.disabled = true; btn.textContent = '접수 중...';
     msg.textContent = ''; msg.className = 'sticky-msg';

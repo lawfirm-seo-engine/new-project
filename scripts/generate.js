@@ -14,11 +14,18 @@ import {
   isCaseAllowedForGroup,
   landingUrlForItem,
 } from "../functions/_seo.js";
+import { LD_CATEGORY_OPTIONS } from "../functions/_readingroomCategory.js";
 import {
   normalizeFraudTypeKey,
   standardMetaDescription,
   standardVictimCases,
 } from "../functions/_standardLanding.js";
+import {
+  STOCK_READINGROOM_CTA_TEXT,
+  STOCK_READINGROOM_CTA_URL,
+  appendStockReadingroomCta,
+  shouldAppendStockReadingroomCta,
+} from "../functions/_stockReadingroomCta.js";
 
 const root = process.cwd();
 const dataPath = path.join(root, "data", "cases.json");
@@ -654,6 +661,10 @@ function createLandingContent(landing, group, caseItem) {
     const _faq = renderFaqForLanding(landing, group, caseItem);
     const _introBody = _body.slice(0, 3);
     const _methodBody = _body.slice(3, 8);
+    const _visibleBody = [..._introBody, ..._methodBody];
+    const _readingroomCta = shouldAppendStockReadingroomCta(caseItem) && !_visibleBody.some((item) => item.includes(STOCK_READINGROOM_CTA_URL))
+      ? `<section class="article-block"><p>${withSentenceBreaks(STOCK_READINGROOM_CTA_TEXT)}</p></section>`
+      : "";
 
     return [
       createHeroCta(_rawCaseName),
@@ -664,6 +675,7 @@ function createLandingContent(landing, group, caseItem) {
       `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
       `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
       createLiveReceiptStatus(caseItem),
+      _readingroomCta,
       _memoSection,
       _form,
       _widgets,
@@ -837,11 +849,12 @@ function renderBodyForLanding(landing, group, caseItem) {
     ],
   }[group.key] || [];
 
-  return uniqueTextList([
+  const body = uniqueTextList([
     ...original,
     ...scenarioBodyAdditions(caseItem, group, compactName),
     ...additions,
   ].map(sanitizeAwkwardText)).slice(0, 9);
+  return shouldAppendStockReadingroomCta(caseItem) ? appendStockReadingroomCta(body) : body;
 }
 
 function renderVictimCasesForLanding(landing, group, caseItem, replacementContext) {
@@ -1927,6 +1940,8 @@ function createHubContent(group) {
         </div>
       </div>
     </section>
+    ${createReadingroomPillarSection(group)}
+    ${createLdCategoryEntrySection(group)}
     ${typeEntrySection}
     ${freshSection}
     <div class="case-search-wrap">
@@ -1942,6 +1957,7 @@ function createHubContent(group) {
       ${rows}
     </section>
     <div id="pgWrap" class="pg-wrap"></div>
+    ${createReadingroomHubFaqSection(group)}
     ${dynScript}`;
 }
 
@@ -2509,6 +2525,129 @@ function createCategoryHeroCta(group) {
   </div>`;
 }
 
+const READINGROOM_PILLAR_SECTIONS = [
+  {
+    title: "주식리딩방사기 정의",
+    body: [
+      "주식리딩방사기는 교수, 대표, 증권사·자산운용사 관계자, 애널리스트, 투자 전문가 등을 사칭한 운영자가 밴드·텔레그램·카카오톡 등 비공개 채팅방(리딩방)으로 투자자를 초대한 뒤, 종목 추천과 허위 수익 인증으로 신뢰를 형성해 투자금을 입금하도록 유도하고 출금 단계에서 세금·보증금·인증비 명목의 추가 입금을 요구하며 출금을 거부하는 투자사기 유형입니다.",
+      "주식 리딩방뿐 아니라 코인·가상자산 리딩방, 증권사·거래소·플랫폼을 사칭한 방, 가짜 HTS·MTS·전용 어플을 설치시키는 방까지 채널과 사칭 대상이 다양하게 확장되고 있어 통칭 '리딩방사기'로 분류합니다.",
+    ],
+  },
+  {
+    title: "접근부터 입금까지의 발생 과정",
+    body: [
+      "① SNS 광고·유튜브·문자메시지로 무료 종목 추천방에 초대 → ② 시황 분석과 종목 추천, 조작된 수익 인증으로 신뢰 형성 → ③ VIP 투자방·기관 투자 프로젝트·공모주 특별배정 등 고수익 제안으로 전환 → ④ 소액 입금 후 일부 출금을 허용해 신뢰를 굳힘 → ⑤ 고액 투자 유도 및 가짜 HTS·MTS·거래 화면으로 수익 표시 → ⑥ 출금 신청 시 세금·보증금·인증비 명목 추가 입금 요구 → ⑦ 출금 거부, 담당자 연락 두절, 단체방 폐쇄 순서로 진행되는 경우가 반복적으로 확인됩니다.",
+    ],
+  },
+  {
+    title: "가짜 HTS·MTS 구조",
+    body: [
+      "정상 증권사·거래소 화면과 유사하게 제작된 가짜 HTS·MTS 앱이나 웹 기반 거래 화면을 설치·접속하게 한 뒤, 실제 시장과 연동되지 않은 수익 화면을 보여주는 방식이 대표적입니다. 잔액과 수익률은 표시되지만 실제 출금 권한은 운영자에게 있어 정상적인 출금이 불가능한 구조이며, 앱 설치 파일명·접속 주소·로그인 화면·고객센터 대화 내용을 보존해두는 것이 이후 대응에 중요합니다.",
+    ],
+  },
+  {
+    title: "출금 거부 및 추가 입금 요구",
+    body: [
+      "출금을 신청하면 세금, 보증금, 계좌(지갑) 인증비, 자금세탁방지(AML) 심사비, 계좌 활성화 비용 등 명목으로 추가 송금을 요구하는 것이 가장 전형적인 패턴입니다. 추가 입금을 완료해도 출금이 이루어지지 않고 새로운 명목의 비용을 반복 요구하거나, 담당자·단체방이 갑자기 사라지는 경우가 대부분이므로 이러한 요구를 받는 즉시 추가 송금을 중단해야 합니다.",
+    ],
+  },
+  {
+    title: "실제 피해 유형",
+    body: [
+      "무료 종목 추천에서 VIP방으로 전환되며 고액 투자를 유도받은 사례, 공모주·비상장주식 특별 배정을 명목으로 예치금을 추가 요구받은 사례, AI 자동매매 시스템 명목으로 투자금을 모집한 뒤 출금을 거부한 사례, 가상자산(코인) 리딩방에서 지갑 인증비를 요구받은 사례, 증권사·자산운용사 관계자를 사칭해 기관 전용 프로젝트라며 투자를 유도한 사례 등이 실제 상담에서 반복적으로 확인됩니다.",
+    ],
+  },
+  {
+    title: "증거 보존 방법",
+    body: [
+      "입금증과 전체 거래내역, 카카오톡·텔레그램·네이버 밴드 대화 캡처, 단체방 공지·수익 인증·출금 인증 게시물, 투자 사이트 주소와 앱 설치 파일명, 출금 거부 화면과 추가 입금 요구 메시지, 상대방 계좌번호·예금주·지갑 주소·담당자 프로필을 삭제하지 않고 원본 그대로 보존해야 합니다. 앱을 삭제하더라도 기기 자체를 초기화하지 않으면 디지털 포렌식을 통한 복원이 가능할 수 있습니다.",
+    ],
+  },
+  {
+    title: "형사고소·계좌동결·민사 손해배상",
+    body: [
+      "형사 절차에서는 형법 제347조 사기죄, 위조 자료 제공 시 제347조의2 컴퓨터등사용사기죄, 통신사기피해환급법상 전기통신금융사기 해당 여부를 함께 검토하며, 계좌 지급정지(계좌동결) 신청은 자금이 인출·이동되기 전 신속히 진행하는 것이 회수 가능성을 높입니다. 민사 절차에서는 채권 가압류로 상대방 재산을 동결한 뒤 손해배상청구·부당이득반환청구를 병행해 회수 경로를 넓히는 전략이 필요합니다. 형사고소만으로는 피해금이 자동으로 환급되지 않으므로 민형사 절차를 함께 검토해야 합니다.",
+    ],
+  },
+];
+
+function createReadingroomPillarSection(group) {
+  if ((group.landingKey || group.key) !== "ld") return "";
+  const items = READINGROOM_PILLAR_SECTIONS.map((section) => (
+    `<section class="article-block"><h2>${escapeHtml(section.title)}</h2>${section.body.map((p) => `<p>${escapeHtml(p)}</p>`).join("")}</section>`
+  )).join("\n");
+  const checklist = [
+    "무료 종목 추천, VIP 투자방 초대, 공모주 특별배정, 기관 투자 프로젝트, AI 자동매매 시스템을 제안받았나요?",
+    "교수, 대표, 증권사·자산운용사 관계자, 애널리스트 등을 사칭한 인물이 접근했나요?",
+    "가짜 HTS·MTS·전용 어플 설치를 안내받았나요?",
+    "출금 신청 시 세금·보증금·인증비 등 추가 입금을 요구받았나요?",
+    "담당자 연락 두절이나 단체방 폐쇄를 경험했나요?",
+  ];
+  return `${items}
+    <section class="article-block evidence-check" aria-label="주식리딩방사기 자가진단 체크리스트">
+      <h2>주식리딩방사기 자가진단 체크리스트</h2>
+      <p>아래 항목 중 2개 이상 해당된다면 리딩방사기 피해 여부를 우선 확인해야 합니다.</p>
+      <ul>${checklist.map((q) => `<li>${escapeHtml(q)}</li>`).join("")}</ul>
+    </section>`;
+}
+
+const READINGROOM_HUB_FAQ = [
+  { q: "리딩방에서 손실이 난 것과 사기는 어떻게 구분하나요?", a: "정상 투자 손실과 달리 허위 수익 화면, 원금 보장 표현, 출금 거부, 추가 입금 요구, 담당자 연락 두절이 결합되어 있다면 사기 구조를 검토할 수 있습니다." },
+  { q: "이미 세금이나 보증금을 추가로 냈다면 어떻게 해야 하나요?", a: "더 이상의 추가 송금을 멈추고 기존 입금 내역과 추가 요구 메시지를 모두 보존해야 합니다. 추가 입금 경위는 피해금 산정과 기망 구조 입증에 중요한 자료가 됩니다." },
+  { q: "코인 지갑으로 보낸 돈도 추적할 수 있나요?", a: "블록체인 거래는 기록이 남기 때문에 지갑 주소와 전송 내역을 기준으로 흐름을 확인할 수 있습니다. 다만 회수 가능성은 거래소 경유 여부와 상대방 특정 가능성에 따라 달라집니다." },
+  { q: "형사고소만 하면 피해금이 바로 돌아오나요?", a: "형사고소는 처벌과 수사를 위한 절차이며, 피해금 회수를 위해서는 민사상 가압류·손해배상청구·부당이득반환청구를 함께 검토해야 하는 경우가 많습니다." },
+  { q: "상담 전 무엇을 준비하면 좋나요?", a: "입금증, 계좌정보, 대화 캡처, 사이트 주소, 출금 거부 화면, 담당자 프로필을 준비하면 초기 검토가 빨라집니다." },
+];
+
+function createReadingroomHubFaqSection(group) {
+  if ((group.landingKey || group.key) !== "ld") return "";
+  const items = READINGROOM_HUB_FAQ.map(({ q, a }) => (
+    `<details><summary>${escapeHtml(q)}</summary><p>${escapeHtml(a)}</p></details>`
+  )).join("\n");
+  return `<section class="article-block faq" aria-label="주식리딩방사기 자주 묻는 질문">
+      <h2>자주 묻는 질문</h2>
+      ${items}
+    </section>`;
+}
+
+function createLdCategoryEntrySection(group) {
+  if ((group.landingKey || group.key) !== "ld") return "";
+  const links = LD_CATEGORY_OPTIONS.map((opt) => (
+    `<a class="type-entry-link" href="/${group.pathPrefix}/type/${opt.key}/"><span>유형</span><strong>${escapeHtml(opt.label)}</strong></a>`
+  )).join("\n");
+  return `<section class="type-entry-section ld-category-entries" aria-label="주식리딩방사기 유형별 분류">${links}</section>`;
+}
+
+function createLdCategoryContent(group, categoryKey, categoryLabel) {
+  const groupCases = cases.filter((item) =>
+    isCaseAllowedForGroup(item, group) && !item.hideFromListing && item.ldCategory === categoryKey);
+  const sortedCases = [...groupCases].reverse();
+  const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
+  const rows = sortedCases.map((item) => {
+    const caseName = escapeHtml(landingDisplayName(item, group));
+    const displayTitle = escapeHtml(landingDisplayTitle(item, suffix, group));
+    const url = buildRelativeLandingPath(group, item);
+    return `<a href="${url}" class="case-row">
+      <span class="case-title-wrap"><strong class="case-title">${displayTitle}</strong></span>
+      <span class="case-date">${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
+    </a>`;
+  }).join("\n");
+
+  const empty = `<p class="ld-category-empty">${escapeHtml(categoryLabel)} 유형으로 새로 접수된 사건이 준비되는 대로 순차적으로 게시됩니다.</p>`;
+
+  return `<section class="type-entry-section ld-category-entries" aria-label="주식리딩방사기 유형별 분류">
+      <a class="type-entry-link" href="/${group.pathPrefix}/">
+        <span>전체</span><strong>주식리딩방사기 사건 전체 보기</strong>
+      </a>
+    </section>
+    <section class="case-table-wrap" aria-label="${escapeHtml(categoryLabel)}">
+      <div class="case-table-title">
+        <h2>${escapeHtml(categoryLabel)} 사건 목록</h2>
+      </div>
+      ${rows || empty}
+    </section>`;
+}
+
 function createTypeEntrySection(group) {
   const category = breadcrumbLabel(group);
   return `<section class="type-entry-section" aria-label="${escapeHtml(category)}">
@@ -2657,7 +2796,7 @@ function groupPageTitle(name, groupKey) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "주식리딩방사기",
+    ld: "주식·코인·투자 리딩방사기",
     le: "진행현황",
   };
   return joinSeoPhrase(base, suffixes[groupKey] || "형사고소");
@@ -2979,6 +3118,33 @@ for (const group of groups) {
   });
 
   await fs.outputFile(path.join(group.outDir, group.pathPrefix, "index.html"), categoryHtml);
+
+  if ((group.landingKey || group.key) === "ld") {
+    for (const opt of LD_CATEGORY_OPTIONS) {
+      const ldCatTitle = `${opt.label} 사건 목록 | ${group.siteName}`;
+      const ldCatDescription = `${opt.label} 유형으로 접수된 사건을 정리합니다. ${group.hubLead}`;
+      const ldCatCanonical = `${group.siteUrl}/${group.pathPrefix}/type/${opt.key}/`;
+      const ldCatHtml = buildPage(template, group, {
+        title: escapeHtml(ldCatTitle),
+        description: escapeHtml(ldCatDescription),
+        canonical: ldCatCanonical,
+        ogTitle: escapeHtml(ldCatTitle),
+        ogDescription: escapeHtml(ldCatDescription),
+        ogImage: `${group.siteUrl}/assets/og-template.png`,
+        headExtra: createHeadExtra({ group, isHub: true }),
+        schema: createCategorySchema(group, ldCatTitle, ldCatDescription, ldCatCanonical),
+        h1: escapeHtml(opt.label),
+        ogThumbnail: "",
+        summary: escapeHtml(ldCatDescription),
+        breadcrumb: createCategoryBreadcrumb(group),
+        content: createLdCategoryContent(group, opt.key, opt.label),
+        headerCall: createCenterHeaderNav(group),
+        floatingWidgets: createHubFloatingWidgets(group),
+        pageKind: "hub-page category-page",
+      });
+      await fs.outputFile(path.join(group.outDir, group.pathPrefix, "type", opt.key, "index.html"), ldCatHtml);
+    }
+  }
 
   // NOTE: Individual case landing pages are now served dynamically by functions/[[path]].js
   // Static HTML generation for case pages has been removed (KV architecture).

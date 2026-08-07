@@ -40,6 +40,7 @@
     .name-cell .slug{color:#8a96a8;font-size:11px}
     .loading{text-align:center;padding:36px;color:#8a96a8}
     .noindex-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;background:#fde8e8;color:#c0392b;margin-left:4px;vertical-align:middle}
+    .search-hidden-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;background:#ece8ff;color:#5b43d6;margin-left:4px;vertical-align:middle}
     .pg-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:14px 0}
     .pg-btn{min-width:36px;height:32px;padding:0 10px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#263244;font-size:13px;font-weight:700;cursor:pointer}
     .pg-btn:hover{background:#f0f4fa}
@@ -57,6 +58,7 @@
     <a class="btn" href="/admin/voicephishing.html">보이스피싱 랜딩 생성</a>
     <a class="btn" href="/admin/chaemubu.html">채무부존재소송 랜딩 생성</a>
     <a class="btn" href="/admin/tujasagi.html">투자사기 랜딩 생성</a>
+    <a class="btn" href="/admin/readingroom.html">리딩방 랜딩 생성</a>
     <a class="btn" href="/admin/center-board.html">통합 허브 게시글 관리</a>
     <button class="btn sec" onclick="syncKvToGithub()">KV→GitHub 동기화</button>
     <button class="btn sec" onclick="batchApplyTemplates()">템플릿 일괄 적용</button>
@@ -92,7 +94,7 @@
     { label:'lA', url:'https://금융사기대응센터.kr',         prefix:'prosecute' },
     { label:'lB', url:'https://금융피해대응센터.kr',         prefix:'civil' },
     { label:'lC', url:'https://사기피해구제센터.kr',         prefix:'success' },
-    { label:'lD', url:'https://리딩방피해회수센터.kr',         prefix:'briefing' },
+    { label:'lD', url:'https://리딩방피해회수센터.kr',         prefix:'insights' },
     { label:'lE', url:'https://투자사기대응센터.kr',         prefix:'case' },
   ];
 
@@ -108,6 +110,100 @@
   let filteredEntries = [];
   let currentPage = 1;
   const PAGE_SIZE = 100;
+  const SEARCH_CHO = ["g","gg","n","d","dd","r","m","b","bb","s","ss","","j","jj","ch","k","t","p","h"];
+  const SEARCH_JUNG = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
+  const SEARCH_JONG = ["","g","gg","gs","n","nj","nh","d","r","rg","rm","rb","rs","rt","rp","rh","m","b","bs","s","ss","ng","j","ch","k","t","p","h"];
+  const SEARCH_GENERIC_TERMS = [
+    "\uc0ac\uce6d","\uc0ac\uae30","\ud53c\ud574","\ud22c\uc790\uc0ac\uae30","\ub9ac\ub529\ubc29","\ub9ac\ub529","\uc8fc\uc2dd","\ucf54\uc778","\uac70\ub798\uc18c",
+    "\ud22c\uc790\uc99d\uad8c","\uc99d\uad8c","\ud22c\uc790","\ud53c\ud574\uae08","\ud68c\uc218","\ud574\uacb0","\ubc29\ubc95","\ub300\uc751",
+    "saching","sagi","pihae","tujasagi","ridingbang","riding","jusig","coin","koin","georaeso","tujajeunggwon","jeunggwon","tuja","hoesu","haegyeol","bangbeob","daeeung"
+  ];
+  const SEARCH_SHORT_BRAND_STOPWORDS = new Set(["app","pro","vip","hts","mts","fx","tv","kr","com","net","org","co","shop","site","store","ltd","inc","llc","corp","group","global","asset","capital","invest","investment","bank","coin","stock"]);
+
+  function hangulToRomanSearch(text = "") {
+    let out = "";
+    for (const ch of String(text || "")) {
+      const code = ch.charCodeAt(0);
+      if (code >= 0xac00 && code <= 0xd7a3) {
+        const off = code - 0xac00;
+        out += SEARCH_CHO[Math.floor(off / 28 / 21)] + SEARCH_JUNG[Math.floor(off / 28) % 21] + SEARCH_JONG[off % 28];
+      } else {
+        out += ch;
+      }
+    }
+    return out;
+  }
+
+  function normalizeSearchText(value = "") {
+    return String(value || "")
+      .normalize("NFKC")
+      .toLowerCase()
+      .replace(/https?:\/\//g, " ")
+      .replace(/www\./g, " ")
+      .replace(/\.(com|net|org|co|kr|vip|shop|site|store|io)\b/g, " ")
+      .replace(/[^0-9a-z\uac00-\ud7a3]+/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function stripSearchGeneric(value = "") {
+    let result = normalizeSearchText(value);
+    SEARCH_GENERIC_TERMS.forEach(term => {
+      result = result.split(term).join(" ");
+    });
+    return result.replace(/\s+/g, " ").trim();
+  }
+
+  function compactSearchText(value = "") {
+    return String(value || "").replace(/\s+/g, "");
+  }
+
+  function shortBrandAliases(value = "") {
+    const normalized = normalizeSearchText(value);
+    const tokens = [normalized, compactSearchText(normalized), ...normalized.split(/\s+/).filter(Boolean)];
+    return [...new Set(tokens.filter(token => {
+      const compacted = compactSearchText(token);
+      return /^[a-z0-9]{3,}$/.test(compacted) && !SEARCH_SHORT_BRAND_STOPWORDS.has(compacted);
+    }))];
+  }
+
+  function searchAliases(value = "") {
+    const raw = normalizeSearchText(value);
+    const roman = normalizeSearchText(hangulToRomanSearch(value));
+    const plain = stripSearchGeneric(raw);
+    const romanPlain = stripSearchGeneric(roman);
+    return [...new Set([raw, compactSearchText(raw), roman, compactSearchText(roman), ...[plain, compactSearchText(plain), romanPlain, compactSearchText(romanPlain)].filter(item => item && item.length >= 4), ...shortBrandAliases(plain), ...shortBrandAliases(romanPlain)]
+      .filter(item => item && item.length >= 2))];
+  }
+
+  function strongSearchAliases(value = "") {
+    const raw = normalizeSearchText(value);
+    const roman = normalizeSearchText(hangulToRomanSearch(value));
+    return [...new Set([raw, compactSearchText(raw), roman, compactSearchText(roman)]
+      .filter(item => item && item.length >= 3))];
+  }
+
+  function canUseShortBrandFallback(query = "") {
+    const compacted = compactSearchText(normalizeSearchText(query));
+    return /^[a-z0-9]{2,4}$/.test(compacted);
+  }
+
+  function matchesSearchText(haystack, query) {
+    const value = String(query || "").trim();
+    const needles = searchAliases(value).filter(item => item.length >= 2);
+    if (!needles.length) return true;
+    const hay = searchAliases(haystack).join(" ");
+    const strongNeedles = strongSearchAliases(value);
+    if (strongNeedles.some(needle => hay.includes(needle))) return true;
+    if (strongNeedles.length && !canUseShortBrandFallback(value)) return false;
+    return needles.some(needle => hay.includes(needle));
+  }
+
+  function entrySearchText(entry) {
+    return [entry.name, entry.slug, entry.createdBy, entry.fraudType, entry.createdAt, entry.updatedAt]
+      .filter(Boolean)
+      .join(" ");
+  }
 
   Promise.all([
     fetch('/api/get-cases').then(r => r.json()).catch(() => ({ ok: false })),
@@ -125,6 +221,8 @@
         updatedAt: c.updatedAt || '',
         memo: c.memo || false,
         noindex: c.noindex || false,
+        hideFromListing: c.hideFromListing || false,
+        searchHidden: c.searchHidden || c.hideFromListing || false,
         createdBy: c.createdBy || '',
         fraudType: c.fraudType || c.scamType || '',
       })),
@@ -184,7 +282,9 @@
       const isPl = e.type === 'pl';
       const typeBadge = renderTypeCell(e);
       const noindexBadge = (!isPl && e.noindex) ? '<span class="noindex-badge">NOINDEX</span>' : '';
-      const nameCell = `<div class="name-cell"><strong>${esc(e.name)}${noindexBadge}</strong><span class="slug">${esc(e.slug)}</span></div>`;
+      const hidden = !isPl && (e.searchHidden || e.hideFromListing);
+      const hiddenBadge = hidden ? '<span class="search-hidden-badge">검색숨김</span>' : '';
+      const nameCell = `<div class="name-cell"><strong>${esc(e.name)}${noindexBadge}${hiddenBadge}</strong><span class="slug">${esc(e.slug)}</span></div>`;
 
       let actions;
       if (isPl) {
@@ -198,15 +298,20 @@
           (d.label !== 'C'  || e.createdBy === 'recovery-manual' || e.createdBy === 'jipjeong-manual') &&
           (d.label !== 'lA' || e.createdBy === 'voicephishing-manual') &&
           (d.label !== 'lC' || e.createdBy === 'tujasagi-manual') &&
+          (d.label !== 'lD' || e.createdBy === 'readingroom-manual') &&
           (d.label !== 'lE' || e.createdBy === 'chaemubu-manual')
         ).map(d => `<a href="${d.url}/${d.prefix}/${encodeURIComponent(e.slug)}-${domainSuffix(d.label)}/" target="_blank">${d.label}</a>`).join('');
         const niLabel = e.noindex ? 'noindex 해제' : 'noindex';
         const niStyle = e.noindex ? 'background:#8a96a8' : 'background:#c0392b';
+        const hiddenLabel = hidden ? '검색 숨김 해제' : '검색 숨김';
+        const hiddenStyle = hidden ? 'background:#8a96a8' : 'background:#5b43d6';
         actions = `
           <a href="/admin/edit.html?slug=${encodeURIComponent(e.slug)}">편집</a>
+          <button class="btn sm" style="background:#1f4fd8;color:#fff" onclick="editLandingTitle('${encodeURIComponent(e.slug)}')">제목 수정</button>
           <a href="#" onclick="setThumbnail('${esc(e.slug)}');return false;">썸네일</a>
           ${domainLinks}
           <button class="btn sm" style="${niStyle};color:#fff" onclick="toggleNoindex('${esc(e.slug)}',${e.noindex})">${niLabel}</button>
+          <button class="btn sm" style="${hiddenStyle};color:#fff" onclick="toggleSearchHidden('${encodeURIComponent(e.slug)}',${hidden})">${hiddenLabel}</button>
           <button class="btn danger sm" onclick="deleteCase('${esc(e.slug)}','${esc(e.name)}')">삭제</button>`;
       }
 
@@ -252,9 +357,9 @@
 
   function filterEntries() {
     currentPage = 1;
-    const q = document.getElementById('mainSearch').value.trim().toLowerCase();
+    const q = document.getElementById('mainSearch').value.trim();
     filteredEntries = q
-      ? allEntries.filter(e => e.name.toLowerCase().includes(q) || e.slug.toLowerCase().includes(q))
+      ? allEntries.filter(e => matchesSearchText(entrySearchText(e), q))
       : allEntries;
     renderEntries(filteredEntries);
   }
@@ -348,6 +453,28 @@
     finally { btn.disabled = false; btn.textContent = '템플릿 일괄 적용'; }
   }
 
+  async function editLandingTitle(encodedSlug) {
+    const slug = decodeURIComponent(encodedSlug);
+    const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
+    const currentTitle = entry ? entry.name : '';
+    const nextTitle = prompt('새 랜딩페이지 제목을 입력하세요:', currentTitle);
+    if (nextTitle === null) return;
+    const value = nextTitle.trim();
+    if (!value) { alert('제목은 비울 수 없습니다.'); return; }
+    try {
+      const res = await fetch('/api/update-case', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug, action:'update-title', value}) });
+      const data = await res.json();
+      if (data.ok) {
+        if (entry) {
+          entry.name = (data.updatedCase && data.updatedCase.caseName) || value;
+          entry.updatedAt = (data.updatedCase && data.updatedCase.updatedAt) || entry.updatedAt;
+        }
+        filterEntries();
+        alert('랜딩페이지 제목이 저장되었습니다.');
+      } else { alert('실패: ' + (data.message || '')); }
+    } catch (e) { alert('오류: ' + e.message); }
+  }
+
   async function toggleNoindex(slug, currentValue) {
     const newValue = !currentValue;
     const label = newValue ? 'noindex로 설정' : 'noindex 해제';
@@ -358,6 +485,28 @@
       if (data.ok) {
         const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
         if (entry) entry.noindex = newValue;
+        filterEntries();
+      } else { alert('실패: ' + (data.message || '')); }
+    } catch (e) { alert('오류: ' + e.message); }
+  }
+
+  async function toggleSearchHidden(encodedSlug, currentValue) {
+    const slug = decodeURIComponent(encodedSlug);
+    const newValue = !currentValue;
+    const label = newValue ? '검색 숨김' : '검색 숨김 해제';
+    if (!confirm(`"${slug}" 페이지를 ${label}하시겠습니까?\n\n검색 숨김 상태에서는 홈, 오늘 추가/갱신된 목록, 사이트맵, RSS에서 제외되고 페이지에는 noindex가 적용됩니다.`)) return;
+    try {
+      const res = await fetch('/api/update-case', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug, action:'set-search-hidden', value:newValue}) });
+      const data = await res.json();
+      if (data.ok) {
+        const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
+        const updated = data.updatedCase || {};
+        if (entry) {
+          entry.searchHidden = typeof updated.searchHidden === 'boolean' ? updated.searchHidden : newValue;
+          entry.hideFromListing = typeof updated.hideFromListing === 'boolean' ? updated.hideFromListing : newValue;
+          entry.noindex = typeof updated.noindex === 'boolean' ? updated.noindex : newValue;
+          entry.updatedAt = updated.updatedAt || entry.updatedAt;
+        }
         filterEntries();
       } else { alert('실패: ' + (data.message || '')); }
     } catch (e) { alert('오류: ' + e.message); }

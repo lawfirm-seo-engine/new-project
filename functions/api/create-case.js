@@ -1,8 +1,17 @@
 import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl } from "../_seo.js";
 import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
 import { normalizeFraudTypeKey } from "../_standardLanding.js";
+import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
+import { classifyLdCategory } from "../_readingroomCategory.js";
+import {
+  buildFromTemplate as buildReadingroomBodyFromTemplate,
+  generateReadingroomMeta,
+  hasReadingroomSignal,
+  parseReadingroomTitleParts,
+} from "../_readingroomTemplate.js";
 
 const DEFAULT_CATEGORY = "형사대응";
+const LD_GROUP = GROUPS.find((group) => (group.landingKey || group.key) === "ld");
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -31,6 +40,7 @@ export async function onRequestPost(context) {
     }
 
     const now = today();
+    const autoLdLanding = buildAutoLdLanding({ caseName, slug, summary, tags });
     const newCase = {
       slug,
       caseName,
@@ -42,7 +52,8 @@ export async function onRequestPost(context) {
       summary,
       tags,
       fraudType,
-      landings,
+      landings: autoLdLanding ? { ...landings, ld: autoLdLanding.landing } : landings,
+      ...(autoLdLanding ? { hasReadingroomLanding: true, ldCategory: autoLdLanding.ldCategory } : {}),
     };
 
     if (env.CASES) {
@@ -70,9 +81,9 @@ export async function onRequestPost(context) {
       const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
       // warmLandingCaches 완료 후 pingIndexNow — Naver가 크롤할 때 og:image가 CDN에 캐시된 상태 보장
       context.waitUntil?.(
-        warmLandingCaches(slug)
+        warmLandingCaches(slug, Boolean(autoLdLanding))
           .catch(() => {})
-          .then(() => pingIndexNow(slug, indexNowKey).catch(() => {})),
+          .then(() => pingIndexNow(slug, indexNowKey, Boolean(autoLdLanding)).catch(() => {})),
       );
 
       return json({
@@ -202,12 +213,32 @@ function buildIndexEntry(c) {
   if (c.listingUrl) entry.listingUrl = c.listingUrl;
   if (c.hideFromListing) entry.hideFromListing = true;
   if (c.searchHidden) entry.searchHidden = true;
+  if (c.hasReadingroomLanding) {
+    entry.hasReadingroomLanding = true;
+    if (c.ldCategory) entry.ldCategory = c.ldCategory;
+    if (c.landings?.ld) {
+      entry.landings = {
+        ld: {
+          createdBy: c.landings.ld.createdBy || "readingroom-manual",
+          title: c.landings.ld.title || c.caseName || "",
+          h1: c.landings.ld.h1 || c.landings.ld.title || c.caseName || "",
+          description: c.landings.ld.description || c.summary || "",
+          canonical: c.landings.ld.canonical || "",
+        },
+      };
+    }
+  }
   return entry;
 }
 
-async function warmLandingCaches(slug) {
+function targetIndexGroups(includeLd) {
+  const keys = includeLd ? ["a", "ld"] : ["a"];
+  return GROUPS.filter((g) => keys.includes(g.landingKey || g.key));
+}
+
+async function warmLandingCaches(slug, includeLd = false) {
   await Promise.allSettled(
-    GROUPS.filter((g) => (g.landingKey || g.key) === "a").flatMap((group) => [
+    targetIndexGroups(includeLd).flatMap((group) => [
       fetch(caseOgImageUrl(slug, group.siteUrl, "png"), { method: "GET" }),
       fetch(caseOgImageUrl(slug, group.siteUrl, "webp"), { method: "GET" }),
       fetch(buildLandingUrl(group, slug), { method: "GET" }),
@@ -215,9 +246,9 @@ async function warmLandingCaches(slug) {
   );
 }
 
-async function pingIndexNow(slug, key) {
+async function pingIndexNow(slug, key, includeLd = false) {
   const results = await Promise.allSettled(
-    GROUPS.filter((g) => (g.landingKey || g.key) === "a").map(async (group) => {
+    targetIndexGroups(includeLd).map(async (group) => {
       const host = group.host || new URL(group.siteUrl).host;
       const urlList = [buildLandingUrl(group, slug), `${group.siteUrl}/`];
       const response = await fetch("https://searchadvisor.naver.com/indexnow", {
@@ -242,6 +273,40 @@ async function pingIndexNow(slug, key) {
   ))));
 
   return results;
+}
+
+// 리딩방 신호가 있는 신규 케이스는 ld(리딩방피해회수센터.kr) 랜딩을 함께 생성한다.
+// 기존 create-readingroom-landing.js와 동일한 본문 템플릿을 재사용해 콘텐츠 구조를 일치시킨다.
+function buildAutoLdLanding({ caseName, slug, summary, tags }) {
+  if (!LD_GROUP) return null;
+  if (!hasReadingroomSignal({ caseName, tags, memo: "" })) return null;
+
+  const title = `${caseName} 출금거부 피해금 회수 대응`;
+  const { caseKeyword, channelType } = parseReadingroomTitleParts(title);
+  const body = appendStockReadingroomCta(buildReadingroomBodyFromTemplate(title, caseKeyword, channelType));
+  const meta = generateReadingroomMeta(caseKeyword, channelType);
+  const ldCategory = classifyLdCategory([caseName, summary, ...(tags || [])].filter(Boolean).join(" "));
+
+  const landing = {
+    title,
+    description: meta.summary,
+    canonical: buildLandingUrl(LD_GROUP, slug),
+    ogTitle: title,
+    ogDescription: meta.summary,
+    ogImage: caseOgImageUrl(slug, LD_GROUP.siteUrl, "png"),
+    h1: title,
+    imageAlt: meta.imageAlt,
+    imageCaption: meta.imageCaption,
+    imageDescription: meta.imageDescription,
+    body,
+    victimCases: [],
+    suspiciousCompanies: [],
+    faq: [],
+    createdBy: "readingroom-manual",
+    targetGroups: ["ld"],
+  };
+
+  return { landing, ldCategory };
 }
 
 function hasRequiredLandingData(landings) {

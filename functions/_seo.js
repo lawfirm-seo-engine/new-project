@@ -120,7 +120,7 @@ export function getLanding(item = {}, group = {}) {
   return item.landings?.[landingKey] || item.landings?.[group.key] || {};
 }
 
-function hasReadingroomLanding(item = {}) {
+export function hasReadingroomLanding(item = {}) {
   return item.hasReadingroomLanding === true ||
     item.createdBy === "readingroom-manual" ||
     item.landings?.ld?.createdBy === "readingroom-manual";
