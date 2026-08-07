@@ -1,4 +1,5 @@
 import { caseOgImageUrl } from "../_seo.js";
+import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
 import { compareCaseIdentity } from "../_searchNormalize.js";
 import {
   normalizeFraudTypeKey,
@@ -158,7 +159,7 @@ export async function onRequestPost(context) {
 async function loadCases(env) {
   if (env.CASES) {
     const raw = await env.CASES.get("cases:index");
-    if (raw) return JSON.parse(raw);
+    if (raw) return mergeIndexRepairCases(env, JSON.parse(raw));
   }
 
   const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
@@ -172,7 +173,7 @@ async function loadCases(env) {
 
   const file = await res.json();
   const raw = await readFileContent(file, token);
-  return raw ? JSON.parse(raw) : [];
+  return mergeIndexRepairCases(env, raw ? JSON.parse(raw) : []);
 }
 
 async function createGeneratedData({ caseName, slug, fraudType, duplicateCheck, env }) {
@@ -810,7 +811,7 @@ function findDuplicateRisks(caseName, slug, cases) {
     .slice(0, 5);
 
   return {
-    block: matches.some((item) => item.exactSlug || item.exactAlias || item.brandOverlap || item.score >= 0.9),
+    block: matches.some((item) => item.exactSlug || item.exactAlias || item.score >= 0.9),
     warn: matches.some((item) => item.containsAlias || item.brandOverlap || item.score >= 0.7),
     matches,
   };

@@ -1,4 +1,5 @@
 import { boardPostCaseEntry, listBoardPosts } from "../_board.js";
+import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
 
 export async function onRequestGet(context) {
   const { env } = context;
@@ -8,7 +9,8 @@ export async function onRequestGet(context) {
     if (env.CASES) {
       const idxRaw = await env.CASES.get("cases:index");
       if (idxRaw) {
-        const cases = await mergeBoardPosts(env, JSON.parse(idxRaw));
+        const repaired = await mergeIndexRepairCases(env, JSON.parse(idxRaw));
+        const cases = await mergeBoardPosts(env, repaired);
         return json({ ok: true, cases, source: "kv" });
       }
     }
@@ -26,7 +28,8 @@ export async function onRequestGet(context) {
 
     const file = await res.json();
     const raw = await readFileContent(file, token);
-    const cases = await mergeBoardPosts(env, raw ? JSON.parse(raw) : []);
+    const repaired = await mergeIndexRepairCases(env, raw ? JSON.parse(raw) : []);
+    const cases = await mergeBoardPosts(env, repaired);
     return json({ ok: true, cases, source: "github" });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);

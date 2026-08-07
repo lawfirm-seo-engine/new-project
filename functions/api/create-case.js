@@ -1,4 +1,5 @@
 import { GROUPS, INDEXNOW_KEY, buildLandingUrl, caseOgImageUrl } from "../_seo.js";
+import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
 import { compareCaseIdentity } from "../_searchNormalize.js";
 import { normalizeFraudTypeKey } from "../_standardLanding.js";
 
@@ -52,7 +53,7 @@ export async function onRequestPost(context) {
       }
 
       const idxRaw = await env.CASES.get("cases:index");
-      const idx = idxRaw ? JSON.parse(idxRaw) : [];
+      const idx = await mergeIndexRepairCases(env, idxRaw ? JSON.parse(idxRaw) : []);
       const similarCase = findTooSimilarCase({ caseName, slug, cases: idx });
 
       if (similarCase) {
@@ -181,7 +182,7 @@ async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
   if (!env.CASES) return;
   const idxRaw = await env.CASES.get("cases:index");
   if (!idxRaw) return;
-  const full = JSON.parse(idxRaw).filter((e) => e.slug);
+  const full = (await mergeIndexRepairCases(env, JSON.parse(idxRaw))).filter((e) => e.slug);
   full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
 
   const filePath = "data/cases.json";
@@ -291,7 +292,7 @@ function findTooSimilarCase({ caseName, slug, cases }) {
     const existingSlug = String(item.slug || "");
     const identity = compareCaseIdentity(incoming, item);
 
-    if (identity.exactSlug || identity.exactAlias || identity.brandOverlap || identity.score >= 0.9) {
+    if (identity.exactSlug || identity.exactAlias || identity.score >= 0.9) {
       return {
         slug: existingSlug,
         caseName: existingName,
