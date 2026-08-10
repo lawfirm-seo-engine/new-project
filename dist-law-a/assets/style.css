@@ -1437,7 +1437,19 @@ button{
 }
 
 .law-compare-table.cols-4 div{
-  grid-template-columns:0.9fr 1.15fr 1.15fr 1.15fr;
+  grid-template-columns:64px 1fr 1fr 1fr;
+}
+
+.law-compare-table.cols-4 span{
+  padding:13px 12px;
+  font-size:12.5px;
+  line-height:1.5;
+}
+
+.law-compare-table.cols-4 span:first-child{
+  padding-left:8px;
+  padding-right:6px;
+  word-break:keep-all;
 }
 
 .law-compare-table div:first-child{
@@ -1467,6 +1479,19 @@ button{
 .law-compare-table div:not(.is-head) span:last-child{
   color:rgba(255,255,255,.9);
   background:color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* cols-4(리딩방 대응 방식 비교)는 마지막 열이 아니라 2번째 열("선린의 대응 방식")이 권장안이므로
+   강조 배경을 2번째 열로 옮긴다 */
+.law-compare-table.cols-4 div:not(.is-head) span:last-child{
+  background:none;
+  color:rgba(255,255,255,.72);
+}
+
+.law-compare-table.cols-4 div:not(.is-head) span:nth-child(2){
+  color:rgba(255,255,255,.95);
+  background:color-mix(in srgb, var(--accent) 14%, transparent);
+  font-weight:700;
 }
 
 .aeo-summary{
@@ -1985,8 +2010,49 @@ button{
     min-width:680px;
   }
 
-  .law-compare-table.cols-4 div{
-    min-width:840px;
+  /* cols-4(리딩방 대응 방식 비교)는 문장이 길어 4열 스크롤 대신 세로 스택 레이아웃으로 전환 —
+     화면 폭과 무관하게 스크롤 없이 한 화면에 들어오게 한다 */
+  .law-compare-table.cols-4{
+    overflow-x:visible;
+  }
+
+  .law-compare-table.cols-4 .is-head{
+    display:none;
+  }
+
+  .law-compare-table.cols-4 div:not(.is-head){
+    display:block;
+    min-width:0;
+    padding:14px 16px;
+  }
+
+  .law-compare-table.cols-4 div:not(.is-head):nth-child(2){
+    border-top:0;
+  }
+
+  .law-compare-table.cols-4 div:not(.is-head) span{
+    display:block;
+    border-left:0;
+    padding:5px 0;
+    font-size:13px;
+  }
+
+  .law-compare-table.cols-4 div:not(.is-head) span:first-child{
+    font-size:13px;
+    font-weight:950;
+    color:var(--accent);
+    padding:0 0 6px;
+  }
+
+  .law-compare-table.cols-4 div:not(.is-head) span[data-label]::before{
+    content:attr(data-label) " · ";
+    color:rgba(255,255,255,.5);
+    font-weight:900;
+  }
+
+  .law-compare-table.cols-4 div:not(.is-head) span:nth-child(2){
+    background:none;
+    padding:5px 0;
   }
 
   .footer-inner{

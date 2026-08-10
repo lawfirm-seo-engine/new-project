@@ -2435,7 +2435,14 @@ function createLawAuthoritySections(key, caseData) {
     <h2>${esc(config.compareTitle)}</h2>
   </div>
   <div class="law-compare-table${config.compare[0]?.length === 4 ? " cols-4" : ""}" role="table">
-    ${config.compare.map((row, index) => `<div class="${index === 0 ? "is-head" : ""}" role="row">${row.map((cell) => `<span role="cell">${esc(cell)}</span>`).join("")}</div>`).join("\n    ")}
+    ${config.compare.map((row, index) => {
+      const isHead = index === 0;
+      const headRow = config.compare[0] || [];
+      const cells = row.map((cell, ci) => (
+        `<span role="cell"${!isHead && ci > 0 ? ` data-label="${esc(headRow[ci] || "")}"` : ""}>${esc(cell)}</span>`
+      )).join("");
+      return `<div class="${isHead ? "is-head" : ""}" role="row">${cells}</div>`;
+    }).join("\n    ")}
   </div>
 </section>`;
 }
