@@ -84284,7 +84284,10 @@
     },
     "targetGroups": [],
     "thumbnailUrl": "",
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "megan-farrell",
@@ -93285,10 +93288,10 @@
   },
   {
     "slug": "eobanbiona",
-    "caseName": "어반비오나 사칭 사기",
+    "caseName": "어반 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-04",
-    "updatedAt": "2026-08-04",
+    "updatedAt": "2026-08-10",
     "thumbnailUrl": "",
     "landingViews": 3919,
     "reports": 6,
