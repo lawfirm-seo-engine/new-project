@@ -276,12 +276,12 @@ const groups = [
     bodyClass: "domain-d domain-ld",
     siteName: "주식리딩방사기 센터",
     shortName: "주식리딩방사기 센터",
-    label: "주식리딩방사기",
+    label: "리딩방 피해회복",
     intent: "주식 리딩방 · 코인 리딩방 · 출금거부 · 피해금 회수",
     ogType: "article",
-    titleSuffix: "주식리딩방사기 피해 회수",
+    titleSuffix: "리딩방 피해회복",
     descriptionSuffix: "주식 리딩방 사기와 코인 리딩방 피해, 출금거부, 추가입금 요구, 계좌·지갑 추적과 민형사 대응 절차를 정리합니다.",
-    ogSuffix: "주식리딩방사기 피해 회수",
+    ogSuffix: "리딩방 피해회복",
     hubTitle: "주식리딩방사기 센터",
     hubLead: "주식·코인 리딩방 피해자가 출금거부, 추가입금 요구, 가짜 거래소·HTS 정황을 빠르게 확인하고 민형사 회수 절차를 검토할 수 있도록 사건별 정보를 정리합니다.",
     tone: "리딩방 피해 회수 브리핑",
@@ -1472,7 +1472,7 @@ function breadcrumbLabel(groupOrKey) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "주식리딩방사기",
+    ld: "리딩방 피해회복",
     le: "진행현황",
   }[key] || "사건현황";
 }
@@ -1501,7 +1501,7 @@ const HUB_SUFFIX = {
   la: "법적조치",
   lb: "피해회복",
   lc: "해결사례",
-  ld: "주식리딩방사기",
+  ld: "리딩방 피해회복",
   le: "진행현황",
 };
 

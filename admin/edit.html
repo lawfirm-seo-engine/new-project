@@ -114,12 +114,16 @@
     { key: 'e',  label: 'E 전체허브' },
     { key: 'la', label: 'lA 보이스피싱' },
     { key: 'lc', label: 'lC 투자사기' },
+    { key: 'ld', label: 'lD 리딩방' },
     { key: 'le', label: 'lE 채무부존재소송' },
   ];
   const FIELDS = [
     { key: 'h1',           label: 'H1 제목',                        multi: false },
     { key: 'title',        label: '페이지 제목 (title/ogTitle)',       multi: false },
     { key: 'description',  label: '메타 설명 (description/ogDesc)',   multi: false },
+    { key: 'imageAlt',     label: '이미지 Alt',                      multi: false },
+    { key: 'imageCaption', label: '이미지 Caption',                  multi: false },
+    { key: 'imageDescription', label: '이미지 Description',           multi: false },
     { key: 'body',         label: '본문 / H2 제목 (## 제목 줄로 수정)', multi: true  },
     { key: 'victimCases',  label: '피해 사례 (줄바꿈으로 항목 구분)',    multi: true  },
   ];
@@ -168,6 +172,7 @@
     const targetGroups = Array.isArray(item?.targetGroups) ? item.targetGroups : [];
     if (item?.createdBy === 'voicephishing-manual' || targetGroups.includes('la')) return 'la';
     if (item?.createdBy === 'tujasagi-manual' || targetGroups.includes('lc')) return 'lc';
+    if (item?.createdBy === 'readingroom-manual' || targetGroups.includes('ld')) return 'ld';
     if (item?.createdBy === 'chaemubu-manual' || targetGroups.includes('le')) return 'le';
     if (item?.createdBy === 'recovery-manual' || item?.createdBy === 'jipjeong-manual' || targetGroups.includes('c')) return 'c';
     return 'a';

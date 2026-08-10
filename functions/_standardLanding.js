@@ -64,6 +64,15 @@ export function fraudTypeLabel(typeKey = "") {
   return FRAUD_TYPE_OPTIONS.find((item) => item.key === typeKey)?.label || FRAUD_TYPE_OPTIONS[0].label;
 }
 
+export function standardReadingRoomReferralFaq(typeKey = "") {
+  const key = normalizeFraudTypeKey(typeKey);
+  if (!["stock-project", "institution-exchange"].includes(key)) return null;
+  return {
+    question: "주식리딩방 사기 피해를 입으셨다면 바로 확인해보세요.",
+    answer: "https://gnlaw-criminal.co.kr/prosecute/jusigridingbang-litigation/",
+  };
+}
+
 export function standardHeroText(typeKey = "") {
   const copy = {
     "stock-project": "교수, 대표, 증권사 이사, 자산운용사 관계자, 애널리스트 등을 사칭하며 접근한 뒤 무료 종목 추천, VIP 투자방, 공모주 특별배정, 기관계좌 운용, AI 투자 시스템, 고수익 프로젝트 등을 제안 받았는지 점검하기 바랍니다.",

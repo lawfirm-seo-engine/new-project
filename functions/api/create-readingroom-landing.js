@@ -18,13 +18,24 @@ const LD_SITE_URL = "https://리딩방피해회수센터.kr";
 const LD_GROUP = GROUPS.find((group) => group.host === LD_HOST);
 const TARGET_GROUPS = ["ld"];
 const CREATED_BY = "readingroom-manual";
+const READINGROOM_TYPE_TITLE_RULES = {
+  "stock-reading-room": { suffix: "사칭 사기 주식·투자 리딩방 피해회복 안내", label: "주식리딩방사기", ldCategory: "stock-reading" },
+  "stock-reading": { suffix: "사칭 사기 주식·투자 리딩방 피해회복 안내", label: "주식리딩방사기", ldCategory: "stock-reading" },
+  "coin-reading-room": { suffix: "사칭 사기 코인리딩방 피해회복 안내", label: "코인리딩방사기", ldCategory: "coin-reading" },
+  "coin-reading": { suffix: "사칭 사기 코인리딩방 피해회복 안내", label: "코인리딩방사기", ldCategory: "coin-reading" },
+  "platform-impersonation": { suffix: "사칭 사기 리딩방 피해회복 안내", label: "증권사·투자사·플랫폼 사칭 사기", ldCategory: "institution-impersonation" },
+  "institution-impersonation": { suffix: "사칭 사기 리딩방 피해회복 안내", label: "증권사·투자사·플랫폼 사칭 사기", ldCategory: "institution-impersonation" },
+  "trading-app": { suffix: "사칭 사기 리딩방 피해회복 안내", label: "HTS·MTS·어플", ldCategory: "hts-mts-app" },
+  "hts-mts-app": { suffix: "사칭 사기 리딩방 피해회복 안내", label: "HTS·MTS·어플", ldCategory: "hts-mts-app" },
+};
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
     const body = await request.json();
-    const title = normalizeSpace(body.title);
+    const requestedTitle = buildRequestedReadingroomTitle(body.caseName || body.subject, body.type || body.readingRoomType);
+    const title = requestedTitle || normalizeSpace(body.title);
     const slug = normalizeSlug(body.slug || title);
     const isPreview = body.preview === true;
 
@@ -36,10 +47,22 @@ export async function onRequestPost(context) {
     const generatedBody = appendStockReadingroomCta(buildReadingroomBodyFromTemplate(title, caseKeyword, channelType));
     const generatedMeta = generateReadingroomMeta(caseKeyword, channelType);
     const suggestedLdCategory = classifyLdCategory(`${title} ${subject}`);
-    const ldCategory = isValidLdCategoryKey(body.ldCategory) ? body.ldCategory : suggestedLdCategory;
+    const requestedLdCategory = readingroomTypeRule(body.type || body.readingRoomType)?.ldCategory;
+    const ldCategory = isValidLdCategoryKey(body.ldCategory)
+      ? body.ldCategory
+      : (requestedLdCategory || suggestedLdCategory);
 
     if (isPreview) {
-      return json({ ok: true, body: generatedBody, subject, caseKeyword, channelType, suggestedLdCategory });
+      return json({
+        ok: true,
+        body: generatedBody,
+        title,
+        subject,
+        caseKeyword,
+        channelType,
+        suggestedLdCategory: ldCategory,
+        typeLabel: readingroomTypeRule(body.type || body.readingRoomType)?.label || channelType,
+      });
     }
 
     const rawBody = body.body;
@@ -128,6 +151,27 @@ export async function onRequestPost(context) {
   }
 }
 
+
+function buildRequestedReadingroomTitle(subjectValue = "", typeValue = "") {
+  const subject = cleanReadingroomSubject(subjectValue);
+  const rule = readingroomTypeRule(typeValue);
+  if (!subject || !rule) return "";
+  return `${subject} ${rule.suffix}`.replace(/\s+/g, " ").trim();
+}
+
+function readingroomTypeRule(value = "") {
+  const key = String(value || "").trim();
+  return READINGROOM_TYPE_TITLE_RULES[key] || null;
+}
+
+function cleanReadingroomSubject(value = "") {
+  return normalizeSpace(value)
+    .replace(/\s*(?:사칭\s*사기\s*)?(?:주식[·ㆍ]?투자\s*)?리딩방\s*피해회복\s*안내\s*$/i, "")
+    .replace(/\s*(?:사칭\s*사기\s*)?코인리딩방\s*피해회복\s*안내\s*$/i, "")
+    .replace(/\s*사칭\s*사기\s*리딩방\s*피해회복\s*안내\s*$/i, "")
+    .replace(/\s*(?:사칭\s*사기|사칭|사기)\s*$/i, "")
+    .trim();
+}
 
 async function loadExisting(env, slug) {
   if (env.CASES) {

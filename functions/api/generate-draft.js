@@ -9,6 +9,7 @@ import {
   standardMetaDescription,
   standardMethodTemplate,
   standardPageTitle,
+  standardReadingRoomReferralFaq,
   standardResponseSections,
 } from "../_standardLanding.js";
 
@@ -88,12 +89,12 @@ const GROUPS = [
   },
   {
     key: "ld",
-    label: "AI 금융사기 브리핑형",
+    label: "리딩방 피해회복형",
     siteUrl: "https://리딩방피해회수센터.kr",
     pathPrefix: "insights",
-    suffix: "AI 금융사기 브리핑 분석",
-    intent: "AI 분석, 금융사기 패턴, 즉시 대응, 증거 보존",
-    primaryKeywords: ["AI 브리핑", "금융사기", "사기 패턴", "즉시 대응", "증거 보존"],
+    suffix: "주식리딩방 사기 피해회복 안내",
+    intent: "주식리딩방사기, 리딩방 사칭 사기, 피해회복, 증거 보존",
+    primaryKeywords: ["주식리딩방사기", "리딩방 사칭 사기", "피해회복", "지급정지", "증거 보존"],
   },
   {
     key: "le",
@@ -214,7 +215,7 @@ function createLandingData({ caseName, slug, fraudType, group, templates = {} })
     la: `금융피해 신고 절차, 형사고소, 계좌 추적, 지급정지 방법을 금융피해 사례 기준으로 정리합니다.`,
     lb: `피해금 회수 전략, 민사소송, 가압류, 부당이득반환 절차와 단계별 회수 경로를 정리합니다.`,
     lc: `실제 회수 사례 아카이브에서 유사 사건의 대응 흐름, 회수 결과, 증거 활용 방식을 비교합니다.`,
-    ld: `AI 분석 기반 금융사기 패턴, 즉시 대응 방법, 증거 보존 순서를 브리핑 형식으로 정리합니다.`,
+    ld: `주식리딩방사기와 리딩방 사칭 사기의 초대 경로, 출금 제한, 추가 입금 요구, 피해회복 검토 순서를 정리합니다.`,
     le: `금융사기 사건 허브에서 형사, 민사, 사례, AI 브리핑을 사건별로 연결하고 대응 경로를 통합합니다.`,
   };
   const description = descByType[group.key] || `${group.intent} 관련 피해 구조와 대응 절차를 정리합니다.`;
@@ -275,7 +276,9 @@ function createStandardLandingData({ caseName, slug, fraudType, group }) {
     ...method.steps,
     ...responseTexts,
   ];
-  const faq = makeFaq({ caseName, base: standardCaseKeyword(caseName), group }).slice(0, 6);
+  const baseFaq = makeFaq({ caseName, base: standardCaseKeyword(caseName), group });
+  const referralFaq = standardReadingRoomReferralFaq(fraudType);
+  const faq = referralFaq ? [...baseFaq.slice(0, 5), referralFaq] : baseFaq.slice(0, 6);
   const landing = {
     title,
     description,
@@ -1042,7 +1045,7 @@ function groupPageTitle(name, groupKey) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "피해정보",
+    ld: "주식리딩방 사기 피해회복 안내",
     le: "진행현황",
   };
   return `${base} ${suffixes[groupKey] || "형사고소"}${secondary ? ` | ${secondary}` : ""}`;
@@ -1059,7 +1062,7 @@ function groupPageH1(name, groupKey) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "피해정보",
+    ld: "주식리딩방 사기 피해회복 안내",
     le: "진행현황",
   };
   return `${base} ${suffixes[groupKey] || "형사고소"}`;

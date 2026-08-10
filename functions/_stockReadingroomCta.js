@@ -10,15 +10,11 @@ const STOCK_READINGROOM_CTA_CREATED_BY = new Set([
 ]);
 
 export function appendStockReadingroomCta(body = []) {
-  const items = normalizeBodyItems(body);
-  if (items.some((item) => item.includes(STOCK_READINGROOM_CTA_URL))) return items;
-  return [...items, STOCK_READINGROOM_CTA_TEXT];
+  return normalizeBodyItems(body).filter((item) => !item.includes(STOCK_READINGROOM_CTA_URL));
 }
 
 export function shouldAppendStockReadingroomCta(item = {}) {
-  if (!item || typeof item !== "object") return false;
-  if (STOCK_READINGROOM_CTA_CREATED_BY.has(item.createdBy)) return true;
-  return item.landings?.ld?.createdBy === "readingroom-manual";
+  return false;
 }
 
 function normalizeBodyItems(body = []) {
