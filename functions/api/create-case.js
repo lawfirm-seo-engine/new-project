@@ -7,6 +7,8 @@ import {
   buildFromTemplate as buildReadingroomBodyFromTemplate,
   generateReadingroomMeta,
   hasReadingroomSignal,
+  ldPageH1,
+  ldPageTitle,
   parseReadingroomTitleParts,
 } from "../_readingroomTemplate.js";
 
@@ -281,21 +283,22 @@ function buildAutoLdLanding({ caseName, slug, summary, tags }) {
   if (!LD_GROUP) return null;
   if (!hasReadingroomSignal({ caseName, tags, memo: "" })) return null;
 
-  const title = `${caseName} 출금거부 피해금 회수 대응`;
-  const { caseKeyword, channelType } = parseReadingroomTitleParts(title);
-  const body = appendStockReadingroomCta(buildReadingroomBodyFromTemplate(title, caseKeyword, channelType));
-  const meta = generateReadingroomMeta(caseKeyword, channelType);
   const ldCategory = classifyLdCategory([caseName, summary, ...(tags || [])].filter(Boolean).join(" "));
+  const pageH1 = ldPageH1(caseName);
+  const pageTitle = ldPageTitle(caseName, ldCategory);
+  const { caseKeyword, channelType } = parseReadingroomTitleParts(pageH1);
+  const body = appendStockReadingroomCta(buildReadingroomBodyFromTemplate(pageH1, caseKeyword, channelType));
+  const meta = generateReadingroomMeta(caseKeyword, channelType);
 
   const landing = {
-    title,
+    title: pageTitle,
     description: meta.summary,
     canonical: buildLandingUrl(LD_GROUP, slug),
-    ogTitle: title,
+    ogTitle: pageTitle,
     ogDescription: meta.summary,
     ogImage: caseOgImageUrl(slug, LD_GROUP.siteUrl, "png"),
-    h1: title,
-    imageAlt: meta.imageAlt,
+    h1: pageH1,
+    imageAlt: pageH1,
     imageCaption: meta.imageCaption,
     imageDescription: meta.imageDescription,
     body,

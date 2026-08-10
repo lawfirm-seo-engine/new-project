@@ -11,7 +11,7 @@ export const TEMPLATE_BODY = [
   `## ${TPL_CASE} 핵심 요약`,
   `${TPL_CASE} 피해가 의심되는 상황이라면 먼저 추가 입금을 멈추고, 리딩방 대화 내용과 입금 내역, 출금 거부 화면을 원본 그대로 보존해야 합니다. ${TPL_CHANNEL} 사건은 단순 투자 손실이 아니라 허위 수익 화면, 바람잡이 계정, 가짜 HTS·거래소, 추가 입금 요구가 결합된 사기 구조인지 확인하는 것이 중요합니다.`,
   `${TPL_CENTER}에서는 ${TPL_CASE} 관련 상담에서 계좌 흐름, 지갑 주소, 대화방 운영자, 출금 조건 변경 시점을 함께 검토해 형사고소와 민사상 피해금 회수 가능성을 나누어 안내합니다.`,
-  `## 네이버 AI 브리핑형 빠른 답변`,
+  `## 상황별 빠른 답변`,
   `### 출금이 막혔을 때 먼저 할 일`,
   `세금, 보증금, 인증비, AML 비용, 지갑 활성화 비용을 먼저 내야 출금된다는 안내를 받았다면 추가 송금 전에 자료를 정리해야 합니다. 정상 투자 서비스에서는 개인 계좌나 지정 계좌로 추가 비용을 반복 송금하라고 요구하는 구조가 일반적이지 않습니다.`,
   `### 계좌·지갑 추적에서 필요한 자료`,
@@ -93,6 +93,31 @@ export function detectChannelType(value = "") {
   if (hasCoin && hasStock) return "주식·코인 리딩방";
   if (hasCoin) return "코인 리딩방";
   return hasStock ? "주식 리딩방" : "주식 리딩방";
+}
+
+// ld(리딩방피해회수센터.kr) 전용 페이지 제목/H1/이미지 제목 생성 — 다른 그룹의 groupPageTitle과 별도로 유지한다.
+// H1/이미지 제목: "사건명 + 사칭 사기" (짧고 명확), <title> 태그: 검색 노출용으로 채널·행동 문구를 덧붙인 긴 버전.
+const LD_TITLE_CHANNEL_SUFFIX = {
+  "stock-reading": "주식 리딩방",
+  "coin-reading": "코인 리딩방",
+  "institution-impersonation": "증권사·투자사 사칭 리딩방",
+  "hts-mts-app": "HTS·MTS 리딩방",
+};
+
+export function ldCleanBaseName(name = "") {
+  const str = String(name || "").trim();
+  const stripped = str.replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
+  return stripped || str;
+}
+
+export function ldPageH1(name = "") {
+  const base = ldCleanBaseName(name);
+  return base ? `${base} 사칭 사기` : "사칭 사기";
+}
+
+export function ldPageTitle(name = "", ldCategory = "") {
+  const channel = LD_TITLE_CHANNEL_SUFFIX[ldCategory] || "주식·코인·투자 리딩방";
+  return `${ldPageH1(name)} ${channel} 피해회복 안내`;
 }
 
 // 신규 케이스(caseName/summary/tags/memo)가 리딩방사기 신호를 담고 있는지 판정한다.

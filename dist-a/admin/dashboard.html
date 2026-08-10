@@ -62,6 +62,9 @@
     <a class="btn" href="/admin/center-board.html">통합 허브 게시글 관리</a>
     <button class="btn sec" onclick="syncKvToGithub()">KV→GitHub 동기화</button>
     <button class="btn sec" onclick="batchApplyTemplates()">템플릿 일괄 적용</button>
+    <button class="btn sec" onclick="backfillReadingroomTags()">리딩방 태그 일괄 반영</button>
+    <button class="btn sec" onclick="regenerateReadingroomLandings()">리딩방 제목 재생성</button>
+    <button class="btn sec" onclick="refreshReadingroomFreshness()">리딩방 신선도 갱신(20건)</button>
     <a class="btn sec" href="/admin/settings.html">텔레그램 설정</a>
     <a class="btn sec" href="/admin/logout">로그아웃</a>
   </div>
@@ -451,6 +454,57 @@
       else alert('실패: ' + (data.message || '알 수 없는 오류'));
     } catch (e) { alert('오류: ' + e.message); }
     finally { btn.disabled = false; btn.textContent = '템플릿 일괄 적용'; }
+  }
+
+  async function backfillReadingroomTags() {
+    const btn = document.querySelector('[onclick="backfillReadingroomTags()"]');
+    btn.disabled = true; btn.textContent = '미리보기 확인 중...';
+    try {
+      const previewRes = await fetch('/api/backfill-readingroom-tags?dry=1', { method:'POST' });
+      const preview = await previewRes.json();
+      if (!preview.ok) { alert('미리보기 실패: ' + (preview.message || '알 수 없는 오류')); return; }
+      if (!confirm(`전체 ${preview.total}건 중 리딩방 신호 매치 ${preview.newlyMatched}건(이미 태깅됨 ${preview.alreadyTagged}건)에\nhasReadingroomLanding을 KV+GitHub에 반영합니다.\n\n계속하시겠습니까?`)) return;
+      btn.textContent = '반영 중...';
+      const res = await fetch('/api/backfill-readingroom-tags', { method:'POST' });
+      const data = await res.json();
+      if (data.ok) alert(`✅ 완료\n전체: ${data.total}건\n이미 태깅됨: ${data.alreadyTagged}건\nKV 반영: ${data.updatedKV}건\nGitHub 반영: ${data.githubUpdated}건` + (data.errors?.length ? `\n오류: ${data.errors.length}건` : ''));
+      else alert('❌ 실패: ' + (data.message || '알 수 없는 오류'));
+    } catch (e) { alert('오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '리딩방 태그 일괄 반영'; }
+  }
+
+  async function regenerateReadingroomLandings() {
+    const btn = document.querySelector('[onclick="regenerateReadingroomLandings()"]');
+    btn.disabled = true; btn.textContent = '미리보기 확인 중...';
+    try {
+      const previewRes = await fetch('/api/regenerate-readingroom-landings?dry=1', { method:'POST' });
+      const preview = await previewRes.json();
+      if (!preview.ok) { alert('미리보기 실패: ' + (preview.message || '알 수 없는 오류')); return; }
+      if (!confirm(`기존 리딩방 랜딩 ${preview.total}건의 제목/H1을 새 패턴으로 재생성하고\n"네이버 AI 브리핑형" 문구를 제거합니다.\n\n계속하시겠습니까?`)) return;
+      btn.textContent = '재생성 중...';
+      const res = await fetch('/api/regenerate-readingroom-landings', { method:'POST' });
+      const data = await res.json();
+      if (data.ok) alert(`✅ 완료\n전체: ${data.total}건\nKV 반영: ${data.updatedKV}건\nGitHub 반영: ${data.githubUpdated}건` + (data.errors?.length ? `\n오류: ${data.errors.length}건` : ''));
+      else alert('❌ 실패: ' + (data.message || '알 수 없는 오류'));
+    } catch (e) { alert('오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '리딩방 제목 재생성'; }
+  }
+
+  async function refreshReadingroomFreshness() {
+    const btn = document.querySelector('[onclick="refreshReadingroomFreshness()"]');
+    btn.disabled = true; btn.textContent = '미리보기 확인 중...';
+    try {
+      const previewRes = await fetch('/api/refresh-readingroom-freshness?count=20&dry=1', { method:'POST' });
+      const preview = await previewRes.json();
+      if (!preview.ok) { alert('미리보기 실패: ' + (preview.message || '알 수 없는 오류')); return; }
+      if (!confirm(`리딩방 케이스 ${preview.eligibleTotal}건 중 가장 오래된 ${preview.willUpdate}건의 updatedAt을 오늘로 갱신합니다.\n(가장 오래된 갱신일: ${preview.oldestUpdatedAt || '-'})\n\n계속하시겠습니까?`)) return;
+      btn.textContent = '갱신 중...';
+      const res = await fetch('/api/refresh-readingroom-freshness?count=20', { method:'POST' });
+      const data = await res.json();
+      if (data.ok) alert(`✅ 완료\n대상: ${data.eligibleTotal}건\nKV 반영: ${data.updatedKV}건\nGitHub 반영: ${data.githubUpdated}건` + (data.errors?.length ? `\n오류: ${data.errors.length}건` : ''));
+      else alert('❌ 실패: ' + (data.message || '알 수 없는 오류'));
+    } catch (e) { alert('오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '리딩방 신선도 갱신(20건)'; }
   }
 
   async function editLandingTitle(encodedSlug) {

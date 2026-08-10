@@ -15,6 +15,7 @@ import {
   landingUrlForItem,
 } from "../functions/_seo.js";
 import { LD_CATEGORY_OPTIONS } from "../functions/_readingroomCategory.js";
+import { ldPageH1, ldPageTitle } from "../functions/_readingroomTemplate.js";
 import {
   normalizeFraudTypeKey,
   standardMetaDescription,
@@ -272,7 +273,7 @@ const groups = [
     siteUrl: "https://리딩방피해회수센터.kr",
     pathPrefix: "insights",
     urlSlugSuffix: "report",
-    bodyClass: "domain-d",
+    bodyClass: "domain-d domain-ld",
     siteName: "주식리딩방사기 센터",
     shortName: "주식리딩방사기 센터",
     label: "주식리딩방사기",
@@ -409,7 +410,7 @@ function makeFallbackFaq(groupKey) {
 function createFallbackLanding(caseItem, group) {
   const caseName = caseItem.caseName || caseItem.name;
   const landingKey = group.landingKey || group.key;
-  const pageTitle = groupPageTitle(caseName, landingKey);
+  const pageTitle = groupPageTitle(caseName, landingKey, caseItem);
   const pageH1 = groupPageH1(caseName, landingKey);
   const dispName = normalizeCaseName(caseName);
   const slug = caseItem.slug;
@@ -1405,7 +1406,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     `<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">`,
     `<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">`,
     ...(group.naverVerification ? (Array.isArray(group.naverVerification) ? group.naverVerification : [group.naverVerification]).map((v) => `<meta name="naver-site-verification" content="${v}">`) : []),
-    `<meta name="theme-color" content="${themeColor(group.key)}">`,
+    `<meta name="theme-color" content="${themeColor(group.landingKey || group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="preload" as="image" href="/assets/og-template.webp">`,
@@ -1456,6 +1457,7 @@ function themeColor(key) {
     c: "#174333",
     d: "#25314d",
     e: "#3b2f52",
+    ld: "#132a4d",
   }[key];
 }
 
@@ -2785,7 +2787,8 @@ function secondaryCaseKeyword(name) {
   return /사칭|피해/.test(tail) ? `${tail} 피해 대응` : `${tail} 사칭 피해 대응`;
 }
 
-function groupPageTitle(name, groupKey) {
+function groupPageTitle(name, groupKey, caseItem = {}) {
+  if (groupKey === "ld") return ldPageTitle(name, caseItem?.ldCategory);
   const base = seoCaseKeyword(name);
   const suffixes = {
     a: "형사고소",
@@ -2796,13 +2799,13 @@ function groupPageTitle(name, groupKey) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "주식·코인·투자 리딩방사기",
     le: "진행현황",
   };
   return joinSeoPhrase(base, suffixes[groupKey] || "형사고소");
 }
 
 function groupPageH1(name, groupKey) {
+  if (groupKey === "ld") return ldPageH1(name);
   return groupPageTitle(name, groupKey);
 }
 

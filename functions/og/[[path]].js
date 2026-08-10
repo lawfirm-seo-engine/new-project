@@ -8,6 +8,9 @@ import { defaultOptions as webpDefaultOptions } from "@jsquash/webp/meta.js";
 import { initEmscriptenModule } from "@jsquash/webp/utils.js";
 import { OG_IMAGE_VERSION } from "../_seo.js";
 import { boardOgText, getBoardPost } from "../_board.js";
+import { ldCategoryLabel } from "../_readingroomCategory.js";
+
+const LD_HOST = "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr";
 
 const FONT_KV_KEY = "og:font:pretendard-black-v1";
 const FONT_CDN_URL =
@@ -211,7 +214,7 @@ function shortTitle(title = "", max = 28) {
   return chars.length > max ? `${chars.slice(0, max).join("")}...` : chars.join("");
 }
 
-function buildSvg(title, templateHref, seed = "") {
+function buildSvg(title, templateHref, seed = "", badge = "") {
   const lines = splitTitle(title);
   const variant = variantForImage(title, seed);
   const topLabel = shortTitle(title);
@@ -251,6 +254,8 @@ function buildSvg(title, templateHref, seed = "") {
 <text x="122" y="101" font-family="Pretendard,sans-serif" font-size="20" font-weight="900" letter-spacing="0" fill="${variant.accent}" text-anchor="middle" dominant-baseline="middle">${variant.code}</text>
 <text x="234" y="77" font-family="Pretendard,sans-serif" font-size="42" font-weight="900" letter-spacing="0" fill="#fff8df" text-anchor="start" dominant-baseline="middle" filter="url(#textShadow)">${escSvg(topLabel)}</text>
 ${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="900" letter-spacing="0" fill="url(#goldText)" stroke="#120800" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" text-rendering="geometricPrecision" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
+${badge ? `<rect x="${1210 - (badge.length * 15 + 40)}" y="37" width="${badge.length * 15 + 40}" height="46" rx="23" fill="#0f2745" opacity="0.92"/>
+<text x="${1210 - (badge.length * 15 + 40) / 2}" y="61" font-family="Pretendard,sans-serif" font-size="22" font-weight="900" letter-spacing="0" fill="#7ec2ff" text-anchor="middle" dominant-baseline="middle">${escSvg(badge)}</text>` : ""}
 </svg>`;
 }
 
@@ -320,7 +325,10 @@ export async function onRequest(context) {
 
   const previewTitle = cleanTitle(url.searchParams.get("t") || "");
   const revision = url.searchParams.get("r") || "";
-  const cacheKey = previewTitle ? "" : `og:img:v${OG_IMAGE_VERSION}:${format}:${rawSlug}:${revision}`;
+  const isLdHost = url.hostname === LD_HOST;
+  // 같은 slug라도 리딩방피해회수센터.kr 요청에는 유형 뱃지가 추가로 그려지므로,
+  // 다른 도메인 요청과 캐시 키를 분리해 뱃지 있는 이미지가 다른 사이트에 잘못 캐시되지 않게 한다.
+  const cacheKey = previewTitle ? "" : `og:img:v${OG_IMAGE_VERSION}:${format}:${rawSlug}:${revision}${isLdHost ? ":ld" : ""}`;
   try {
     const cached = cacheKey ? await env.CASES?.get?.(cacheKey, { type: "arrayBuffer" }) : null;
     if (cached && cached.byteLength > 1000) {
@@ -332,6 +340,7 @@ export async function onRequest(context) {
   } catch (_) {}
 
   let title = previewTitle || humanizeSlug(slug);
+  let ldCategory = "";
   try {
     if (previewTitle) {
       title = previewTitle;
@@ -352,15 +361,18 @@ export async function onRequest(context) {
           data.name ||
           title,
         );
+        ldCategory = data.ldCategory || "";
       }
     }
   } catch (_) {}
+
+  const badge = isLdHost ? (ldCategoryLabel(ldCategory) || "리딩방사기") : "";
 
   try {
     await ensureInit(env);
 
     const templateHref = await getTemplateDataUri(url.origin);
-    const svg = buildSvg(title, templateHref, rawSlug);
+    const svg = buildSvg(title, templateHref, rawSlug, badge);
     const resvg = new Resvg(svg, {
       shapeRendering: 2,
       textRendering: 1,

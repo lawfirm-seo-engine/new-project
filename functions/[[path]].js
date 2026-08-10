@@ -40,6 +40,7 @@ import {
   appendStockReadingroomCta,
   shouldAppendStockReadingroomCta,
 } from "./_stockReadingroomCta.js";
+import { ldPageH1, ldPageTitle } from "./_readingroomTemplate.js";
 import {
   BOARD_HOST,
   BOARD_REFRESHED_AT,
@@ -151,7 +152,7 @@ const GROUPS = {
     siteUrl: "https://사기피해구제센터.kr",
   },
   "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr": {
-    key: "d", pathPrefix: "insights", urlSlugSuffix: "report", bodyClass: "domain-d",
+    key: "d", pathPrefix: "insights", urlSlugSuffix: "report", bodyClass: "domain-d domain-ld",
     landingKey: "ld",
     siteName: "주식리딩방사기 센터", shortName: "주식리딩방사기 센터",
     intent: "주식 리딩방 · 코인 리딩방 · 출금거부 · 피해금 회수", tone: "리딩방 피해 회수 브리핑",
@@ -396,7 +397,7 @@ export async function onRequest(context) {
     return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
   }
 
-  const relatedCases = !isManualLandingForGroup(caseData, group) && isStandardLandingCase(caseData)
+  const relatedCases = (!isManualLandingForGroup(caseData, group) && isStandardLandingCase(caseData)) || (group.landingKey || group.key) === "ld"
     ? await loadSeoCases(env).catch(() => [])
     : [];
   const html = renderLanding(caseData, group, url.origin, relatedCases);
@@ -1282,10 +1283,10 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const useManualTitle = isManualLandingForGroup(caseData, group);
   const useStandardTemplate = !useManualTitle && isStandardLandingCase(caseData) && lk === "a";
   const pageTitle = useManualTitle
-    ? (landing.title || groupPageTitle(rawCaseName, lk))
+    ? (landing.title || groupPageTitle(rawCaseName, lk, caseData))
     : useStandardTemplate
       ? standardPageTitle(rawCaseName)
-      : groupPageTitle(rawCaseName, lk);
+      : groupPageTitle(rawCaseName, lk, caseData);
   const pageH1 = useManualTitle
     ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk))
     : useStandardTemplate
@@ -1313,7 +1314,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     ? standardMetaDescription(rawCaseName)
     : createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
   const articleTags = createArticleTags(rawCaseName, lk);
-  const imageMeta = normalizeLandingImageMeta(landing, pageTitle, seoDescription, caseData);
+  const imageMeta = normalizeLandingImageMeta(landing, pageH1, seoDescription, caseData);
   const imageAlt = imageMeta.alt;
   const imageCaption = imageMeta.caption;
   const imageDescription = imageMeta.description;
@@ -1335,7 +1336,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     `<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">`,
     `<link rel="alternate" hreflang="ko" href="${canonical}">`,
     ...(group.naverVerification ? (Array.isArray(group.naverVerification) ? group.naverVerification : [group.naverVerification]).map((v) => `<meta name="naver-site-verification" content="${v}">`) : []),
-    `<meta name="theme-color" content="${themeColor(group.key)}">`,
+    `<meta name="theme-color" content="${themeColor(group.landingKey || group.key)}">`,
     `<link rel="alternate" type="application/rss+xml" title="${esc(group.siteName)} RSS" href="/rss.xml">`,
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     ...centerFintechHeadLinks(group),
@@ -1535,7 +1536,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     bodyClass: `${group.bodyClass} landing-page`,
     tone: esc(group.tone),
     h1: esc(pageH1),
-    breadcrumb: createHtmlBreadcrumb(group, rawCaseName, pageTitle),
+    breadcrumb: createHtmlBreadcrumb(group, rawCaseName, pageH1),
     ogThumbnail,
     summary: pageSummary,
     heroTyping: useManualTitle ? "" : createHeroTypingBlock(rawCaseName, caseData),
@@ -1594,7 +1595,7 @@ function createFallbackLanding(caseData, group, key) {
     ld: "주식·코인 리딩방 피해, 출금거부, 추가입금 요구, 증거 보존과 피해금 회수 검토 절차를 정리합니다.",
     le: "피해 대응 허브에서 형사, 민사, 사례, 브리핑을 사건별로 연결하고 대응 경로를 통합합니다.",
   };
-  const title = groupPageTitle(caseName, key);
+  const title = groupPageTitle(caseName, key, caseData);
   const description = descriptions[key] || group.descriptionSuffix || "";
 
   return {
@@ -1868,6 +1869,25 @@ function createReadingroomCrossLink(contentKey, caseData) {
   return `<section class="article-block"><p><a href="${url}">주식·투자 리딩방 사기 피해 회수 절차 보기</a></p></section>`;
 }
 
+function createLdRelatedCasesSection(contentKey, caseData, relatedCases = []) {
+  if (contentKey !== "ld" || !LD_CROSSLINK_GROUP) return "";
+  const currentSlug = caseData.slug || "";
+  const myCategory = caseData.ldCategory || "";
+  const pool = (Array.isArray(relatedCases) ? relatedCases : [])
+    .filter((item) => item?.slug && item.slug !== currentSlug && hasReadingroomLanding(item));
+  const sameCategory = myCategory ? pool.filter((item) => item.ldCategory === myCategory) : [];
+  const picks = (sameCategory.length >= 3 ? sameCategory : pool)
+    .sort((a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")))
+    .slice(0, 5);
+  if (!picks.length) return "";
+  const items = picks.map((item) => {
+    const title = esc(ldPageH1(item.caseName || item.slug));
+    const url = esc(buildLandingUrl(LD_CROSSLINK_GROUP, item.slug));
+    return `<li><a href="${url}">${title}</a></li>`;
+  }).join("");
+  return `<section class="article-block related-ld-cases" aria-label="관련 리딩방 사건"><h2>관련 리딩방 사건 더 보기</h2><ul>${items}</ul></section>`;
+}
+
 function createLandingContent(landing, group, caseData, relatedCases = []) {
   const templateContentKey = group.landingKey || group.key;
   if (isStandardLandingCase(caseData) && templateContentKey === "a") {
@@ -1903,6 +1923,7 @@ function createLandingContent(landing, group, caseData, relatedCases = []) {
       _authoritySections,
       `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
       createReadingroomCrossLink(_contentKey, caseData),
+      createLdRelatedCasesSection(_contentKey, caseData, relatedCases),
       createLiveReceiptStatus(caseData),
       createScamTypeSelfAnalysisSection(),
       renderComments(caseData),
@@ -2193,9 +2214,10 @@ function buildLawBody(landing, group, caseData) {
       `지역별 상담 사례를 보면 출금 거부 후 24~72시간 안에 자료를 정리한 사건과 몇 주 뒤 접수한 사건은 계좌 추적 속도에서 차이가 큽니다. 현재 자료가 일부뿐이어도 먼저 점검하는 것이 좋습니다.`,
     ],
     ld: [
-      `${base} AI 금융사기 브리핑은 접근 채널, 수익 약속, 입금 명목, 출금 거부, 추가 비용 요구를 순서대로 분석합니다. 네이버 AI 브리핑에 적합한 정보형 구조를 위해 질문과 답변, 대응 순서, 증거 체크리스트를 분명하게 나눕니다.`,
-      `${brand} 관련 정황은 단순 투자 실패와 구분해야 합니다. 허위 담당자, 사칭 프로필, 조작된 수익 화면, 출금 제한 메시지, 세금 선납 요구가 함께 나타나면 금융사기 패턴으로 볼 수 있습니다.`,
-      `AI 요약에 노출되려면 본문 안에 사건 개요, 피해자가 먼저 할 일, 신고와 상담의 차이, 준비 자료가 명확해야 합니다. 그래서 이 페이지는 추가 입금 중단, 증거 보존, 계좌 정보 정리, 상담 접수 순서로 답을 제공합니다.`,
+      `${base}는 교수, 대표, 증권사·자산운용사 관계자, 애널리스트 등을 사칭한 운영자가 밴드·텔레그램·카카오톡 리딩방으로 투자자를 초대한 뒤 종목 추천과 허위 수익 인증으로 신뢰를 쌓아 투자금을 유도하는 구조인지 먼저 확인해야 합니다.`,
+      `${brand} 관련 정황은 단순 투자 실패와 구분해야 합니다. 가짜 HTS·MTS 화면, 조작된 수익 인증, 출금 제한, 세금·보증금 명목의 추가 입금 요구가 함께 나타나면 리딩방 사기 패턴으로 볼 수 있습니다.`,
+      `무료 종목 추천에서 VIP 투자방, 공모주 특별배정, AI 자동매매 프로젝트로 전환을 유도받았다면 그 시점의 대화와 화면을 따로 정리해야 합니다. 리딩방 운영자가 실제 증권사·거래소 소속인지 확인하는 절차 없이 투자금을 늘리도록 유도했는지가 핵심 쟁점입니다.`,
+      `출금 신청 이후에는 계좌 인증비, 자금세탁방지 심사비, 지갑 활성화 비용 등 명목이 계속 바뀌며 추가 송금을 요구하는 경우가 많습니다. 이 단계에서는 형사고소를 위한 사기죄 구성요건 검토와 함께, 수취 계좌·지갑 주소를 기준으로 한 민사 가압류 가능성도 함께 살펴야 회수 경로가 넓어집니다.`,
     ],
     le: [
       `${base} 금융사기 사건 허브는 형사고소, 민사 회수, 실제 회수 사례, AI 브리핑을 한 번에 비교하도록 구성합니다. 처음 방문한 피해자는 현재 상황이 처벌 중심인지 회수 중심인지 먼저 나눠보는 것이 좋습니다.`,
@@ -2227,9 +2249,10 @@ function buildLawVictimCases(landing, group, caseData) {
       `피해자가 여럿 모인 사건에서는 동일 URL, 동일 계좌, 같은 출금 제한 문구가 확인되어 합의 협상과 엄벌 탄원 준비가 함께 진행됐습니다.`,
     ],
     ld: [
-      `AI 브리핑 기준으로 보면 첫 접촉은 온라인 채팅방, 두 번째 단계는 소액 지급 또는 화면 수익 노출, 세 번째 단계는 출금 제한과 추가 입금 요구로 이어진 패턴이 확인됐습니다.`,
+      `리딩방 피해 상담 사례를 보면 첫 접촉은 무료 종목 추천 채팅방, 두 번째 단계는 소액 수익 인증 또는 화면상 잔고 노출, 세 번째 단계는 출금 제한과 추가 입금 요구로 이어지는 패턴이 반복적으로 확인됩니다.`,
       `피해자는 "다음 주 환불" 안내를 반복해서 받았지만 실제로는 계좌 변경과 담당자 교체가 이어졌습니다. 이 흐름은 단순 지연보다 사기 의심 신호로 분류됩니다.`,
       `앱 내 잔고와 실제 금융기관 거래내역이 일치하지 않은 사례에서는 조작 화면 가능성을 전제로 원본 캡처와 송금 내역을 분리해 정리했습니다.`,
+      `가짜 거래소·코인 지갑을 이용한 사례에서는 지갑 주소와 원화 입금 계좌가 반복 사용된 정황을 확인해 동일 조직 여부와 계좌 추적 가능성을 함께 검토했습니다.`,
     ],
     le: [
       `처음에는 형사고소 가능성만 문의했지만, 상담 과정에서 가압류와 피해금 회수 전략까지 함께 검토할 필요가 확인된 사례입니다.`,
@@ -2363,10 +2386,11 @@ function createLawAuthoritySections(key, caseData) {
       ],
       compareTitle: "대응 방식 비교",
       compare: [
-        ["구분", "그냥 기다리기", "구조 파악 후 대응"],
-        ["입금 요구", "계속 응함", "추가 입금 중단"],
-        ["증거 상태", "서서히 사라짐", "캡처와 영수증 보존"],
-        ["신고 시점", "늦어질수록 불리", "초기 신고로 계좌 동결 가능성 확보"],
+        ["구분", "선린의 대응 방식", "단체 소송", "후불제 주장"],
+        ["착수 시점", "개별 사건 접수 즉시 증거 분석과 대응 착수", "동일 사건으로 분류되는 기간을 먼저 기다려야 함", "정상적인 변호사는 수임료 없이 사건을 맡을 수 없어 후불제 자체가 성립하지 않음"],
+        ["진행 주체", "담당 변호사가 사건 초기부터 직접 검토·대응", "대표자 선정까지 또 다른 대기 기간 발생", "탐정·금융전문가 등 비(非)변호사가 변호사를 사칭해 진행하는 경우가 많음"],
+        ["위험 요소", "변호사법에 따른 정식 수임 계약으로 진행", "다수 피해자 의견 조율로 개별 사정 반영이 어려움", "무자격자 개입 시 추가 비용 요구 등 2차 사기 피해 우려"],
+        ["대응 속도", "골든타임 내 형사·민사 절차 병행 착수", "분류·대표자 선정 기간만큼 대응이 늦어짐", "정식 수임 구조가 아니어서 진행 상황을 신뢰하기 어려움"],
       ],
       aeoTitle: `${base} 피해 구조 요약`,
       aeo: `${base} 사건은 접근 채널, 입금 명목, 출금 거부, 추가 입금 요구를 순서대로 정리해야 합니다. 지금 해야 할 행동은 추가 입금 중단, 증거 보존, 신고 접수입니다.`,
@@ -2410,7 +2434,7 @@ function createLawAuthoritySections(key, caseData) {
     <p>CHECK POINT</p>
     <h2>${esc(config.compareTitle)}</h2>
   </div>
-  <div class="law-compare-table" role="table">
+  <div class="law-compare-table${config.compare[0]?.length === 4 ? " cols-4" : ""}" role="table">
     ${config.compare.map((row, index) => `<div class="${index === 0 ? "is-head" : ""}" role="row">${row.map((cell) => `<span role="cell">${esc(cell)}</span>`).join("")}</div>`).join("\n    ")}
   </div>
 </section>`;
@@ -2952,7 +2976,8 @@ function secondaryCaseKeyword(name) {
   return /사칭|피해/.test(tail) ? `${tail} 피해 대응` : `${tail} 사칭 피해 대응`;
 }
 
-function groupPageTitle(name, key) {
+function groupPageTitle(name, key, caseData = {}) {
+  if (key === "ld") return ldPageTitle(name, caseData?.ldCategory);
   const base = seoCaseKeyword(name);
   const suffixes = {
     a: "형사고소",
@@ -2963,14 +2988,14 @@ function groupPageTitle(name, key) {
     la: "법적조치",
     lb: "피해회복",
     lc: "해결사례",
-    ld: "주식·코인·투자 리딩방사기",
     le: "진행현황",
   };
   return joinSeoPhrase(base, suffixes[key] || "형사고소");
 }
 
 function groupPageH1(name, key) {
-  // H1 = title without "| 법무법인 선린" — share suffix map with groupPageTitle
+  // ld는 "사건명 + 사칭 사기"의 짧은 H1을 별도로 사용 — <title> 태그(groupPageTitle)와 분리
+  if (key === "ld") return ldPageH1(name);
   return groupPageTitle(name, key);
 }
 
@@ -3001,7 +3026,7 @@ function searchKeyword(name) {
 }
 
 function themeColor(key) {
-  return { a: "#111827", b: "#173b57", c: "#174333", d: "#25314d", e: "#3b2f52" }[key] || "#111827";
+  return { a: "#111827", b: "#173b57", c: "#174333", d: "#25314d", e: "#3b2f52", ld: "#132a4d" }[key] || "#111827";
 }
 
 function breadcrumbLabel(groupOrKey) {
@@ -3126,14 +3151,14 @@ function createSeoDescription(description = "", caseName = "", key = "") {
   return (desc || "입금 내역, 대화 내용, 사이트 주소를 기준으로 피해 구조와 대응 가능성을 정리합니다.").slice(0, 150);
 }
 
-function normalizeLandingImageMeta(landing = {}, pageTitle = "", seoDescription = "", caseData = {}) {
-  let alt = landing.imageAlt || pageTitle;
+function normalizeLandingImageMeta(landing = {}, pageH1 = "", seoDescription = "", caseData = {}) {
+  let alt = landing.imageAlt || pageH1;
   let caption = landing.imageCaption || alt;
   let description = landing.imageDescription || seoDescription;
   let emit = Boolean(landing.imageAlt || landing.imageCaption || landing.imageDescription);
 
   if (caseData.createdBy === "voicephishing-manual") {
-    const parsed = parseVoicephishingTitleForMeta(caseData.caseName || landing.title || pageTitle);
+    const parsed = parseVoicephishingTitleForMeta(caseData.caseName || landing.title || pageH1);
     if (parsed.region) {
       alt = `${parsed.subject} ${parsed.action} 보이스피싱 피해 대응`;
       caption = `${parsed.subject}가 안내하는 ${parsed.action} 절차와 피해금 회수 대응`;
@@ -3188,7 +3213,7 @@ function createArticleTags(caseName = "", key = "") {
     la: [`${primary} 형사고소`, `${primary} 사기죄`, "지급정지", "계좌추적"],
     lb: [`${primary} 피해금 회수`, "가압류", "손해배상", "부당이득반환"],
     lc: [`${primary} 회수 사례`, "성공사례", "피해금 회수율"],
-    ld: [`${primary} AI 브리핑`, "금융사기 분석", "증거 보존"],
+    ld: [`${primary} 리딩방사기`, "리딩방 피해 분석", "증거 보존"],
     le: [`${primary} 사건 허브`, "형사 민사 대응", "금융사기 대응"],
   };
   return [...new Set([...common, ...(byKey[key] || [])])].slice(0, 8);
