@@ -1507,10 +1507,11 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     caption: imageCaption,
   });
 
-  const rawContent = isManualLandingCase(caseData)
+  const useManualBodyRenderer = isManualLandingCase(caseData) && lk !== "ld";
+  const rawContent = useManualBodyRenderer
     ? createRecoveryManualContent(landing, group, caseData)
     : createLandingContent(landing, group, caseData, relatedCases);
-  const content = isManualLandingCase(caseData) ? rawContent : softenRepeatedContextTerms(rawContent);
+  const content = useManualBodyRenderer ? rawContent : softenRepeatedContextTerms(rawContent);
   const footerLinks = CROSS_LINKS.map((l) => {
     const active = l.key === group.key ? "is-active" : "";
     return `<a class="${active}" href="${l.url}/">${esc(l.label)}</a>`;
