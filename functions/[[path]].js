@@ -406,7 +406,9 @@ export async function onRequest(context) {
   return new Response(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400",
+      "Cache-Control": (group.landingKey || group.key) === "ld"
+        ? "public, max-age=60, s-maxage=300"
+        : "public, max-age=3600, s-maxage=86400",
       "X-Robots-Tag": robotsTag,
     },
   });
