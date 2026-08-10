@@ -93305,10 +93305,12 @@
       "증거보존"
     ],
     "memo": "",
-    "noindex": false,
+    "noindex": true,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "team-mission"
+    "fraudType": "team-mission",
+    "searchHidden": true,
+    "hideFromListing": true
   },
   {
     "slug": "urbanvionakr-com",
