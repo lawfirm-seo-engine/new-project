@@ -88312,7 +88312,7 @@
     "caseName": "테더포유 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-28",
-    "updatedAt": "2026-08-11",
+    "updatedAt": "2026-07-28",
     "thumbnailUrl": "",
     "landingViews": 3157,
     "reports": 26,
@@ -88330,13 +88330,8 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project",
-    "memos": [
-      {
-        "id": 1786461762756,
-        "text": "이민재 매니저를 사칭한 테더포유 사기 사건이 접수중 입니다. 피해 없도록 주의 바랍니다.",
-        "createdAt": "2026-08-12 00:22"
-      }
-    ]
+    "searchHidden": false,
+    "hideFromListing": false
   },
   {
     "slug": "je8gisuigpeurojegteu-t59",
@@ -108375,7 +108370,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1786461894692,
+        "text": "내일의별빛리딩방은 부국증권을 사칭한 사기로 현재 사건 접수중입니다. 피해 없도록 주의하시기 바랍니다.",
+        "createdAt": "2026-08-12 00:24"
+      }
+    ]
   },
   {
     "slug": "jenigseuobsyeon",
