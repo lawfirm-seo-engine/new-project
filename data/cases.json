@@ -88312,7 +88312,7 @@
     "caseName": "테더포유 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-28",
-    "updatedAt": "2026-07-28",
+    "updatedAt": "2026-08-11",
     "thumbnailUrl": "",
     "landingViews": 3157,
     "reports": 26,
@@ -88329,7 +88329,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1786461762756,
+        "text": "이민재 매니저를 사칭한 테더포유 사기 사건이 접수중 입니다. 피해 없도록 주의 바랍니다.",
+        "createdAt": "2026-08-12 00:22"
+      }
+    ]
   },
   {
     "slug": "je8gisuigpeurojegteu-t59",
@@ -108741,7 +108748,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "체슬리투자자문-박세익-교수-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -108833,7 +108843,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "sg-global-pro-화이트스톡-whitestock-사칭-사기-리딩방-피해회복-안내",
@@ -108925,7 +108938,10 @@
         ]
       }
     },
-    "ldCategory": "hts-mts-app"
+    "ldCategory": "hts-mts-app",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "teelx-pro-archimedesai-사칭-사기-리딩방-피해회복-안내",
@@ -109017,7 +109033,10 @@
         ]
       }
     },
-    "ldCategory": "hts-mts-app"
+    "ldCategory": "hts-mts-app",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "startraderkron-com-사칭-사기-리딩방-피해회복-안내",
@@ -109109,7 +109128,10 @@
         ]
       }
     },
-    "ldCategory": "institution-impersonation"
+    "ldCategory": "institution-impersonation",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "prlcoax-quantix-fxcmmint-사칭-사기-리딩방-피해회복-안내",
@@ -109201,7 +109223,10 @@
         ]
       }
     },
-    "ldCategory": "hts-mts-app"
+    "ldCategory": "hts-mts-app",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "public-재테크클래스-봄날의-이야기-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -109293,7 +109318,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "퍼블릭재테크-이은정-매니저-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -109385,7 +109413,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "pub-pro-사칭-사기-리딩방-피해회복-안내",
@@ -109477,7 +109508,10 @@
         ]
       }
     },
-    "ldCategory": "hts-mts-app"
+    "ldCategory": "hts-mts-app",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "얼라인-파트너스-자산운용-이남우-교수-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -109569,7 +109603,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "jh-one-어플-야누스헨더슨-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -109661,7 +109698,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "투자의혜안-혜안인베스트먼트-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -109753,7 +109793,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "지능형리더서클44-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -109845,7 +109888,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "골든트리-투자자문-goldentreeinvest-co-kr-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -109937,7 +109983,10 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   },
   {
     "slug": "xenics-option-xenicsoptions-kr-사칭-사기-주식-투자-리딩방-피해회복-안내",
@@ -110029,6 +110078,9 @@
         ]
       }
     },
-    "ldCategory": "stock-reading"
+    "ldCategory": "stock-reading",
+    "searchHidden": false,
+    "hideFromListing": false,
+    "noindex": false
   }
 ]
