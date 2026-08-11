@@ -1519,5 +1519,14 @@
     "caseName": "gaeguriwangjatv.com 사칭 사기",
     "domain": "피해금 추적 법률센터",
     "createdAt": "2026. 8. 7. 오전 8:29:37"
+  },
+  {
+    "id": 1786440737963,
+    "name": "이대선",
+    "phone": "+821090816365",
+    "amount": "1500000",
+    "caseName": "NEERIX 사칭 사기",
+    "domain": "피해금 추적 법률센터",
+    "createdAt": "2026. 8. 11. 오후 6:32:17"
   }
 ]
