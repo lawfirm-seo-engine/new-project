@@ -16237,7 +16237,7 @@
     "caseName": "케이알이심 사기",
     "category": "형사대응",
     "createdAt": "2026-06-21",
-    "updatedAt": "2026-06-21",
+    "updatedAt": "2026-08-11",
     "thumbnailUrl": "",
     "landingViews": 1153,
     "reports": 14,
@@ -16249,7 +16249,14 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "memos": [
+      {
+        "id": 1786428399108,
+        "text": "케이알이심, kresim 사건 접수 중 입니다.",
+        "createdAt": "2026-08-11 15:06"
+      }
+    ]
   },
   {
     "slug": "jaetaegbueob-taipingarba",
