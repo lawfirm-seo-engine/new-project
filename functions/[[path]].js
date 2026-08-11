@@ -1278,6 +1278,13 @@ function canonicalForLanding(landing = {}, group = {}, fallback = "") {
   return fallback;
 }
 
+function appendOgRevision(imageUrl = "", revision = "") {
+  const value = String(revision || "").trim();
+  if (!imageUrl || !value) return imageUrl;
+  const separator = imageUrl.includes("?") ? "&" : "?";
+  return `${imageUrl}${separator}r=${encodeURIComponent(value.slice(0, 80))}`;
+}
+
 function renderLanding(caseData, group, origin, relatedCases = []) {
   const lk = group.landingKey ?? group.key;
   const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
@@ -1303,8 +1310,9 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const urlSuffix = isAllDomainsNoSuffix ? "" : isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const fallbackCanonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const canonical = canonicalForLanding(landing, group, fallbackCanonical);
-  const ogImage = caseOgPngImageUrl(caseData.slug || "landing", group.siteUrl);
-  const displayOgImage = caseOgWebpImageUrl(caseData.slug || "landing", group.siteUrl);
+  const ogRevision = landing.ogRevision || caseData.ogRevision || caseData.updatedAt || "";
+  const ogImage = appendOgRevision(caseOgPngImageUrl(caseData.slug || "landing", group.siteUrl), ogRevision);
+  const displayOgImage = appendOgRevision(caseOgWebpImageUrl(caseData.slug || "landing", group.siteUrl), ogRevision);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), SEO_STABILIZED_AT);
   const isoPublished = `${publishedDate}T00:00:00+09:00`;

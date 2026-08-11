@@ -34,7 +34,7 @@ export async function onRequestPost(context) {
       if (!cases[idx].landings) cases[idx].landings = {};
       if (!cases[idx].landings[groupKey]) cases[idx].landings[groupKey] = {};
       cases[idx].landings[groupKey][field] = value;
-      if (field === "title") cases[idx].landings[groupKey].ogTitle = value;
+      if (field === "title") updateLandingTitleMeta(cases[idx].landings[groupKey], value, createOgRevision());
       if (field === "description") cases[idx].landings[groupKey].ogDescription = value;
       cases[idx].updatedAt = now;
 
@@ -62,7 +62,7 @@ export async function onRequestPost(context) {
     } else if (action === "rename" || action === "update-title") {
       const newName = String(value || "").trim();
       if (!newName) return json({ ok: false, message: "새 사건명 필수" }, 400);
-      updateCaseTitle(cases[idx], newName);
+      updateCaseTitle(cases[idx], newName, createOgRevision());
       cases[idx].updatedAt = now;
 
     } else if (action === "update-summary") {
@@ -160,7 +160,7 @@ export async function onRequestPost(context) {
         }
       }
       if (action === "rename" || action === "update-title") {
-        updateCaseTitle(kvEntry, cases[idx].caseName);
+        updateCaseTitle(kvEntry, cases[idx].caseName, cases[idx].ogRevision || createOgRevision());
       }
       await env.CASES.put(`case:${slug}`, JSON.stringify(kvEntry));
       responseCase = kvEntry;
@@ -249,15 +249,35 @@ function buildIndexEntry(c) {
   };
 }
 
-function updateCaseTitle(item, title) {
+function updateCaseTitle(item, title, ogRevision = createOgRevision()) {
   item.caseName = title;
+  item.title = title;
+  item.h1 = title;
+  item.ogText = title;
+  item.ogTitle = title;
+  item.ogRevision = ogRevision;
   if (!item.landings || typeof item.landings !== "object") return;
   for (const landing of Object.values(item.landings)) {
     if (!landing || typeof landing !== "object") continue;
-    landing.title = title;
-    landing.h1 = title;
-    landing.ogTitle = title;
+    updateLandingTitleMeta(landing, title, ogRevision, { updateH1: true });
   }
+}
+
+function updateLandingTitleMeta(landing, title, ogRevision = createOgRevision(), options = {}) {
+  const cleanTitle = String(title || "").trim();
+  if (!landing || typeof landing !== "object" || !cleanTitle) return;
+  landing.title = cleanTitle;
+  if (options.updateH1) landing.h1 = cleanTitle;
+  landing.ogTitle = cleanTitle;
+  landing.ogText = cleanTitle;
+  landing.ogRevision = ogRevision;
+  landing.imageAlt = cleanTitle;
+  landing.imageCaption = cleanTitle;
+  landing.imageDescription = landing.description || cleanTitle;
+}
+
+function createOgRevision() {
+  return Date.now().toString(36);
 }
 
 function toBoolean(value) {

@@ -6,7 +6,7 @@ import webpEncodeFactory from "@jsquash/webp/codec/enc/webp_enc.js";
 import webpEncodeWasm from "@jsquash/webp/codec/enc/webp_enc.wasm";
 import { defaultOptions as webpDefaultOptions } from "@jsquash/webp/meta.js";
 import { initEmscriptenModule } from "@jsquash/webp/utils.js";
-import { OG_IMAGE_VERSION } from "../_seo.js";
+import { OG_IMAGE_VERSION, groupForHost } from "../_seo.js";
 import { boardOgText, getBoardPost } from "../_board.js";
 import { ldCategoryLabel } from "../_readingroomCategory.js";
 
@@ -353,15 +353,22 @@ export async function onRequest(context) {
       : await env.CASES?.get?.(`case:${slug}`);
       if (raw) {
         const data = JSON.parse(raw);
+        const group = groupForHost(url.hostname);
+        const landingKey = group?.landingKey || group?.key || "";
+        const landing = landingKey ? data.landings?.[landingKey] : null;
         title = cleanTitle(
+          landing?.ogText ||
           data.ogText ||
           data.title ||
           data.h1 ||
+          landing?.ogTitle ||
+          landing?.title ||
+          landing?.h1 ||
           data.caseName ||
           data.name ||
           title,
         );
-        ldCategory = data.ldCategory || "";
+        ldCategory = landing?.ldCategory || data.ldCategory || "";
       }
     }
   } catch (_) {}
