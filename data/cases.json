@@ -106405,7 +106405,7 @@
   },
   {
     "slug": "peurobiteu-geurrobeor",
-    "caseName": "금싸라기 사칭 사기",
+    "caseName": "프로비트 글로벌 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-11",
     "updatedAt": "2026-08-11",
@@ -106426,6 +106426,8 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "institution-exchange"
+    "fraudType": "institution-exchange",
+    "searchHidden": false,
+    "hideFromListing": false
   }
 ]
