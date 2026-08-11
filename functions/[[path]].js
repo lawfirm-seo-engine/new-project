@@ -360,7 +360,7 @@ export async function onRequest(context) {
     for (const old of NEW_PROJECT_OLD_SUFFIXES) {
       if (urlSlug.endsWith(`-${old}`)) { baseSlug = urlSlug.slice(0, -(old.length + 1)); break; }
     }
-    const redirectUrl = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(baseSlug)}-${suffix}/`;
+    const redirectUrl = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(baseSlug)}-${suffix}/${url.search}`;
     return new Response(null, { status: 301, headers: { Location: redirectUrl } });
   } else {
     slug = urlSlug;
