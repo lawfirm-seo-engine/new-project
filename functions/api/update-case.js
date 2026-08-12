@@ -1,4 +1,4 @@
-const EDITABLE_LANDING_FIELDS = ["body", "victimCases", "suspiciousCompanies", "faq", "h1", "title", "description", "imageAlt", "imageCaption", "imageDescription"];
+const EDITABLE_LANDING_FIELDS = ["body", "victimCases", "suspiciousCompanies", "faq", "h1", "title", "description", "imageAlt", "imageCaption", "imageDescription", "currentProgress"];
 const FRAUD_TYPE_KEYS = new Set(["stock-project", "institution-exchange", "team-mission", "live-dating", "refund-reward"]);
 
 export async function onRequestPost(context) {

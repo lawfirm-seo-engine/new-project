@@ -645,6 +645,20 @@ function renderOperatorMemos(caseItem, heading = "운영 안내") {
   return `<section class="article-block memo-section"><h2>${escapeHtml(heading)}</h2>${items}</section>`;
 }
 
+function currentProgressItems(landing = {}) {
+  const value = landing?.currentProgress;
+  if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean);
+  const text = String(value || "").trim();
+  if (!text) return [];
+  return text.split(/\n{1,}/).map((item) => item.trim()).filter(Boolean);
+}
+
+function renderCurrentProgressSection(landing = {}) {
+  const items = currentProgressItems(landing);
+  if (!items.length) return "";
+  return `<section class="article-block current-progress"><h2>현재 진행 상황</h2>${paragraphs(items)}</section>`;
+}
+
 function createLandingContent(landing, group, caseItem) {
   {
     const _keyword = escapeHtml(seoCaseKeyword(caseItem.caseName || caseItem.name || ""));
@@ -653,6 +667,7 @@ function createLandingContent(landing, group, caseItem) {
     const _slug = escapeHtml(caseItem.slug);
     const _trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${_slug}'})}).catch(function(){});})();</script>`;
     const _memoSection = renderOperatorMemos(caseItem);
+    const _currentProgressSection = renderCurrentProgressSection(landing);
     const _rawCaseName = caseItem.caseName || caseItem.name || "";
     const _replacementContext = createReplacementContext(_rawCaseName);
     const _body = renderBodyForLanding(landing, group, caseItem).map((item) => reduceCaseNameText(item, _rawCaseName, false, _replacementContext));
@@ -674,6 +689,7 @@ function createLandingContent(landing, group, caseItem) {
       `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName))}</section>`,
       `<section class="article-block"><h2>${_keyword} 피해 사례</h2>${list(_victimCases)}</section>`,
       `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
+      _currentProgressSection,
       `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
       createLiveReceiptStatus(caseItem),
       _readingroomCta,
@@ -1277,7 +1293,15 @@ function addFaqCta(answer = "") {
 }
 
 function withSentenceBreaks(value = "") {
-  return escapeHtml(value).replace(/([.!?])\s+/g, "$1<br>");
+  return linkifyEscapedUrls(escapeHtml(value).replace(/([.!?])\s+/g, "$1<br>"));
+}
+
+function linkifyEscapedUrls(value = "") {
+  return String(value || "").replace(/https?:\/\/[^\s<]+/g, (match) => {
+    const clean = match.replace(/[.,!?)]*$/g, "");
+    const tail = match.slice(clean.length);
+    return `<a href="${clean}">${clean}</a>${tail}`;
+  });
 }
 
 function createReceiptBadge(caseItem) {

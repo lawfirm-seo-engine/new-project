@@ -4,6 +4,7 @@ import {
   buildLandingUrl,
   caseOgImageUrl,
 } from "../_seo.js";
+import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const RECOVERY_HOST = "gnlaw-recovery.co.kr";
@@ -20,14 +21,15 @@ export async function onRequestPost(context) {
     const title = normalizeSpace(body.title);
     const slug = normalizeSlug(body.slug || title);
     const h1 = normalizeSpace(body.h1) || title;
-    const articleBody = normalizeBody(body.body);
+    const rawArticleBody = normalizeBody(body.body);
+    const articleBody = appendStockReadingroomCta(bodyToParagraphs(rawArticleBody));
     const summary = normalizeSpace(body.summary || body.description).slice(0, 180)
       || `${title} 관련 회복 사례와 대응 흐름을 정리했습니다.`;
     const imageAlt = normalizeSpace(body.imageAlt).slice(0, 160);
     const imageCaption = normalizeSpace(body.imageCaption).slice(0, 220);
     const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300);
 
-    if (!title || !slug || !articleBody) {
+    if (!title || !slug || !rawArticleBody) {
       return json({ ok: false, message: "제목, URL slug, 원고는 필수입니다." }, 400);
     }
 
@@ -51,7 +53,7 @@ export async function onRequestPost(context) {
       ...(imageAlt ? { imageAlt } : {}),
       ...(imageCaption ? { imageCaption } : {}),
       ...(imageDescription ? { imageDescription } : {}),
-      body: bodyToParagraphs(articleBody),
+      body: articleBody,
       victimCases: [],
       suspiciousCompanies: [],
       faq: [],

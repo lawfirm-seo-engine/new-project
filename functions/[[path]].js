@@ -37,6 +37,7 @@ import {
   standardVictimCases,
 } from "./_standardLanding.js";
 import {
+  STOCK_READINGROOM_CTA_TEXT,
   appendStockReadingroomCta,
   shouldAppendStockReadingroomCta,
 } from "./_stockReadingroomCta.js";
@@ -1678,13 +1679,13 @@ function renderManualArticleParts(input) {
 
   function flushParagraph() {
     if (!paragraph.length) return;
-    parts.push(`<p>${paragraph.map((line) => esc(line)).join("<br>")}</p>`);
+    parts.push(`<p>${paragraph.map((line) => formatInlineText(line)).join("<br>")}</p>`);
     paragraph = [];
   }
 
   function flushList() {
     if (!listBuf.length) return;
-    parts.push(`<ul>${listBuf.map((text) => `<li>${esc(text)}</li>`).join("")}</ul>`);
+    parts.push(`<ul>${listBuf.map((text) => `<li>${formatInlineText(text)}</li>`).join("")}</ul>`);
     listBuf = [];
   }
 
@@ -1845,6 +1846,25 @@ function renderOperatorMemos(caseData, heading = "운영 안내") {
   return `<section class="article-block memo-section"><h2>${esc(heading)}</h2>${items}</section>`;
 }
 
+function currentProgressItems(landing = {}) {
+  const value = landing?.currentProgress;
+  if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean);
+  const text = String(value || "").trim();
+  if (!text) return [];
+  return text.split(/\n{1,}/).map((item) => item.trim()).filter(Boolean);
+}
+
+function renderCurrentProgressSection(landing = {}) {
+  const items = currentProgressItems(landing);
+  if (!items.length) return "";
+  return `<section class="article-block current-progress"><h2>현재 진행 상황</h2>${paragraphs(items)}</section>`;
+}
+
+function renderStockReadingroomCtaSection(caseData = {}) {
+  if (!shouldAppendStockReadingroomCta(caseData)) return "";
+  return `<section class="article-block readingroom-referral"><p>${withSentenceBreaks(STOCK_READINGROOM_CTA_TEXT)}</p></section>`;
+}
+
 function createRecoveryManualContent(landing, group, caseData) {
   const cn = esc(normalizeCaseName(caseData.caseName));
   const siteName = esc(group.siteName);
@@ -1861,9 +1881,11 @@ function createRecoveryManualContent(landing, group, caseData) {
     ? renderManualBodyArray(manualBody)
     : renderManualArticle(String(manualBody || ""));
   const memoSection = renderOperatorMemos(caseData);
+  const currentProgressSection = renderCurrentProgressSection(landing);
   return [
     MANUAL_BODY_STYLE,
     `<section class="article-block manual-body">${bodyHtml}</section>`,
+    currentProgressSection,
     memoSection,
     createConsultForm(cn, siteName),
     createFloatingWidgets(cn, siteName, slug),
@@ -1916,6 +1938,7 @@ function createLandingContent(landing, group, caseData, relatedCases = []) {
     const _siteName = esc(group.siteName);
     const _trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${_slug}'})}).catch(function(){});})();</script>`;
     const _memoSection = renderOperatorMemos(caseData);
+    const _currentProgressSection = renderCurrentProgressSection(landing);
     const _body = renderBodyForLanding(landing, _contentGroup, caseData).map((item) => normalizeScamCopyPhrases(reduceCaseNameText(item, _rawCaseName, false, _replacementContext)));
     const _victimCases = renderVictimCasesForLanding(landing, _contentGroup, caseData, _replacementContext);
     const _faq = renderFaqForLanding(landing, _contentGroup, caseData);
@@ -1931,6 +1954,7 @@ function createLandingContent(landing, group, caseData, relatedCases = []) {
       `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName, landing, _replacementContext))}</section>`,
       `<section class="article-block"><h2>${_keyword} 피해 사례</h2>${list(_victimCases)}</section>`,
       `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
+      _currentProgressSection,
       _authoritySections,
       `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
       createReadingroomCrossLink(_contentKey, caseData),
@@ -1994,6 +2018,8 @@ function createStandardLandingContent(landing, group, caseData, relatedCases = [
   const victimCases = standardVictimCases(typeKey);
   const faq = renderFaqForLanding(landing, { ...group, key: "a" }, caseData);
   const memoSection = renderOperatorMemos(caseData);
+  const currentProgressSection = renderCurrentProgressSection(landing);
+  const readingroomCtaSection = renderStockReadingroomCtaSection(caseData);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
 
   const responseHtml = responseSections.map((section) => (
@@ -2007,7 +2033,9 @@ function createStandardLandingContent(landing, group, caseData, relatedCases = [
     `<section class="article-block"><h2>${keyword} 수법</h2><h3>${esc(method.title)}</h3>${list(method.bullets)}<h3>주요 진행 단계</h3>${orderedList(method.steps)}</section>`,
     `<section class="article-block"><h2>${keyword} 피해 사례</h2>${list(victimCases)}</section>`,
     `<section class="article-block"><h2>${keyword} 대응 방법</h2>${responseHtml}${createEvidenceCheckSection()}</section>`,
+    currentProgressSection,
     `<section class="article-block faq" id="faq-list"><h2>${keyword} FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`,
+    readingroomCtaSection,
     createReadingroomCrossLink(group.landingKey || group.key, caseData),
     createLiveReceiptStatus(caseData),
     createScamTypeSelfAnalysisSection(),
@@ -3432,7 +3460,19 @@ function addFaqCta(answer = "") {
 }
 
 function withSentenceBreaks(value = "") {
-  return esc(value).replace(/([.!?])\s+/g, "$1<br>");
+  return linkifyEscapedUrls(esc(value).replace(/([.!?])\s+/g, "$1<br>"));
+}
+
+function formatInlineText(value = "") {
+  return linkifyEscapedUrls(esc(value));
+}
+
+function linkifyEscapedUrls(value = "") {
+  return String(value || "").replace(/https?:\/\/[^\s<]+/g, (match) => {
+    const clean = match.replace(/[.,!?)]*$/g, "");
+    const tail = match.slice(clean.length);
+    return `<a href="${clean}">${clean}</a>${tail}`;
+  });
 }
 
 function createReceiptBadge(caseData) {

@@ -4,16 +4,23 @@ export const STOCK_READINGROOM_CTA_TEXT = `주식리딩방 사기 피해를 입�
 const STOCK_READINGROOM_CTA_CREATED_BY = new Set([
   "voicephishing-manual",
   "jipjeong-manual",
+  "recovery-manual",
   "tujasagi-manual",
   "chaemubu-manual",
-  "readingroom-manual",
 ]);
 
 export function appendStockReadingroomCta(body = []) {
-  return normalizeBodyItems(body).filter((item) => !item.includes(STOCK_READINGROOM_CTA_URL));
+  const items = normalizeBodyItems(body).filter((item) => !item.includes(STOCK_READINGROOM_CTA_URL));
+  return [...items, STOCK_READINGROOM_CTA_TEXT];
 }
 
 export function shouldAppendStockReadingroomCta(item = {}) {
+  const createdBy = String(item.createdBy || "").trim();
+  if (STOCK_READINGROOM_CTA_CREATED_BY.has(createdBy)) return true;
+  if (!createdBy) {
+    const targetGroups = Array.isArray(item.targetGroups) ? item.targetGroups : [];
+    return targetGroups.length === 0 || targetGroups.includes("a");
+  }
   return false;
 }
 

@@ -1,6 +1,7 @@
 import { caseOgImageUrl } from "../_seo.js";
 import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
 import { compareCaseIdentity } from "../_searchNormalize.js";
+import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import {
   normalizeFraudTypeKey,
   standardCaseKeyword,
@@ -243,7 +244,7 @@ function createLandingData({ caseName, slug, fraudType, group, templates = {} })
     ogDescription: description,
     ogImage: caseOgImageUrl(slug || "landing", group.siteUrl, "png"),
     h1: groupPageH1(caseName, group.key),
-    body,
+    body: appendStockReadingroomCta(body),
     victimCases,
     suspiciousCompanies: makeSuspiciousCompanies({ caseName }),
     faq,
@@ -287,7 +288,7 @@ function createStandardLandingData({ caseName, slug, fraudType, group }) {
     ogDescription: description,
     ogImage: caseOgImageUrl(slug || "landing", group.siteUrl, "png"),
     h1: title,
-    body,
+    body: appendStockReadingroomCta(body),
     scamIntroItems: standardIntroParagraphs(fraudType, caseName),
     scamMethodItems: [...method.bullets, ...method.steps],
     victimCases: makeVictimCases({ base: standardCaseKeyword(caseName), group }),

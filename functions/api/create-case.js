@@ -42,6 +42,7 @@ export async function onRequestPost(context) {
     }
 
     const now = today();
+    const landingsWithCta = applyStockReadingroomCtaToCaseLandings(landings);
     const autoLdLanding = buildAutoLdLanding({ caseName, slug, summary, tags });
     const newCase = {
       slug,
@@ -54,7 +55,7 @@ export async function onRequestPost(context) {
       summary,
       tags,
       fraudType,
-      landings: autoLdLanding ? { ...landings, ld: autoLdLanding.landing } : landings,
+      landings: autoLdLanding ? { ...landingsWithCta, ld: autoLdLanding.landing } : landingsWithCta,
       ...(autoLdLanding ? { hasReadingroomLanding: true, ldCategory: autoLdLanding.ldCategory } : {}),
     };
 
@@ -310,6 +311,17 @@ function buildAutoLdLanding({ caseName, slug, summary, tags }) {
   };
 
   return { landing, ldCategory };
+}
+
+function applyStockReadingroomCtaToCaseLandings(landings = {}) {
+  const next = { ...landings };
+  if (next.a && typeof next.a === "object") {
+    next.a = {
+      ...next.a,
+      body: appendStockReadingroomCta(next.a.body || []),
+    };
+  }
+  return next;
 }
 
 function hasRequiredLandingData(landings) {
