@@ -88635,7 +88635,7 @@
     "caseName": "MetaPro메타프로 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-29",
-    "updatedAt": "2026-07-29",
+    "updatedAt": "2026-08-12",
     "thumbnailUrl": "",
     "landingViews": 3942,
     "reports": 27,
@@ -88652,7 +88652,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1786513908468,
+        "text": "MetaPro 메타프로는 me-ta-pro.com 가상화폐 거래소 사칭 사기 사건 입니다.",
+        "createdAt": "2026-08-12 14:51"
+      }
+    ]
   },
   {
     "slug": "teureoseuteu-worres",
