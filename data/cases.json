@@ -93473,7 +93473,7 @@
     "caseName": "루멘라이브TV 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-05",
-    "updatedAt": "2026-08-05",
+    "updatedAt": "2026-08-12",
     "thumbnailUrl": "",
     "landingViews": 1720,
     "reports": 28,
@@ -93490,7 +93490,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "live-dating"
+    "fraudType": "live-dating",
+    "memos": [
+      {
+        "id": 1786513581917,
+        "text": "루멘라이브TV는 포인트를 \"대신 충전 해준다\"며 접근하는 방식의 로맨스스캠 사기 사건 입니다.",
+        "createdAt": "2026-08-12 14:46"
+      }
+    ]
   },
   {
     "slug": "reowner-net",
