@@ -102024,7 +102024,7 @@
     "caseName": "BEACON ASSET 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-06",
-    "updatedAt": "2026-08-06",
+    "updatedAt": "2026-08-12",
     "thumbnailUrl": "",
     "landingViews": 7394,
     "reports": 33,
@@ -102042,7 +102042,14 @@
     "noindex": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1786515703487,
+        "text": "BEACON ASSET(비컨에셋)은 해외선물 리딩방 사칭 사기 사건으로 동일한 화면으로 Reddit Asset CVC투자증권 사칭, bcon-asset.com reddit-asset.com cvc-ast.com이 사건 접수되고 있으니 피해 주의 바랍니다.",
+        "createdAt": "2026-08-12 15:21"
+      }
+    ]
   },
   {
     "slug": "clsakoreajeunggwon",
