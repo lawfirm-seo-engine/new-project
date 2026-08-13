@@ -192,7 +192,9 @@ export function buildSitemapXml(group, cases = [], options = {}) {
     .filter((item) => item?.slug && isCaseAllowedForGroup(item, group))
     .map((item) => {
       const sourceLastmod = isStandardLandingCase(item) ? standardLastModified(item) : (item.updatedAt || item.createdAt || today);
-      const lastmod = options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
+      const lastmod = (group.landingKey || group.key) === "c"
+        ? today
+        : options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
       const priority = options.recent ? "1.0" : "0.9";
       const changefreq = options.recent ? "hourly" : "daily";
       const loc = escapeXml(landingUrlForItem(group, item));

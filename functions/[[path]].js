@@ -85,12 +85,12 @@ const GROUPS = {
   },
   "gnlaw-recovery.co.kr": {
     key: "c", pathPrefix: "success", urlSlugSuffix: "result", bodyClass: "domain-c",
-    siteName: "피해 회수 성공사례", shortName: "성공사례",
-    intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수", tone: "결과 중심",
-    ctaTitle: "유사 성공사례 비교",
-    ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
-    ctaLabel: "사례 비교 문의", ogType: "article",
-    descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
+    siteName: "법무법인 선린 계좌 지급정지 대응센터", shortName: "지급정지 대응",
+    intent: "계좌 지급정지 · 이의제기 · 해제 · 채무부존재확인소송", tone: "지급정지 대응",
+    ctaTitle: "지급정지 해제 절차 검토",
+    ctaText: "통지서, 문제 된 입금과 거래자료를 기준으로 이의제기와 채무부존재확인소송 필요성을 검토합니다.",
+    ctaLabel: "지급정지 상담", ogType: "article",
+    descriptionSuffix: "계좌 지급정지 원인, 이의제기, 해제 절차와 채무부존재확인소송 대응을 사건별로 정리합니다.",
     naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"],
     siteUrl: "https://gnlaw-recovery.co.kr",
   },
@@ -1318,15 +1318,19 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const ogImage = appendOgRevision(caseOgPngImageUrl(caseData.slug || "landing", group.siteUrl), ogRevision);
   const displayOgImage = appendOgRevision(caseOgWebpImageUrl(caseData.slug || "landing", group.siteUrl), ogRevision);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
-  const modifiedDate = latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), SEO_STABILIZED_AT);
+  const modifiedDate = lk === "c"
+    ? "2026-08-13"
+    : latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), SEO_STABILIZED_AT);
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
   const keyword = searchKeyword(rawCaseName);
   const renderedFaq = renderFaqForLanding(landing, { ...group, key: lk }, caseData);
   const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
-  const seoDescription = useStandardTemplate
-    ? standardMetaDescription(rawCaseName)
-    : createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
+  const seoDescription = lk === "c"
+    ? `${primaryCaseKeyword(rawCaseName) || normalizeCaseName(rawCaseName)} 관련 계좌 지급정지 원인, 이의제기·해제 절차, 준비자료와 채무부존재확인소송 대응 방법을 정리합니다.`.slice(0, 150)
+    : useStandardTemplate
+      ? standardMetaDescription(rawCaseName)
+      : createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
   const articleTags = createArticleTags(rawCaseName, lk);
   const imageMeta = normalizeLandingImageMeta(landing, pageH1, seoDescription, caseData);
   const imageAlt = imageMeta.alt;
@@ -1499,10 +1503,15 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
       {
         "@type": "HowTo",
         "@id": `${canonical}#howto`,
-        name: `${caseKeywordForSchema} 피해 발생 후 대응 방법`,
-        description: "금융사기 피해가 의심될 때 즉시 해야 할 증거 보존 순서",
+        name: lk === "c" ? `${caseKeywordForSchema} 계좌 지급정지 해제 대응 방법` : `${caseKeywordForSchema} 피해 발생 후 대응 방법`,
+        description: lk === "c" ? "계좌 지급정지 원인을 확인하고 이의제기와 채무부존재확인소송을 검토하는 순서" : "금융사기 피해가 의심될 때 즉시 해야 할 증거 보존 순서",
         totalTime: "PT5M",
-        step: [
+        step: lk === "c" ? [
+          { "@type": "HowToStep", position: 1, name: "지급정지 사유 확인", text: "은행 통지서에서 조치명, 요청기관, 문제 된 입금액과 채권소멸절차 공고일을 확인합니다." },
+          { "@type": "HowToStep", position: 2, name: "거래와 자금 흐름 정리", text: "계약, 주문, 배송, 대화 원본과 입금 전후 계좌 거래내역을 시간순으로 정리합니다." },
+          { "@type": "HowToStep", position: 3, name: "이의제기 제출", text: "정당한 거래대금임을 보여주는 자료를 이의제기신청서와 함께 계좌 관리 금융회사에 제출합니다." },
+          { "@type": "HowToStep", position: 4, name: "법원 절차 검토", text: "이의제기로 해결되지 않으면 상대방과 청구 범위를 특정해 채무부존재확인소송 필요성을 검토합니다." },
+        ] : [
           { "@type": "HowToStep", position: 1, name: "입금 자료 확인", text: "입금증, 계좌번호, 예금주가 남아 있는지 확인합니다." },
           { "@type": "HowToStep", position: 2, name: "대화 캡처", text: "카카오톡·텔레그램 대화방과 담당자 프로필을 캡처합니다." },
           { "@type": "HowToStep", position: 3, name: "사이트 정보 저장", text: "사이트 주소, 로그인 화면, 출금 제한 안내를 저장합니다." },
@@ -1548,7 +1557,8 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     siteName: esc(group.siteName),
     headExtra,
     schema,
-    bodyClass: `${group.bodyClass} landing-page`,
+    bodyClass: `${group.bodyClass} landing-page${lk === "c" ? " recovery-landing-page" : ""}`,
+    styleHref: lk === "c" ? "/assets/style.css?v=20260813-recovery-landing-v1" : "/assets/style.css",
     tone: esc(group.tone),
     h1: esc(pageH1),
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName, pageH1),
@@ -1875,6 +1885,43 @@ function renderStockReadingroomCtaSection(caseData = {}) {
   return `<section class="article-block readingroom-referral"><p>${withSentenceBreaks(STOCK_READINGROOM_CTA_TEXT)}</p></section>`;
 }
 
+function createRecoveryLandingUpdatedNote() {
+  return `<div class="recovery-landing-updated" aria-label="콘텐츠 수정일">
+    <span>법률·절차 안내 업데이트</span>
+    <time datetime="2026-08-13">2026. 08. 13.</time>
+  </div>`;
+}
+
+function createRecoveryDebtNonexistenceSection() {
+  return `<section class="article-block recovery-lawsuit-guide" id="debt-nonexistence-lawsuit">
+    <header class="recovery-lawsuit-guide-head">
+      <span>COURT PROCEDURE</span>
+      <h2>채무부존재확인소송으로 지급정지에 대응하는 방법</h2>
+      <p>은행 이의제기만으로 해결되지 않고, 피해자로 신고한 상대방에게 돌려줄 채무가 없다고 다툴 객관적인 근거가 있다면 관할 법원에 채무부존재확인의 소를 제기하는 방법을 검토할 수 있습니다.</p>
+    </header>
+    <div class="recovery-lawsuit-guide-grid">
+      <ol class="recovery-lawsuit-steps">
+        <li><b>01</b><div><strong>상대방과 청구 범위 특정</strong><p>피해구제 신청인, 문제 된 입금액, 실제 거래관계와 반환채무의 범위를 먼저 확인합니다.</p></div></li>
+        <li><b>02</b><div><strong>소장과 입증자료 제출</strong><p>계약·주문·배송·대화·거래내역 등 해당 입금이 정당한 거래대금임을 보여주는 자료를 소장과 함께 정리합니다.</p></div></li>
+        <li><b>03</b><div><strong>소송계속 사실을 은행에 알림</strong><p>사건번호, 접수증 또는 소송계속증명원 등 법원 접수 사실을 확인할 수 있는 서류를 계좌 관리 금융회사에 제출합니다.</p></div></li>
+        <li><b>04</b><div><strong>종료·해제 범위 확인</strong><p>채권소멸절차와 전자금융거래 제한의 종료 여부, 피해금과 그 밖의 예금에 대한 지급정지 범위를 구분해 확인합니다.</p></div></li>
+      </ol>
+      <aside class="recovery-lawsuit-docs">
+        <span>준비자료</span>
+        <strong>법원과 은행에<br>설명할 자료</strong>
+        <ul>
+          <li>지급정지 통지서와 공고 내역</li>
+          <li>문제 된 입금 전후 거래내역</li>
+          <li>거래 상대방과 나눈 대화 원본</li>
+          <li>계약·배송·세금계산서 등 원인자료</li>
+          <li>소장 접수증·소송계속증명원</li>
+        </ul>
+      </aside>
+    </div>
+    <p class="recovery-lawsuit-caution"><strong>소장 접수만으로 계좌 전액이 곧바로 풀리는 것은 아닙니다.</strong> 현행 통신사기피해환급법상 소송이 법원에 계속 중인 경우 채권소멸절차 등의 종료 사유가 되지만, 피해금에 해당하는 금액은 소송 계속 중 지급정지가 유지될 수 있습니다. 실제 적용 범위는 은행 통지 내용과 사건 진행 상태를 함께 확인해야 합니다.</p>
+  </section>`;
+}
+
 function createRecoveryManualContent(landing, group, caseData) {
   const cn = esc(normalizeCaseName(caseData.caseName));
   const siteName = esc(group.siteName);
@@ -1892,9 +1939,12 @@ function createRecoveryManualContent(landing, group, caseData) {
     : renderManualArticle(String(manualBody || ""));
   const memoSection = renderOperatorMemos(caseData);
   const currentProgressSection = renderCurrentProgressSection(landing, caseData, group.landingKey || group.key);
+  const isRecoveryLanding = (group.landingKey || group.key) === "c";
   return [
     MANUAL_BODY_STYLE,
-    `<section class="article-block manual-body">${bodyHtml}</section>`,
+    isRecoveryLanding ? createRecoveryLandingUpdatedNote() : "",
+    `<section class="article-block manual-body${isRecoveryLanding ? " recovery-manual-body" : ""}">${bodyHtml}</section>`,
+    isRecoveryLanding ? createRecoveryDebtNonexistenceSection() : "",
     currentProgressSection,
     memoSection,
     createConsultForm(cn, siteName),
@@ -1931,8 +1981,63 @@ function createLdRelatedCasesSection(contentKey, caseData, relatedCases = []) {
   return `<section class="article-block related-ld-cases" aria-label="관련 리딩방 사건"><h2>관련 리딩방 사건 더 보기</h2><ul>${items}</ul></section>`;
 }
 
+function createRecoveryEvidenceChecklist() {
+  return `<aside class="recovery-landing-checklist">
+    <div><span>DOCUMENT CHECK</span><strong>이의제기 전에<br>자료부터 묶어두세요</strong></div>
+    <ul>
+      <li>지급정지 통지서와 채권소멸절차 공고일</li>
+      <li>문제 된 입금 일시·금액·보낸 사람</li>
+      <li>계약·주문·배송·세금계산서 등 거래 원인</li>
+      <li>카카오톡·문자·이메일 등 대화 원본</li>
+      <li>입금 전후 전체 계좌 거래내역</li>
+      <li>이의제기 반려 시 은행의 서면 사유</li>
+    </ul>
+  </aside>`;
+}
+
+function createRecoveryCaseLandingContent(landing, group, caseData) {
+  const rawCaseName = caseData.caseName || "";
+  const replacementContext = createReplacementContext(rawCaseName);
+  const keyword = esc(seoCaseKeyword(rawCaseName));
+  const slug = esc(caseData.slug);
+  const cn = esc(normalizeCaseName(rawCaseName));
+  const siteName = esc(group.siteName);
+  const body = renderBodyForLanding(landing, { ...group, key: "c" }, caseData)
+    .map((item) => normalizeScamCopyPhrases(reduceCaseNameText(item, rawCaseName, false, replacementContext)));
+  const introBody = body.slice(0, 3);
+  const methodBody = body.slice(3, 8);
+  const victimCases = renderVictimCasesForLanding(landing, { ...group, key: "c" }, caseData, replacementContext);
+  const faq = renderFaqForLanding(landing, { ...group, key: "c" }, caseData);
+  const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
+
+  return [
+    createRecoveryLandingUpdatedNote(),
+    renderOperatorMemos(caseData),
+    `<section class="aeo-summary recovery-landing-direct" id="aeo-summary" aria-label="${keyword} 지급정지 핵심 답변">
+      <p>먼저 확인할 답</p>
+      <h2>${keyword} 관련 계좌 지급정지, 원인과 기한부터 확인해야 합니다</h2>
+      <blockquote>은행에서 조치명·요청기관·문제 된 입금액·채권소멸절차 공고일을 확인한 뒤, 해당 입금이 정당한 거래대금이라는 자료와 자금 흐름을 함께 제출해야 합니다. 이의제기로 해결되지 않으면 채무부존재확인소송을 포함한 법원 절차를 검토할 수 있습니다.</blockquote>
+    </section>`,
+    `<section class="article-block recovery-landing-overview"><p class="section-kicker">CASE OVERVIEW</p><h2>${keyword} 사건 핵심 정리</h2>${createConfirmedSignals(rawCaseName, landing, replacementContext)}${paragraphs(introBody)}</section>`,
+    `<section class="article-block recovery-landing-pattern"><p class="section-kicker">TRANSACTION FLOW</p><h2>${keyword} 거래 흐름에서 확인할 부분</h2>${list(createScamMethodItems(rawCaseName, landing, replacementContext))}</section>`,
+    `<section class="article-block recovery-landing-cases"><p class="section-kicker">KEY ISSUES</p><h2>유사 상황에서 자주 문제 되는 쟁점</h2>${list(victimCases)}</section>`,
+    `<section class="article-block recovery-landing-response"><p class="section-kicker">RESPONSE</p><h2>지급정지 해제와 이의제기 대응</h2>${paragraphs(methodBody)}${createRecoveryEvidenceChecklist()}</section>`,
+    renderCurrentProgressSection(landing, caseData, "c"),
+    createRecoveryDebtNonexistenceSection(),
+    `<section class="article-block faq recovery-landing-faq" id="faq-list"><p class="section-kicker">FAQ</p><h2>${keyword} 자주 묻는 질문</h2>${faqHtml(faq, rawCaseName)}</section>`,
+    createLiveReceiptStatus(caseData),
+    renderComments(caseData),
+    createConsultForm(cn, siteName),
+    createFloatingWidgets(cn, siteName, slug),
+    trackScript,
+  ].filter(Boolean).join("\n");
+}
+
 function createLandingContent(landing, group, caseData, relatedCases = []) {
   const templateContentKey = group.landingKey || group.key;
+  if (templateContentKey === "c") {
+    return createRecoveryCaseLandingContent(landing, group, caseData);
+  }
   if (isStandardLandingCase(caseData) && templateContentKey === "a") {
     return createStandardLandingContent(landing, group, caseData, relatedCases);
   }
@@ -2743,7 +2848,10 @@ function renderFaqForLanding(landing, group, caseData) {
   const fullName = normalizeCaseName(caseData.caseName || "");
   const base = fullName.replace(/\s*(사칭\s*사기|사기|탈출|스캠|scam)$/i, "").trim() || fullName;
   const original = Array.isArray(landing.faq) ? landing.faq.filter((item) => item?.question && item?.answer) : [];
-  const shared = [
+  const shared = group.key === "c" ? [
+    { question: "지급정지 상담 전 무엇을 준비해야 하나요?", answer: "은행 통지서, 채권소멸절차 공고 내역, 문제 된 입금 전후 계좌 거래내역, 거래 상대방과의 대화, 계약·주문·배송 자료를 준비하면 원인과 대응 기한을 빠르게 확인할 수 있습니다." },
+    { question: "이의제기 반려 뒤에도 대응할 수 있나요?", answer: "반려 사유를 서면으로 받은 뒤 부족한 자료를 보완하고, 수사기관 확인이나 채무부존재확인소송이 필요한 상황인지 검토할 수 있습니다." },
+  ] : [
     { question: "전화나 카톡 상담은 언제 이용하면 좋나요?", answer: "추가 입금 요구가 계속되거나 대화방 삭제가 예상되면 전화나 카톡 상담으로 먼저 증거 상태를 점검하는 것이 좋습니다. 상담 접수 전이라도 입금증, 계좌번호, 대화 캡처를 준비하면 초기 판단이 빨라집니다." },
     { question: "2차 피해를 막으려면 무엇을 조심해야 하나요?", answer: "피해금 회복팀, 환불 대행, 법무팀을 사칭해 선입금을 요구하는 연락을 조심해야 합니다. 기존 사건 자료를 넘기기 전 상대방 신원과 절차를 확인하고, 수수료 선입금 요구에는 응하지 않는 것이 안전합니다." },
   ];
@@ -2757,8 +2865,9 @@ function renderFaqForLanding(landing, group, caseData) {
       { question: "손해배상과 부당이득반환은 무엇이 다른가요?", answer: "손해배상은 불법행위로 발생한 손해를 청구하는 구조이고, 부당이득반환은 법률상 원인 없이 얻은 이익의 반환을 구하는 구조입니다. 사건 자료에 따라 함께 검토될 수 있습니다." },
     ],
     c: [
-      { question: "어떤 성공사례를 참고해야 하나요?", answer: "지급정지 후 일부 회수, 가압류 후 합의, 수사 중 반환 협의처럼 절차가 구체적으로 이어진 사례를 참고해야 합니다. 결과만 보지 말고 증거 보존과 접수 시점을 비교하는 것이 좋습니다." },
-      { question: "성공사례와 내 사건이 비슷한지 어떻게 확인하나요?", answer: "업체명보다 계좌, URL, 상담원 계정, 입금 명목, 출금 제한 방식이 더 중요합니다. 상담 접수 시 이 자료를 제시하면 유사 사례와 비교해 절차 방향을 검토할 수 있습니다." },
+      { question: "채무부존재확인소송을 접수하면 지급정지가 바로 해제되나요?", answer: "소송이 법원에 계속 중이면 채권소멸절차 등의 종료 사유가 될 수 있지만, 소장 접수만으로 계좌 전액이 즉시 풀리는 것은 아닙니다. 피해금에 해당하는 금액은 소송 계속 중 지급정지가 유지될 수 있어 은행에 소송계속 사실을 제출하고 적용 범위를 확인해야 합니다." },
+      { question: "지급정지 이의제기에는 어떤 자료가 필요한가요?", answer: "문제 된 입금이 재화·용역의 대가이거나 그 밖의 정당한 권원으로 받은 돈임을 보여주는 계약서, 주문·배송 자료, 대화 원본, 거래내역과 자금 흐름 자료가 중요합니다." },
+      { question: "다른 은행 계좌까지 거래가 막혔다면 어떻게 하나요?", answer: "지급정지와 전자금융거래 제한은 범위와 해제 요건이 다를 수 있습니다. 각 금융회사에 조치명과 근거를 확인하고, 이의제기 또는 소송계속 사실 제출 뒤 어떤 제한이 종료되는지 구분해 확인해야 합니다." },
     ],
     d: [
       { question: "입금 직후 가장 먼저 해야 할 일은 무엇인가요?", answer: "추가 입금을 즉시 중단하고 대화방 캡처, 입금증, 계좌번호, 사이트 주소, 담당자 연락처를 삭제하지 않고 보존해야 합니다. 자료가 남아 있을수록 이후 형사·민사 절차에서 대응 가능성이 높아집니다." },
@@ -2790,7 +2899,9 @@ function renderFaqForLanding(landing, group, caseData) {
     ],
   }[group.key] || [];
 
-  return [...original, ...additions, ...shared].slice(0, 7);
+  return group.key === "c"
+    ? [...additions, ...original, ...shared].slice(0, 7)
+    : [...original, ...additions, ...shared].slice(0, 7);
 }
 
 function fallbackBody(base, key) {
@@ -2823,7 +2934,7 @@ function consultationLabelsForSite(siteName = "") {
   if (siteName === "금융피해 대응센터") {
     return { stickyTitle: "지금 바로 전문 상담", amountPlaceholder: "사건 발생 일시" };
   }
-  if (siteName === "피해 회수 성공사례") {
+  if (siteName === "피해 회수 성공사례" || siteName === "법무법인 선린 계좌 지급정지 대응센터") {
     return { stickyTitle: "지급정지 피해 상담", amountPlaceholder: "문의 내용" };
   }
   if (siteName === "실제 회수 사례 아카이브") {
@@ -2837,9 +2948,10 @@ function consultationLabelsForSite(siteName = "") {
 
 function createConsultForm(cn, siteName) {
   const { amountPlaceholder } = consultationLabelsForSite(siteName);
+  const isRecovery = siteName === "법무법인 선린 계좌 지급정지 대응센터" || siteName === "피해 회수 성공사례";
   return `<section class="article-block consult-form-section" id="consult">
   <h2>상담 접수</h2>
-  <p>추가 입금 요구를 받았거나 출금이 막혔다면 지금 자료를 남겨주세요. 상담 접수 후 전화 또는 카톡으로 입금 내역, 대화 캡처, 계좌 정보를 확인해 초기 대응 방향을 안내합니다.</p>
+  <p>${isRecovery ? "지급정지 통지서와 문제 된 입금 내역을 남겨주시면 이의제기 기한, 준비자료와 채무부존재확인소송 필요성을 확인합니다." : "추가 입금 요구를 받았거나 출금이 막혔다면 지금 자료를 남겨주세요. 상담 접수 후 전화 또는 카톡으로 입금 내역, 대화 캡처, 계좌 정보를 확인해 초기 대응 방향을 안내합니다."}</p>
   <form class="consult-form" id="consultForm">
     <input type="text" name="cname" placeholder="이름" required autocomplete="name">
     <input type="tel" name="phone" placeholder="010-1234-5678" required autocomplete="tel">
@@ -2937,7 +3049,7 @@ function pageTemplate(d) {
   <meta property="og:locale" content="ko_KR">
   ${d.headExtra}
   <script type="application/ld+json">${d.schema}</script>
-  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="${d.styleHref || "/assets/style.css"}">
 </head>
 <body class="${d.bodyClass}">
   <header class="site-header">
@@ -3394,6 +3506,16 @@ function cleanupRepeatedWordsLegacy(value = "") {
 
 function createHeroCta(caseName = "", group = {}) {
   const prefix = esc(group.pathPrefix || "prosecute");
+  if ((group.landingKey || group.key) === "c") {
+    return `<div class="hero-cta recovery-hero-cta">
+      <p class="hero-cta-lead">지급정지 통지서를 받았다면 공고일과 문제 된 입금부터 확인하세요.</p>
+      <div>
+        <a href="#consult" class="hero-cta-primary">지급정지<br>상담 접수</a>
+        <a href="tel:0263480406" class="hero-cta-secondary">전화 상담<br>02-6348-0406</a>
+        <a href="/${prefix}/" class="hero-cta-secondary">관련 사례<br>더 보기</a>
+      </div>
+    </div>`;
+  }
   return `<div class="hero-cta">
     <p class="hero-cta-lead"><span class="hero-cta-typing"></span><span class="hero-cta-cursor"></span></p>
     <div>
