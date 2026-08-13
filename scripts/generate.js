@@ -3217,7 +3217,7 @@ function buildPage(template, group, data) {
       .replace(/\s*<section id="sunlin-intro" class="center-intro-section"[\s\S]*?<\/section>\s*(?=<section id="members")/, "\n")
       .replace(/\s*<section id="members" class="center-member-section"[\s\S]*?<\/section>\s*(?=<section class="center-progress-section")/, "\n");
   }
-  if (group.key === "c" && String(group.bodyClass || "").includes("recovery-guide-home")) {
+  if (group.key === "c" && String(data.pageKind || "").includes("recovery-guide-home")) {
     html = html.replace('href="/assets/style.css"', `href="/assets/style.css?v=${RECOVERY_HOME_STYLE_VERSION}"`);
   }
   return html;
