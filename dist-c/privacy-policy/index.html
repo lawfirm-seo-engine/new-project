@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>개인정보처리방침 | 피해 회수 성공사례</title>
+  <title>개인정보처리방침 | 법무법인 선린 계좌 지급정지 대응센터</title>
   <meta name="description" content="법무법인 선린의 개인정보 수집·이용·보호에 관한 방침입니다.">
   <link rel="canonical" href="https://gnlaw-recovery.co.kr/privacy-policy/">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="개인정보처리방침 | 피해 회수 성공사례">
+  <meta property="og:title" content="개인정보처리방침 | 법무법인 선린 계좌 지급정지 대응센터">
   <meta property="og:description" content="법무법인 선린의 개인정보 수집·이용·보호에 관한 방침입니다.">
   <meta property="og:image" content="https://gnlaw-recovery.co.kr/assets/og-template.png">
   <meta property="og:url" content="https://gnlaw-recovery.co.kr/privacy-policy/">
-  <meta property="og:site_name" content="피해 회수 성공사례">
+  <meta property="og:site_name" content="법무법인 선린 계좌 지급정지 대응센터">
   <meta property="og:locale" content="ko_KR">
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"개인정보처리방침 | 피해 회수 성공사례","url":"https://gnlaw-recovery.co.kr/privacy-policy/","inLanguage":"ko-KR","description":"법무법인 선린의 개인정보 수집·이용·보호에 관한 방침입니다.","dateModified":"2026-08-11","publisher":{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}},{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"개인정보처리방침 | 법무법인 선린 계좌 지급정지 대응센터","url":"https://gnlaw-recovery.co.kr/privacy-policy/","inLanguage":"ko-KR","description":"법무법인 선린의 개인정보 수집·이용·보호에 관한 방침입니다.","dateModified":"2026-08-13","publisher":{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}},{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}]}</script>
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body class="domain-c privacy-policy-page hub-page">
@@ -37,7 +37,7 @@
 
     <div class="page-shell">
       <article class="article-block privacy-policy-content">
-  <p class="policy-date">시행일: 2026년 1월 1일 &nbsp;|&nbsp; 최종 수정일: 2026-08-11</p>
+  <p class="policy-date">시행일: 2026년 1월 1일 &nbsp;|&nbsp; 최종 수정일: 2026-08-13</p>
   <p>법무법인 선린(이하 "법인")은 개인정보 보호법 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 다음과 같이 개인정보처리방침을 수립·공개합니다.</p>
 
   <h3>제1조 개인정보의 수집 및 이용 목적</h3>
@@ -152,10 +152,10 @@
     </div>
 
     <section id="consult" class="cta">
-      <p class="eyebrow">성공사례 · 지역 · 회수율 · 전액 또는 일부 회수</p>
-      <h2>유사 성공사례 비교</h2>
-      <p>피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.</p>
-      <a href="tel:0263480406">사례 비교 문의</a>
+      <p class="eyebrow">지급정지 원인 · 이의제기 · 해제 절차 · 채무부존재확인</p>
+      <h2>내 계좌의 지급정지 원인부터 확인하세요</h2>
+      <p>통지서, 거래내역, 입금 경위 자료를 기준으로 은행 이의제기와 법적 대응 방향을 검토합니다.</p>
+      <a href="tel:0263480406">지급정지 상담 문의</a>
     </section>
   </main>
 
@@ -238,7 +238,7 @@
     try {
       var res = await fetch('https://gnlaw-criminal.co.kr/api/submit-consult', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: "피해 회수 성공사례", domain: "피해 회수 성공사례" })
+        body: JSON.stringify({ name: this.sname.value, phone: this.sphone.value, amount: this.samount.value, caseName: "법무법인 선린 계좌 지급정지 대응센터", domain: "법무법인 선린 계좌 지급정지 대응센터" })
       });
       var data = await res.json();
       if (data.ok) { msg.textContent = '접수 완료!'; msg.className = 'sticky-msg ok'; this.reset(); btn.disabled = false; btn.textContent = '확인 요청'; }

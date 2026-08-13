@@ -119,20 +119,20 @@ const groups = [
     pathPrefix: "success",
     urlSlugSuffix: "result",
     bodyClass: "domain-c",
-    siteName: "피해 회수 성공사례",
-    shortName: "성공사례",
-    label: "성공사례형",
-    intent: "성공사례 · 지역 · 회수율 · 전액 또는 일부 회수",
+    siteName: "법무법인 선린 계좌 지급정지 대응센터",
+    shortName: "지급정지 대응센터",
+    label: "계좌 지급정지 대응",
+    intent: "지급정지 원인 · 이의제기 · 해제 절차 · 채무부존재확인",
     ogType: "article",
     titleSuffix: "회수 성공사례 분석",
     descriptionSuffix: "성공사례, 지역, 회수율, 전액 또는 일부 회수 흐름을 사건별로 정리합니다.",
     ogSuffix: "회수 성공사례",
-    hubTitle: "법무법인 선린 피해 회수 성공 사건 리스트",
-    hubLead: "유사 사건의 대응 흐름과 회수율을 비교할 수 있도록 성공사례 중심으로 재구성한 사건 목록입니다.",
-    tone: "결과 중심",
-    ctaTitle: "유사 성공사례 비교",
-    ctaText: "피해 유형과 증거 상태가 비슷한 사례를 기준으로 예상 대응 순서와 회수 가능성을 확인합니다.",
-    ctaLabel: "사례 비교 문의",
+    hubTitle: "계좌 지급정지 원인부터 이의제기·해제 절차까지",
+    hubLead: "계좌 지급정지는 사기이용계좌 신고나 수사기관 요청, 금융회사의 이상거래 판단 등으로 발생할 수 있습니다. 통지서에서 조치의 법적 근거와 범위를 먼저 확인한 뒤 이의제기 자료와 필요한 법적 절차를 준비해야 합니다.",
+    tone: "ACCOUNT FREEZE RESPONSE GUIDE",
+    ctaTitle: "내 계좌의 지급정지 원인부터 확인하세요",
+    ctaText: "통지서, 거래내역, 입금 경위 자료를 기준으로 은행 이의제기와 법적 대응 방향을 검토합니다.",
+    ctaLabel: "지급정지 상담 문의",
     tableTitle: "성공사례 진행 현황",
     naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"],
   },
@@ -1633,6 +1633,10 @@ function createHubContent(group) {
   const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { maxItems: HOME_FRESH_LIST_LIMIT, powerlinks: group.key === "a" ? powerlinks : [] });
   const typeEntrySection = createTypeEntrySection(group);
 
+  if (group.key === "c" && !group.landingKey) {
+    return createRecoveryGuideHomeContent(group, groupCases, caseNoMap);
+  }
+
   const showPL = group.key === "a" && !group.landingKey;
   const caseEntries = sortedCases.map((c) => ({ type: "case", data: c, date: c.updatedAt || c.createdAt || "" }));
   const plEntries = showPL ? powerlinks.filter((p) => p?.slug).map((p) => ({ type: "pl", data: p, date: p.updatedAt || p.createdAt || "" })) : [];
@@ -1997,6 +2001,224 @@ function createHubContent(group) {
     <div id="pgWrap" class="pg-wrap"></div>
     ${createReadingroomHubFaqSection(group)}
     ${dynScript}`;
+}
+
+const RECOVERY_HOME_FAQ = [
+  {
+    question: "보이스피싱과 관련이 없어도 지급정지될 수 있나요?",
+    answer: "가능합니다. 정상적인 중고거래·가상자산 거래·물품대금 정산이라도 입금된 돈이 피해금의 이동 경로에 포함되면 초기 단계에서 사기이용계좌로 판단될 수 있습니다. 거래가 정당했다는 계약, 대화, 배송, 세금계산서와 자금 흐름 자료로 소명해야 합니다.",
+  },
+  {
+    question: "지급정지 이의제기는 언제까지 해야 하나요?",
+    answer: "통신사기피해환급법상 이의제기는 지급정지 또는 전자금융거래 제한이 이루어진 뒤 채권소멸절차 개시 공고일을 기준으로 2개월이 지나기 전까지 할 수 있습니다. 실제 기산점과 마감일은 은행 통지서와 금융감독원 공고를 바로 확인해야 합니다.",
+  },
+  {
+    question: "이의제기를 하면 계좌가 바로 풀리나요?",
+    answer: "이의제기 접수만으로 모든 제한이 즉시 해제된다고 단정할 수 없습니다. 금융회사가 객관적 자료와 사유를 검토하며, 피해자 통보 후 일정 기간이나 소송이 계속되는 동안 피해금에 해당하는 부분의 지급정지가 유지될 수 있습니다.",
+  },
+  {
+    question: "채무부존재확인 소송을 접수하면 지급정지가 해제되나요?",
+    answer: "소송 제기는 채권소멸절차를 멈추거나 권리관계를 법원에서 판단받는 수단이 될 수 있지만 접수만으로 전액이 자동 해제되는 것은 아닙니다. 소송계속 사실을 은행에 제출하고, 피해금과 고유자금을 구분해 해제 범위를 검토해야 합니다.",
+  },
+  {
+    question: "다른 은행 계좌까지 거래가 막힌 이유는 무엇인가요?",
+    answer: "사기이용계좌에 대한 지급정지와 함께 명의인에 대한 전자금융거래 제한 또는 금융회사의 별도 사고예방 조치가 적용되면 다른 계좌의 비대면 거래도 제한될 수 있습니다. 각 금융회사에 조치 명칭, 근거, 범위를 구분해 확인해야 합니다.",
+  },
+  {
+    question: "은행 이의제기가 받아들여지지 않으면 무엇을 해야 하나요?",
+    answer: "반려 사유를 서면으로 확보한 뒤 부족한 소명자료를 보완하고, 수사기관의 확인 가능성, 피해자와의 권리관계, 채무부존재확인 소송 필요성을 함께 검토해야 합니다. 사건별로 적절한 절차가 달라 통지서와 거래자료 확인이 먼저입니다.",
+  },
+];
+
+function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
+  const sortedCases = [...groupCases].sort((a, b) =>
+    String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")),
+  );
+  const recentCases = sortedCases.slice(0, 6);
+  const recentCards = recentCases.map((item) => {
+    const landing = getLanding(item, group);
+    const title = landingDisplayTitle(item, HUB_SUFFIX.c, group);
+    const summary = compactText(landing.description || item.summary || "계좌 지급정지 대응과 해제 절차를 검토한 관련 사례입니다.").slice(0, 120);
+    return `<a class="recovery-case-card" href="${buildRelativeLandingPath(group, item)}">
+      <span>No. ${caseNoMap.get(item.slug) ?? ""} · ${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
+      <strong>${escapeHtml(title)}</strong>
+      <p>${escapeHtml(summary)}</p>
+      <em>사례 보기 →</em>
+    </a>`;
+  }).join("\n");
+  const faq = RECOVERY_HOME_FAQ.map((item, index) => `<details${index === 0 ? " open" : ""}>
+    <summary>${escapeHtml(item.question)}</summary>
+    <p>${escapeHtml(item.answer)}</p>
+  </details>`).join("\n");
+
+  return `<article class="recovery-guide" aria-label="계좌 지급정지 해제 가이드">
+    <nav class="recovery-jump" aria-label="페이지 목차">
+      <a href="#freeze-causes">발생 원인</a>
+      <a href="#freeze-difference">용어 차이</a>
+      <a href="#release-process">해제 절차</a>
+      <a href="#required-documents">준비자료</a>
+      <a href="#situation-response">상황별 대응</a>
+      <a href="#recovery-faq">FAQ</a>
+    </nav>
+
+    <section class="recovery-answer" aria-labelledby="direct-answer-title">
+      <div>
+        <p class="recovery-kicker">먼저 확인할 답</p>
+        <h2 id="direct-answer-title">지급정지는 ‘이유 확인 → 자료 보존 → 기한 내 이의제기’ 순서로 대응합니다.</h2>
+        <p>은행에 <strong>정확한 조치명·요청기관·지급정지 금액·채권소멸 공고일</strong>을 확인하세요. 이후 해당 입금의 정당한 원인과 자금 흐름을 객관적인 자료로 설명하고, 필요하면 채무부존재확인 소송 등 법적 절차를 검토합니다.</p>
+        <p class="recovery-note">지급정지 통지서에 적힌 날짜가 대응 기한을 좌우합니다. 전화 안내만 듣지 말고 서면을 확보하는 것이 우선입니다.</p>
+      </div>
+      <ol class="recovery-quick-steps" aria-label="지급정지 초기 대응 4단계">
+        <li><span>01</span><strong>은행 확인</strong><small>조치 사유와 범위</small></li>
+        <li><span>02</span><strong>자료 보존</strong><small>입금 경위와 원본</small></li>
+        <li><span>03</span><strong>이의제기</strong><small>기한과 제출처 확인</small></li>
+        <li><span>04</span><strong>법적 대응</strong><small>필요한 경우 소송 검토</small></li>
+      </ol>
+    </section>
+
+    <section id="freeze-causes" class="recovery-section">
+      <header class="recovery-section-head">
+        <p class="recovery-kicker">01 · CAUSE</p>
+        <h2>계좌 지급정지는 왜 발생하나요?</h2>
+        <p>통신사기피해환급법상 피해구제 신청이나 수사기관 요청으로 사기이용계좌에 지급정지가 이루어질 수 있고, 이상거래 탐지에 따른 임시조치나 금융회사의 별도 거래제한이 함께 나타날 수도 있습니다.</p>
+      </header>
+      <div class="recovery-question-grid">
+        <article>
+          <span>신고·요청</span>
+          <h3>갑자기 통장이 지급정지된 이유</h3>
+          <p>피해자가 송금한 계좌로 피해구제를 신청했거나, 수사기관·금융회사 사이에 지급정지 요청이 전달되었을 가능성이 있습니다. 입금 직후 다른 계좌로 이체된 경우에는 자금이 거쳐 간 계좌까지 확인 대상이 될 수 있습니다.</p>
+        </article>
+        <article>
+          <span>정상거래 소명</span>
+          <h3>보이스피싱과 관련이 없어도 지급정지될 수 있나요?</h3>
+          <p>본인이 범행을 몰랐더라도 거래 상대방이 보낸 돈이 피해금으로 신고되면 초기 조치가 이루어질 수 있습니다. ‘몰랐다’는 설명만으로는 부족하고, 물품·용역 제공이나 정당한 거래대금임을 보여주는 자료가 필요합니다.</p>
+        </article>
+      </div>
+      <aside class="recovery-check-callout">
+        <strong>은행에 바로 물어볼 5가지</strong>
+        <ul>
+          <li>조치명이 법률상 지급정지인지, 임시조치·사고신고·거래제한인지</li>
+          <li>지급정지를 요청한 기관과 최초 조치일</li>
+          <li>문제가 된 입금 일시·금액과 현재 묶인 금액</li>
+          <li>채권소멸절차 개시 여부와 금융감독원 공고일</li>
+          <li>이의제기 양식, 담당 부서, 제출 방법</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="freeze-difference" class="recovery-section recovery-section-dark">
+      <header class="recovery-section-head">
+        <p class="recovery-kicker">02 · DISTINCTION</p>
+        <h2>지급정지와 계좌동결은 무엇이 다른가요?</h2>
+        <p>‘계좌동결’은 일상적으로 넓게 쓰는 표현입니다. 실제 해결 절차는 통지서에 적힌 법적 조치가 무엇인지에 따라 달라집니다.</p>
+      </header>
+      <div class="recovery-compare">
+        <article>
+          <span>법률상 조치</span>
+          <h3>지급정지</h3>
+          <p>사기이용계좌의 예금채권에 대해 출금·이체 등 지급을 막는 조치입니다. 통신사기피해환급법상 피해구제와 채권소멸절차로 이어질 수 있어 공고일과 이의제기 기한이 중요합니다.</p>
+        </article>
+        <article>
+          <span>포괄적 표현</span>
+          <h3>계좌동결</h3>
+          <p>지급정지뿐 아니라 수사상 조치, 민사집행상 압류·가압류, 금융회사의 사고예방 거래제한 등을 통칭하는 경우가 많습니다. ‘동결’이라는 말만으로 해제 절차를 정하면 안 됩니다.</p>
+        </article>
+        <article>
+          <span>함께 확인</span>
+          <h3>전자금융거래 제한</h3>
+          <p>특정 계좌의 잔액과 별개로 본인 명의 계좌의 비대면 이체·출금 등이 제한되는 경우가 있습니다. 지급정지 계좌의 해제와 다른 계좌의 거래 정상화가 동시에 이루어지지 않을 수 있습니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="release-process" class="recovery-section">
+      <header class="recovery-section-head">
+        <p class="recovery-kicker">03 · PROCESS</p>
+        <h2>지급정지 해제는 어떻게 하나요?</h2>
+        <p>모든 사건에 같은 신청서 한 장이 적용되는 것은 아닙니다. 먼저 은행 단계에서 이의제기 가능성을 검토하고, 해결되지 않으면 수사 확인이나 민사소송이 필요한지 판단합니다.</p>
+      </header>
+      <ol class="recovery-timeline">
+        <li><span>1</span><div><h3>지급정지 통지와 공고일 확인</h3><p>은행 통지서, 문자, 창구 안내를 모으고 금융감독원 채권소멸절차 공고 여부를 확인합니다.</p></div></li>
+        <li><span>2</span><div><h3>문제가 된 거래 특정</h3><p>피해신고 금액과 본인 계좌의 입출금 흐름을 시간순으로 표시해 정상거래 대금과 고유자금을 구분합니다.</p></div></li>
+        <li><span>3</span><div><h3>은행에 이의제기 제출</h3><p>이의제기신청서, 신분증 사본, 사기이용계좌가 아니라는 사실을 뒷받침하는 자료를 계좌 관리 금융회사에 제출합니다.</p></div></li>
+        <li><span>4</span><div><h3>반려 사유와 수사 진행 확인</h3><p>서면 반려 사유를 받고, 수사기관이 사기이용계좌가 아니라고 확인할 수 있는지와 추가 소명자료를 점검합니다.</p></div></li>
+        <li><span>5</span><div><h3>필요시 채무부존재확인 소송 검토</h3><p>피해자로 지목된 상대방과의 반환채무가 없다는 확인을 구할 필요가 있는지, 소송계속 사실을 은행에 어떻게 제출할지 검토합니다.</p></div></li>
+      </ol>
+      <div class="recovery-deadline">
+        <strong>기한 주의</strong>
+        <p>법상 이의제기는 채권소멸절차 개시 공고일을 기준으로 2개월이 지나기 전까지 가능합니다. 다만 사건별 통지·공고 상태가 다르므로 실제 마감일을 은행과 공고에서 확인해야 합니다.</p>
+      </div>
+    </section>
+
+    <section id="required-documents" class="recovery-section recovery-docs-section">
+      <header class="recovery-section-head">
+        <p class="recovery-kicker">04 · DOCUMENTS</p>
+        <h2>이의제기에는 어떤 자료가 필요한가요?</h2>
+        <p>시행령상 기본 서류에 더해 ‘왜 이 돈을 받았는지’를 제3자가 보아도 이해할 수 있는 거래 원본을 붙이는 것이 핵심입니다.</p>
+      </header>
+      <div class="recovery-doc-grid">
+        <article><b>01</b><h3>필수 신청자료</h3><ul><li>은행 이의제기신청서</li><li>계좌 명의인 신분증 사본</li><li>지급정지 통지서·안내문</li></ul></article>
+        <article><b>02</b><h3>거래의 원인 자료</h3><ul><li>계약서·주문서·세금계산서</li><li>중고거래 게시글·배송증</li><li>가상자산 주문·체결·지갑 기록</li></ul></article>
+        <article><b>03</b><h3>대화와 연락 자료</h3><ul><li>카카오톡·문자·이메일 원본</li><li>통화내역과 상대방 정보</li><li>거래 전후 설명이 담긴 대화</li></ul></article>
+        <article><b>04</b><h3>자금 흐름 자료</h3><ul><li>해당 계좌 전체 거래내역</li><li>문제 입금 전후 이체내역</li><li>고유자금 출처 증빙</li></ul></article>
+      </div>
+      <p class="recovery-evidence-tip"><strong>자료 정리 팁</strong> 캡처만 나열하지 말고 ‘날짜 · 상대방 · 거래 목적 · 금액 · 첨부자료 번호’를 한 장의 표로 먼저 정리하면 거래 경위를 설명하기 쉽습니다.</p>
+    </section>
+
+    <section class="recovery-section recovery-lawsuit">
+      <div>
+        <p class="recovery-kicker">법원 절차</p>
+        <h2>채무부존재확인 소송을 법원에 접수하여 지급정지에 대응하는 방법</h2>
+        <p>통신사기피해환급법은 지급정지 이후에도 계좌 명의인이나 피해자가 상대방을 상대로 채무부존재확인·부당이득반환청구 소송 등을 제기할 수 있도록 두고 있습니다. 계좌 명의인은 피해자로 신고한 상대방에 대한 반환채무가 존재하지 않는다는 확인을 구하고, 소송이 법원에 계속 중임을 증명하는 서류를 은행에 제출해 채권소멸절차 중단 여부를 검토할 수 있습니다.</p>
+        <p>다만 <strong>소장 접수만으로 계좌 전액이 자동 해제되는 것은 아닙니다.</strong> 피해금에 해당하는 부분은 소송 결과가 확정될 때까지 지급정지가 유지될 수 있고, 당사자 특정·송달·청구 범위·입증책임도 개별 사건마다 다릅니다.</p>
+      </div>
+      <div class="recovery-lawsuit-flow">
+        <span>상대방·청구금액 특정</span><i>→</i><span>소장과 증거 제출</span><i>→</i><span>소송계속 증명 확보</span><i>→</i><span>은행에 제출·해제 범위 검토</span>
+      </div>
+    </section>
+
+    <aside class="recovery-mid-cta">
+      <div><span>지급정지 통지서를 받으셨나요?</span><strong>공고일과 입금 경위를 먼저 확인해 드립니다.</strong></div>
+      <div><a href="tel:0263480406">전화 상담 02-6348-0406</a><a href="https://pf.kakao.com/_WkdxfX/chat" target="_blank" rel="noopener">카카오톡 상담</a></div>
+    </aside>
+
+    <section id="situation-response" class="recovery-section">
+      <header class="recovery-section-head">
+        <p class="recovery-kicker">05 · BY SITUATION</p>
+        <h2>상황별로 무엇부터 대응해야 하나요?</h2>
+      </header>
+      <div class="recovery-situation-grid">
+        <article><span>중고거래·사업대금</span><h3>정상적으로 물건이나 서비스를 제공한 경우</h3><p>게시글, 주문서, 배송완료, 세금계산서, 상대방과의 전체 대화를 거래일 순으로 묶어 정당한 권원을 소명합니다.</p></article>
+        <article><span>가상자산 P2P</span><h3>코인 거래 대금을 받은 뒤 정지된 경우</h3><p>거래소 KYC 정보, 주문·체결 화면, 지갑 TXID, 시세와 수량, 매수인 대화를 보존하고 반복·분할 거래 구조를 설명합니다.</p></article>
+        <article><span>명의도용·접근매체</span><h3>계좌를 직접 사용하지 않았거나 빌려준 정황이 있는 경우</h3><p>은행 이의제기와 별도로 명의도용 신고, 접근매체 관리 경위, 수사기관 진술을 함께 검토해야 합니다. 형사책임 문제와 민사 해제 절차를 구분합니다.</p></article>
+        <article><span>이의제기 반려</span><h3>은행에서 자료가 부족하다고 한 경우</h3><p>반려 사유를 서면으로 받아 부족한 자료를 특정하고, 수사기관 확인 또는 채무부존재확인 소송이 필요한 단계인지 판단합니다.</p></article>
+      </div>
+    </section>
+
+    <section id="recovery-faq" class="recovery-section recovery-faq faq">
+      <header class="recovery-section-head">
+        <p class="recovery-kicker">06 · FAQ</p>
+        <h2>계좌 지급정지 자주 묻는 질문</h2>
+      </header>
+      ${faq}
+    </section>
+
+    <section class="recovery-section recovery-cases">
+      <header class="recovery-section-head recovery-cases-head">
+        <div><p class="recovery-kicker">RELATED CASES</p><h2>최근 지급정지 해결·대응 사례</h2><p>기존 사건 데이터와 랜딩페이지 URL은 그대로 유지하고, 메인에서는 최신 관련 사례만 연결합니다.</p></div>
+        <a href="/${group.pathPrefix}/">전체 사례 아카이브 보기 (${groupCases.length.toLocaleString("ko-KR")}건)</a>
+      </header>
+      <div class="recovery-case-grid">${recentCards}</div>
+    </section>
+
+    <section id="consult" class="recovery-final-cta">
+      <p class="recovery-kicker">LEGAL REVIEW</p>
+      <h2>지급정지는 원인과 기한을 먼저 확인해야 합니다.</h2>
+      <p>통지서, 해당 입금 전후 거래내역, 거래 상대방과의 대화를 준비해 주시면 이의제기와 소송 필요성을 검토합니다.</p>
+      <div><a href="tel:0263480406">02-6348-0406 전화 상담</a><a href="https://pf.kakao.com/_WkdxfX/chat" target="_blank" rel="noopener">카카오톡으로 자료 보내기</a></div>
+      <small>본 페이지는 일반적인 법률 정보를 제공하며, 구체적인 결과는 사실관계와 금융회사·수사기관·법원의 판단에 따라 달라질 수 있습니다.</small>
+    </section>
+  </article>`;
 }
 
 function isCenterBoardSite(group) {
@@ -2547,10 +2769,66 @@ function createCategoryContent(group) {
   const caseNoMap = new Map(groupCases.map((c, i) => [c.slug, i + 1]));
   const sortedCases = [...groupCases].reverse();
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
+  if (group.key === "c" && !group.landingKey) {
+    return createRecoveryArchiveContent(group, sortedCases, caseNoMap, suffix);
+  }
   return [
     createCategoryHeroCta(group),
     createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { powerlinks: group.key === "a" ? powerlinks : [] }),
   ].join("\n");
+}
+
+function createRecoveryArchiveContent(group, sortedCases, caseNoMap, suffix) {
+  const links = sortedCases.map((item) => {
+    const title = landingDisplayTitle(item, suffix, group);
+    const landing = getLanding(item, group);
+    const summary = compactText(landing.description || item.summary || group.hubLead || "").slice(0, 150);
+    const search = [title, item.caseName, item.slug, summary].filter(Boolean).join(" ");
+    return `<a class="recovery-archive-card" href="${buildRelativeLandingPath(group, item)}" data-recovery-search="${escapeHtml(search)}">
+      <span>No. ${caseNoMap.get(item.slug) ?? ""}</span>
+      <strong>${escapeHtml(title)}</strong>
+      <p>${escapeHtml(summary)}</p>
+      <time>${escapeHtml(item.updatedAt || item.createdAt || "")}</time>
+    </a>`;
+  }).join("\n");
+
+  return `<section class="recovery-archive-intro">
+    <p class="recovery-kicker">PRESERVED LANDING ARCHIVE</p>
+    <h2>기존 사건 URL과 콘텐츠를 그대로 보존한 사례 아카이브</h2>
+    <p>메인은 계좌 지급정지 정보 가이드로 전환했지만, 기존 사건 랜딩페이지는 삭제하거나 주소를 변경하지 않았습니다.</p>
+    <a href="/">계좌 지급정지 해제 가이드로 돌아가기</a>
+  </section>
+  <div class="recovery-archive-search">
+    <label for="recoveryArchiveSearch">사건명 또는 키워드 검색</label>
+    <input id="recoveryArchiveSearch" type="search" placeholder="은행명, 지역, 지급정지 키워드를 입력하세요" autocomplete="off">
+    <span id="recoveryArchiveCount">전체 ${sortedCases.length.toLocaleString("ko-KR")}건</span>
+  </div>
+  <section id="recoveryArchiveGrid" class="recovery-archive-grid" aria-label="지급정지 관련 사례 목록">${links}</section>
+  <nav id="recoveryArchivePagination" class="recovery-archive-pagination" aria-label="사례 페이지 이동"></nav>
+  <script>(function(){
+    var input=document.getElementById('recoveryArchiveSearch');
+    var grid=document.getElementById('recoveryArchiveGrid');
+    var count=document.getElementById('recoveryArchiveCount');
+    var pagination=document.getElementById('recoveryArchivePagination');
+    if(!input||!grid||!pagination)return;
+    var all=[].slice.call(grid.querySelectorAll('.recovery-archive-card'));
+    var filtered=all.slice();var page=1;var size=48;
+    function norm(v){return String(v||'').normalize('NFKC').toLowerCase().replace(/\\s+/g,' ').trim();}
+    function draw(){
+      var pages=Math.max(1,Math.ceil(filtered.length/size));if(page>pages)page=pages;
+      all.forEach(function(el){el.hidden=true;});
+      filtered.slice((page-1)*size,page*size).forEach(function(el){el.hidden=false;});
+      count.textContent='검색 결과 '+filtered.length.toLocaleString('ko-KR')+'건';
+      var start=Math.max(1,page-2),end=Math.min(pages,start+4);start=Math.max(1,end-4);
+      var html=page>1?'<button type="button" data-page="'+(page-1)+'">이전</button>':'';
+      for(var p=start;p<=end;p++)html+='<button type="button" data-page="'+p+'"'+(p===page?' aria-current="page"':'')+'>'+p+'</button>';
+      if(page<pages)html+='<button type="button" data-page="'+(page+1)+'">다음</button>';
+      pagination.innerHTML=html;
+    }
+    input.addEventListener('input',function(){var q=norm(input.value);filtered=q?all.filter(function(el){return norm(el.dataset.recoverySearch).indexOf(q)>=0;}):all.slice();page=1;draw();});
+    pagination.addEventListener('click',function(e){var btn=e.target.closest('button[data-page]');if(!btn)return;page=Number(btn.dataset.page)||1;draw();document.querySelector('.recovery-archive-search').scrollIntoView({behavior:'smooth',block:'start'});});
+    draw();
+  })();</script>`;
 }
 
 function createCategoryHeroCta(group) {
@@ -2953,6 +3231,77 @@ function createCategorySchema(group, title, description, canonical) {
   });
 }
 
+function createRecoveryHomeSchema(group, title, description) {
+  const home = `${group.siteUrl}/`;
+  const organizationId = `${home}#organization`;
+  const serviceId = `${home}#legal-service`;
+  const pageId = `${home}#webpage`;
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": pageId,
+        name: title,
+        url: home,
+        inLanguage: "ko-KR",
+        description,
+        dateModified: today,
+        about: [
+          { "@type": "Thing", name: "계좌 지급정지" },
+          { "@type": "Thing", name: "지급정지 이의제기" },
+          { "@type": "Thing", name: "채무부존재확인 소송" },
+        ],
+        breadcrumb: { "@id": `${home}#breadcrumb` },
+        publisher: { "@id": organizationId },
+        mainEntity: { "@id": serviceId },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${home}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "계좌 지급정지 해제 가이드", item: home },
+        ],
+      },
+      {
+        "@type": "LegalService",
+        "@id": serviceId,
+        name: "법무법인 선린 계좌 지급정지 대응 법률서비스",
+        url: home,
+        telephone: "+82-2-6348-0406",
+        image: `${group.siteUrl}/assets/og-template.png`,
+        areaServed: { "@type": "Country", name: "대한민국" },
+        serviceType: ["계좌 지급정지 이의제기", "지급정지 해제", "채무부존재확인 소송"],
+        provider: { "@id": organizationId },
+        address: {
+          "@type": "PostalAddress",
+          addressCountry: "KR",
+          addressRegion: "서울특별시",
+          addressLocality: "서초구",
+          streetAddress: "반포대로 108 양원빌딩 4층",
+        },
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${home}#faq`,
+        mainEntity: RECOVERY_HOME_FAQ.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
+      },
+      {
+        "@type": "Organization",
+        "@id": organizationId,
+        name: "법무법인 선린",
+        url: home,
+        logo: { "@type": "ImageObject", url: `${group.siteUrl}/assets/logo.png` },
+        telephone: "+82-2-6348-0406",
+      },
+    ],
+  });
+}
+
 function createPrivacyPolicyContent() {
   return `<article class="article-block privacy-policy-content">
   <p class="policy-date">시행일: 2026년 1월 1일 &nbsp;|&nbsp; 최종 수정일: ${today}</p>
@@ -3094,8 +3443,14 @@ for (const group of groups) {
     await fs.copy(path.join(root, "admin"), path.join(root, "dist-a", "admin"));
   }
 
-  const hubTitle = group.hubTitle;
+  const isRecoveryGuide = group.key === "c" && !group.landingKey;
+  const hubTitle = isRecoveryGuide
+    ? "계좌 지급정지 원인·이의제기·해제 절차 | 법무법인 선린"
+    : group.hubTitle;
   const hubDescription = group.hubLead;
+  const hubH1 = isRecoveryGuide
+    ? "계좌 지급정지, 왜 발생하고 어떻게 해제하나요?"
+    : hubTitle;
   const hubHtml = buildPage(template, group, {
     title: escapeHtml(hubTitle),
     description: escapeHtml(hubDescription),
@@ -3104,7 +3459,7 @@ for (const group of groups) {
     ogDescription: escapeHtml(hubDescription),
     ogImage: `${group.siteUrl}/assets/og-template.png`,
     headExtra: createHeadExtra({ group, isHub: true }),
-    schema: JSON.stringify({
+    schema: isRecoveryGuide ? createRecoveryHomeSchema(group, hubTitle, hubDescription) : JSON.stringify({
       "@context": "https://schema.org",
       "@graph": [
         {
@@ -3119,14 +3474,16 @@ for (const group of groups) {
         ORGANIZATION,
       ],
     }),
-    h1: escapeHtml(hubTitle),
+    h1: escapeHtml(hubH1),
     ogThumbnail: isCenterBoardSite(group) ? createCenterMainHeroSlider() : "",
-    summary: "",
+    summary: isRecoveryGuide ? escapeHtml(hubDescription) : "",
     content: createHubContent(group),
-    headerCall: createCenterHeaderNav(group),
+    headerCall: isRecoveryGuide
+      ? `<a class="header-call" href="tel:0263480406">지급정지 상담 02-6348-0406</a>`
+      : createCenterHeaderNav(group),
     floatingWidgets: isCenterBoardSite(group) ? "" : createHubFloatingWidgets(group),
-    pageKind: isCenterBoardSite(group) ? "hub-page home-page" : "hub-page",
-    omitConsultCta: isCenterBoardSite(group),
+    pageKind: isCenterBoardSite(group) ? "hub-page home-page" : isRecoveryGuide ? "hub-page recovery-guide-home" : "hub-page",
+    omitConsultCta: isCenterBoardSite(group) || isRecoveryGuide,
     omitCenterHomeAbout: isCenterBoardSite(group),
   });
 
@@ -3135,8 +3492,12 @@ for (const group of groups) {
   await writeCenterAboutPages(template, group);
 
   const category = breadcrumbLabel(group);
-  const categoryTitle = `${group.siteName} ${category} ${FRESH_LIST_LABEL}`;
-  const categoryDescription = `${category} 유형에서 오늘 추가되거나 갱신된 사건만 정리합니다. ${group.hubLead}`;
+  const categoryTitle = isRecoveryGuide
+    ? `지급정지 관련 사례 아카이브 | ${group.siteName}`
+    : `${group.siteName} ${category} ${FRESH_LIST_LABEL}`;
+  const categoryDescription = isRecoveryGuide
+    ? "기존 지급정지 관련 사건 랜딩페이지와 URL을 그대로 보존한 법무법인 선린 사례 아카이브입니다."
+    : `${category} 유형에서 오늘 추가되거나 갱신된 사건만 정리합니다. ${group.hubLead}`;
   const categoryCanonical = `${group.siteUrl}/${group.pathPrefix}/`;
   const categoryHtml = buildPage(template, group, {
     title: escapeHtml(categoryTitle),
@@ -3152,7 +3513,9 @@ for (const group of groups) {
     summary: escapeHtml(categoryDescription),
     breadcrumb: createCategoryBreadcrumb(group),
     content: createCategoryContent(group),
-    headerCall: createCenterHeaderNav(group),
+    headerCall: isRecoveryGuide
+      ? `<a class="header-call" href="tel:0263480406">지급정지 상담 02-6348-0406</a>`
+      : createCenterHeaderNav(group),
     floatingWidgets: createHubFloatingWidgets(group),
     pageKind: "hub-page category-page",
   });
