@@ -8408,13 +8408,8 @@
     "fraudType": "",
     "landings": {
       "a": {
-        "title": "주식리딩방 사기 형사고소",
-        "ogTitle": "주식리딩방 사기 형사고소",
-        "ogText": "주식리딩방 사기 형사고소",
-        "ogRevision": "msqxpt95",
-        "imageAlt": "주식리딩방 사기 형사고소",
-        "imageCaption": "주식리딩방 사기 형사고소",
-        "imageDescription": "주식리딩방 사기 형사고소"
+        "description": "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 증거 상태와 사건 구조 기준으로 정리합니다.",
+        "ogDescription": "형사고소, 법적제재, 형사합의, 피해금 회수 가능성을 증거 상태와 사건 구조 기준으로 정리합니다."
       }
     }
   },
