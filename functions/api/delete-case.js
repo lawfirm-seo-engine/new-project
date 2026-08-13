@@ -1,3 +1,5 @@
+import { mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -87,6 +89,7 @@ async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
   );
   if (!fileRes.ok) return;
   const fileInfo = await fileRes.json();
+  mergeDurableFieldsFromExisting(full, JSON.parse(await readFileContent(fileInfo, token) || "[]"));
 
   await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,

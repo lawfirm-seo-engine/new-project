@@ -11,6 +11,7 @@ import {
   generateReadingroomMeta,
   parseReadingroomTitleParts,
 } from "../_readingroomTemplate.js";
+import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const LD_HOST = "xn--o01bo9fw8bq3ho5ap91depg2maj5f.kr";
@@ -224,6 +225,7 @@ function buildIndexEntry(item) {
     searchHidden: item.searchHidden || false,
     targetGroups: item.targetGroups || [],
     createdBy: item.createdBy || "",
+    ...durableCaseIndexFields(item),
     ...(item.ldCategory ? { ldCategory: item.ldCategory } : {}),
     ...(readingroomLanding ? { hasReadingroomLanding: true, landings: { ld: readingroomLanding } } : {}),
   };
@@ -260,7 +262,11 @@ async function saveCasesToGitHub(env, list, message) {
     { headers: githubHeaders(token) },
   );
   let sha = null;
-  if (getRes.ok) sha = (await getRes.json()).sha;
+  if (getRes.ok) {
+    const fileInfo = await getRes.json();
+    sha = fileInfo.sha;
+    mergeDurableFieldsFromExisting(list, JSON.parse(await readFileContent(fileInfo, token) || "[]"));
+  }
   else if (getRes.status !== 404) throw new Error("GitHub cases.json 상태 확인 실패");
   const putRes = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/${GITHUB_FILE_PATH}`,

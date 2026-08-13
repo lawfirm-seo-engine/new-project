@@ -1,3 +1,5 @@
+import { durableCaseIndexFields } from "../_durableCaseFields.js";
+
 export async function onRequestPost(context) {
   const { env } = context;
 
@@ -65,6 +67,7 @@ function buildIndexEntry(c) {
     searchHidden: c.searchHidden || false,
     targetGroups: Array.isArray(c.targetGroups) ? c.targetGroups : [],
     createdBy: c.createdBy || "",
+    ...durableCaseIndexFields(c),
     ...(c.listingPath ? { listingPath: c.listingPath } : {}),
     ...(c.publicPath ? { publicPath: c.publicPath } : {}),
     ...(c.listingUrl ? { listingUrl: c.listingUrl } : {}),

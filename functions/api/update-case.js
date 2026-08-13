@@ -1,5 +1,6 @@
 const EDITABLE_LANDING_FIELDS = ["body", "victimCases", "suspiciousCompanies", "faq", "h1", "title", "description", "imageAlt", "imageCaption", "imageDescription", "currentProgress"];
 const FRAUD_TYPE_KEYS = new Set(["stock-project", "institution-exchange", "team-mission", "live-dating", "refund-reward"]);
+const LANDING_WRITE_ACTIONS = new Set(["update-landing", "update-landing-fields", "save-landings"]);
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -26,23 +27,41 @@ export async function onRequestPost(context) {
     const now = new Date().toISOString().slice(0, 10);
     const nowKst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace("T", " ").slice(0, 16);
     const existingKvCase = await loadKvCase(env, slug);
+    if (LANDING_WRITE_ACTIONS.has(action)) {
+      mergeDurableCaseState(cases[idx], existingKvCase);
+    }
 
     if (action === "update-landing" && groupKey && field) {
       if (!EDITABLE_LANDING_FIELDS.includes(field)) {
         return json({ ok: false, message: "편집 불가 필드입니다." }, 400);
       }
-      if (!cases[idx].landings) cases[idx].landings = {};
-      if (!cases[idx].landings[groupKey]) cases[idx].landings[groupKey] = {};
-      cases[idx].landings[groupKey][field] = value;
-      if (field === "title") updateLandingTitleMeta(cases[idx].landings[groupKey], value, createOgRevision());
-      if (field === "description") cases[idx].landings[groupKey].ogDescription = value;
+      const landing = ensureLanding(cases[idx], groupKey);
+      landing[field] = value;
+      if (field === "currentProgress") rememberCurrentProgress(cases[idx], groupKey, value);
+      if (field === "title") updateLandingTitleMeta(landing, value, createOgRevision());
+      if (field === "description") landing.ogDescription = value;
+      cases[idx].updatedAt = now;
+
+    } else if (action === "update-landing-fields" && groupKey && value && typeof value === "object" && !Array.isArray(value)) {
+      const landing = ensureLanding(cases[idx], groupKey);
+      for (const [nextField, nextValue] of Object.entries(value)) {
+        if (!EDITABLE_LANDING_FIELDS.includes(nextField)) {
+          return json({ ok: false, message: `편집 불가 필드입니다: ${nextField}` }, 400);
+        }
+        landing[nextField] = nextValue;
+        if (nextField === "currentProgress") rememberCurrentProgress(cases[idx], groupKey, nextValue);
+        if (nextField === "title") updateLandingTitleMeta(landing, nextValue, createOgRevision());
+        if (nextField === "description") landing.ogDescription = nextValue;
+      }
       cases[idx].updatedAt = now;
 
     } else if (action === "sync-from-github") {
       // GitHub의 최신 cases.json 데이터를 KV에 즉시 반영
       if (!env.CASES) return json({ ok: false, message: "KV 없음" }, 500);
       const existing = await env.CASES.get(`case:${slug}`);
-      const kvEntry = existing ? { ...JSON.parse(existing), ...cases[idx] } : cases[idx];
+      const existingParsed = existing ? JSON.parse(existing) : null;
+      const kvEntry = mergeDurableCaseState({ ...(existingParsed || {}), ...cases[idx] }, existingParsed);
+      kvEntry.landings = mergeLandingMaps(existingParsed?.landings, cases[idx].landings);
       await env.CASES.put(`case:${slug}`, JSON.stringify(kvEntry));
       const idxRaw = await env.CASES.get("cases:index");
       if (idxRaw) {
@@ -56,7 +75,8 @@ export async function onRequestPost(context) {
 
     } else if (action === "save-landings") {
       if (!value || typeof value !== "object") return json({ ok: false, message: "landings 객체 필수" }, 400);
-      cases[idx].landings = value;
+      cases[idx].landings = mergeLandingMaps(existingKvCase?.landings, value);
+      applyCurrentProgressAliases(cases[idx]);
       cases[idx].updatedAt = now;
 
     } else if (action === "rename" || action === "update-title") {
@@ -143,17 +163,18 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
     }
 
-    // KV 업데이트 — rename 시 기존 KV의 landings 보존
+    // KV 업데이트 — 기존 KV의 landings/memos를 보존하며 새 수정분을 병합
     let responseCase = cases[idx];
     if (env.CASES) {
-      let kvEntry = cases[idx];
+      let kvEntry = existingKvCase
+        ? mergeDurableCaseState({ ...existingKvCase, ...cases[idx] }, existingKvCase)
+        : cases[idx];
+      if (existingKvCase?.landings || cases[idx].landings) {
+        kvEntry.landings = mergeLandingMaps(existingKvCase?.landings, cases[idx].landings);
+      }
       if (action === "rename" || action === "update-title" || action === "update-summary" || action === "set-noindex" || action === "set-search-hidden" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
         if (existingKvCase) {
           const existingParsed = existingKvCase;
-          kvEntry = { ...existingParsed, ...cases[idx] };
-          if (existingParsed.landings && !cases[idx].landings) {
-            kvEntry.landings = existingParsed.landings;
-          }
           if (action === "update-memo" || action === "add-memo") {
             mergeOperatorMemoState(kvEntry, existingParsed);
           }
@@ -168,8 +189,8 @@ export async function onRequestPost(context) {
       if (idxRaw) {
         const indexArr = JSON.parse(idxRaw);
         const pos = indexArr.findIndex((e) => e.slug === slug);
-        if (pos !== -1) indexArr[pos] = buildIndexEntry(cases[idx]);
-        else indexArr.push(buildIndexEntry(cases[idx]));
+        if (pos !== -1) indexArr[pos] = buildIndexEntry(kvEntry);
+        else indexArr.push(buildIndexEntry(kvEntry));
         await env.CASES.put("cases:index", JSON.stringify(indexArr));
       }
     }
@@ -199,6 +220,75 @@ function appendOperatorMemo(item, value, createdAt) {
     text,
     createdAt,
   });
+}
+
+function ensureLanding(item, groupKey) {
+  if (!item.landings || typeof item.landings !== "object") item.landings = {};
+  if (!item.landings[groupKey] || typeof item.landings[groupKey] !== "object") item.landings[groupKey] = {};
+  return item.landings[groupKey];
+}
+
+function isPlainObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value);
+}
+
+function mergeLandingMaps(base = {}, updates = {}) {
+  const merged = {};
+  if (isPlainObject(base)) {
+    for (const [key, value] of Object.entries(base)) merged[key] = isPlainObject(value) ? { ...value } : value;
+  }
+  if (isPlainObject(updates)) {
+    for (const [key, value] of Object.entries(updates)) {
+      merged[key] = isPlainObject(merged[key]) && isPlainObject(value)
+        ? { ...merged[key], ...value }
+        : value;
+    }
+  }
+  return Object.keys(merged).length ? merged : undefined;
+}
+
+function normalizeProgressValue(value) {
+  if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean);
+  const text = String(value || "").trim();
+  if (!text) return [];
+  return text.split(/\n{1,}/).map((item) => item.trim()).filter(Boolean);
+}
+
+function rememberCurrentProgress(item, groupKey, value) {
+  const items = normalizeProgressValue(value);
+  if (!items.length) return;
+  if (!item.currentProgressByKey || typeof item.currentProgressByKey !== "object") item.currentProgressByKey = {};
+  item.currentProgressByKey[groupKey] = items;
+  if (groupKey === "a") item.currentProgress = items;
+}
+
+function applyCurrentProgressAliases(item) {
+  if (!item?.landings || typeof item.landings !== "object") return item;
+  for (const [key, landing] of Object.entries(item.landings)) {
+    if (landing?.currentProgress) rememberCurrentProgress(item, key, landing.currentProgress);
+  }
+  return item;
+}
+
+function mergeDurableCaseState(target = {}, source = {}) {
+  if (!source || typeof source !== "object") return target;
+  mergeOperatorMemoState(target, source);
+
+  if (isPlainObject(source.landings) || isPlainObject(target.landings)) {
+    target.landings = mergeLandingMaps(source.landings, target.landings);
+  }
+
+  if (!target.currentProgress && source.currentProgress) {
+    target.currentProgress = source.currentProgress;
+  }
+  if (isPlainObject(source.currentProgressByKey) || isPlainObject(target.currentProgressByKey)) {
+    target.currentProgressByKey = { ...(source.currentProgressByKey || {}), ...(target.currentProgressByKey || {}) };
+  }
+  if (Array.isArray(source.comments) && !Array.isArray(target.comments)) {
+    target.comments = source.comments;
+  }
+  applyCurrentProgressAliases(target);
+  return target;
 }
 
 function mergeOperatorMemoState(target = {}, source = {}) {
@@ -243,6 +333,9 @@ function buildIndexEntry(c) {
     targetGroups: c.targetGroups || [],
     createdBy: c.createdBy || "",
     fraudType: c.fraudType || "",
+    ...(Array.isArray(c.memos) && c.memos.length ? { memos: c.memos } : {}),
+    ...(c.currentProgress ? { currentProgress: c.currentProgress } : {}),
+    ...(c.currentProgressByKey ? { currentProgressByKey: c.currentProgressByKey } : {}),
     ...(c.listingPath ? { listingPath: c.listingPath } : {}),
     ...(c.publicPath ? { publicPath: c.publicPath } : {}),
     ...(c.listingUrl ? { listingUrl: c.listingUrl } : {}),

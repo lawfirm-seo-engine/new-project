@@ -1,4 +1,5 @@
 import { boardPostCaseEntry, listBoardPosts } from "../_board.js";
+import { mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
 
 /**
  * POST /api/sync-kv-to-github
@@ -56,6 +57,7 @@ export async function onRequestPost(context) {
     const fileInfo = await fileRes.json();
     const sha = fileInfo.sha;
     const existingCases = parseJson(await readFileContent(fileInfo, token), []);
+    mergeDurableFieldsFromExisting(full, existingCases);
     const boardEntries = mergeBySlug(
       existingCases.filter(isBoardCaseEntry),
       await loadBoardCaseEntries(env),

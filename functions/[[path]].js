@@ -1846,16 +1846,23 @@ function renderOperatorMemos(caseData, heading = "운영 안내") {
   return `<section class="article-block memo-section"><h2>${esc(heading)}</h2>${items}</section>`;
 }
 
-function currentProgressItems(landing = {}) {
-  const value = landing?.currentProgress;
-  if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean);
-  const text = String(value || "").trim();
-  if (!text) return [];
-  return text.split(/\n{1,}/).map((item) => item.trim()).filter(Boolean);
+function currentProgressItems(landing = {}, caseData = {}, groupKey = "") {
+  const candidates = [
+    landing?.currentProgress,
+    caseData?.currentProgressByKey?.[groupKey],
+    groupKey === "a" ? caseData?.currentProgress : null,
+  ];
+  for (const value of candidates) {
+    const items = Array.isArray(value)
+      ? value.map((item) => String(item || "").trim()).filter(Boolean)
+      : String(value || "").trim().split(/\n{1,}/).map((item) => item.trim()).filter(Boolean);
+    if (items.length) return items;
+  }
+  return [];
 }
 
-function renderCurrentProgressSection(landing = {}) {
-  const items = currentProgressItems(landing);
+function renderCurrentProgressSection(landing = {}, caseData = {}, groupKey = "") {
+  const items = currentProgressItems(landing, caseData, groupKey);
   if (!items.length) return "";
   return `<section class="article-block current-progress"><h2>현재 진행 상황</h2>${paragraphs(items)}</section>`;
 }
@@ -1881,7 +1888,7 @@ function createRecoveryManualContent(landing, group, caseData) {
     ? renderManualBodyArray(manualBody)
     : renderManualArticle(String(manualBody || ""));
   const memoSection = renderOperatorMemos(caseData);
-  const currentProgressSection = renderCurrentProgressSection(landing);
+  const currentProgressSection = renderCurrentProgressSection(landing, caseData, group.landingKey || group.key);
   return [
     MANUAL_BODY_STYLE,
     `<section class="article-block manual-body">${bodyHtml}</section>`,
@@ -1938,7 +1945,7 @@ function createLandingContent(landing, group, caseData, relatedCases = []) {
     const _siteName = esc(group.siteName);
     const _trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${_slug}'})}).catch(function(){});})();</script>`;
     const _memoSection = renderOperatorMemos(caseData);
-    const _currentProgressSection = renderCurrentProgressSection(landing);
+    const _currentProgressSection = renderCurrentProgressSection(landing, caseData, _contentKey);
     const _body = renderBodyForLanding(landing, _contentGroup, caseData).map((item) => normalizeScamCopyPhrases(reduceCaseNameText(item, _rawCaseName, false, _replacementContext)));
     const _victimCases = renderVictimCasesForLanding(landing, _contentGroup, caseData, _replacementContext);
     const _faq = renderFaqForLanding(landing, _contentGroup, caseData);
@@ -2018,7 +2025,7 @@ function createStandardLandingContent(landing, group, caseData, relatedCases = [
   const victimCases = standardVictimCases(typeKey);
   const faq = renderFaqForLanding(landing, { ...group, key: "a" }, caseData);
   const memoSection = renderOperatorMemos(caseData);
-  const currentProgressSection = renderCurrentProgressSection(landing);
+  const currentProgressSection = renderCurrentProgressSection(landing, caseData, group.landingKey || group.key);
   const readingroomCtaSection = renderStockReadingroomCtaSection(caseData);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
 

@@ -5,6 +5,7 @@ import {
   caseOgImageUrl,
 } from "../_seo.js";
 import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
+import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const RECOVERY_HOST = "gnlaw-recovery.co.kr";
@@ -153,6 +154,7 @@ function buildIndexEntry(item) {
     noindex: item.noindex || false,
     targetGroups: item.targetGroups || [],
     createdBy: item.createdBy || "",
+    ...durableCaseIndexFields(item),
   };
 }
 
@@ -197,6 +199,7 @@ async function saveCasesToGitHub(env, list, message) {
   if (getRes.ok) {
     const file = await getRes.json();
     sha = file.sha;
+    mergeDurableFieldsFromExisting(list, JSON.parse(await readFileContent(file, token) || "[]"));
   } else if (getRes.status !== 404) {
     throw new Error("GitHub cases.json 상태 확인 실패");
   }

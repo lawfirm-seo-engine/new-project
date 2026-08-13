@@ -183,7 +183,12 @@
     const landing = caseData?.landings?.[activeGroup] || {};
     document.getElementById('landingEditor').innerHTML = FIELDS.map(f => {
       const val = f.key === 'currentProgress'
-        ? (landing.currentProgress || extractCurrentProgress(landing.body))
+        ? firstFilled(
+          landing.currentProgress,
+          caseData?.currentProgressByKey?.[activeGroup],
+          activeGroup === 'a' ? caseData?.currentProgress : null,
+          extractCurrentProgress(landing.body)
+        )
         : landing[f.key];
       const text = f.multi ? (Array.isArray(val) ? val.join('\n') : (val || '')) : (val || '');
       return `<div class="field">
@@ -209,6 +214,14 @@
     return out;
   }
 
+  function firstFilled(...values) {
+    for (const value of values) {
+      if (Array.isArray(value) && value.some(item => String(item || '').trim())) return value;
+      if (!Array.isArray(value) && String(value || '').trim()) return value;
+    }
+    return [];
+  }
+
   async function saveBasicInfo() {
     const msg = document.getElementById('basicMsg');
     msg.textContent = '저장 중...'; msg.className = 'msg';
@@ -231,18 +244,23 @@
   async function saveLanding() {
     const msg = document.getElementById('landingMsg');
     msg.textContent = '저장 중...'; msg.className = 'msg';
+    const fields = {};
     for (const f of FIELDS) {
       const el = document.getElementById('field_' + f.key);
       if (!el) continue;
       const rawVal = el.value;
       if (!rawVal.trim()) continue; // 비어 있는 필드는 건너뜀
-      const value = f.multi
+      fields[f.key] = f.multi
         ? rawVal.split('\n').map(s => s.trim()).filter(Boolean)
         : rawVal.trim();
-      const res = await api('/api/update-case', { slug, action: 'update-landing', groupKey: activeGroup, field: f.key, value });
-      if (!res.ok) { msg.textContent = '저장 실패: ' + (res.message || ''); msg.className = 'msg err'; return; }
-      if (res.updatedCase) caseData = res.updatedCase;
     }
+    if (!Object.keys(fields).length) {
+      msg.textContent = '저장할 내용이 없습니다.'; msg.className = 'msg err';
+      return;
+    }
+    const res = await api('/api/update-case', { slug, action: 'update-landing-fields', groupKey: activeGroup, value: fields });
+    if (!res.ok) { msg.textContent = '저장 실패: ' + (res.message || ''); msg.className = 'msg err'; return; }
+    if (res.updatedCase) caseData = res.updatedCase;
     msg.textContent = '저장 완료'; msg.className = 'msg ok';
     setTimeout(() => msg.textContent = '', 3000);
   }

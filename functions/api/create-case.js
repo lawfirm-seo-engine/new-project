@@ -3,6 +3,7 @@ import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
 import { normalizeFraudTypeKey } from "../_standardLanding.js";
 import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import { classifyLdCategory } from "../_readingroomCategory.js";
+import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
 import {
   buildFromTemplate as buildReadingroomBodyFromTemplate,
   generateReadingroomMeta,
@@ -186,6 +187,7 @@ async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
   );
   if (!fileRes.ok) return;
   const fileInfo = await fileRes.json();
+  mergeDurableFieldsFromExisting(full, JSON.parse(await readFileContent(fileInfo, token) || "[]"));
 
   await fetch(
     `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
@@ -210,6 +212,7 @@ function buildIndexEntry(c) {
     reports: c.reports || 0, summary: c.summary || "", tags: c.tags || [], memo: c.memo || "",
     noindex: c.noindex || false,
     targetGroups: c.targetGroups || [], createdBy: c.createdBy || "", fraudType: c.fraudType || "",
+    ...durableCaseIndexFields(c),
   };
   if (c.listingPath) entry.listingPath = c.listingPath;
   if (c.publicPath) entry.publicPath = c.publicPath;
