@@ -41,9 +41,45 @@ export function mergeDurableFieldsFromExisting(cases = [], existingCases = []) {
   return cases;
 }
 
+export function mergeCaseDataForRead(primary = {}, fallback = {}) {
+  if (!fallback || typeof fallback !== "object") return primary;
+  if (!primary || typeof primary !== "object") return fallback;
+
+  const merged = { ...primary, ...fallback };
+  merged.memos = mergeMemos(fallback.memos, primary.memos);
+  if (!merged.memos.length) delete merged.memos;
+  merged.landings = mergeLandingMaps(primary.landings, fallback.landings);
+  if (!merged.landings) delete merged.landings;
+
+  if (!hasProgress(merged.currentProgress) && hasProgress(primary.currentProgress)) {
+    merged.currentProgress = primary.currentProgress;
+  }
+  if (primary.currentProgressByKey || fallback.currentProgressByKey) {
+    merged.currentProgressByKey = { ...(primary.currentProgressByKey || {}), ...(fallback.currentProgressByKey || {}) };
+  }
+  return merged;
+}
+
 function hasProgress(value) {
   if (Array.isArray(value)) return value.some((item) => String(item || "").trim());
   return Boolean(String(value || "").trim());
+}
+
+function mergeLandingMaps(base = {}, updates = {}) {
+  const merged = {};
+  if (base && typeof base === "object" && !Array.isArray(base)) {
+    for (const [key, value] of Object.entries(base)) {
+      merged[key] = value && typeof value === "object" && !Array.isArray(value) ? { ...value } : value;
+    }
+  }
+  if (updates && typeof updates === "object" && !Array.isArray(updates)) {
+    for (const [key, value] of Object.entries(updates)) {
+      merged[key] = merged[key] && typeof merged[key] === "object" && !Array.isArray(merged[key]) && value && typeof value === "object" && !Array.isArray(value)
+        ? { ...merged[key], ...value }
+        : value;
+    }
+  }
+  return Object.keys(merged).length ? merged : undefined;
 }
 
 function mergeMemos(...groups) {

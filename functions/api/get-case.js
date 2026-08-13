@@ -1,5 +1,8 @@
 // Public case lookup API for landing page rendering.
 // GET /api/get-case?slug=xxx
+import { mergeCaseDataForRead } from "../_durableCaseFields.js";
+
+const READ_REPAIR_SLUGS = new Set(["jusigridingbang"]);
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -8,35 +11,43 @@ export async function onRequestGet(context) {
 
   if (!slug) return json({ ok: false, message: "slug is required" }, 400);
 
+  let kvCase = null;
+
   // 1st priority: KV
   if (env.CASES) {
     const raw = await env.CASES.get(`case:${slug}`);
-    if (raw) return json({ ok: true, case: JSON.parse(raw) });
+    if (raw) kvCase = JSON.parse(raw);
+    if (kvCase && !READ_REPAIR_SLUGS.has(slug)) return json({ ok: true, case: kvCase });
   }
 
   // 2nd priority: GitHub
   try {
-    const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
-    if (!owner || !repo || !token) return json({ ok: false, message: "not found" }, 404);
-
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`,
-      { headers: githubHeaders(token) }
-    );
-    if (!res.ok) return json({ ok: false, message: "not found" }, 404);
-
-    const file = await res.json();
-    const text = await readFileContent(file, token);
-    if (!text) return json({ ok: false, message: "not found" }, 404);
-
-    const cases = JSON.parse(text);
-    const found = cases.find((c) => c.slug === slug);
+    const found = await fetchCaseFromGitHub(slug, env);
+    if (!found && kvCase) return json({ ok: true, case: kvCase });
     if (!found) return json({ ok: false, message: "not found" }, 404);
 
-    return json({ ok: true, case: found });
+    return json({ ok: true, case: kvCase ? mergeCaseDataForRead(kvCase, found) : found });
   } catch (err) {
     return json({ ok: false, message: err.message }, 500);
   }
+}
+
+async function fetchCaseFromGitHub(slug, env) {
+  const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
+  if (!owner || !repo || !token) return null;
+
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`,
+    { headers: githubHeaders(token) }
+  );
+  if (!res.ok) return null;
+
+  const file = await res.json();
+  const text = await readFileContent(file, token);
+  if (!text) return null;
+
+  const cases = JSON.parse(text);
+  return cases.find((c) => c.slug === slug) || null;
 }
 
 function githubHeaders(token) {

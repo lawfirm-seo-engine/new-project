@@ -36,6 +36,7 @@ import {
   standardSubtitle,
   standardVictimCases,
 } from "./_standardLanding.js";
+import { mergeCaseDataForRead } from "./_durableCaseFields.js";
 import {
   STOCK_READINGROOM_CTA_TEXT,
   appendStockReadingroomCta,
@@ -225,6 +226,7 @@ const SEO_XML_ROUTES = new Set([
 const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
 <!-- End LogScan Code -->`;
+const READ_REPAIR_SLUGS = new Set(["jusigridingbang"]);
 
 async function handleSeoXmlRoute({ pathname, url, env }) {
   if (!SEO_XML_ROUTES.has(pathname)) return null;
@@ -377,8 +379,9 @@ export async function onRequest(context) {
     if (raw) caseData = JSON.parse(raw);
   }
 
-  if (!caseData) {
-    caseData = await fetchCaseFromGitHub(slug, env);
+  if (!caseData || READ_REPAIR_SLUGS.has(slug)) {
+    const githubCase = await fetchCaseFromGitHub(slug, env);
+    caseData = caseData && githubCase ? mergeCaseDataForRead(caseData, githubCase) : (caseData || githubCase);
   }
 
   if (!caseData) {
