@@ -1918,7 +1918,7 @@ function createRecoveryDebtNonexistenceSection() {
         </ul>
       </aside>
     </div>
-    <p class="recovery-lawsuit-caution"><strong>소장 접수만으로 계좌 전액이 곧바로 풀리는 것은 아닙니다.</strong> 현행 통신사기피해환급법상 소송이 법원에 계속 중인 경우 채권소멸절차 등의 종료 사유가 되지만, 피해금에 해당하는 금액은 소송 계속 중 지급정지가 유지될 수 있습니다. 실제 적용 범위는 은행 통지 내용과 사건 진행 상태를 함께 확인해야 합니다.</p>
+    <p class="recovery-lawsuit-caution">현행 통신사기피해환급법상 소송이 법원에 계속 중인 경우 채권소멸절차 등의 종료 사유가 됩니다. 실제 적용 범위는 은행 통지 내용과 사건 진행 상태를 함께 확인해야 합니다.</p>
   </section>`;
 }
 
