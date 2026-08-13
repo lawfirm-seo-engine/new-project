@@ -2030,6 +2030,28 @@ const RECOVERY_HOME_FAQ = [
   },
 ];
 
+const RECOVERY_ICON_PATHS = {
+  alert: '<path d="M12 3 2.8 19h18.4L12 3Z"/><path d="M12 8v5"/><path d="M12 16.5h.01"/>',
+  bank: '<path d="m3 9 9-5 9 5"/><path d="M5 10v7M9.5 10v7M14.5 10v7M19 10v7M3 20h18"/>',
+  shield: '<path d="M12 3 5 6v5c0 4.5 2.7 8 7 10 4.3-2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-5"/>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/>',
+  freeze: '<path d="M12 2v20M4 6l16 12M20 6 4 18"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2M4 10l3 2-3 2M20 10l-3 2 3 2"/>',
+  phone: '<rect x="6.5" y="2.5" width="11" height="19" rx="2"/><path d="M10 5h4M11 18.5h2"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  file: '<path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5M9 12h6M9 16h6"/>',
+  message: '<path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/>',
+  flow: '<circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12h4c3 0 3-6 6-6M11 12c3 0 3 6 6 6"/>',
+  scale: '<path d="M12 3v18M7 21h10M5 6h14"/><path d="m5 6-3 6h6L5 6Zm14 0-3 6h6l-3-6Z"/><path d="M2 12c.5 2 5.5 2 6 0M16 12c.5 2 5.5 2 6 0"/>',
+  package: '<path d="m4 8 8-4 8 4-8 4-8-4Z"/><path d="M4 8v9l8 4 8-4V8M12 12v9"/>',
+  coin: '<circle cx="9" cy="12" r="6"/><path d="M9 8v8M7 10h3a1.5 1.5 0 0 1 0 3H8a1.5 1.5 0 0 0 0 3h3M15 7a6 6 0 0 1 0 10"/>',
+  identity: '<circle cx="12" cy="8" r="3"/><path d="M5 20c.7-4 3-6 7-6s6.3 2 7 6"/><path d="M4 4h3M4 4v3M20 4h-3M20 4v3"/>',
+  retry: '<path d="M20 7v5h-5"/><path d="M18.5 17A8 8 0 1 1 20 12"/><path d="m20 12-4-4"/>',
+};
+
+function recoveryIcon(name, modifier = "") {
+  return `<span class="recovery-icon${modifier ? ` ${modifier}` : ""}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${RECOVERY_ICON_PATHS[name] || RECOVERY_ICON_PATHS.shield}</svg></span>`;
+}
+
 function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
   const sortedCases = [...groupCases].sort((a, b) =>
     String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")),
@@ -2040,6 +2062,7 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
     const title = landingDisplayTitle(item, HUB_SUFFIX.c, group);
     const summary = compactText(landing.description || item.summary || "계좌 지급정지 대응과 해제 절차를 검토한 관련 사례입니다.").slice(0, 120);
     return `<a class="recovery-case-card" href="${buildRelativeLandingPath(group, item)}">
+      <i class="recovery-case-status">해결 사례</i>
       <span>No. ${caseNoMap.get(item.slug) ?? ""} · ${escapeHtml(item.updatedAt || item.createdAt || "")}</span>
       <strong>${escapeHtml(title)}</strong>
       <p>${escapeHtml(summary)}</p>
@@ -2047,7 +2070,7 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
     </a>`;
   }).join("\n");
   const faq = RECOVERY_HOME_FAQ.map((item, index) => `<details${index === 0 ? " open" : ""}>
-    <summary>${escapeHtml(item.question)}</summary>
+    <summary><b>Q${String(index + 1).padStart(2, "0")}</b><span>${escapeHtml(item.question)}</span></summary>
     <p>${escapeHtml(item.answer)}</p>
   </details>`).join("\n");
 
@@ -2063,10 +2086,10 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
 
     <section class="recovery-answer" aria-labelledby="direct-answer-title">
       <div>
-        <p class="recovery-kicker">먼저 확인할 답</p>
-        <h2 id="direct-answer-title">지급정지는 ‘이유 확인 → 자료 보존 → 기한 내 이의제기’ 순서로 대응합니다.</h2>
-        <p>은행에 <strong>정확한 조치명·요청기관·지급정지 금액·채권소멸 공고일</strong>을 확인하세요. 이후 해당 입금의 정당한 원인과 자금 흐름을 객관적인 자료로 설명하고, 필요하면 채무부존재확인 소송 등 법적 절차를 검토합니다.</p>
-        <p class="recovery-note">지급정지 통지서에 적힌 날짜가 대응 기한을 좌우합니다. 전화 안내만 듣지 말고 서면을 확보하는 것이 우선입니다.</p>
+        <div class="recovery-answer-mark">${recoveryIcon("shield")}<p class="recovery-kicker">먼저 확인할 답</p></div>
+        <h2 id="direct-answer-title">지급정지를 풀기 위한 출발점은 원인과 기한을 정확히 확인하는 것입니다.</h2>
+        <p>은행에서 <strong>정확한 조치명·요청기관·지급정지 금액·채권소멸 공고일</strong>을 먼저 확인하세요. 그다음 문제 된 입금이 왜 들어왔는지, 돈이 어떻게 이동했는지를 객관적인 자료로 설명하고 필요하면 채무부존재확인 소송 등 법적 절차를 검토합니다.</p>
+        <p class="recovery-note"><strong>기억하세요.</strong> 지급정지 통지서에 적힌 날짜가 대응 기한을 좌우합니다. 전화 안내에 그치지 말고 통지서와 안내문을 서면으로 확보해 두는 것이 좋습니다.</p>
       </div>
       <ol class="recovery-quick-steps" aria-label="지급정지 초기 대응 4단계">
         <li><span>01</span><strong>은행 확인</strong><small>조치 사유와 범위</small></li>
@@ -2076,22 +2099,24 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
       </ol>
     </section>
 
-    <section id="freeze-causes" class="recovery-section">
+    <section id="freeze-causes" class="recovery-section recovery-causes" data-step="01">
       <header class="recovery-section-head">
         <p class="recovery-kicker">01 · CAUSE</p>
         <h2>계좌 지급정지는 왜 발생하나요?</h2>
-        <p>통신사기피해환급법상 피해구제 신청이나 수사기관 요청으로 사기이용계좌에 지급정지가 이루어질 수 있고, 이상거래 탐지에 따른 임시조치나 금융회사의 별도 거래제한이 함께 나타날 수도 있습니다.</p>
+        <p>대부분 피해자의 피해구제 신청이나 수사기관의 요청에서 시작됩니다. 다만 이상거래 탐지에 따른 임시조치나 금융회사의 사고예방 거래제한이 함께 적용되는 경우도 있어, 먼저 조치의 정확한 이름부터 확인해야 합니다.</p>
       </header>
       <div class="recovery-question-grid">
         <article>
+          ${recoveryIcon("alert")}
           <span>신고·요청</span>
           <h3>갑자기 통장이 지급정지된 이유</h3>
           <p>피해자가 송금한 계좌로 피해구제를 신청했거나, 수사기관·금융회사 사이에 지급정지 요청이 전달되었을 가능성이 있습니다. 입금 직후 다른 계좌로 이체된 경우에는 자금이 거쳐 간 계좌까지 확인 대상이 될 수 있습니다.</p>
         </article>
         <article>
+          ${recoveryIcon("shield")}
           <span>정상거래 소명</span>
           <h3>보이스피싱과 관련이 없어도 지급정지될 수 있나요?</h3>
-          <p>본인이 범행을 몰랐더라도 거래 상대방이 보낸 돈이 피해금으로 신고되면 초기 조치가 이루어질 수 있습니다. ‘몰랐다’는 설명만으로는 부족하고, 물품·용역 제공이나 정당한 거래대금임을 보여주는 자료가 필요합니다.</p>
+          <p>범행과 무관한 정상 거래였더라도 상대방이 보낸 돈이 피해금으로 신고되면 초기 지급정지가 이루어질 수 있습니다. 이때는 단순히 ‘몰랐다’고 설명하기보다 물품·용역을 실제로 제공했거나 정당한 거래대금을 받았다는 자료를 함께 제시해야 합니다.</p>
         </article>
       </div>
       <aside class="recovery-check-callout">
@@ -2106,7 +2131,7 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
       </aside>
     </section>
 
-    <section id="freeze-difference" class="recovery-section recovery-section-dark">
+    <section id="freeze-difference" class="recovery-section recovery-section-dark" data-step="02">
       <header class="recovery-section-head">
         <p class="recovery-kicker">02 · DISTINCTION</p>
         <h2>지급정지와 계좌동결은 무엇이 다른가요?</h2>
@@ -2114,16 +2139,19 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
       </header>
       <div class="recovery-compare">
         <article>
+          ${recoveryIcon("freeze")}
           <span>법률상 조치</span>
           <h3>지급정지</h3>
           <p>사기이용계좌의 예금채권에 대해 출금·이체 등 지급을 막는 조치입니다. 통신사기피해환급법상 피해구제와 채권소멸절차로 이어질 수 있어 공고일과 이의제기 기한이 중요합니다.</p>
         </article>
         <article>
+          ${recoveryIcon("bank")}
           <span>포괄적 표현</span>
           <h3>계좌동결</h3>
-          <p>지급정지뿐 아니라 수사상 조치, 민사집행상 압류·가압류, 금융회사의 사고예방 거래제한 등을 통칭하는 경우가 많습니다. ‘동결’이라는 말만으로 해제 절차를 정하면 안 됩니다.</p>
+          <p>지급정지뿐 아니라 수사상 조치, 민사집행상 압류·가압류, 금융회사의 사고예방 거래제한 등을 통칭하는 경우가 많습니다. 따라서 ‘동결’이라는 말만으로는 어떤 해제 절차가 필요한지 판단하기 어렵습니다.</p>
         </article>
         <article>
+          ${recoveryIcon("phone")}
           <span>함께 확인</span>
           <h3>전자금융거래 제한</h3>
           <p>특정 계좌의 잔액과 별개로 본인 명의 계좌의 비대면 이체·출금 등이 제한되는 경우가 있습니다. 지급정지 계좌의 해제와 다른 계좌의 거래 정상화가 동시에 이루어지지 않을 수 있습니다.</p>
@@ -2131,15 +2159,15 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
       </div>
     </section>
 
-    <section id="release-process" class="recovery-section">
+    <section id="release-process" class="recovery-section recovery-process" data-step="03">
       <header class="recovery-section-head">
         <p class="recovery-kicker">03 · PROCESS</p>
         <h2>지급정지 해제는 어떻게 하나요?</h2>
-        <p>모든 사건에 같은 신청서 한 장이 적용되는 것은 아닙니다. 먼저 은행 단계에서 이의제기 가능성을 검토하고, 해결되지 않으면 수사 확인이나 민사소송이 필요한지 판단합니다.</p>
+        <p>지급정지의 원인과 진행 단계에 따라 필요한 절차가 달라집니다. 우선 은행에 이의제기가 가능한지 검토하고, 이 단계에서 해결되지 않으면 수사기관의 확인이나 민사소송이 필요한지 차례로 판단합니다.</p>
       </header>
       <ol class="recovery-timeline">
         <li><span>1</span><div><h3>지급정지 통지와 공고일 확인</h3><p>은행 통지서, 문자, 창구 안내를 모으고 금융감독원 채권소멸절차 공고 여부를 확인합니다.</p></div></li>
-        <li><span>2</span><div><h3>문제가 된 거래 특정</h3><p>피해신고 금액과 본인 계좌의 입출금 흐름을 시간순으로 표시해 정상거래 대금과 고유자금을 구분합니다.</p></div></li>
+        <li><span>2</span><div><h3>문제가 된 거래를 정확히 찾기</h3><p>피해신고 금액과 본인 계좌의 입출금 흐름을 시간순으로 표시해 정상거래 대금과 고유자금을 구분합니다.</p></div></li>
         <li><span>3</span><div><h3>은행에 이의제기 제출</h3><p>이의제기신청서, 신분증 사본, 사기이용계좌가 아니라는 사실을 뒷받침하는 자료를 계좌 관리 금융회사에 제출합니다.</p></div></li>
         <li><span>4</span><div><h3>반려 사유와 수사 진행 확인</h3><p>서면 반려 사유를 받고, 수사기관이 사기이용계좌가 아니라고 확인할 수 있는지와 추가 소명자료를 점검합니다.</p></div></li>
         <li><span>5</span><div><h3>필요시 채무부존재확인 소송 검토</h3><p>피해자로 지목된 상대방과의 반환채무가 없다는 확인을 구할 필요가 있는지, 소송계속 사실을 은행에 어떻게 제출할지 검토합니다.</p></div></li>
@@ -2150,27 +2178,33 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
       </div>
     </section>
 
-    <section id="required-documents" class="recovery-section recovery-docs-section">
+    <section id="required-documents" class="recovery-section recovery-docs-section" data-step="04">
       <header class="recovery-section-head">
         <p class="recovery-kicker">04 · DOCUMENTS</p>
         <h2>이의제기에는 어떤 자료가 필요한가요?</h2>
-        <p>시행령상 기본 서류에 더해 ‘왜 이 돈을 받았는지’를 제3자가 보아도 이해할 수 있는 거래 원본을 붙이는 것이 핵심입니다.</p>
+        <p>기본 신청서류만 제출하는 것보다 ‘왜 이 돈을 받았는지’를 처음 보는 사람도 이해할 수 있도록 거래 원본과 자금 흐름을 함께 정리하는 것이 중요합니다.</p>
       </header>
       <div class="recovery-doc-grid">
-        <article><b>01</b><h3>필수 신청자료</h3><ul><li>은행 이의제기신청서</li><li>계좌 명의인 신분증 사본</li><li>지급정지 통지서·안내문</li></ul></article>
-        <article><b>02</b><h3>거래의 원인 자료</h3><ul><li>계약서·주문서·세금계산서</li><li>중고거래 게시글·배송증</li><li>가상자산 주문·체결·지갑 기록</li></ul></article>
-        <article><b>03</b><h3>대화와 연락 자료</h3><ul><li>카카오톡·문자·이메일 원본</li><li>통화내역과 상대방 정보</li><li>거래 전후 설명이 담긴 대화</li></ul></article>
-        <article><b>04</b><h3>자금 흐름 자료</h3><ul><li>해당 계좌 전체 거래내역</li><li>문제 입금 전후 이체내역</li><li>고유자금 출처 증빙</li></ul></article>
+        <article>${recoveryIcon("file")}<b>01</b><h3>필수 신청자료</h3><ul><li>은행 이의제기신청서</li><li>계좌 명의인 신분증 사본</li><li>지급정지 통지서·안내문</li></ul></article>
+        <article>${recoveryIcon("package")}<b>02</b><h3>거래의 원인 자료</h3><ul><li>계약서·주문서·세금계산서</li><li>중고거래 게시글·배송증</li><li>가상자산 주문·체결·지갑 기록</li></ul></article>
+        <article>${recoveryIcon("message")}<b>03</b><h3>대화와 연락 자료</h3><ul><li>카카오톡·문자·이메일 원본</li><li>통화내역과 상대방 정보</li><li>거래 전후 설명이 담긴 대화</li></ul></article>
+        <article>${recoveryIcon("flow")}<b>04</b><h3>자금 흐름 자료</h3><ul><li>해당 계좌 전체 거래내역</li><li>문제 입금 전후 이체내역</li><li>고유자금 출처 증빙</li></ul></article>
       </div>
       <p class="recovery-evidence-tip"><strong>자료 정리 팁</strong> 캡처만 나열하지 말고 ‘날짜 · 상대방 · 거래 목적 · 금액 · 첨부자료 번호’를 한 장의 표로 먼저 정리하면 거래 경위를 설명하기 쉽습니다.</p>
     </section>
 
-    <section class="recovery-section recovery-lawsuit">
+    <section class="recovery-section recovery-lawsuit" data-step="COURT">
       <div>
-        <p class="recovery-kicker">법원 절차</p>
+        <div class="recovery-lawsuit-label">${recoveryIcon("scale")}<p class="recovery-kicker">법원 절차</p></div>
         <h2>채무부존재확인 소송을 법원에 접수하여 지급정지에 대응하는 방법</h2>
         <p>통신사기피해환급법은 지급정지 이후에도 계좌 명의인이나 피해자가 상대방을 상대로 채무부존재확인·부당이득반환청구 소송 등을 제기할 수 있도록 두고 있습니다. 계좌 명의인은 피해자로 신고한 상대방에 대한 반환채무가 존재하지 않는다는 확인을 구하고, 소송이 법원에 계속 중임을 증명하는 서류를 은행에 제출해 채권소멸절차 중단 여부를 검토할 수 있습니다.</p>
         <p>다만 <strong>소장 접수만으로 계좌 전액이 자동 해제되는 것은 아닙니다.</strong> 피해금에 해당하는 부분은 소송 결과가 확정될 때까지 지급정지가 유지될 수 있고, 당사자 특정·송달·청구 범위·입증책임도 개별 사건마다 다릅니다.</p>
+      </div>
+      <div class="recovery-court-document" aria-hidden="true">
+        <span>법원 제출 서류</span>
+        <strong>채무부존재<br>확인의 소</strong>
+        <i></i><i></i><i></i>
+        <em>접수</em>
       </div>
       <div class="recovery-lawsuit-flow">
         <span>상대방·청구금액 특정</span><i>→</i><span>소장과 증거 제출</span><i>→</i><span>소송계속 증명 확보</span><i>→</i><span>은행에 제출·해제 범위 검토</span>
@@ -2182,20 +2216,20 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
       <div><a href="tel:0263480406">전화 상담 02-6348-0406</a><a href="https://pf.kakao.com/_WkdxfX/chat" target="_blank" rel="noopener">카카오톡 상담</a></div>
     </aside>
 
-    <section id="situation-response" class="recovery-section">
+    <section id="situation-response" class="recovery-section recovery-situations" data-step="05">
       <header class="recovery-section-head">
         <p class="recovery-kicker">05 · BY SITUATION</p>
         <h2>상황별로 무엇부터 대응해야 하나요?</h2>
       </header>
       <div class="recovery-situation-grid">
-        <article><span>중고거래·사업대금</span><h3>정상적으로 물건이나 서비스를 제공한 경우</h3><p>게시글, 주문서, 배송완료, 세금계산서, 상대방과의 전체 대화를 거래일 순으로 묶어 정당한 권원을 소명합니다.</p></article>
-        <article><span>가상자산 P2P</span><h3>코인 거래 대금을 받은 뒤 정지된 경우</h3><p>거래소 KYC 정보, 주문·체결 화면, 지갑 TXID, 시세와 수량, 매수인 대화를 보존하고 반복·분할 거래 구조를 설명합니다.</p></article>
-        <article><span>명의도용·접근매체</span><h3>계좌를 직접 사용하지 않았거나 빌려준 정황이 있는 경우</h3><p>은행 이의제기와 별도로 명의도용 신고, 접근매체 관리 경위, 수사기관 진술을 함께 검토해야 합니다. 형사책임 문제와 민사 해제 절차를 구분합니다.</p></article>
-        <article><span>이의제기 반려</span><h3>은행에서 자료가 부족하다고 한 경우</h3><p>반려 사유를 서면으로 받아 부족한 자료를 특정하고, 수사기관 확인 또는 채무부존재확인 소송이 필요한 단계인지 판단합니다.</p></article>
+        <article>${recoveryIcon("package")}<span>중고거래·사업대금</span><h3>정상적으로 물건이나 서비스를 제공한 경우</h3><p>게시글, 주문서, 배송완료, 세금계산서, 상대방과의 전체 대화를 거래일 순으로 묶어 정당한 거래였음을 설명합니다.</p></article>
+        <article>${recoveryIcon("coin")}<span>가상자산 P2P</span><h3>코인 거래 대금을 받은 뒤 정지된 경우</h3><p>거래소 KYC 정보, 주문·체결 화면, 지갑 TXID, 시세와 수량, 매수인 대화를 보존하고 반복·분할 거래 구조를 설명합니다.</p></article>
+        <article>${recoveryIcon("identity")}<span>명의도용·접근매체</span><h3>계좌를 직접 사용하지 않았거나 빌려준 정황이 있는 경우</h3><p>은행 이의제기와 별도로 명의도용 신고, 접근매체 관리 경위, 수사기관 진술을 함께 검토해야 합니다. 형사책임 문제와 민사상 해제 절차도 나누어 살펴야 합니다.</p></article>
+        <article>${recoveryIcon("retry")}<span>이의제기 반려</span><h3>은행에서 자료가 부족하다고 한 경우</h3><p>반려 사유를 서면으로 받아 부족한 자료를 정확히 보완하고, 수사기관 확인이나 채무부존재확인 소송이 필요한 단계인지 판단합니다.</p></article>
       </div>
     </section>
 
-    <section id="recovery-faq" class="recovery-section recovery-faq faq">
+    <section id="recovery-faq" class="recovery-section recovery-faq faq" data-step="06">
       <header class="recovery-section-head">
         <p class="recovery-kicker">06 · FAQ</p>
         <h2>계좌 지급정지 자주 묻는 질문</h2>
@@ -2203,9 +2237,9 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
       ${faq}
     </section>
 
-    <section class="recovery-section recovery-cases">
+    <section class="recovery-section recovery-cases" data-step="CASE">
       <header class="recovery-section-head recovery-cases-head">
-        <div><p class="recovery-kicker">RELATED CASES</p><h2>최근 지급정지 해결·대응 사례</h2><p>기존 사건 데이터와 랜딩페이지 URL은 그대로 유지하고, 메인에서는 최신 관련 사례만 연결합니다.</p></div>
+        <div><p class="recovery-kicker">RELATED CASES</p><h2>최근 지급정지 해결·대응 사례</h2><p>유사한 상황에서 어떤 쟁점과 자료를 살펴봤는지 최근 사례를 통해 확인해 보세요. 전체 사례와 기존 랜딩페이지도 그대로 이어집니다.</p></div>
         <a href="/${group.pathPrefix}/">전체 사례 아카이브 보기 (${groupCases.length.toLocaleString("ko-KR")}건)</a>
       </header>
       <div class="recovery-case-grid">${recentCards}</div>
@@ -2213,7 +2247,7 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
 
     <section id="consult" class="recovery-final-cta">
       <p class="recovery-kicker">LEGAL REVIEW</p>
-      <h2>지급정지는 원인과 기한을 먼저 확인해야 합니다.</h2>
+      <h2>지급정지, 원인과 기한부터 차근히 확인해 보세요.</h2>
       <p>통지서, 해당 입금 전후 거래내역, 거래 상대방과의 대화를 준비해 주시면 이의제기와 소송 필요성을 검토합니다.</p>
       <div><a href="tel:0263480406">02-6348-0406 전화 상담</a><a href="https://pf.kakao.com/_WkdxfX/chat" target="_blank" rel="noopener">카카오톡으로 자료 보내기</a></div>
       <small>본 페이지는 일반적인 법률 정보를 제공하며, 구체적인 결과는 사실관계와 금융회사·수사기관·법원의 판단에 따라 달라질 수 있습니다.</small>
@@ -2226,6 +2260,7 @@ function isCenterBoardSite(group) {
 }
 
 const CENTER_FINTECH_STYLE_VERSION = "20260806-center-layout";
+const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 
 function centerFintechHeadExtra(group) {
   if (!isCenterBoardSite(group)) return "";
@@ -3181,6 +3216,9 @@ function buildPage(template, group, data) {
     html = html
       .replace(/\s*<section id="sunlin-intro" class="center-intro-section"[\s\S]*?<\/section>\s*(?=<section id="members")/, "\n")
       .replace(/\s*<section id="members" class="center-member-section"[\s\S]*?<\/section>\s*(?=<section class="center-progress-section")/, "\n");
+  }
+  if (group.key === "c" && String(group.bodyClass || "").includes("recovery-guide-home")) {
+    html = html.replace('href="/assets/style.css"', `href="/assets/style.css?v=${RECOVERY_HOME_STYLE_VERSION}"`);
   }
   return html;
 }
