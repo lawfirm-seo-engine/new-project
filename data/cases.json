@@ -43111,7 +43111,7 @@
     "caseName": "자산증식프로젝트 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-04",
-    "updatedAt": "2026-07-04",
+    "updatedAt": "2026-08-14",
     "thumbnailUrl": "",
     "landingViews": 209,
     "reports": 6,
@@ -43126,7 +43126,14 @@
     ],
     "memo": "",
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "memos": [
+      {
+        "id": 1786686383043,
+        "text": "현재 자산증식프로젝트 사기가 기승을 부리고 있습니다.",
+        "createdAt": "2026-08-14 14:46"
+      }
+    ]
   },
   {
     "slug": "unyongsiseutem-8gi-peurojegteu",
@@ -114484,6 +114491,7 @@
         "suspiciousCompanies": [],
         "faq": []
       }
-    }
+    },
+    "noindex": false
   }
 ]
