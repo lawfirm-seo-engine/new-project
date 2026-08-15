@@ -1,11 +1,24 @@
 // POST /api/batch-add-regular-memo
 // KV cases:index를 소스로 모든 일반랜딩에 운영자 메모를 추가합니다.
-// Body: { offset?: number, limit?: number }  ← 페이지네이션 (기본 limit=200)
+// Body: { offset?: number, limit?: number }
 
 import { GROUPS, INDEXNOW_KEY as DEFAULT_INDEXNOW_KEY, buildLandingUrl } from "../_seo.js";
 
 const MAIN_GROUP = GROUPS.find((g) => (g.landingKey || g.key) === "a");
-const MEMO_SUFFIX = " 사칭 사기 사건 현재 접수중 입니다.";
+
+// caseName에서 "사칭 사기" 접미사를 제거해 브랜드명만 추출
+function extractBrand(caseName) {
+  return (caseName || "").replace(/\s+사칭\s+사기\s*$/i, "").trim() || caseName;
+}
+
+function correctMemoText(caseName) {
+  return extractBrand(caseName) + " 사칭 사기 사건 현재 접수중 입니다.";
+}
+
+// 기존에 잘못 들어간 중복 형태 ("사칭 사기 사칭 사기") 메모 텍스트
+function wrongMemoText(caseName) {
+  return caseName + " 사칭 사기 사건 현재 접수중 입니다.";
+}
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -15,7 +28,6 @@ export async function onRequestPost(context) {
   const offset = Number(body.offset) || 0;
   const limit = Math.min(Number(body.limit) || 200, 300);
 
-  // KV cases:index에서 전체 목록 로드
   const idxRaw = await env.CASES.get("cases:index");
   if (!idxRaw) return json({ ok: false, message: "cases:index 없음" }, 404);
 
@@ -28,6 +40,7 @@ export async function onRequestPost(context) {
   const today = new Date().toISOString().slice(0, 10);
 
   let updated = 0;
+  let fixed = 0;   // 잘못된 메모를 올바른 형식으로 교체한 건수
   let skipped = 0;
   const errors = [];
   const indexNowSlugs = [];
@@ -44,22 +57,41 @@ export async function onRequestPost(context) {
       if (caseData.createdBy) { skipped++; continue; }
 
       const caseName = caseData.caseName || entry.caseName || slug;
-      const memoText = caseName + MEMO_SUFFIX;
+      const correct = correctMemoText(caseName);
+      const wrong = wrongMemoText(caseName);
 
       if (!Array.isArray(caseData.memos)) caseData.memos = [];
 
-      const alreadyHas = caseData.memos.some((m) => {
+      const hasCorrect = caseData.memos.some((m) => {
         const t = typeof m === "string" ? m : m?.text;
-        return String(t || "").trim() === memoText;
+        return String(t || "").trim() === correct;
       });
-      if (alreadyHas) { skipped++; continue; }
+      const hasWrong = caseData.memos.some((m) => {
+        const t = typeof m === "string" ? m : m?.text;
+        return String(t || "").trim() === wrong && wrong !== correct;
+      });
 
-      caseData.memos.push({ id: Date.now() + updated, text: memoText, createdAt: now });
+      // 이미 올바른 메모가 있고 잘못된 메모가 없으면 건너뜀
+      if (hasCorrect && !hasWrong) { skipped++; continue; }
+
+      // 잘못된 메모(중복 "사칭 사기") 제거
+      if (hasWrong && wrong !== correct) {
+        caseData.memos = caseData.memos.filter((m) => {
+          const t = typeof m === "string" ? m : m?.text;
+          return String(t || "").trim() !== wrong;
+        });
+        fixed++;
+      }
+
+      // 올바른 메모가 없으면 추가
+      if (!hasCorrect) {
+        caseData.memos.push({ id: Date.now() + updated + fixed, text: correct, createdAt: now });
+        updated++;
+      }
+
       caseData.updatedAt = today;
-
       await env.CASES.put(`case:${slug}`, JSON.stringify(caseData));
       indexNowSlugs.push(slug);
-      updated++;
     } catch (e) {
       errors.push({ slug, error: e.message });
     }
@@ -97,6 +129,7 @@ export async function onRequestPost(context) {
     limit,
     processed: slice.length,
     updated,
+    fixed,
     skipped,
     errors: errors.length ? errors : undefined,
     nextOffset: isLast ? null : nextOffset,
