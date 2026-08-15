@@ -52,7 +52,9 @@ export async function onRequest(context) {
     url.pathname.startsWith("/api/admin-settings") ||
     url.pathname.startsWith("/api/delete-case") ||
     url.pathname.startsWith("/api/telegram-test") ||
-    url.pathname.startsWith("/api/migrate-to-kv")
+    url.pathname.startsWith("/api/migrate-to-kv") ||
+    url.pathname.startsWith("/api/batch-check-cases") ||
+    url.pathname.startsWith("/api/batch-add-regular-memo")
   ) {
 
     const ok = await verifySession(request, env);

@@ -63,7 +63,7 @@ export async function onRequestPost(context) {
 async function loadCases(env) {
   if (env.CASES) {
     const raw = await env.CASES.get("cases:index");
-    if (raw) return mergeIndexRepairCases(env, JSON.parse(raw));
+    if (raw) return await mergeIndexRepairCases(env, JSON.parse(raw));
   }
   const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
   if (!owner || !repo || !token) return [];

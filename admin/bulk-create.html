@@ -180,7 +180,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items }),
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`서버 응답 파싱 실패 (HTTP ${res.status})`);
+      }
       if (!data.ok) throw new Error(data.message || '검수 실패');
 
       // 결과 반영
@@ -220,7 +225,8 @@
       setMsg(`검수 완료: ${data.results.length}건 중 ${passCount}건 선택됨.`, 'ok');
       updateCreateBtn();
     } catch (e) {
-      setMsg('검수 오류: ' + e.message, 'err');
+      setMsg('검수 오류: ' + (e.message || String(e)), 'err');
+      console.error('[batch-check]', e);
     } finally {
       isChecking = false;
       document.getElementById('checkBtn').disabled = false;
