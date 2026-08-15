@@ -138,6 +138,43 @@ export async function onRequestPost(context) {
       if (!Array.isArray(cases[idx].comments)) return json({ ok: false, message: "댓글 없음" }, 404);
       cases[idx].comments = cases[idx].comments.filter((c) => c.id !== commentId);
 
+    } else if (action === "delete-memo") {
+      const { memoId, memoText } = body;
+      if (Array.isArray(cases[idx].memos)) {
+        cases[idx].memos = cases[idx].memos.filter((m) => {
+          const id = typeof m === "object" ? m.id : null;
+          const t = typeof m === "string" ? m : m?.text;
+          if (memoId != null && id != null) return Number(id) !== Number(memoId);
+          if (memoText) return String(t || "").trim() !== String(memoText).trim();
+          return true;
+        });
+      }
+      if (memoText && String(cases[idx].memo || "").trim() === String(memoText).trim()) {
+        cases[idx].memo = "";
+      }
+
+    } else if (action === "edit-memo") {
+      const { memoId, memoText, newText } = body;
+      if (!String(newText || "").trim()) return json({ ok: false, message: "메모 내용 필수" }, 400);
+      if (Array.isArray(cases[idx].memos)) {
+        const i = cases[idx].memos.findIndex((m) => {
+          const id = typeof m === "object" ? m.id : null;
+          const t = typeof m === "string" ? m : m?.text;
+          if (memoId != null && id != null) return Number(id) === Number(memoId);
+          if (memoText) return String(t || "").trim() === String(memoText).trim();
+          return false;
+        });
+        if (i !== -1) {
+          const orig = cases[idx].memos[i];
+          cases[idx].memos[i] = {
+            ...(typeof orig === "object" ? orig : {}),
+            id: typeof orig === "object" && orig.id ? orig.id : Date.now(),
+            text: String(newText).trim(),
+            editedAt: nowKst,
+          };
+        }
+      }
+
     } else {
       return json({ ok: false, message: "유효하지 않은 action" }, 400);
     }
@@ -172,11 +209,40 @@ export async function onRequestPost(context) {
       if (existingKvCase?.landings || cases[idx].landings) {
         kvEntry.landings = mergeLandingMaps(existingKvCase?.landings, cases[idx].landings);
       }
-      if (action === "rename" || action === "update-title" || action === "update-summary" || action === "set-noindex" || action === "set-search-hidden" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment") {
+      if (action === "rename" || action === "update-title" || action === "update-summary" || action === "set-noindex" || action === "set-search-hidden" || action === "update-memo" || action === "add-memo" || action === "update-thumbnail" || action === "add-comment" || action === "delete-comment" || action === "delete-memo" || action === "edit-memo") {
         if (existingKvCase) {
           const existingParsed = existingKvCase;
           if (action === "update-memo" || action === "add-memo") {
             mergeOperatorMemoState(kvEntry, existingParsed);
+          }
+        }
+      }
+      // Re-apply memo delete/edit after merge (merge may restore deleted or old memos from KV)
+      if (action === "delete-memo") {
+        const { memoId, memoText } = body;
+        if (Array.isArray(kvEntry.memos)) {
+          kvEntry.memos = kvEntry.memos.filter((m) => {
+            const id = typeof m === "object" ? m.id : null;
+            const t = typeof m === "string" ? m : m?.text;
+            if (memoId != null && id != null) return Number(id) !== Number(memoId);
+            if (memoText) return String(t || "").trim() !== String(memoText).trim();
+            return true;
+          });
+        }
+        if (memoText && String(kvEntry.memo || "").trim() === String(memoText).trim()) kvEntry.memo = "";
+      } else if (action === "edit-memo") {
+        const { memoId, memoText, newText } = body;
+        if (Array.isArray(kvEntry.memos)) {
+          const i = kvEntry.memos.findIndex((m) => {
+            const id = typeof m === "object" ? m.id : null;
+            const t = typeof m === "string" ? m : m?.text;
+            if (memoId != null && id != null) return Number(id) === Number(memoId);
+            if (memoText) return String(t || "").trim() === String(memoText).trim();
+            return false;
+          });
+          if (i !== -1) {
+            const orig = kvEntry.memos[i];
+            kvEntry.memos[i] = { ...(typeof orig === "object" ? orig : {}), id: typeof orig === "object" && orig.id ? orig.id : Date.now(), text: String(newText).trim(), editedAt: nowKst };
           }
         }
       }
