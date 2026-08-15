@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>대량생성 랜딩 생성</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#172033}
+    .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 60px}
+    h1{margin:0 0 6px;font-size:22px}
+    .desc{color:#6b7a90;font-size:13px;margin:0 0 20px}
+    .nav{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;height:38px;padding:0 16px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none}
+    .btn.sec{background:#263244}.btn.danger{background:#c0392b}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .card{background:#fff;border-radius:10px;padding:20px;margin-bottom:18px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+    .card h2{margin:0 0 14px;font-size:15px;color:#263244}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #e8edf4}
+    th{background:#f0f4fa;font-weight:700;color:#4b5a70;white-space:nowrap}
+    td input[type=text]{width:100%;border:1px solid #cfd8e6;border-radius:5px;padding:7px 9px;font:inherit;font-size:13px}
+    td select{width:100%;border:1px solid #cfd8e6;border-radius:5px;padding:7px 9px;font:inherit;font-size:12px;background:#fff}
+    td input[type=checkbox]{width:16px;height:16px;cursor:pointer}
+    .status-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:800}
+    .st-pass{background:#edf7ed;color:#145b22}
+    .st-warning{background:#fff7e0;color:#714900}
+    .st-blocked{background:#ffe8e8;color:#8a1f1f}
+    .st-empty{background:#f0f0f0;color:#888}
+    .similar-list{font-size:11px;color:#555;margin-top:3px;line-height:1.5}
+    .action-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+    .msg{font-size:13px;font-weight:700}
+    .msg.ok{color:#145b22}.msg.err{color:#c0392b}.msg.info{color:#263244}
+    .progress-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+    .progress-bar-wrap{flex:1;height:8px;background:#e8edf4;border-radius:4px;overflow:hidden}
+    .progress-bar{height:100%;background:#1f4fd8;border-radius:4px;transition:width .3s}
+    .result-cell{font-size:12px}
+    .result-ok{color:#145b22;font-weight:700}
+    .result-err{color:#c0392b;font-weight:700}
+    .result-skip{color:#8a96a8}
+    tr.done-ok td{background:#f6fef6}
+    tr.done-err td{background:#fff6f6}
+    .no-name{color:#ccc;font-style:italic}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <a class="btn sec" href="/admin/dashboard.html">← 대시보드</a>
+  </div>
+  <h1>대량생성 랜딩 생성</h1>
+  <p class="desc">최대 30개까지 사건명과 사기 유형을 입력하고, 검수 후 선택하여 일괄 생성합니다. 원고는 '일반랜딩·새 사건 생성'과 동일합니다.</p>
+
+  <div class="card">
+    <h2>사건명 입력</h2>
+    <table id="inputTable">
+      <thead>
+        <tr>
+          <th style="width:32px">No.</th>
+          <th>사건명</th>
+          <th style="width:260px">사기 유형</th>
+          <th style="width:70px">유사도</th>
+          <th style="width:64px">상태</th>
+          <th style="width:60px">생성</th>
+          <th style="width:80px">결과</th>
+        </tr>
+      </thead>
+      <tbody id="inputBody"></tbody>
+    </table>
+    <div class="action-row">
+      <button class="btn sec" onclick="addRow()">+ 행 추가</button>
+      <button class="btn sec" onclick="removeLastRow()">행 삭제</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>검수 및 생성</h2>
+    <div class="action-row">
+      <button class="btn" id="checkBtn" onclick="runBatchCheck()">AI 데이터 생성 및 중복 검수</button>
+      <button class="btn" id="createBtn" onclick="runBatchCreate()" disabled>선택한 사건 생성</button>
+      <button class="btn sec" onclick="selectAll(true)">전체 선택</button>
+      <button class="btn sec" onclick="selectAll(false)">전체 해제</button>
+      <span class="msg" id="actionMsg"></span>
+    </div>
+    <div class="progress-row" id="progressRow" style="display:none">
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <span id="progressText" style="font-size:12px;white-space:nowrap"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const FRAUD_TYPES = [
+    { value: "stock-project", label: "주식 리딩방 사기·투자 프로젝트 사칭형" },
+    { value: "institution-exchange", label: "증권사·은행·거래소 사기 사칭형" },
+    { value: "team-mission", label: "팀미션 사기(쇼핑몰 구매대행·부업·영상 시청)형" },
+    { value: "live-dating", label: "라이브 방송·만남 플랫폼 사칭형" },
+    { value: "refund-reward", label: "환불·보상금 지급 사칭형" },
+  ];
+
+  let rowCount = 0;
+  let checkResults = {};
+  let isChecking = false;
+  let isCreating = false;
+
+  function addRow() {
+    if (rowCount >= 30) { alert('최대 30개까지 입력 가능합니다.'); return; }
+    rowCount++;
+    const n = rowCount;
+    const tbody = document.getElementById('inputBody');
+    const tr = document.createElement('tr');
+    tr.id = `row-${n}`;
+    tr.innerHTML = `
+      <td style="text-align:center;color:#8a96a8">${n}</td>
+      <td><input type="text" id="name-${n}" placeholder="사건명 입력" oninput="clearRowResult(${n})"></td>
+      <td>
+        <select id="type-${n}">
+          <option value="">유형 선택</option>
+          ${FRAUD_TYPES.map(f => `<option value="${f.value}">${f.label}</option>`).join('')}
+        </select>
+      </td>
+      <td id="score-${n}" class="result-cell">-</td>
+      <td id="status-${n}"></td>
+      <td style="text-align:center"><input type="checkbox" id="sel-${n}" disabled></td>
+      <td id="result-${n}" class="result-cell"></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function removeLastRow() {
+    if (rowCount === 0) return;
+    const tr = document.getElementById(`row-${rowCount}`);
+    if (tr) tr.remove();
+    delete checkResults[rowCount];
+    rowCount--;
+  }
+
+  function clearRowResult(n) {
+    document.getElementById(`score-${n}`).textContent = '-';
+    document.getElementById(`status-${n}`).innerHTML = '';
+    document.getElementById(`result-${n}`).textContent = '';
+    document.getElementById(`sel-${n}`).disabled = true;
+    document.getElementById(`sel-${n}`).checked = false;
+    delete checkResults[n];
+    const tr = document.getElementById(`row-${n}`);
+    if (tr) tr.className = '';
+    updateCreateBtn();
+  }
+
+  function selectAll(val) {
+    for (let i = 1; i <= rowCount; i++) {
+      const cb = document.getElementById(`sel-${i}`);
+      if (cb && !cb.disabled) cb.checked = val;
+    }
+  }
+
+  function updateCreateBtn() {
+    let anyChecked = false;
+    for (let i = 1; i <= rowCount; i++) {
+      const cb = document.getElementById(`sel-${i}`);
+      if (cb && cb.checked) { anyChecked = true; break; }
+    }
+    document.getElementById('createBtn').disabled = !anyChecked;
+  }
+
+  async function runBatchCheck() {
+    if (isChecking || isCreating) return;
+    const items = collectItems();
+    if (!items.length) { setMsg('사건명을 1개 이상 입력하세요.', 'err'); return; }
+
+    isChecking = true;
+    document.getElementById('checkBtn').disabled = true;
+    document.getElementById('createBtn').disabled = true;
+    setMsg('중복 검수 중...', 'info');
+
+    try {
+      const res = await fetch('/api/batch-check-cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.message || '검수 실패');
+
+      // 결과 반영
+      let passCount = 0;
+      data.results.forEach((result, idx) => {
+        const n = items[idx]._row;
+        checkResults[n] = result;
+        const scoreEl = document.getElementById(`score-${n}`);
+        const statusEl = document.getElementById(`status-${n}`);
+        const selEl = document.getElementById(`sel-${n}`);
+
+        if (result.status === 'empty') {
+          scoreEl.textContent = '-';
+          statusEl.innerHTML = '';
+          selEl.disabled = true;
+          return;
+        }
+
+        const pct = result.score > 0 ? Math.round(result.score * 100) + '%' : '-';
+        scoreEl.textContent = pct;
+
+        const statusClass = { pass: 'st-pass', warning: 'st-warning', blocked: 'st-blocked' }[result.status] || 'st-empty';
+        const statusLabel = { pass: '✅ 통과', warning: '⚠️ 주의', blocked: '🚫 중복' }[result.status] || '-';
+        let html = `<span class="status-badge ${statusClass}">${statusLabel}</span>`;
+        if (result.matches && result.matches.length) {
+          html += `<div class="similar-list">` + result.matches.map(m =>
+            `• ${esc(m.caseName)} (${Math.round(m.score * 100)}%)`
+          ).join('<br>') + `</div>`;
+        }
+        statusEl.innerHTML = html;
+
+        selEl.disabled = result.status === 'blocked';
+        selEl.checked = result.status !== 'blocked';
+        if (result.status !== 'blocked') passCount++;
+      });
+
+      setMsg(`검수 완료: ${data.results.length}건 중 ${passCount}건 선택됨.`, 'ok');
+      updateCreateBtn();
+    } catch (e) {
+      setMsg('검수 오류: ' + e.message, 'err');
+    } finally {
+      isChecking = false;
+      document.getElementById('checkBtn').disabled = false;
+    }
+  }
+
+  async function runBatchCreate() {
+    if (isCreating || isChecking) return;
+
+    const selected = [];
+    for (let i = 1; i <= rowCount; i++) {
+      const cb = document.getElementById(`sel-${i}`);
+      if (!cb || !cb.checked || cb.disabled) continue;
+      const name = (document.getElementById(`name-${i}`)?.value || '').trim();
+      const type = document.getElementById(`type-${i}`)?.value || '';
+      if (name) selected.push({ row: i, caseName: name, fraudType: type });
+    }
+    if (!selected.length) { setMsg('생성할 사건을 선택하세요.', 'err'); return; }
+
+    isCreating = true;
+    document.getElementById('createBtn').disabled = true;
+    document.getElementById('checkBtn').disabled = true;
+
+    const total = selected.length;
+    let done = 0;
+    setMsg(`0 / ${total} 생성 중...`, 'info');
+    showProgress(0, total);
+
+    for (const item of selected) {
+      const resultEl = document.getElementById(`result-${item.row}`);
+      const tr = document.getElementById(`row-${item.row}`);
+      resultEl.innerHTML = '<span class="result-skip">생성 중...</span>';
+
+      try {
+        // 1단계: AI 원고 생성
+        const draftRes = await fetch('/api/generate-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ caseName: item.caseName, fraudType: item.fraudType }),
+        });
+        const draftData = await draftRes.json();
+        if (!draftData.ok) throw new Error(draftData.message || '원고 생성 실패');
+
+        const caseObj = { ...draftData.case, fraudType: item.fraudType };
+
+        // 2단계: 사건 저장
+        const createRes = await fetch('/api/create-case', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(caseObj),
+        });
+        const createData = await createRes.json();
+
+        if (createData.ok || createRes.status === 409) {
+          const slug = caseObj.slug;
+          const url = `https://gnlaw-criminal.co.kr/prosecute/${encodeURIComponent(slug)}-litigation/`;
+          resultEl.innerHTML = `<span class="result-ok">✅ 생성</span> <a href="${url}" target="_blank" style="font-size:11px;color:#1f4fd8">보기</a>`;
+          if (tr) tr.className = 'done-ok';
+        } else {
+          throw new Error(createData.message || '저장 실패');
+        }
+      } catch (e) {
+        resultEl.innerHTML = `<span class="result-err">❌ ${esc(e.message.slice(0, 40))}</span>`;
+        if (tr) tr.className = 'done-err';
+      }
+
+      done++;
+      showProgress(done, total);
+      setMsg(`${done} / ${total} 생성 중...`, 'info');
+      // 서버 부하 방지: 각 케이스 생성 후 0.5초 대기
+      if (done < total) await sleep(500);
+    }
+
+    setMsg(`완료: ${done}건 처리했습니다.`, 'ok');
+    isCreating = false;
+    document.getElementById('checkBtn').disabled = false;
+    document.getElementById('createBtn').disabled = false;
+  }
+
+  function collectItems() {
+    const items = [];
+    for (let i = 1; i <= rowCount; i++) {
+      const name = (document.getElementById(`name-${i}`)?.value || '').trim();
+      if (name) items.push({ caseName: name, fraudType: document.getElementById(`type-${i}`)?.value || '', _row: i });
+    }
+    return items;
+  }
+
+  function showProgress(done, total) {
+    const row = document.getElementById('progressRow');
+    const bar = document.getElementById('progressBar');
+    const text = document.getElementById('progressText');
+    row.style.display = 'flex';
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    bar.style.width = pct + '%';
+    text.textContent = `${done} / ${total} (${pct}%)`;
+  }
+
+  function setMsg(text, cls) {
+    const el = document.getElementById('actionMsg');
+    el.textContent = text;
+    el.className = 'msg ' + (cls || '');
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // 초기 5행 추가
+  for (let i = 0; i < 5; i++) addRow();
+
+  // 체크박스 변경 → 생성 버튼 상태 업데이트
+  document.getElementById('inputBody').addEventListener('change', (e) => {
+    if (e.target.type === 'checkbox') updateCreateBtn();
+  });
+</script>
+</body>
+</html>

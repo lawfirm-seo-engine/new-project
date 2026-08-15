@@ -786,8 +786,10 @@ function createTags(caseName) {
 }
 
 function findDuplicateRisks(caseName, slug, cases) {
+  // 일반랜딩(createdBy 없음)만 비교 대상으로 제한 — manual 랜딩 제외로 검수 속도 개선
+  const regularCases = cases.filter((c) => !c.createdBy);
   const incoming = { caseName, slug };
-  const matches = cases
+  const matches = regularCases
     .map((item) => {
       const existingName = String(item.caseName || item.name || item.title || "");
       const existingSlug = String(item.slug || "");
