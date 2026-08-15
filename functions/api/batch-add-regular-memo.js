@@ -1,6 +1,6 @@
 // POST /api/batch-add-regular-memo
-// GitHub data/cases.json을 소스로 모든 일반랜딩 KV에 운영자 메모를 추가합니다.
-// Body: { offset?: number, limit?: number }  ← 페이지네이션 지원 (기본 limit=200)
+// KV cases:index를 소스로 모든 일반랜딩에 운영자 메모를 추가합니다.
+// Body: { offset?: number, limit?: number }  ← 페이지네이션 (기본 limit=200)
 
 import { GROUPS, INDEXNOW_KEY as DEFAULT_INDEXNOW_KEY, buildLandingUrl } from "../_seo.js";
 
@@ -15,12 +15,15 @@ export async function onRequestPost(context) {
   const offset = Number(body.offset) || 0;
   const limit = Math.min(Number(body.limit) || 200, 300);
 
-  // GitHub에서 cases.json 로드 (최신 상태, 이미 메모 포함)
-  const regularCases = await loadRegularFromGithub(env);
-  if (!regularCases) return json({ ok: false, message: "GitHub 케이스 로드 실패" }, 500);
+  // KV cases:index에서 전체 목록 로드
+  const idxRaw = await env.CASES.get("cases:index");
+  if (!idxRaw) return json({ ok: false, message: "cases:index 없음" }, 404);
 
-  const total = regularCases.length;
-  const slice = regularCases.slice(offset, offset + limit);
+  const allIndex = JSON.parse(idxRaw);
+  const regularIndex = allIndex.filter((c) => !c.createdBy);
+  const total = regularIndex.length;
+  const slice = regularIndex.slice(offset, offset + limit);
+
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace("T", " ").slice(0, 16);
   const today = new Date().toISOString().slice(0, 10);
 
@@ -29,12 +32,9 @@ export async function onRequestPost(context) {
   const errors = [];
   const indexNowSlugs = [];
 
-  for (const ghCase of slice) {
-    const slug = ghCase.slug;
+  for (const entry of slice) {
+    const slug = entry.slug;
     if (!slug) { skipped++; continue; }
-
-    const caseName = ghCase.caseName || slug;
-    const memoText = caseName + MEMO_SUFFIX;
 
     try {
       const raw = await env.CASES.get(`case:${slug}`);
@@ -42,6 +42,9 @@ export async function onRequestPost(context) {
 
       const caseData = JSON.parse(raw);
       if (caseData.createdBy) { skipped++; continue; }
+
+      const caseName = caseData.caseName || entry.caseName || slug;
+      const memoText = caseName + MEMO_SUFFIX;
 
       if (!Array.isArray(caseData.memos)) caseData.memos = [];
 
@@ -62,7 +65,6 @@ export async function onRequestPost(context) {
     }
   }
 
-  // 이 배치의 마지막 페이지이면 IndexNow 전송
   const nextOffset = offset + limit;
   const isLast = nextOffset >= total;
   const indexNowResults = [];
@@ -101,27 +103,6 @@ export async function onRequestPost(context) {
     done: isLast,
     indexNow: indexNowResults.length ? indexNowResults : undefined,
   });
-}
-
-async function loadRegularFromGithub(env) {
-  const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
-  if (!owner || !repo || !token) return null;
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`,
-      { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "batch-add-memo" } },
-    );
-    if (!res.ok) return null;
-    const file = await res.json();
-    if (!file.content) return null;
-    const content = new TextDecoder().decode(
-      Uint8Array.from(atob(file.content.replace(/\n/g, "")), (c) => c.charCodeAt(0)),
-    );
-    const all = JSON.parse(content);
-    return Array.isArray(all) ? all.filter((c) => !c.createdBy) : null;
-  } catch {
-    return null;
-  }
 }
 
 function json(data, status = 200) {
