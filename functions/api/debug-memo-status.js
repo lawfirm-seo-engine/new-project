@@ -32,6 +32,7 @@ export async function onRequestGet(context) {
       memoCount: (caseData.memos || []).length,
       hasMemo,
       caseName: caseData.caseName,
+      memos: (caseData.memos || []).map(m => typeof m === "string" ? m : m?.text),
     });
   }
 
