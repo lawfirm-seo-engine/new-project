@@ -434,16 +434,28 @@
   async function batchAddRegularMemo() {
     if (!confirm('모든 일반랜딩에 "OOO 사칭 사기 사건 현재 접수중 입니다." 메모를 추가하고\n네이버·구글 IndexNow를 실행합니다.\n\n계속하시겠습니까?')) return;
     const btn = document.querySelector('[onclick="batchAddRegularMemo()"]');
-    btn.disabled = true; btn.textContent = '처리 중...';
+    btn.disabled = true;
+    let totalUpdated = 0, totalSkipped = 0, offset = 0;
+    let indexNowSummary = '';
     try {
-      const res = await fetch('/api/batch-add-regular-memo', { method: 'POST' });
-      const data = await res.json();
-      if (data.ok) {
-        const indexNowSummary = (data.indexNow || []).map(r => `${r.engine}: ${r.ok ? '✅' : '❌'} (${r.count || 0}건)`).join(', ');
-        alert(`✅ 완료!\n처리: ${data.updated}건 추가 / ${data.skipped}건 건너뜀\nIndexNow: ${indexNowSummary || '없음'}`);
-      } else {
-        alert('❌ 실패: ' + (data.message || '알 수 없는 오류'));
+      while (true) {
+        btn.textContent = `처리 중... (${offset}건 완료)`;
+        const res = await fetch('/api/batch-add-regular-memo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ offset, limit: 200 }),
+        });
+        const data = await res.json();
+        if (!data.ok) { alert('❌ 실패: ' + (data.message || '오류')); break; }
+        totalUpdated += data.updated || 0;
+        totalSkipped += data.skipped || 0;
+        if (data.indexNow && data.indexNow.length) {
+          indexNowSummary = data.indexNow.map(r => `${r.engine}: ${r.ok ? '✅' : '❌'} (${r.count || 0}건)`).join(', ');
+        }
+        if (data.done || data.nextOffset == null) break;
+        offset = data.nextOffset;
       }
+      alert(`✅ 완료! (총 ${totalUpdated + totalSkipped}건)\n추가: ${totalUpdated}건 / 건너뜀: ${totalSkipped}건\nIndexNow: ${indexNowSummary || '없음'}`);
     } catch (e) { alert('오류: ' + e.message); }
     finally { btn.disabled = false; btn.textContent = '일반랜딩 운영자 메모 일괄 추가'; }
   }
