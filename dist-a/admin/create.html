@@ -282,7 +282,7 @@
 
   <div id="successBox" style="display:none;margin-top:16px;padding:18px 20px;background:#edf7ed;border:1px solid #b2dfb2;border-radius:8px;color:#145b22">
     <strong id="successTitle">✅ 저장 완료</strong>
-    <div id="successLinks" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px"></div>
+    <div id="successLinks" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
     <p style="margin:12px 0 0;font-size:12px;color:#3d7a4a">랜딩페이지 반영까지 최대 30초 소요될 수 있습니다. 링크가 열리지 않으면 잠시 후 다시 시도하세요.</p>
     <button type="button" onclick="resetForNewCase()" style="margin-top:14px;padding:10px 18px;background:#1f4fd8;color:#fff;border:0;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">+ 새 사건 생성</button>
   </div>
@@ -436,14 +436,41 @@
       successTitleEl.textContent = `✅ "${caseName}" 저장 완료!`;
       successLinksEl.innerHTML = "";
       for (const g of LANDING_GROUPS) {
-        const a = document.createElement("a");
         const suffix = g.suffix ? `-${g.suffix}` : "";
-        a.href = `${g.url}/${g.prefix}/${encodeURIComponent(slug)}${suffix}/`;
+        const url = `${g.url}/${g.prefix}/${encodeURIComponent(slug)}${suffix}/`;
+
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;gap:8px;flex-wrap:wrap";
+
+        const labelEl = document.createElement("span");
+        labelEl.textContent = g.label;
+        labelEl.style.cssText = "display:inline-block;flex-shrink:0;padding:4px 10px;background:#1f4fd8;color:#fff;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap";
+        row.appendChild(labelEl);
+
+        const a = document.createElement("a");
+        a.href = url;
         a.target = "_blank";
         a.rel = "noopener";
-        a.textContent = g.label;
-        a.style.cssText = "display:inline-block;padding:6px 12px;background:#1f4fd8;color:#fff;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none";
-        successLinksEl.appendChild(a);
+        a.textContent = url;
+        a.style.cssText = "color:#0f4fcf;font-size:13px;word-break:break-all";
+        row.appendChild(a);
+
+        const copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.textContent = "복사";
+        copyBtn.style.cssText = "flex-shrink:0;padding:3px 10px;background:#e7edf9;color:#1f4fd8;border:1px solid #c7d4f0;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer";
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(url);
+            copyBtn.textContent = "복사됨";
+            setTimeout(() => { copyBtn.textContent = "복사"; }, 1500);
+          } catch (e) {
+            copyBtn.textContent = "복사 실패";
+          }
+        });
+        row.appendChild(copyBtn);
+
+        successLinksEl.appendChild(row);
       }
       successBoxEl.style.display = "block";
       messageEl.textContent = "";

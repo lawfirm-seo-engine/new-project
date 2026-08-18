@@ -33,9 +33,18 @@
     .comment-text{font-size:14px;flex:1}
     .comment-date{font-size:11px;color:#8a96a8;white-space:nowrap}
     .memo-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-    .memo-item{padding:10px 14px;border:1px solid #e8edf4;border-radius:6px;background:#fafbfd}
-    .memo-text{font-size:14px;line-height:1.6;white-space:pre-wrap}
+    .memo-item{padding:10px 14px;border:1px solid #e8edf4;border-radius:6px;background:#fafbfd;position:relative}
+    .memo-item:hover .memo-actions{opacity:1}
+    .memo-actions{position:absolute;top:8px;right:10px;display:flex;gap:6px;opacity:0;transition:opacity .15s}
+    .memo-btn{padding:2px 8px;border:0;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;line-height:1.6}
+    .memo-btn.del{background:#ffe8e8;color:#c0392b}.memo-btn.edit{background:#edf3ff;color:#1f4fd8}
+    .memo-text{font-size:14px;line-height:1.6;white-space:pre-wrap;padding-right:100px}
     .memo-date{margin-top:4px;font-size:11px;color:#8a96a8}
+    .memo-edit-area{display:none;margin-top:8px}
+    .memo-edit-area textarea{width:100%;border:1px solid #cfd8e6;border-radius:5px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical}
+    .memo-edit-row{display:flex;gap:8px;margin-top:6px}
+    .memo-edit-row button{padding:4px 12px;border:0;border-radius:5px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+    .memo-save-btn{background:#1f4fd8;color:#fff}.memo-cancel-btn{background:#e8edf4;color:#263244}
     .loading{color:#8a96a8;font-size:14px}
   </style>
 </head>
@@ -289,27 +298,80 @@
       const text = typeof item === 'string' ? item : item?.text;
       const clean = String(text || '').trim();
       const createdAt = typeof item === 'object' ? (item.createdAt || '') : '';
-      const id = typeof item === 'object' ? (item.id || '') : '';
-      const key = id || (createdAt ? `${createdAt}\n${clean}` : clean);
+      const editedAt = typeof item === 'object' ? (item.editedAt || '') : '';
+      const id = typeof item === 'object' ? (item.id ?? '') : '';
+      const key = id !== '' ? String(id) : (createdAt ? `${createdAt}\n${clean}` : clean);
       if (!clean || seen.has(key)) return;
       seen.add(key);
-      list.push({ text: clean, createdAt });
+      list.push({ text: clean, createdAt, editedAt, id });
     }
     if (caseData?.memo) addMemo({ text: caseData.memo });
-    if (Array.isArray(caseData?.memos)) {
-      caseData.memos.forEach(addMemo);
-    }
+    if (Array.isArray(caseData?.memos)) caseData.memos.forEach(addMemo);
     const el = document.getElementById('memoList');
     el.className = 'memo-list';
     if (!list.length) {
       el.innerHTML = '<p style="color:#8a96a8;font-size:14px;margin:0">등록된 운영자 메모가 없습니다.</p>';
       return;
     }
-    el.innerHTML = list.map((item) => `
-      <div class="memo-item">
-        <div class="memo-text">${esc(item.text)}</div>
-        ${item.createdAt ? `<div class="memo-date">${esc(item.createdAt)}</div>` : ''}
-      </div>`).join('');
+    el.innerHTML = list.map((item, idx) => {
+      const safeText = esc(item.text);
+      const safeId = esc(String(item.id ?? ''));
+      const dateStr = item.editedAt ? `${esc(item.createdAt || '')} (수정: ${esc(item.editedAt)})` : esc(item.createdAt || '');
+      return `<div class="memo-item" data-memo-idx="${idx}" data-memo-id="${safeId}" data-memo-text="${safeText}">
+        <div class="memo-actions">
+          <button class="memo-btn edit" onclick="startEditMemo(${idx})">수정</button>
+          <button class="memo-btn del" onclick="deleteMemo(${idx})">삭제</button>
+        </div>
+        <div class="memo-text" id="memo-text-${idx}">${safeText}</div>
+        ${dateStr ? `<div class="memo-date">${dateStr}</div>` : ''}
+        <div class="memo-edit-area" id="memo-edit-${idx}">
+          <textarea id="memo-edit-ta-${idx}" rows="3">${safeText}</textarea>
+          <div class="memo-edit-row">
+            <button class="memo-save-btn" onclick="saveEditMemo(${idx})">저장</button>
+            <button class="memo-cancel-btn" onclick="cancelEditMemo(${idx})">취소</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    // store list reference for actions
+    window._memoList = list;
+  }
+
+  async function deleteMemo(idx) {
+    const item = window._memoList?.[idx];
+    if (!item) return;
+    if (!confirm(`이 메모를 삭제하시겠습니까?\n\n"${item.text.slice(0, 80)}${item.text.length > 80 ? '…' : ''}"`)) return;
+    const payload = { slug, action: 'delete-memo', memoText: item.text };
+    if (item.id !== '') payload.memoId = item.id;
+    const res = await api('/api/update-case', payload);
+    if (res.ok) { caseData = res.updatedCase; renderMemoHistory(); }
+    else alert('삭제 실패: ' + (res.message || ''));
+  }
+
+  function startEditMemo(idx) {
+    document.getElementById(`memo-edit-${idx}`).style.display = 'block';
+    document.getElementById(`memo-text-${idx}`).style.display = 'none';
+    document.querySelector(`[data-memo-idx="${idx}"] .memo-actions`).style.display = 'none';
+    document.getElementById(`memo-edit-ta-${idx}`).focus();
+  }
+
+  function cancelEditMemo(idx) {
+    document.getElementById(`memo-edit-${idx}`).style.display = 'none';
+    document.getElementById(`memo-text-${idx}`).style.display = '';
+    document.querySelector(`[data-memo-idx="${idx}"] .memo-actions`).style.display = '';
+  }
+
+  async function saveEditMemo(idx) {
+    const item = window._memoList?.[idx];
+    if (!item) return;
+    const newText = document.getElementById(`memo-edit-ta-${idx}`).value.trim();
+    if (!newText) { alert('메모 내용을 입력하세요.'); return; }
+    if (newText === item.text) { cancelEditMemo(idx); return; }
+    const payload = { slug, action: 'edit-memo', memoText: item.text, newText };
+    if (item.id !== '') payload.memoId = item.id;
+    const res = await api('/api/update-case', payload);
+    if (res.ok) { caseData = res.updatedCase; renderMemoHistory(); }
+    else alert('수정 실패: ' + (res.message || ''));
   }
 
   function renderComments() {

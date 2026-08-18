@@ -52,7 +52,7 @@
   <h1>관리자 대시보드</h1>
   <div class="top-nav">
     <a class="btn" href="/admin/create.html">+ 새 사건 생성</a>
-    <a class="btn" href="/admin/powerlink.html">+ 파워링크 랜딩 생성</a>
+    <a class="btn" href="/admin/bulk-create.html">+ 대량생성 랜딩 생성</a>
     <a class="btn" href="/admin/recovery.html">리커버리 랜딩 생성</a>
     <a class="btn" href="/admin/jipjeong.html">지급정지 랜딩 생성</a>
     <a class="btn" href="/admin/voicephishing.html">보이스피싱 랜딩 생성</a>
@@ -60,6 +60,7 @@
     <a class="btn" href="/admin/tujasagi.html">투자사기 랜딩 생성</a>
     <a class="btn" href="/admin/readingroom.html">리딩방 랜딩 생성</a>
     <a class="btn" href="/admin/center-board.html">통합 허브 게시글 관리</a>
+    <button class="btn sec" onclick="batchAddRegularMemo()">일반랜딩 운영자 메모 일괄 추가</button>
     <button class="btn sec" onclick="syncKvToGithub()">KV→GitHub 동기화</button>
     <button class="btn sec" onclick="batchApplyTemplates()">템플릿 일괄 적용</button>
     <button class="btn sec" onclick="backfillReadingroomTags()">리딩방 태그 일괄 반영</button>
@@ -428,6 +429,35 @@
       filterEntries();
       alert('오류: ' + e.message);
     }
+  }
+
+  async function batchAddRegularMemo() {
+    if (!confirm('모든 일반랜딩에 "OOO 사칭 사기 사건 현재 접수중 입니다." 메모를 추가하고\n네이버·구글 IndexNow를 실행합니다.\n\n계속하시겠습니까?')) return;
+    const btn = document.querySelector('[onclick="batchAddRegularMemo()"]');
+    btn.disabled = true;
+    let totalUpdated = 0, totalSkipped = 0, offset = 0;
+    let indexNowSummary = '';
+    try {
+      while (true) {
+        btn.textContent = `처리 중... (${offset}건 완료)`;
+        const res = await fetch('/api/batch-add-regular-memo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ offset, limit: 200 }),
+        });
+        const data = await res.json();
+        if (!data.ok) { alert('❌ 실패: ' + (data.message || '오류')); break; }
+        totalUpdated += data.updated || 0;
+        totalSkipped += data.skipped || 0;
+        if (data.indexNow && data.indexNow.length) {
+          indexNowSummary = data.indexNow.map(r => `${r.engine}: ${r.ok ? '✅' : '❌'} (${r.count || 0}건)`).join(', ');
+        }
+        if (data.done || data.nextOffset == null) break;
+        offset = data.nextOffset;
+      }
+      alert(`✅ 완료! (총 ${totalUpdated + totalSkipped}건)\n추가: ${totalUpdated}건 / 건너뜀: ${totalSkipped}건\nIndexNow: ${indexNowSummary || '없음'}`);
+    } catch (e) { alert('오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '일반랜딩 운영자 메모 일괄 추가'; }
   }
 
   async function syncKvToGithub() {
