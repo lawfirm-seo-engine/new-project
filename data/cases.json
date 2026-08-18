@@ -133196,7 +133196,7 @@
     "caseName": "PCM Pro 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-12",
-    "updatedAt": "2026-08-12",
+    "updatedAt": "2026-08-18",
     "thumbnailUrl": "",
     "landingViews": 7372,
     "reports": 24,
@@ -133392,7 +133392,14 @@
           ]
         }
       }
-    }
+    },
+    "memos": [
+      {
+        "id": 1787032467617,
+        "text": "PCM증권을 사칭한 PCM Pro 어플과 PCM Ultra 어플을 통한 사기 사건이 접수되고 있습니다.",
+        "createdAt": "2026-08-18 14:54"
+      }
+    ]
   },
   {
     "slug": "yohi-io",
