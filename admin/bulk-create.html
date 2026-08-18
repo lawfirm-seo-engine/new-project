@@ -211,9 +211,13 @@
         const statusLabel = { pass: '✅ 통과', warning: '⚠️ 주의', blocked: '🚫 중복' }[result.status] || '-';
         let html = `<span class="status-badge ${statusClass}">${statusLabel}</span>`;
         if (result.matches && result.matches.length) {
-          html += `<div class="similar-list">` + result.matches.map(m =>
-            `• ${esc(m.caseName)} (${Math.round(m.score * 100)}%)`
-          ).join('<br>') + `</div>`;
+          html += `<div class="similar-list">` + result.matches.map(m => {
+            const editHref = m.slug ? `/admin/edit.html?slug=${encodeURIComponent(m.slug)}` : '';
+            const editLink = editHref
+              ? ` <a href="${editHref}" target="_blank" rel="noopener" style="color:#1f4fd8;font-weight:700;text-decoration:none">편집</a>`
+              : '';
+            return `• ${esc(m.caseName)} (${Math.round(m.score * 100)}%)${editLink}`;
+          }).join('<br>') + `</div>`;
         }
         statusEl.innerHTML = html;
 
@@ -222,7 +226,11 @@
         if (result.status !== 'blocked') passCount++;
       });
 
-      setMsg(`검수 완료: ${data.results.length}건 중 ${passCount}건 선택됨.`, 'ok');
+      if (data.truncated) {
+        setMsg(data.message || `검수 완료(일부): ${data.results.length}/${items.length}건 처리, ${passCount}건 선택됨. 나머지는 다시 검수해주세요.`, 'err');
+      } else {
+        setMsg(`검수 완료: ${data.results.length}건 중 ${passCount}건 선택됨.`, 'ok');
+      }
       updateCreateBtn();
     } catch (e) {
       setMsg('검수 오류: ' + (e.message || String(e)), 'err');

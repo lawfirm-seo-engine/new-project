@@ -77,20 +77,26 @@ export function searchAliases(value = "") {
   ].filter((item) => item && item.length >= 2));
 }
 
-export function compareCaseIdentity(incoming = {}, existing = {}) {
-  const incomingSlugAliases = searchAliases(incoming.slug || "");
-  const existingSlugAliases = searchAliases(existing.slug || "");
-  const incomingAliases = aliasesForCase(incoming);
-  const existingAliases = aliasesForCase(existing);
-  const exactSlug = hasStrongOverlap(incomingSlugAliases, existingSlugAliases);
-  const exactAlias = hasStrongOverlap(incomingAliases, existingAliases);
-  const incomingCoreAliases = coreAliasesForCase(incoming);
-  const existingCoreAliases = coreAliasesForCase(existing);
-  const exactCore = hasStrongOverlap(incomingCoreAliases, existingCoreAliases);
-  const containsCore = hasStrongContainment(incomingCoreAliases, existingCoreAliases);
-  const brandOverlap = hasBrandOverlap(brandAliasesForCase(incoming), brandAliasesForCase(existing));
-  const containsAlias = hasStrongContainment(incomingAliases, existingAliases) && containsCore;
-  const fuzzyScore = maxSimilarity(incomingAliases, existingAliases);
+// 케이스 1건에 대한 별칭 묶음을 미리 계산해둔다. 배치 중복 검수처럼 같은 "existing" 케이스를
+// 여러 "incoming" 항목과 반복 비교할 때, 이 묶음을 한 번만 만들어 재사용하면
+// aliasesForCase/coreAliasesForCase 등 비싼 정규화 연산의 반복 계산을 피할 수 있다.
+export function buildCaseIdentityBundle(item = {}) {
+  return {
+    slugAliases: searchAliases(item.slug || ""),
+    aliases: aliasesForCase(item),
+    coreAliases: coreAliasesForCase(item),
+    brandAliases: brandAliasesForCase(item),
+  };
+}
+
+export function compareIdentityBundles(incomingBundle, existingBundle, tokenCache = null) {
+  const exactSlug = hasStrongOverlap(incomingBundle.slugAliases, existingBundle.slugAliases);
+  const exactAlias = hasStrongOverlap(incomingBundle.aliases, existingBundle.aliases);
+  const exactCore = hasStrongOverlap(incomingBundle.coreAliases, existingBundle.coreAliases);
+  const containsCore = hasStrongContainment(incomingBundle.coreAliases, existingBundle.coreAliases);
+  const brandOverlap = hasBrandOverlap(incomingBundle.brandAliases, existingBundle.brandAliases);
+  const containsAlias = hasStrongContainment(incomingBundle.aliases, existingBundle.aliases) && containsCore;
+  const fuzzyScore = maxSimilarity(incomingBundle.aliases, existingBundle.aliases, tokenCache);
   const adjustedFuzzyScore = exactCore || containsCore ? fuzzyScore : Math.min(fuzzyScore, 0.69);
   const score = exactSlug || exactAlias || exactCore
     ? 1
@@ -108,6 +114,10 @@ export function compareCaseIdentity(incoming = {}, existing = {}) {
     containsCore,
     brandOverlap,
   };
+}
+
+export function compareCaseIdentity(incoming = {}, existing = {}) {
+  return compareIdentityBundles(buildCaseIdentityBundle(incoming), buildCaseIdentityBundle(existing));
 }
 
 function aliasesForCase(item = {}) {
@@ -222,24 +232,35 @@ function hasStrongContainment(left = [], right = []) {
   return a.some((x) => b.some((y) => x.includes(y) || y.includes(x)));
 }
 
-function maxSimilarity(left = [], right = []) {
+function maxSimilarity(left = [], right = [], tokenCache = null) {
   let best = 0;
   for (const a of left) {
     for (const b of right) {
-      best = Math.max(best, similarity(a, b));
+      best = Math.max(best, similarity(a, b, tokenCache));
+      if (best === 1) return best;
     }
   }
   return best;
 }
 
-function similarity(a = "", b = "") {
+function similarity(a = "", b = "", tokenCache = null) {
   if (!a || !b) return 0;
   if (a === b) return 1;
-  const aSet = tokenSet(a);
-  const bSet = tokenSet(b);
+  const aSet = cachedTokenSet(a, tokenCache);
+  const bSet = cachedTokenSet(b, tokenCache);
   const intersection = [...aSet].filter((item) => bSet.has(item)).length;
   const union = new Set([...aSet, ...bSet]).size || 1;
   return intersection / union;
+}
+
+function cachedTokenSet(value, tokenCache) {
+  if (!tokenCache) return tokenSet(value);
+  let cached = tokenCache.get(value);
+  if (!cached) {
+    cached = tokenSet(value);
+    tokenCache.set(value, cached);
+  }
+  return cached;
 }
 
 function tokenSet(value = "") {

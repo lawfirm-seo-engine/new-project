@@ -3,7 +3,7 @@
 // Body: { items: [{caseName, fraudType}] }
 // Response: { ok, results: [{caseName, slug, fraudType, status, score, matches}] }
 
-import { compareCaseIdentity, hangulToRoman } from "../_searchNormalize.js";
+import { buildCaseIdentityBundle, compareIdentityBundles, hangulToRoman } from "../_searchNormalize.js";
 import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
 
 export async function onRequestPost(context) {
@@ -18,16 +18,39 @@ export async function onRequestPost(context) {
     // 일반랜딩만 비교 대상
     const regularCases = cases.filter((c) => !c.createdBy);
 
-    const results = items.map(({ caseName: rawName, fraudType }) => {
+    // existing 케이스 쪽 별칭 묶음은 incoming 30건 전체에서 동일하게 재사용되므로 미리 한 번만 계산한다.
+    // (예전에는 이 연산을 항목당 매번 반복해서 5천여 건 x 30항목 규모에서 CPU 타임아웃(503)이 발생했다.)
+    const existingBundles = regularCases.map((item) => ({
+      item,
+      bundle: buildCaseIdentityBundle(item),
+    }));
+    const tokenCache = new Map();
+
+    // 방어적 시간 예산: 케이스 수가 계속 늘어나는 상황에서도 CPU 타임아웃으로 통째로 503이 나는 대신,
+    // 예산을 넘기면 처리된 만큼만 정상 반환하고 나머지는 truncated로 표시한다.
+    const TIME_BUDGET_MS = 20000;
+    const startedAt = Date.now();
+    let truncated = false;
+
+    const results = [];
+    for (const { caseName: rawName, fraudType } of items) {
+      if (Date.now() - startedAt > TIME_BUDGET_MS) {
+        truncated = true;
+        break;
+      }
+
       const caseName = normalizeSpace(rawName);
-      if (!caseName) return { caseName: rawName, slug: "", fraudType, status: "empty", score: 0, matches: [] };
+      if (!caseName) {
+        results.push({ caseName: rawName, slug: "", fraudType, status: "empty", score: 0, matches: [] });
+        continue;
+      }
 
       const slug = createSlug(slugBase(caseName));
-      const incoming = { caseName, slug };
+      const incomingBundle = buildCaseIdentityBundle({ caseName, slug });
 
-      const matches = regularCases
-        .map((item) => {
-          const identity = compareCaseIdentity(incoming, item);
+      const matches = existingBundles
+        .map(({ item, bundle }) => {
+          const identity = compareIdentityBundles(incomingBundle, bundle, tokenCache);
           return {
             slug: item.slug || "",
             caseName: item.caseName || "",
@@ -51,10 +74,14 @@ export async function onRequestPost(context) {
       const status = blocked ? "blocked" : warn ? "warning" : "pass";
       const topScore = matches.length ? matches[0].score : 0;
 
-      return { caseName, slug, fraudType: fraudType || "", status, score: topScore, matches };
-    });
+      results.push({ caseName, slug, fraudType: fraudType || "", status, score: topScore, matches });
+    }
 
-    return json({ ok: true, results });
+    return json({
+      ok: true,
+      results,
+      ...(truncated ? { truncated: true, message: `${results.length}/${items.length}건까지 처리 후 시간 예산을 초과해 중단했습니다. 남은 항목은 다시 검수해주세요.` } : {}),
+    });
   } catch (e) {
     return json({ ok: false, message: e.message }, 500);
   }
