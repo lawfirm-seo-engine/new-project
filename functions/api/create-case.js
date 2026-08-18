@@ -66,12 +66,8 @@ export async function onRequestPost(context) {
         return json({ ok: false, message: "이미 존재하는 slug입니다." }, 409);
       }
 
-      const idxRaw = await env.CASES.get("cases:index");
-      const idx = await mergeIndexRepairCases(env, idxRaw ? JSON.parse(idxRaw) : []);
-
       await env.CASES.put(`case:${slug}`, JSON.stringify(newCase));
-      idx.push(buildIndexEntry(newCase));
-      await env.CASES.put("cases:index", JSON.stringify(idx));
+      await appendToIndexSafely(env, buildIndexEntry(newCase));
 
       // GitHub에도 동기화 — KV 전체를 덮어쓰는 방식으로 race condition 방지
       const repoOwner = env.GITHUB_REPO_OWNER;
@@ -202,6 +198,25 @@ async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
       }),
     }
   );
+}
+
+// cases:index는 "읽기 → 메모리에 push → 통째로 쓰기" 방식이라, 두 생성 요청이 겹치면
+// 나중에 쓰는 쪽이 먼저 쓴 쪽의 추가분을 덮어써 인덱스에서 유실될 수 있다
+// (case:{slug} 본문은 살아있는데 검색/목록/사이트맵에서만 사라지는 증상).
+// 쓰기 직후 재조회로 실제 반영됐는지 확인하고, 유실됐으면 최신 인덱스를 다시 읽어 재시도한다.
+async function appendToIndexSafely(env, entry, maxAttempts = 3) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const idxRaw = await env.CASES.get("cases:index");
+    const idx = await mergeIndexRepairCases(env, idxRaw ? JSON.parse(idxRaw) : []);
+    if (idx.some((e) => e.slug === entry.slug)) return;
+
+    idx.push(entry);
+    await env.CASES.put("cases:index", JSON.stringify(idx));
+
+    const verifyRaw = await env.CASES.get("cases:index");
+    const verifyIdx = verifyRaw ? JSON.parse(verifyRaw) : [];
+    if (verifyIdx.some((e) => e.slug === entry.slug)) return;
+  }
 }
 
 function buildIndexEntry(c) {

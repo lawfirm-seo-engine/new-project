@@ -66,6 +66,7 @@
     <button class="btn sec" onclick="backfillReadingroomTags()">리딩방 태그 일괄 반영</button>
     <button class="btn sec" onclick="regenerateReadingroomLandings()">리딩방 제목 재생성</button>
     <button class="btn sec" onclick="refreshReadingroomFreshness()">리딩방 신선도 갱신(20건)</button>
+    <button class="btn sec" onclick="repairMissingIndexEntries()">검색 누락 사건 복구</button>
     <a class="btn sec" href="/admin/settings.html">텔레그램 설정</a>
     <a class="btn sec" href="/admin/logout">로그아웃</a>
   </div>
@@ -535,6 +536,24 @@
       else alert('❌ 실패: ' + (data.message || '알 수 없는 오류'));
     } catch (e) { alert('오류: ' + e.message); }
     finally { btn.disabled = false; btn.textContent = '리딩방 신선도 갱신(20건)'; }
+  }
+
+  async function repairMissingIndexEntries() {
+    const btn = document.querySelector('[onclick="repairMissingIndexEntries()"]');
+    btn.disabled = true; btn.textContent = '점검 중...';
+    try {
+      const previewRes = await fetch('/api/repair-missing-index-entries?dry=1', { method:'POST' });
+      const preview = await previewRes.json();
+      if (!preview.ok) { alert('점검 실패: ' + (preview.message || '알 수 없는 오류')); return; }
+      if (preview.missingCount === 0) { alert(`✅ 누락된 사건이 없습니다.\n전체 케이스 레코드: ${preview.totalCaseRecords}건 / 인덱스: ${preview.totalIndexed}건`); return; }
+      if (!confirm(`전체 케이스 레코드 ${preview.totalCaseRecords}건 중 검색·목록 인덱스에서 빠진 케이스 ${preview.missingCount}건을 발견했습니다.\n(예: ${preview.sample.slice(0,5).join(', ')}${preview.sample.length>5?' 등':''})\n\nKV+GitHub 인덱스에 복구하시겠습니까?`)) return;
+      btn.textContent = '복구 중...';
+      const res = await fetch('/api/repair-missing-index-entries', { method:'POST' });
+      const data = await res.json();
+      if (data.ok) alert(`✅ 완료\n누락 발견: ${data.missingCount}건\n복구됨: ${data.repaired}건\nGitHub 반영: ${data.githubUpdated}건` + (data.errors?.length ? `\n오류: ${data.errors.length}건` : ''));
+      else alert('❌ 실패: ' + (data.message || '알 수 없는 오류'));
+    } catch (e) { alert('오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '검색 누락 사건 복구'; }
   }
 
   async function editLandingTitle(encodedSlug) {

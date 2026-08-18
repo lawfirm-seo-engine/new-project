@@ -1,5 +1,11 @@
+// cases:index는 여러 생성 엔드포인트가 "읽기→메모리에서 push→통째로 쓰기" 방식으로 갱신하는데,
+// 두 요청이 거의 동시에 들어오면 나중에 쓰는 쪽이 먼저 쓴 쪽의 index 추가분을 덮어써 유실될 수 있다
+// (case:{slug} 본문 레코드는 키가 겹치지 않아 살아있지만 목록/검색에서는 사라지는 증상).
+// 이 목록은 그렇게 유실된 게 발견된 slug의 임시 땜질 목록이다 — 근본적으로는
+// /api/repair-missing-index-entries로 전체를 한 번 정리하는 것이 맞다.
 const INDEX_REPAIR_SLUGS = [
   "cvctujajeunggwon",
+  "pcm-pro",
 ];
 
 export async function mergeIndexRepairCases(env, cases = []) {
@@ -25,7 +31,7 @@ export async function mergeIndexRepairCases(env, cases = []) {
   return [...bySlug.values()];
 }
 
-function buildIndexEntry(item = {}, fallbackSlug = "") {
+export function buildIndexEntry(item = {}, fallbackSlug = "") {
   const landings = item.landings && typeof item.landings === "object" ? item.landings : {};
   const firstLanding = landings.a || Object.values(landings)[0] || {};
   const entry = {
