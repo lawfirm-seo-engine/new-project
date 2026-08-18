@@ -11290,11 +11290,6 @@
         "id": 1786595021282,
         "text": "우리투자증권 사칭 K-AGENT AI 프로젝트\nNAVER 주식유치원\n웰스성장플랜\n접수중인 사건명 입니다.",
         "createdAt": "2026-08-13 13:23"
-      },
-      {
-        "id": 1786779063876,
-        "text": "주식리딩방 사기 사칭 사기 사건 현재 접수중 입니다.",
-        "createdAt": "2026-08-15 16:31"
       }
     ],
     "currentProgress": [
@@ -133399,7 +133394,9 @@
         "text": "PCM증권을 사칭한 PCM Pro 어플과 PCM Ultra 어플을 통한 사기 사건이 접수되고 있습니다.",
         "createdAt": "2026-08-18 14:54"
       }
-    ]
+    ],
+    "searchHidden": false,
+    "hideFromListing": false
   },
   {
     "slug": "yohi-io",
