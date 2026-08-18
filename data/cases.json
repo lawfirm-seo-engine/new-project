@@ -137168,5 +137168,111 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
+  },
+  {
+    "slug": "bookook-erigsad-com",
+    "caseName": "bookook.erigsad.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-08-18",
+    "updatedAt": "2026-08-18",
+    "thumbnailUrl": "",
+    "landingViews": 5461,
+    "reports": 21,
+    "summary": "bookook.erigsad.com 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "bookook.erigsad.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "institution-exchange"
+  },
+  {
+    "slug": "hdfc-securities",
+    "caseName": "HDFC Securities 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-08-18",
+    "updatedAt": "2026-08-18",
+    "thumbnailUrl": "",
+    "landingViews": 4657,
+    "reports": 5,
+    "summary": "HDFC Securities 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "HDFC",
+      "Securities",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "ipogongmoju",
+    "caseName": "IPO공모주사기",
+    "category": "형사대응",
+    "createdAt": "2026-08-18",
+    "updatedAt": "2026-08-18",
+    "thumbnailUrl": "",
+    "landingViews": 635,
+    "reports": 8,
+    "summary": "IPO공모주 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "IPO공모주사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "baendeuridingbang",
+    "caseName": "밴드리딩방 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-08-18",
+    "updatedAt": "2026-08-18",
+    "thumbnailUrl": "",
+    "landingViews": 7683,
+    "reports": 5,
+    "summary": "밴드리딩방 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "밴드리딩방",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project",
+    "hasReadingroomLanding": true,
+    "ldCategory": "institution-impersonation",
+    "landings": {
+      "ld": {
+        "createdBy": "readingroom-manual",
+        "title": "밴드리딩방 사칭 사기 증권사·투자사 사칭 리딩방 피해회복 안내",
+        "h1": "밴드리딩방 사칭 사기",
+        "description": "밴드리딩방 사기 피해가 의심되나요? 주식 리딩방 출금거부, 추가입금 요구, 가짜 HTS·거래소 정황과 피해금 회수 가능성, 형사고소 및 민사 대응 절차를 02-6348-0406 24시간 안내합니다.",
+        "canonical": "https://리딩방피해회수센터.kr/insights/baendeuridingbang-report/"
+      }
+    }
   }
 ]
