@@ -15,17 +15,20 @@ const GENERIC_TERMS = [
   "ppareun", "sangdam", "ganeung", "chulgeum", "geobu",
 ];
 
+// 금융업 일반명사(증권/투자/거래소 등)는 특정 업체를 식별하는 신호가 아니므로
+// "HDFC Securities" vs "Toss Securities"처럼 이름은 전혀 다른데 이 단어 하나만 겹쳐서
+// 완전일치(exactSlug/exactAlias)로 오판되는 걸 막기 위해 브랜드 별칭 단계에서부터 제외한다.
 const SHORT_BRAND_STOPWORDS = new Set([
   "app", "pro", "vip", "hts", "mts", "fx", "tv", "kr", "com", "net", "org", "co",
   "shop", "site", "store", "ltd", "inc", "llc", "corp", "group", "global", "asset",
-  "capital", "invest", "investment", "bank", "coin", "stock",
+  "assets", "capital", "invest", "investment", "investments", "bank", "coin", "stock",
+  "securities", "security", "finance", "financial", "fintech",
+  "trade", "trading", "market", "markets", "limited", "company", "partners", "partner",
+  "management", "holdings", "holding", "fund", "funds", "exchange",
 ]);
 
 const CORE_STOPWORDS = new Set([
   ...SHORT_BRAND_STOPWORDS,
-  "assets", "investments", "securities", "security", "finance", "financial", "fintech",
-  "trade", "trading", "market", "markets", "limited", "company", "partners", "partner",
-  "management", "holdings", "holding", "fund", "funds", "exchange", "securities",
 ]);
 
 export function hangulToRoman(text = "") {
