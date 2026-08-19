@@ -15,18 +15,29 @@ export async function onRequestPost(context) {
     const filePath = "data/cases.json";
     const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
 
-    const res = await fetch(apiUrl, { headers: githubHeaders(token) });
-    if (!res.ok) return json({ ok: false, message: "cases.json 로드 실패" }, 500);
+    // KV 우선 로드 — data/cases.json 전체(케이스 수천 건)를 매번 GitHub API로 통째로 받아오면
+    // 파일이 커질수록 느려지고 GitHub API 요청 한도에 걸려 "cases.json 로드 실패"가 나기 쉽다.
+    // KV가 있으면 이 한 건만 조회해서 처리하고, GitHub에는 백그라운드로만 동기화한다.
+    const existingKvCase = await loadKvCase(env, slug);
+    let cases, idx, file;
+    const usingKvSource = Boolean(env.CASES && existingKvCase);
 
-    const file = await res.json();
-    const raw = await readFileContent(file, token);
-    const cases = raw ? JSON.parse(raw) : [];
-    const idx = cases.findIndex((c) => c.slug === slug);
-    if (idx === -1) return json({ ok: false, message: "사건을 찾을 수 없습니다." }, 404);
+    if (usingKvSource) {
+      cases = [{ ...existingKvCase }];
+      idx = 0;
+    } else {
+      const res = await fetch(apiUrl, { headers: githubHeaders(token) });
+      if (!res.ok) return json({ ok: false, message: "cases.json 로드 실패" }, 500);
+
+      file = await res.json();
+      const raw = await readFileContent(file, token);
+      cases = raw ? JSON.parse(raw) : [];
+      idx = cases.findIndex((c) => c.slug === slug);
+      if (idx === -1) return json({ ok: false, message: "사건을 찾을 수 없습니다." }, 404);
+    }
 
     const now = new Date().toISOString().slice(0, 10);
     const nowKst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace("T", " ").slice(0, 16);
-    const existingKvCase = await loadKvCase(env, slug);
     if (LANDING_WRITE_ACTIONS.has(action)) {
       mergeDurableCaseState(cases[idx], existingKvCase);
     }
@@ -181,23 +192,28 @@ export async function onRequestPost(context) {
 
     await mergeVisibilityStateFromKv(env, cases, slug, action);
 
-    const updateRes = await fetch(
-      `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-      {
-        method: "PUT",
-        headers: githubHeaders(token),
-        body: JSON.stringify({
-          message: `Admin: ${action} for ${slug}`,
-          content: encodeBase64(JSON.stringify(cases, null, 2)),
-          sha: file.sha,
-          branch,
-        }),
-      }
-    );
+    // KV가 소스일 때는 data/cases.json 전체를 여기서 동기로 다시 쓰지 않는다 — cases 배열이
+    // 이 케이스 한 건만 들어있는 임시 배열이라, 그대로 PUT하면 GitHub의 나머지 수천 건이 지워진다.
+    // GitHub 반영은 KV 쓰기 이후 백그라운드 전체 동기화(syncCasesIndexToGithub)로 처리한다.
+    if (!usingKvSource) {
+      const updateRes = await fetch(
+        `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+        {
+          method: "PUT",
+          headers: githubHeaders(token),
+          body: JSON.stringify({
+            message: `Admin: ${action} for ${slug}`,
+            content: encodeBase64(JSON.stringify(cases, null, 2)),
+            sha: file.sha,
+            branch,
+          }),
+        }
+      );
 
-    if (!updateRes.ok) {
-      const detail = await updateRes.text();
-      return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
+      if (!updateRes.ok) {
+        const detail = await updateRes.text();
+        return json({ ok: false, message: "GitHub 저장 실패", detail }, 500);
+      }
     }
 
     // KV 업데이트 — 기존 KV의 landings/memos를 보존하며 새 수정분을 병합
@@ -259,12 +275,50 @@ export async function onRequestPost(context) {
         else indexArr.push(buildIndexEntry(kvEntry));
         await env.CASES.put("cases:index", JSON.stringify(indexArr));
       }
+
+      if (usingKvSource) {
+        context.waitUntil?.(
+          syncCasesIndexToGithub(env, repoOwner, repoName, branch, token).catch(() => {})
+        );
+      }
     }
 
     return json({ ok: true, updatedCase: responseCase });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
+}
+
+// KV의 cases:index(경량 메타데이터)를 통째로 GitHub data/cases.json에 반영한다.
+// 다른 생성 엔드포인트들이 쓰는 "sync: KV→GitHub" 패턴과 동일 — 개별 편집 직후 백그라운드로 호출된다.
+async function syncCasesIndexToGithub(env, owner, repo, branch, token) {
+  if (!env.CASES || !owner || !repo || !token) return;
+  const idxRaw = await env.CASES.get("cases:index");
+  if (!idxRaw) return;
+  const list = JSON.parse(idxRaw).filter((e) => e?.slug);
+  list.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+
+  const filePath = "data/cases.json";
+  const fileRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
+    { headers: githubHeaders(token) },
+  );
+  if (!fileRes.ok) return;
+  const fileInfo = await fileRes.json();
+
+  await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+    {
+      method: "PUT",
+      headers: githubHeaders(token),
+      body: JSON.stringify({
+        message: `sync: KV→GitHub ${list.length} cases`,
+        content: encodeBase64(JSON.stringify(list, null, 2)),
+        sha: fileInfo.sha,
+        branch,
+      }),
+    },
+  );
 }
 
 async function loadKvCase(env, slug) {
