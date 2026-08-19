@@ -26,7 +26,18 @@ export async function onRequestPost(context) {
     item.ogTitle = replaceAll(item.ogTitle);
     item.summary = replaceAll(item.summary);
     item.ogDescription = replaceAll(item.ogDescription);
+    item.memo = replaceAll(item.memo);
     if (Array.isArray(item.tags)) item.tags = item.tags.map(replaceAll);
+    if (Array.isArray(item.memos)) {
+      item.memos = item.memos.map((m) => (m && typeof m === "object"
+        ? { ...m, text: replaceAll(m.text) }
+        : replaceAll(m)));
+    }
+    if (Array.isArray(item.comments)) {
+      item.comments = item.comments.map((c) => (c && typeof c === "object"
+        ? { ...c, text: replaceAll(c.text) }
+        : c));
+    }
 
     if (item.landings && typeof item.landings === "object") {
       for (const landing of Object.values(item.landings)) {
