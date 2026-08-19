@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate": "node scripts/generate.js",
+    "generate:base": "node scripts/generate.js",
+    "apply:criminal-fintech": "node scripts/apply-criminal-fintech.js",
+    "generate": "npm run generate:base && npm run apply:criminal-fintech",
     "migrate:cases": "node scripts/migrate-cases.js",
     "warmup": "node scripts/warmup.js",
     "indexnow": "node scripts/indexnow-bulk.js",
