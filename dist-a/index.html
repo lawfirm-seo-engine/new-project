@@ -35,9 +35,9 @@
   <meta name="twitter:image" content="https://gnlaw-criminal.co.kr/assets/og-template.png">
   <meta name="twitter:image:alt" content="법무법인 선린 사기피해 형사 사건 접수 리스트">
   <meta name="classification" content="형사고소 · 법적제재 · 형사합의 · 회수">
-  <meta property="og:updated_time" content="2026-08-19">
+  <meta property="og:updated_time" content="2026-08-20">
   <style>.pg-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:16px 0 8px;margin:0 auto;max-width:900px}.pg-btn{min-width:36px;height:34px;padding:0 10px;border:1px solid #cfd8e6;border-radius:6px;background:#fff;color:#263244;font-size:13px;font-weight:700;cursor:pointer}.pg-btn:hover{background:#f0f4fa}.pg-active{background:#1f4fd8!important;color:#fff!important;border-color:#1f4fd8!important}</style>
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"법무법인 선린 사기피해 형사 사건 접수 리스트","url":"https://gnlaw-criminal.co.kr/","inLanguage":"ko-KR","description":"사기 의심 업체명과 접수 현황을 빠르게 확인하고, 동일 피해자가 모일 수 있도록 사건별 법적 대응 정보를 정리합니다.","dateModified":"2026-08-19","publisher":{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}},{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"법무법인 선린 사기피해 형사 사건 접수 리스트","url":"https://gnlaw-criminal.co.kr/","inLanguage":"ko-KR","description":"사기 의심 업체명과 접수 현황을 빠르게 확인하고, 동일 피해자가 모일 수 있도록 사건별 법적 대응 정보를 정리합니다.","dateModified":"2026-08-20","publisher":{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}},{"@type":"Organization","@id":"https://gnlaw-criminal.co.kr/#organization","name":"법무법인 선린","url":"https://gnlaw-criminal.co.kr","logo":{"@type":"ImageObject","url":"https://gnlaw-criminal.co.kr/assets/logo.png"}}]}</script>
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body class="domain-a hub-page">
@@ -64,13 +64,13 @@
       <div class="hub-stats">
         <div>
           <span>등록 사건</span>
-          <strong id="statTotal">3,037</strong>
-          <em class="stat-today" id="statTodayCount">오늘 추가 +0</em>
+          <strong id="statTotal">-</strong>
+          <em class="stat-today" id="statTodayCount"></em>
         </div>
         <div>
           <span>누적 접수</span>
-          <strong id="statReports">57,559</strong>
-          <em class="stat-today" id="statTodayReports">오늘 추가 +0</em>
+          <strong id="statReports">-</strong>
+          <em class="stat-today" id="statTodayReports"></em>
         </div>
       </div>
     </section>
@@ -32058,6 +32058,7 @@
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+  function d10(s){return String(s||'').slice(0,10);}
   function hasLdLanding(c){return !!c&&(c.hasReadingroomLanding===true||c.createdBy==='readingroom-manual'||(c.landings&&c.landings.ld&&c.landings.ld.createdBy==='readingroom-manual'));}
   function manual(c){return !!c&&(['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual','readingroom-manual','board-manual'].indexOf(c.createdBy)>=0||(TARGET_KEY==='ld'&&hasLdLanding(c)));}
   function normName(n,c){if(manual(c))return String(n||'').trim();var s=String(n||'').trim();if(/사기$/.test(s))return s;var clean=s.replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i,'').trim();return /사기/.test(clean)?clean:clean+' 사칭 사기';}
@@ -32278,7 +32279,7 @@
             b.innerHTML='<span class="case-no"><em class="pl-badge">파워링크</em></span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+t+'</strong><em class="today-badge">NEW</em></span>'
               +'<span class="case-status">파워링크</span>'
-              +'<span class="case-date">'+esc(pl.updatedAt||pl.createdAt||'')+'</span>'
+              +'<span class="case-date">'+esc(d10(pl.updatedAt||pl.createdAt||''))+'</span>'
               +'<span class="case-views">'+((pl.landingViews||0).toLocaleString('ko-KR'))+'</span>';
             insertSorted(wrap,b,entry._date);
           } else {
@@ -32291,7 +32292,7 @@
             a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
               +'<span class="case-status">'+esc(getStatus(item.slug,item.createdBy))+'</span>'
-              +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'
+              +'<span class="case-date">'+esc(d10(item.updatedAt||item.createdAt||''))+'</span>'
               +'<span class="case-views">'+((item.landingViews||0).toLocaleString('ko-KR'))+'</span>';
             insertSorted(wrap,a,entry._date);
           }
