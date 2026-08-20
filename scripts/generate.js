@@ -2260,6 +2260,10 @@ function isCenterBoardSite(group) {
   return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-center.co.kr";
 }
 
+function isCriminalMirroredSite(group) {
+  return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr";
+}
+
 const CENTER_FINTECH_STYLE_VERSION = "20260820-nav-fix-v1";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
@@ -3540,13 +3544,21 @@ for (const group of groups) {
   await fs.outputFile(path.join(group.outDir, "_headers"), createStaticHeaders());
   await writeCenterAboutPages(template, group);
 
+  // gnlaw-criminal.co.kr의 루트(/)는 apply-criminal-fintech.js가 핀테크센터 홈으로 덮어써서
+  // 통계·검색·전체 목록이 있는 원래 허브 콘텐츠가 더 이상 어디에도 노출되지 않는다.
+  // 헤더의 '진행사건' 메뉴가 가리키는 /prosecute/ 에 그 허브 콘텐츠를 그대로 옮겨 노출한다.
+  const useFullHubAtCategory = isCriminalMirroredSite(group);
   const category = breadcrumbLabel(group);
   const categoryTitle = isRecoveryGuide
     ? `지급정지 관련 사례 아카이브 | ${group.siteName}`
-    : `${group.siteName} ${category} ${FRESH_LIST_LABEL}`;
+    : useFullHubAtCategory
+      ? hubTitle
+      : `${group.siteName} ${category} ${FRESH_LIST_LABEL}`;
   const categoryDescription = isRecoveryGuide
     ? "기존 지급정지 관련 사건 랜딩페이지와 URL을 그대로 보존한 법무법인 선린 사례 아카이브입니다."
-    : `${category} 유형에서 오늘 추가되거나 갱신된 사건만 정리합니다. ${group.hubLead}`;
+    : useFullHubAtCategory
+      ? hubDescription
+      : `${category} 유형에서 오늘 추가되거나 갱신된 사건만 정리합니다. ${group.hubLead}`;
   const categoryCanonical = `${group.siteUrl}/${group.pathPrefix}/`;
   const categoryHtml = buildPage(template, group, {
     title: escapeHtml(categoryTitle),
@@ -3561,7 +3573,7 @@ for (const group of groups) {
     ogThumbnail: "",
     summary: escapeHtml(categoryDescription),
     breadcrumb: createCategoryBreadcrumb(group),
-    content: createCategoryContent(group),
+    content: useFullHubAtCategory ? createHubContent(group) : createCategoryContent(group),
     headerCall: isRecoveryGuide
       ? `<a class="header-call" href="tel:0263480406">지급정지 상담 02-6348-0406</a>`
       : createCenterHeaderNav(group),
