@@ -1828,23 +1828,23 @@ button{
   .center-site .brand{
     flex:0 1 auto;
     min-width:0;
-    max-width:84px;
+    max-width:70px;
   }
 
   .center-site .brand img{
-    width:min(100%,84px);
+    width:min(100%,70px);
   }
 
   .center-site .brand::after{
-    max-width:84px;
-    font-size:12px;
+    max-width:70px;
+    font-size:11px;
   }
 
   .center-nav{
     gap:6px;
     overflow-x:auto;
     padding:10px 0;
-    font-size:12px;
+    font-size:11px;
   }
 
   .center-nav a:not(.center-nav-call){
@@ -2200,11 +2200,11 @@ button{
 .hub-page .site-footer{padding-bottom:100px}
 
 @media(max-width:640px){
-  .sticky-bar{padding:10px 12px;gap:0;min-height:60px;flex-wrap:wrap}
+  .sticky-bar{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));gap:0;min-height:auto;flex-wrap:wrap}
   .sticky-title{flex:0 0 100%;font-size:13px;margin-bottom:4px;padding-left:0}
-  .sticky-form{flex:0 0 100%;gap:6px}
-  .sticky-form input,.sticky-form button{height:36px;font-size:12px}
-  .floating-contact{bottom:170px;right:14px;gap:12px}
+  .sticky-form{flex:0 0 100%;flex-wrap:wrap;gap:6px}
+  .sticky-form input,.sticky-form button{flex:1 1 calc(50% - 3px);height:38px;font-size:12px}
+  .floating-contact{bottom:220px;right:14px;gap:12px}
   .float-btn{min-width:150px;padding:15px 22px;font-size:16px}
   .receipt-badge{padding:13px 18px;gap:7px;font-size:13px}
   .receipt-badge strong{font-size:28px}

@@ -24,7 +24,6 @@ html = html
   .replaceAll("https://gnlaw-center.co.kr", "https://gnlaw-criminal.co.kr")
   .replaceAll('content="11d695d7d711ce5e50abbe85ae49a60242a37e70"', 'content="8ac581a40e5eda3767c63ce7d27c155ccc8ea98f"')
   .replaceAll("domain-e center-site center-fintech", "domain-a center-site center-fintech")
-  .replaceAll('href="/board/">진행사건</a>', 'href="/board/">성공사례</a>')
   .replaceAll('href="/board/">진행사건 보기</a>', 'href="/board/">성공사례 보기</a>')
   .replaceAll('/case/', '/prosecute/')
   .replaceAll('-issue/', '-litigation/');

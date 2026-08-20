@@ -1828,23 +1828,24 @@ button{
   .center-site .brand{
     flex:0 1 auto;
     min-width:0;
-    max-width:84px;
+    max-width:70px;
   }
 
   .center-site .brand img{
-    width:min(100%,84px);
+    width:min(100%,70px);
   }
 
   .center-site .brand::after{
-    max-width:84px;
-    font-size:12px;
+    max-width:70px;
+    font-size:11px;
   }
 
-  .center-nav{
+  .center-nav,
+  .center-site.center-fintech .center-nav{
     gap:6px;
     overflow-x:auto;
     padding:10px 0;
-    font-size:12px;
+    font-size:11px;
   }
 
   .center-nav a:not(.center-nav-call){

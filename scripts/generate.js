@@ -2284,7 +2284,8 @@ function createCenterHeaderNav(group) {
       </div>
     </div>
     <a href="/#practice">업무분야</a>
-    <a href="/board/">진행사건</a>
+    <a href="/${group.pathPrefix}/">진행사건</a>
+    <a href="/board/">성공사례</a>
     <a class="center-nav-call" href="tel:0263480406">상담문의</a>
   </nav>`;
 }
