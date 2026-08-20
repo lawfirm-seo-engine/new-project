@@ -2321,7 +2321,6 @@ function createCenterMainHeroSlider() {
     .center-main-hero,.center-main-hero .hero-slide{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;}
     .center-main-hero .hero-slide{opacity:0;transition:opacity 1.3s ease-in-out;pointer-events:none;}
     .center-main-hero .hero-slide.active{z-index:1;opacity:1;pointer-events:auto;}
-    .center-main-hero .hero-slide-link{position:absolute;inset:0;display:block;cursor:pointer;}
     .center-main-hero .hero-slide img{width:100%;height:420px;object-fit:cover;transform:scale(1);}
     .center-main-hero .hero-slide.active img{animation:centerHeroZoom 8.5s ease-out forwards;}
     .center-main-hero .hero-overlay{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.42);}
@@ -2345,11 +2344,8 @@ function createCenterMainHeroSlider() {
         <h2 class="hero-title">${escapeHtml(slide.title)}</h2>
         <p class="hero-desc">${escapeHtml(slide.desc)}</p>
       </div>`;
-    const body = i > 0
-      ? `<a class="hero-slide-link" href="tel:0263480406" aria-label="전화 상담 연결 02-6348-0406">${img}${overlayText}</a>`
-      : `${img}${overlayText}`;
     return `<div class="hero-slide${i === 0 ? " active" : ""}">
-      ${body}
+      ${img}${overlayText}
     </div>`;
   }).join("\n");
 
