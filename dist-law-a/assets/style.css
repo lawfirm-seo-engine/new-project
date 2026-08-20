@@ -1840,7 +1840,8 @@ button{
     font-size:11px;
   }
 
-  .center-nav{
+  .center-nav,
+  .center-site.center-fintech .center-nav{
     gap:6px;
     overflow-x:auto;
     padding:10px 0;

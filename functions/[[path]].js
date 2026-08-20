@@ -1557,7 +1557,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     headExtra,
     schema,
     bodyClass: `${group.bodyClass} landing-page${lk === "c" ? " recovery-landing-page" : ""}`,
-    styleHref: lk === "c" ? "/assets/style.css?v=20260813-recovery-landing-v1" : "/assets/style.css",
+    styleHref: lk === "c" ? "/assets/style.css?v=20260813-recovery-landing-v1" : "/assets/style.css?v=20260820-nav-fix-v1",
     tone: esc(group.tone),
     h1: esc(pageH1),
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName, pageH1),
@@ -3048,7 +3048,7 @@ function pageTemplate(d) {
   <meta property="og:locale" content="ko_KR">
   ${d.headExtra}
   <script type="application/ld+json">${d.schema}</script>
-  <link rel="stylesheet" href="${d.styleHref || "/assets/style.css"}">
+  <link rel="stylesheet" href="${d.styleHref || "/assets/style.css?v=20260820-nav-fix-v1"}">
 </head>
 <body class="${d.bodyClass}">
   <header class="site-header">

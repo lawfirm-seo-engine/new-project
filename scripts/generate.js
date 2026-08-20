@@ -2262,6 +2262,7 @@ function isCenterBoardSite(group) {
 
 const CENTER_FINTECH_STYLE_VERSION = "20260806-center-layout";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
+const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
 
 function centerFintechHeadExtra(group) {
   if (!isCenterBoardSite(group)) return "";
@@ -3226,9 +3227,10 @@ function buildPage(template, group, data) {
       .replace(/\s*<section id="sunlin-intro" class="center-intro-section"[\s\S]*?<\/section>\s*(?=<section id="members")/, "\n")
       .replace(/\s*<section id="members" class="center-member-section"[\s\S]*?<\/section>\s*(?=<section class="center-progress-section")/, "\n");
   }
-  if (group.key === "c" && String(data.pageKind || "").includes("recovery-guide-home")) {
-    html = html.replace('href="/assets/style.css"', `href="/assets/style.css?v=${RECOVERY_HOME_STYLE_VERSION}"`);
-  }
+  const styleVersion = group.key === "c" && String(data.pageKind || "").includes("recovery-guide-home")
+    ? RECOVERY_HOME_STYLE_VERSION
+    : STYLE_CSS_VERSION;
+  html = html.replace('href="/assets/style.css"', `href="/assets/style.css?v=${styleVersion}"`);
   return html;
 }
 
