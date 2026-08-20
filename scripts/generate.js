@@ -2260,7 +2260,7 @@ function isCenterBoardSite(group) {
   return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-center.co.kr";
 }
 
-const CENTER_FINTECH_STYLE_VERSION = "20260806-center-layout";
+const CENTER_FINTECH_STYLE_VERSION = "20260820-nav-fix-v1";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
 

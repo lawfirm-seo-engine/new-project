@@ -195,7 +195,7 @@ for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
   if (GROUPS[host]) GROUPS[host].siteUrl = siteUrl;
 }
 
-const CENTER_FINTECH_STYLE_VERSION = "20260806-center-layout";
+const CENTER_FINTECH_STYLE_VERSION = "20260820-nav-fix-v1";
 
 function centerFintechHeadLinks(group) {
   if (!group || String(group.siteUrl || "").replace(/\/$/, "") !== "https://gnlaw-center.co.kr") return [];
