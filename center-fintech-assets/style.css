@@ -1062,10 +1062,9 @@
   }
 
   .center-site.center-fintech .center-nav{
-    gap:12px;
+    gap:14px;
     overflow-x:auto;
     padding:10px 0;
-    font-size:13px;
   }
 
   .center-site.center-fintech .center-nav a:not(.center-nav-call){
@@ -1074,10 +1073,27 @@
 
   .center-site.center-fintech .center-nav-group{
     flex:0 0 auto;
+    gap:10px;
   }
 
   .center-site.center-fintech .center-nav-sub{
-    display:none;
+    position:static;
+    display:flex;
+    gap:8px;
+    min-width:0;
+    padding:0;
+    border:0;
+    background:transparent;
+    box-shadow:none;
+    opacity:1;
+    visibility:visible;
+    transform:none;
+  }
+
+  .center-site.center-fintech .center-nav-sub a{
+    padding:0;
+    color:#475569;
+    font-size:13px;
   }
 
   .center-site.center-fintech .center-intro-section{

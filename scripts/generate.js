@@ -1695,7 +1695,6 @@ function createHubContent(group) {
   var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function attr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-  function d10(s){return String(s||'').slice(0,10);}
   function hasLdLanding(c){return !!c&&(c.hasReadingroomLanding===true||c.createdBy==='readingroom-manual'||(c.landings&&c.landings.ld&&c.landings.ld.createdBy==='readingroom-manual'));}
   function manual(c){return !!c&&(['recovery-manual','jipjeong-manual','voicephishing-manual','chaemubu-manual','tujasagi-manual','readingroom-manual','board-manual'].indexOf(c.createdBy)>=0||(TARGET_KEY==='ld'&&hasLdLanding(c)));}
   function normName(n,c){if(manual(c))return String(n||'').trim();var s=String(n||'').trim();if(/사기$/.test(s))return s;var clean=s.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();return /사기/.test(clean)?clean:clean+' 사칭 사기';}
@@ -1916,7 +1915,7 @@ function createHubContent(group) {
             b.innerHTML='<span class="case-no"><em class="pl-badge">파워링크</em></span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+t+'</strong><em class="today-badge">NEW</em></span>'
               +'<span class="case-status">파워링크</span>'
-              +'<span class="case-date">'+esc(d10(pl.updatedAt||pl.createdAt||''))+'</span>'
+              +'<span class="case-date">'+esc(pl.updatedAt||pl.createdAt||'')+'</span>'
               +'<span class="case-views">'+((pl.landingViews||0).toLocaleString('ko-KR'))+'</span>';
             insertSorted(wrap,b,entry._date);
           } else {
@@ -1929,7 +1928,7 @@ function createHubContent(group) {
             a.innerHTML='<span class="case-no">'+(noMap[item.slug]||total)+'</span>'
               +'<span class="case-title-wrap"><strong class="case-title">'+dt+'</strong><em class="today-badge">NEW</em></span>'
               +'<span class="case-status">'+esc(getStatus(item.slug,item.createdBy))+'</span>'
-              +'<span class="case-date">'+esc(d10(item.updatedAt||item.createdAt||''))+'</span>'
+              +'<span class="case-date">'+esc(item.updatedAt||item.createdAt||'')+'</span>'
               +'<span class="case-views">'+((item.landingViews||0).toLocaleString('ko-KR'))+'</span>';
             insertSorted(wrap,a,entry._date);
           }
@@ -1973,13 +1972,13 @@ function createHubContent(group) {
       <div class="hub-stats">
         <div>
           <span>등록 사건</span>
-          <strong id="statTotal">-</strong>
-          <em class="stat-today" id="statTodayCount"></em>
+          <strong id="statTotal">${groupCases.length.toLocaleString("ko-KR")}</strong>
+          <em class="stat-today" id="statTodayCount">오늘 추가 +${todayCases}</em>
         </div>
         <div>
           <span>누적 접수</span>
-          <strong id="statReports">-</strong>
-          <em class="stat-today" id="statTodayReports"></em>
+          <strong id="statReports">${totalReports.toLocaleString("ko-KR")}</strong>
+          <em class="stat-today" id="statTodayReports">오늘 추가 +${todayReports}</em>
         </div>
       </div>
     </section>
@@ -2315,7 +2314,6 @@ function createCenterMainHeroSlider() {
     .center-main-hero,.center-main-hero .hero-slide{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;}
     .center-main-hero .hero-slide{opacity:0;transition:opacity 1.3s ease-in-out;pointer-events:none;}
     .center-main-hero .hero-slide.active{z-index:1;opacity:1;pointer-events:auto;}
-    .center-main-hero .hero-slide-link{position:absolute;inset:0;display:block;cursor:pointer;}
     .center-main-hero .hero-slide img{width:100%;height:420px;object-fit:cover;transform:scale(1);}
     .center-main-hero .hero-slide.active img{animation:centerHeroZoom 8.5s ease-out forwards;}
     .center-main-hero .hero-overlay{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.42);}
@@ -2332,20 +2330,14 @@ function createCenterMainHeroSlider() {
     @media(max-width:768px){.center-site.center-fintech.home-page .hero{height:300px;min-height:300px;}.center-main-hero .hero-slide img{height:300px;}.center-main-hero .hero-title{font-size:24px;}.center-main-hero .hero-desc{font-size:14px;}}
   </style>`;
 
-  const slideMarkup = slides.map((slide, i) => {
-    const img = `<img src="${slide.image}" alt="${escapeHtml(slide.title)}"${i === 0 ? ' fetchpriority="high" loading="eager"' : ' loading="lazy"'}>`;
-    const overlayText = `<div class="hero-overlay"></div>
+  const slideMarkup = slides.map((slide, i) => `<div class="hero-slide${i === 0 ? " active" : ""}">
+      <img src="${slide.image}" alt="${escapeHtml(slide.title)}"${i === 0 ? ' fetchpriority="high" loading="eager"' : ' loading="lazy"'}>
+      <div class="hero-overlay"></div>
       <div class="hero-text">
         <h2 class="hero-title">${escapeHtml(slide.title)}</h2>
         <p class="hero-desc">${escapeHtml(slide.desc)}</p>
-      </div>`;
-    const body = i > 0
-      ? `<a class="hero-slide-link" href="tel:0263480406" aria-label="전화 상담 연결 02-6348-0406">${img}${overlayText}</a>`
-      : `${img}${overlayText}`;
-    return `<div class="hero-slide${i === 0 ? " active" : ""}">
-      ${body}
-    </div>`;
-  }).join("\n");
+      </div>
+    </div>`).join("\n");
 
   const dotMarkup = slides.map((_, i) => `<button type="button" class="${i === 0 ? "active" : ""}" aria-label="${i + 1}번째 메인 이미지 보기"></button>`).join("");
 

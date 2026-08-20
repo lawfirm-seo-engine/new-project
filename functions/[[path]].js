@@ -39,6 +39,7 @@ import {
 import { mergeCaseDataForRead } from "./_durableCaseFields.js";
 import {
   STOCK_READINGROOM_CTA_TEXT,
+  appendStockReadingroomCta,
   shouldAppendStockReadingroomCta,
 } from "./_stockReadingroomCta.js";
 import { ldPageH1, ldPageTitle } from "./_readingroomTemplate.js";
@@ -1930,9 +1931,12 @@ function createRecoveryManualContent(landing, group, caseData) {
   const rawManualBody = Array.isArray(landing.body)
     ? stripLeadingDuplicateManualTitle(landing.body, manualTitle)
     : landing.body;
-  const bodyHtml = Array.isArray(rawManualBody)
-    ? renderManualBodyArray(rawManualBody)
-    : renderManualArticle(String(rawManualBody || ""));
+  const manualBody = shouldAppendStockReadingroomCta(caseData)
+    ? appendStockReadingroomCta(rawManualBody)
+    : rawManualBody;
+  const bodyHtml = Array.isArray(manualBody)
+    ? renderManualBodyArray(manualBody)
+    : renderManualArticle(String(manualBody || ""));
   const memoSection = renderOperatorMemos(caseData);
   const currentProgressSection = renderCurrentProgressSection(landing, caseData, group.landingKey || group.key);
   const isRecoveryLanding = (group.landingKey || group.key) === "c";
@@ -1941,7 +1945,6 @@ function createRecoveryManualContent(landing, group, caseData) {
     isRecoveryLanding ? createRecoveryLandingUpdatedNote() : "",
     `<section class="article-block manual-body${isRecoveryLanding ? " recovery-manual-body" : ""}">${bodyHtml}</section>`,
     isRecoveryLanding ? createRecoveryDebtNonexistenceSection() : "",
-    renderStockReadingroomCtaSection(caseData),
     currentProgressSection,
     memoSection,
     createConsultForm(cn, siteName),
@@ -2228,14 +2231,12 @@ function createHeroTypingBlock(caseName, caseData = {}) {
   const question = esc(standardSubtitle(caseName));
   const typeKey = normalizeFraudTypeKey(caseData.fraudType || caseData.scamType, { ...caseData, caseName });
   const message = splitHeroText(standardHeroText(typeKey));
-  const l1Json = JSON.stringify(message[0] || "").replace(/</g, "\\u003C");
-  const l2Json = JSON.stringify(message[1] || "").replace(/</g, "\\u003C");
   return `<div class="hero-typing">
   <p class="hero-typing-q"><strong>${question}</strong></p>
-  <p class="hero-typing-l1"></p>
-  <p class="hero-typing-l2"></p>
+  <p class="hero-typing-l1">${esc(message[0])}</p>
+  <p class="hero-typing-l2">${esc(message[1])}</p>
 </div>
-<script>(function(){var L1=${l1Json};var L2=${l2Json};var CYCLE=9400;function run(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.textContent='';l2.textContent='';var i=0;function type1(){if(i<=L1.length){l1.textContent=L1.slice(0,i);i++;setTimeout(type1,26);}else if(L2){var j=0;(function type2(){if(j<=L2.length){l2.textContent=L2.slice(0,j);j++;setTimeout(type2,24);}else{setTimeout(run,CYCLE);}})();}else{setTimeout(run,CYCLE);}}type1();}run();})();</script>`;
+<script>(function(){var CYCLE=9400;function restart(){var l1=document.querySelector('.hero-typing-l1');var l2=document.querySelector('.hero-typing-l2');if(!l1||!l2)return;l1.style.animation='none';l2.style.animation='none';void l1.offsetWidth;void l2.offsetWidth;l1.style.animation='';l2.style.animation='';setTimeout(restart,CYCLE);}setTimeout(restart,CYCLE);})();</script>`;
 }
 
 function splitHeroText(value = "") {
