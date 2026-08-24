@@ -134,7 +134,7 @@ const groups = [
     ctaText: "통지서, 거래내역, 입금 경위 자료를 기준으로 은행 이의제기와 법적 대응 방향을 검토합니다.",
     ctaLabel: "지급정지 상담 문의",
     tableTitle: "성공사례 진행 현황",
-    naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"],
+    naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7", "99ed6755b70bb8f224f3c0cb6d31b4e313c22330"],
   },
   {
     key: "d",
