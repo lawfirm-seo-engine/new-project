@@ -5,6 +5,7 @@ import {
   escapeXml,
   getRecentCases,
   groupForHost,
+  isCaseAllowedForGroup,
   loadCases,
   loadPowerlinks,
   powerlinkOgImageUrl,
@@ -22,7 +23,8 @@ export async function onRequest(context) {
   }
 
   const cases = await loadCases(env);
-  const recentCases = getRecentCases(cases, RECENT_SITEMAP_DAYS, RECENT_SITEMAP_LIMIT);
+  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group));
+  const recentCases = getRecentCases(groupCases, RECENT_SITEMAP_DAYS, RECENT_SITEMAP_LIMIT);
   let xml = buildSitemapXml(group, recentCases, { includeHome: false, recent: true });
 
   if (host === POWERLINK_HOST) {

@@ -4,6 +4,7 @@ import {
   buildRssXml,
   getRecentCases,
   groupForHost,
+  isCaseAllowedForGroup,
   loadCases,
 } from "./_seo.js";
 
@@ -16,7 +17,8 @@ export async function onRequest(context) {
   }
 
   const cases = await loadCases(env);
-  const rssCases = getRecentCases(cases, RECENT_SITEMAP_DAYS, RSS_LIMIT);
+  const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group));
+  const rssCases = getRecentCases(groupCases, RECENT_SITEMAP_DAYS, RSS_LIMIT);
 
   return new Response(buildRssXml(group, rssCases, { limit: RSS_LIMIT }), {
     headers: {
