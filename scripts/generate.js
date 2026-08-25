@@ -2264,7 +2264,7 @@ function isCenterBoardSite(group) {
 
 const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
 const CENTER_FINTECH_IMAGE_VERSION = "20260821-main-slide-03";
-const CRIMINAL_PUBLIC_STYLE_VERSION = "20260821-search-hidden";
+const CRIMINAL_PUBLIC_STYLE_VERSION = "20260825-mobile-header-match";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
 

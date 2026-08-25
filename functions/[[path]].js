@@ -1568,7 +1568,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     styleHref: lk === "c"
       ? "/assets/style.css?v=20260813-recovery-landing-v1"
       : String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
-        ? "/assets/style.css?v=20260821-single-row-navigation"
+        ? "/assets/style.css?v=20260825-mobile-header-match"
         : "/assets/style.css?v=20260820-nav-fix-v1",
     tone: esc(group.tone),
     h1: esc(pageH1),
