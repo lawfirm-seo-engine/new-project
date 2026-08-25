@@ -1443,7 +1443,7 @@ function createHeadExtra({ landing, group, caseItem, isHub = false, keyword = ""
     `<link rel="sitemap" type="application/xml" href="/sitemap-index.xml">`,
     `<link rel="preload" as="image" href="/assets/og-template.webp">`,
   ];
-  const centerHeadExtra = centerFintechHeadExtra(group);
+  const centerHeadExtra = isHub ? centerFintechHeadExtra(group) : "";
   if (centerHeadExtra) links.push(centerHeadExtra);
   if (slug) {
     links.push(`<link rel="prefetch" href="https://gnlaw-center.co.kr/case/${slug}/">`);
@@ -2258,39 +2258,45 @@ function createRecoveryGuideHomeContent(group, groupCases, caseNoMap) {
 }
 
 function isCenterBoardSite(group) {
-  return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-center.co.kr";
+  const siteUrl = String(group?.siteUrl || "").replace(/\/$/, "");
+  return siteUrl === "https://gnlaw-criminal.co.kr" || siteUrl === "https://gnlaw-center.co.kr";
 }
 
-function isCriminalMirroredSite(group) {
-  return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr";
-}
-
-const CENTER_FINTECH_STYLE_VERSION = "20260820-nav-fix-v1";
+const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
+const CENTER_FINTECH_IMAGE_VERSION = "20260821-main-slide-03";
+const CRIMINAL_PUBLIC_STYLE_VERSION = "20260821-search-hidden";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
 
 function centerFintechHeadExtra(group) {
   if (!isCenterBoardSite(group)) return "";
   return [
-    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp">`,
-    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp">`,
-    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
     `<link rel="stylesheet" href="/assets/center-fintech/style.css?v=${CENTER_FINTECH_STYLE_VERSION}">`,
   ].join("\n");
 }
 
+function centerProgressHref(group) {
+  return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
+    ? "/prosecute/"
+    : "/case/";
+}
+
 function createCenterHeaderNav(group) {
   if (!isCenterBoardSite(group)) return "";
+  const progressHref = centerProgressHref(group);
   return `<nav class="center-nav" aria-label="주요 메뉴">
-    <div class="center-nav-group">
-      <a class="center-nav-parent" href="/about/greeting/">선린소개</a>
+    <details class="center-nav-group">
+      <summary class="center-nav-parent">선린소개</summary>
       <div class="center-nav-sub" aria-label="선린소개 하위 메뉴">
         <a href="/about/greeting/">인사말</a>
         <a href="/about/members/">선린의 구성원</a>
       </div>
-    </div>
+    </details>
     <a href="/#practice">업무분야</a>
-    <a href="/${group.pathPrefix}/">진행사건</a>
+    <a href="${progressHref}">진행사건</a>
     <a href="/board/">성공사례</a>
     <a class="center-nav-call" href="tel:0263480406">상담문의</a>
   </nav>`;
@@ -2299,55 +2305,43 @@ function createCenterHeaderNav(group) {
 function createCenterMainHeroSlider() {
   const slides = [
     {
-      image: "/assets/center-fintech/main-slide-01-q90.webp",
+      image: `/assets/center-fintech/main-slide-01-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}`,
+      title: "법무법인 선린 핀테크센터 회의 및 사건 전략 수립",
+    },
+    {
+      image: `/assets/center-fintech/main-slide-02-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}`,
       title: "금융 투자 사기 피해자를 위한 사건 진행",
-      desc: "법무법인 선린 핀테크센터는 투자사기, 부업사기, 가상자산 사기 등 사건에서 의뢰인의 권리 보호와 피해 회복을 위해 조력합니다.",
+      href: "tel:0263480406",
     },
     {
-      image: "/assets/center-fintech/main-slide-02-q90.webp",
-      title: "Digital Finance",
-      desc: "가상자산을 사칭한 사기 사건은 블록체인 기반 기술 이해를 통해 자산을 추적하고 동결, 몰수, 추징 종결까지 검토합니다.",
-    },
-    {
-      image: "/assets/center-fintech/main-slide-03-q90.webp",
-      title: "법무법인 선린 핀테크센터",
-      desc: "풍부한 사건 경험으로 맞춤 전략을 수립하고 수행하는 법무법인 선린 핀테크센터가 고도의 전문성을 바탕으로 신뢰를 제공합니다.",
+      image: `/assets/center-fintech/main-slide-03-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}`,
+      title: "Digital Finance 가상자산 사기 대응",
+      href: "tel:0263480406",
     },
   ];
 
   const criticalStyle = `<style data-center-hero-critical>
-    .center-site.center-fintech.home-page .hero{position:relative;width:100%;height:420px;min-height:420px;overflow:hidden;padding:0;background:#0f172a;}
+    .center-site.center-fintech.home-page .hero{position:relative;width:100%;height:min(66.667vw,760px);min-height:0;overflow:hidden;padding:0;background:#050505;}
     .center-site.center-fintech.home-page .hero::after{display:none;}
     .center-site.center-fintech.home-page .hero>.eyebrow,.center-site.center-fintech.home-page .hero>h1,.center-site.center-fintech.home-page .hero>.summary{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;border:0;clip:rect(0 0 0 0);}
     .center-main-hero,.center-main-hero .hero-slide{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;}
     .center-main-hero .hero-slide{opacity:0;transition:opacity 1.3s ease-in-out;pointer-events:none;}
     .center-main-hero .hero-slide.active{z-index:1;opacity:1;pointer-events:auto;}
-    .center-main-hero .hero-slide img{width:100%;height:420px;object-fit:cover;transform:scale(1);}
-    .center-main-hero .hero-slide.active img{animation:centerHeroZoom 8.5s ease-out forwards;}
-    .center-main-hero .hero-overlay{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.42);}
-    .center-main-hero .hero-text{position:absolute;top:50%;left:10%;z-index:5;max-width:640px;color:#fff;transform:translateY(-50%);}
-    .center-main-hero .hero-title{margin:0 0 12px;color:#fff;font-size:36px;font-weight:800;line-height:1.25;letter-spacing:0;opacity:0;transform:translateY(40px);}
-    .center-main-hero .hero-desc{margin:0;color:rgba(255,255,255,.92);font-size:17px;line-height:1.7;opacity:0;transform:translateY(40px);}
-    .center-main-hero .hero-slide.active .hero-title{animation:centerTextUp .9s ease forwards;}
-    .center-main-hero .hero-slide.active .hero-desc{animation:centerTextUp .9s ease .45s forwards;}
+    .center-main-hero .hero-slide img{width:100%;height:100%;object-fit:contain;background:#050505;}
     .center-main-hero .hero-dots{position:absolute;bottom:22px;left:50%;z-index:6;display:flex;gap:8px;transform:translateX(-50%);}
     .center-main-hero .hero-dots button{width:30px;height:4px;padding:0;border:0;background:rgba(255,255,255,.5);cursor:pointer;}
     .center-main-hero .hero-dots button.active{background:#2e86c1;}
-    @keyframes centerHeroZoom{from{transform:scale(1);}to{transform:scale(1.16);}}
-    @keyframes centerTextUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
-    @media(max-width:768px){.center-site.center-fintech.home-page .hero{height:300px;min-height:300px;}.center-main-hero .hero-slide img{height:300px;}.center-main-hero .hero-title{font-size:24px;}.center-main-hero .hero-desc{font-size:14px;}}
+    @media(max-width:768px){.center-site.center-fintech.home-page .hero{height:66.667vw;min-height:0;}}
   </style>`;
 
   const slideMarkup = slides.map((slide, i) => {
-    const img = `<img src="${slide.image}" alt="${escapeHtml(slide.title)}"${i === 0 ? ' fetchpriority="high" loading="eager"' : ' loading="lazy"'}>`;
-    const overlayText = `<div class="hero-overlay"></div>
-      <div class="hero-text">
-        <h2 class="hero-title">${escapeHtml(slide.title)}</h2>
-        <p class="hero-desc">${escapeHtml(slide.desc)}</p>
-      </div>`;
-    return `<div class="hero-slide${i === 0 ? " active" : ""}">
-      ${img}${overlayText}
-    </div>`;
+    const tag = slide.href ? "a" : "div";
+    const linkAttributes = slide.href
+      ? ` href="${slide.href}" aria-label="${escapeHtml(slide.title)} · 전화 상담 02-6348-0406"`
+      : "";
+    return `<${tag} class="hero-slide${i === 0 ? " active" : ""}"${linkAttributes}>
+      <img src="${slide.image}" alt="${escapeHtml(slide.title)}"${i === 0 ? ' fetchpriority="high" loading="eager"' : ' loading="lazy"'}>
+    </${tag}>`;
   }).join("\n");
 
   const dotMarkup = slides.map((_, i) => `<button type="button" class="${i === 0 ? "active" : ""}" aria-label="${i + 1}번째 메인 이미지 보기"></button>`).join("");
@@ -2404,6 +2398,7 @@ function createStaticHeaders() {
 }
 
 function createCenterFintechHomeContent(group, stats = {}) {
+  const progressHref = centerProgressHref(group);
   const trustPoints = [
     "금융·투자사기 유형별 사건 정리",
     "도메인·상호·리딩방명 기반 피해 사례 분석",
@@ -2414,37 +2409,37 @@ function createCenterFintechHomeContent(group, stats = {}) {
     {
       title: "주식 리딩방·투자 프로젝트 사칭형",
       description: "공모주, 비상장주식, 투자 프로젝트, 전문가 리딩방을 내세워 입금을 유도한 사건을 검토합니다.",
-      href: "/board/",
+      href: progressHref,
       keywords: ["리딩방", "공모주", "비상장", "투자 프로젝트"],
     },
     {
       title: "증권사·은행 사칭형",
       description: "금융기관 임직원, 공식 앱, 인증 절차를 사칭하며 계좌 개설이나 추가 예치금을 요구한 흐름을 정리합니다.",
-      href: "/board/",
+      href: progressHref,
       keywords: ["증권사 사칭", "은행 사칭", "인증비", "계좌"],
     },
     {
       title: "코인·거래소 사칭형",
       description: "가짜 거래소, 월렛, 스테이킹, 선물거래 화면을 통해 출금을 막거나 추가 납입을 요구한 사건을 분류합니다.",
-      href: "/board/",
+      href: progressHref,
       keywords: ["코인", "거래소", "월렛", "스테이킹"],
     },
     {
       title: "팀미션·부업·영상시청 사기형",
       description: "쇼핑몰 주문대행, 팀미션, 리뷰 작성, 영상 시청 보상을 이유로 보증금과 정산금을 요구한 사례를 확인합니다.",
-      href: "/board/",
+      href: progressHref,
       keywords: ["팀미션", "부업", "쇼핑몰", "영상시청"],
     },
     {
       title: "라이브 방송·만남·데이트 플랫폼 사칭형",
       description: "방송 환전, 포인트 정산, 만남 플랫폼 인증비 등 관계 형성을 이용해 금전 요구가 이어진 사건을 다룹니다.",
-      href: "/board/",
+      href: progressHref,
       keywords: ["라이브 방송", "만남", "데이트", "환전"],
     },
     {
       title: "환불·보상금 지급 사칭형",
       description: "피해금을 돌려주겠다며 수수료, 세금, 보증금을 다시 요구하는 2차 피해 구조를 차단합니다.",
-      href: "/board/",
+      href: progressHref,
       keywords: ["환불", "보상금", "수수료", "2차 피해"],
     },
   ];
@@ -2500,7 +2495,7 @@ function createCenterFintechHomeContent(group, stats = {}) {
         </ul>
         <div>
           <a href="#practice">업무분야 보기</a>
-          <a href="/board/">진행사건 보기</a>
+          <a href="${progressHref}">진행사건 보기</a>
         </div>
       </div>
     </section>
@@ -2569,7 +2564,7 @@ function createCenterFintechHomeContent(group, stats = {}) {
         <h2>진행 중인 사건은 별도 메뉴에서 확인합니다.</h2>
         <p>메인 화면은 핀테크센터 소개와 업무분야 중심으로 운영하고, 기존 사건 페이지는 진행사건 메뉴에서 분리해 확인할 수 있습니다. 현재 ${totalCases}개 사건이 정리되어 있으며 오늘 추가·갱신된 항목은 ${todayCases}개입니다.</p>
       </div>
-      <a class="center-progress-button" href="/board/">진행사건 보기</a>
+      <a class="center-progress-button" href="${progressHref}">진행사건 보기</a>
     </section>`;
 }
 
@@ -2690,13 +2685,16 @@ async function writeCenterAboutPages(template, group) {
       content: page.content,
       headerCall: createCenterHeaderNav(group),
       floatingWidgets: createHubFloatingWidgets(group),
-      pageKind: "hub-page center-about-page",
+      pageKind: String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
+        ? "center-site center-fintech hub-page center-about-page"
+        : "hub-page center-about-page",
     });
     await fs.outputFile(path.join(group.outDir, "about", page.slug, "index.html"), html);
   }
 }
 
 function createCenterBoardHubContent(group) {
+  const progressHref = centerProgressHref(group);
   const practiceAreas = [
     {
       title: "주식 리딩방·투자 프로젝트 사칭형",
@@ -2806,15 +2804,21 @@ function createCenterBoardHubContent(group) {
         <h2>진행 중인 사건은 별도 페이지에서 확인합니다.</h2>
         <p>메인 화면은 핀테크센터 소개와 업무분야 중심으로 운영하고, 기존 사건 페이지는 진행사건 메뉴에서 확인할 수 있도록 분리했습니다.</p>
       </div>
-      <a class="center-progress-button" href="/board/">진행사건 보기</a>
+      <a class="center-progress-button" href="${progressHref}">진행사건 보기</a>
     </section>`;
 }
 
 function createCategoryContent(group) {
   const groupCases = cases.filter((item) => isCaseAllowedForGroup(item, group) && !item.hideFromListing);
   const caseNoMap = new Map(groupCases.map((c, i) => [c.slug, i + 1]));
-  const sortedCases = [...groupCases].reverse();
+  const sortedCases = [...groupCases]
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => String(b.item.createdAtKst || b.item.createdAt || "").localeCompare(String(a.item.createdAtKst || a.item.createdAt || "")) || b.index - a.index)
+    .map(({ item }) => item);
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
+  if (String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr") {
+    return createCenterProgressArchiveContent(group, sortedCases, caseNoMap, suffix);
+  }
   if (group.key === "c" && !group.landingKey) {
     return createRecoveryArchiveContent(group, sortedCases, caseNoMap, suffix);
   }
@@ -2822,6 +2826,148 @@ function createCategoryContent(group) {
     createCategoryHeroCta(group),
     createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { powerlinks: group.key === "a" ? powerlinks : [] }),
   ].join("\n");
+}
+
+function createCenterProgressArchiveContent(group, sortedCases, caseNoMap, suffix) {
+  const rows = sortedCases.map((item) => {
+    const title = landingDisplayTitle(item, suffix, group);
+    const landing = getLanding(item, group);
+    const summary = compactText(landing.description || item.summary || group.hubLead || "").slice(0, 180);
+    const search = [title, item.caseName, item.slug, summary, item.createdAt, item.updatedAt].filter(Boolean).join(" ");
+    return `<a class="case-row" href="${buildRelativeLandingPath(group, item)}" data-progress-search="${escapeHtml(search)}">
+      <span class="case-no">${caseNoMap.get(item.slug) ?? ""}</span>
+      <span class="case-title-wrap"><strong class="case-title">${escapeHtml(title)}</strong></span>
+      <span class="case-status">형사 진행중</span>
+      <span class="case-date">${escapeHtml(item.createdAtKst || item.createdAt || "")}</span>
+      <span class="case-views">${Number(item.landingViews || 0).toLocaleString("ko-KR")}</span>
+    </a>`;
+  }).join("\n");
+
+  return `<section class="center-archive-top" id="fresh-landings">
+    <div>
+      <p class="center-kicker">ONGOING CASES</p>
+      <h2>지금까지 생성된 진행사건</h2>
+      <p>기존 랜딩페이지의 주소와 내용을 그대로 유지하면서 사건명, 등록일, 조회수를 기준으로 한곳에서 확인할 수 있습니다.</p>
+    </div>
+    <div class="center-check-card">
+      <strong>전체 진행사건</strong>
+      <span id="progressCaseTotal" aria-live="polite">최신 건수 집계 중</span>
+      <span>사건명 또는 업체명으로 검색할 수 있습니다.</span>
+    </div>
+  </section>
+  <div class="case-search-wrap center-search-wrap">
+    <input id="progressCaseSearch" type="search" class="case-search" placeholder="사기 업체명 또는 사건명 검색" autocomplete="off">
+    <button id="progressCaseSearchButton" class="search-btn" type="button">검색</button>
+  </div>
+  <section class="case-table-wrap center-board-table" aria-label="진행사건 전체 목록">
+    <div class="case-table-title">
+      <h2>형사고소 진행 현황</h2>
+      <p class="case-table-lead" id="progressCaseCount" aria-live="polite">최신 목록 불러오는 중</p>
+    </div>
+    <div class="case-table-header"><span>No.</span><span>사건명</span><span>상태</span><span>등록일</span><span>조회수</span></div>
+    <div id="progressCaseRows">${rows}</div>
+  </section>
+  <nav id="progressCasePagination" class="pg-wrap" aria-label="진행사건 페이지 이동"></nav>
+  <script>(function(){
+    var input=document.getElementById('progressCaseSearch');
+    var button=document.getElementById('progressCaseSearchButton');
+    var wrap=document.getElementById('progressCaseRows');
+    var count=document.getElementById('progressCaseCount');
+    var total=document.getElementById('progressCaseTotal');
+    var pagination=document.getElementById('progressCasePagination');
+    if(!input||!wrap||!pagination)return;
+    var PREFIX=${JSON.stringify(group.pathPrefix)};
+    var URL_SUFFIX=${JSON.stringify(group.urlSlugSuffix || "")};
+    var SUFFIX=${JSON.stringify(suffix)};
+    var NO_SUFFIX_SLUGS={"soiraeb-sagi-syopingmor":1,"grucompany-sagi-syopingmor":1,"geuruaenkeompeoni-sagi-syopingmor":1};
+    var ALL_NO_SUFFIX_SLUGS={"baidogseu-georaeso-litigation-noindex":1,"bydoxe-litigation-noidex":1};
+    var OLD_URL_SUFFIX={"mediacastlekr-com-sagi-tikesyemae-bueob":"prosecute"};
+    var all=[].slice.call(wrap.querySelectorAll('.case-row'));
+    var filtered=all.slice();var page=1;var size=80;
+    function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    function attr(v){return esc(v).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+    function norm(v){return String(v||'').normalize('NFKC').toLowerCase().replace(/\\s+/g,' ').trim();}
+    function allowed(item){
+      if(!item||!item.slug||item.hideFromListing)return false;
+      var targets=(Array.isArray(item.targetGroups)?item.targetGroups:[]).filter(Boolean);
+      return !targets.length||targets.indexOf('a')>=0;
+    }
+    function normalizedCaseName(value){
+      var raw=String(value||'').trim();
+      if(/사기$/.test(raw))return raw;
+      var clean=raw.replace(/\\s*(사칭\\s*사기|사칭|사기|탈출|스캠|scam)\\s*$/i,'').trim();
+      return /사기/.test(clean)?clean:clean+' 사칭 사기';
+    }
+    function titleFor(item){
+      var raw=String(item.caseName||item.name||item.slug||'').trim();
+      var title=item.createdBy?raw:normalizedCaseName(raw);
+      if(!item.createdBy&&SUFFIX&&title.indexOf(SUFFIX)<0)title+=' '+SUFFIX;
+      return title;
+    }
+    function itemPath(item){
+      if(item.listingPath||item.publicPath)return item.listingPath||item.publicPath;
+      var slug=item.slug;
+      var extra=ALL_NO_SUFFIX_SLUGS[slug]?'':NO_SUFFIX_SLUGS[slug]?'':OLD_URL_SUFFIX[slug]?'-'+OLD_URL_SUFFIX[slug]:URL_SUFFIX?'-'+URL_SUFFIX:'';
+      return '/'+PREFIX+'/'+encodeURIComponent(slug)+extra+'/';
+    }
+    function creationMs(item){
+      var raw=String(item.createdAtKst||item.createdAtTime||item.createdAt||'').trim();
+      if(!raw)return 0;
+      if(/^\\d{4}-\\d{2}-\\d{2}$/.test(raw))raw+='T00:00:00+09:00';
+      else if(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(?::\\d{2}(?:\\.\\d+)?)?$/.test(raw))raw+='+09:00';
+      var parsed=Date.parse(raw);return Number.isNaN(parsed)?0:parsed;
+    }
+    function displayCreated(item){
+      var raw=String(item.createdAtKst||item.createdAt||'');
+      if(!item.createdAtKst)return raw;
+      var parsed=new Date(item.createdAtKst);
+      if(Number.isNaN(parsed.getTime()))return raw;
+      return new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(parsed);
+    }
+    function rowHtml(item,index,length){
+      var title=titleFor(item);
+      var search=[title,item.caseName,item.slug,item.summary,item.createdAt,item.createdAtKst].filter(Boolean).join(' ');
+      return '<a class="case-row" href="'+attr(itemPath(item))+'" data-progress-search="'+attr(search)+'" data-slug="'+attr(item.slug)+'">'
+        +'<span class="case-no">'+(length-index)+'</span>'
+        +'<span class="case-title-wrap"><strong class="case-title">'+esc(title)+'</strong></span>'
+        +'<span class="case-status">형사 진행중</span>'
+        +'<span class="case-date">'+esc(displayCreated(item))+'</span>'
+        +'<span class="case-views">'+Number(item.landingViews||0).toLocaleString('ko-KR')+'</span></a>';
+    }
+    function draw(suppressCount){
+      var pages=Math.max(1,Math.ceil(filtered.length/size));if(page>pages)page=pages;
+      all.forEach(function(el){el.hidden=true;});
+      filtered.slice((page-1)*size,page*size).forEach(function(el){el.hidden=false;});
+      if(!suppressCount)count.textContent='검색 결과 '+filtered.length.toLocaleString('ko-KR')+'건';
+      var start=Math.max(1,page-2),end=Math.min(pages,start+4);start=Math.max(1,end-4);
+      var html=page>1?'<button class="pg-btn" type="button" data-page="'+(page-1)+'">이전</button>':'';
+      for(var p=start;p<=end;p++)html+='<button class="pg-btn'+(p===page?' pg-active':'')+'" type="button" data-page="'+p+'">'+p+'</button>';
+      if(page<pages)html+='<button class="pg-btn" type="button" data-page="'+(page+1)+'">다음</button>';
+      pagination.innerHTML=html;
+    }
+    function search(){var q=norm(input.value);filtered=q?all.filter(function(el){return norm(el.dataset.progressSearch).indexOf(q)>=0;}):all.slice();page=1;draw();}
+    input.addEventListener('input',search);
+    button.addEventListener('click',search);
+    pagination.addEventListener('click',function(e){var btn=e.target.closest('button[data-page]');if(!btn)return;page=Number(btn.dataset.page)||1;draw();document.querySelector('.center-search-wrap').scrollIntoView({behavior:'smooth',block:'start'});});
+    wrap.setAttribute('aria-busy','true');
+    wrap.style.visibility='hidden';
+    draw(true);
+    fetch('/api/get-cases?archive='+Date.now(),{cache:'no-store'}).then(function(response){return response.ok?response.json():null;}).then(function(data){
+      if(!data||!data.ok||!Array.isArray(data.cases))throw new Error('latest cases unavailable');
+      var items=data.cases.map(function(item,index){return {item:item,index:index,created:creationMs(item)};}).filter(function(entry){return allowed(entry.item);});
+      items.sort(function(a,b){return b.created-a.created||b.index-a.index;});
+      var ordered=items.map(function(entry){return entry.item;});
+      wrap.innerHTML=ordered.map(function(item,index){return rowHtml(item,index,ordered.length);}).join('');
+      all=[].slice.call(wrap.querySelectorAll('.case-row'));filtered=all.slice();page=1;
+      wrap.removeAttribute('aria-busy');wrap.style.visibility='';
+      if(total)total.textContent=ordered.length.toLocaleString('ko-KR')+'건';
+      search();
+    }).catch(function(){
+      wrap.removeAttribute('aria-busy');wrap.style.visibility='';
+      if(total)total.textContent='최신 건수 확인 필요';
+      if(count)count.textContent='최신 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';
+    });
+  })();</script>`;
 }
 
 function createRecoveryArchiveContent(group, sortedCases, caseNoMap, suffix) {
@@ -3280,6 +3426,9 @@ function buildPage(template, group, data) {
     ogType: group.ogType,
     ...data,
   }));
+  if (String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr") {
+    html = html.replace('href="/assets/style.css"', `href="/assets/style.css?v=${CRIMINAL_PUBLIC_STYLE_VERSION}"`);
+  }
   if (data.omitConsultCta) {
     html = html.replace(/\s*<section id="consult" class="cta">[\s\S]*?<\/section>\s*(?=<\/main>)/, "\n  ");
   }
@@ -3668,7 +3817,9 @@ for (const group of groups) {
       ? `<a class="header-call" href="tel:0263480406">지급정지 상담 02-6348-0406</a>`
       : createCenterHeaderNav(group),
     floatingWidgets: isCenterBoardSite(group) ? "" : createHubFloatingWidgets(group),
-    pageKind: isCenterBoardSite(group) ? "hub-page home-page" : isRecoveryGuide ? "hub-page recovery-guide-home" : "hub-page",
+    pageKind: isCenterBoardSite(group)
+      ? (String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr" ? "center-site center-fintech hub-page home-page" : "hub-page home-page")
+      : isRecoveryGuide ? "hub-page recovery-guide-home" : "hub-page",
     omitConsultCta: isCenterBoardSite(group) || isRecoveryGuide,
     omitCenterHomeAbout: isCenterBoardSite(group),
   });
@@ -3677,20 +3828,17 @@ for (const group of groups) {
   await fs.outputFile(path.join(group.outDir, "_headers"), createStaticHeaders());
   await writeCenterAboutPages(template, group);
 
-  // gnlaw-criminal.co.kr의 루트(/)는 apply-criminal-fintech.js가 핀테크센터 홈으로 덮어써서
-  // 통계·검색·전체 목록이 있는 원래 허브 콘텐츠가 더 이상 어디에도 노출되지 않는다.
-  // 헤더의 '진행사건' 메뉴가 가리키는 /prosecute/ 에 그 허브 콘텐츠를 그대로 옮겨 노출한다.
-  const useFullHubAtCategory = isCriminalMirroredSite(group);
   const category = breadcrumbLabel(group);
+  const isCriminalProgressPage = String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr";
   const categoryTitle = isRecoveryGuide
     ? `지급정지 관련 사례 아카이브 | ${group.siteName}`
-    : useFullHubAtCategory
-      ? hubTitle
+    : isCriminalProgressPage
+      ? "법무법인 선린 진행사건 | 형사고소 사건 전체 목록"
       : `${group.siteName} ${category} ${FRESH_LIST_LABEL}`;
   const categoryDescription = isRecoveryGuide
     ? "기존 지급정지 관련 사건 랜딩페이지와 URL을 그대로 보존한 법무법인 선린 사례 아카이브입니다."
-    : useFullHubAtCategory
-      ? hubDescription
+    : isCriminalProgressPage
+      ? "법무법인 선린이 지금까지 생성한 형사고소 진행사건 랜딩페이지를 사건명, 등록일, 조회수와 함께 확인할 수 있습니다."
       : `${category} 유형에서 오늘 추가되거나 갱신된 사건만 정리합니다. ${group.hubLead}`;
   const categoryCanonical = `${group.siteUrl}/${group.pathPrefix}/`;
   const categoryHtml = buildPage(template, group, {
@@ -3706,12 +3854,12 @@ for (const group of groups) {
     ogThumbnail: "",
     summary: escapeHtml(categoryDescription),
     breadcrumb: createCategoryBreadcrumb(group),
-    content: useFullHubAtCategory ? createHubContent(group) : createCategoryContent(group),
+    content: createCategoryContent(group),
     headerCall: isRecoveryGuide
       ? `<a class="header-call" href="tel:0263480406">지급정지 상담 02-6348-0406</a>`
       : createCenterHeaderNav(group),
     floatingWidgets: createHubFloatingWidgets(group),
-    pageKind: "hub-page category-page",
+    pageKind: isCriminalProgressPage ? "center-site center-fintech hub-page category-page" : "hub-page category-page",
   });
 
   await fs.outputFile(path.join(group.outDir, group.pathPrefix, "index.html"), categoryHtml);
@@ -3795,7 +3943,7 @@ Sitemap: ${group.siteUrl}/sitemap.xml
     content: createPrivacyPolicyContent(),
     headerCall: createCenterHeaderNav(group),
     floatingWidgets: createHubFloatingWidgets(group),
-    pageKind: "privacy-policy-page hub-page",
+    pageKind: isCriminalProgressPage ? "center-site center-fintech privacy-policy-page hub-page" : "privacy-policy-page hub-page",
     tone: "개인정보 보호",
     receiptBadge: "",
   });

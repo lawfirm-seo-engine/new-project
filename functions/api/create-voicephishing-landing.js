@@ -91,6 +91,7 @@ export async function onRequestPost(context) {
     const title = normalizeSpace(body.title);
     const slug = normalizeSlug(body.slug || title);
     const isPreview = body.preview === true;
+    const batchMode = body.batchMode === true;
 
     if (!title || !slug) {
       return json({ ok: false, message: "페이지 제목은 필수입니다." }, 400);
@@ -166,7 +167,7 @@ export async function onRequestPost(context) {
       const index = await loadIndexFromKv(env);
       upsertIndex(index, item);
       await env.CASES.put("cases:index", JSON.stringify(index));
-      context.waitUntil?.(upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} voicephishing landing ${slug}`).catch(() => {}));
+      if (!batchMode) context.waitUntil?.(upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} voicephishing landing ${slug}`).catch(() => {}));
 
       const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
       context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));

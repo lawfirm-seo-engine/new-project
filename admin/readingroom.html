@@ -4,341 +4,42 @@
   <meta charset="UTF-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>리딩방 랜딩 생성</title>
-  <style>
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f6fb;color:#172033}
-    .wrap{max-width:980px;margin:0 auto;padding:32px 20px 48px}
-    .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
-    h1{margin:0 0 6px;font-size:25px;line-height:1.25}
-    .meta{margin:0;color:#6b7a90;font-size:13px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 16px;border:0;border-radius:7px;background:#1f4fd8;color:#fff;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer}
-    .btn.sec{background:#263244}
-    .btn:disabled{opacity:.55;cursor:not-allowed}
-    form{background:#fff;border:1px solid #dde3ee;border-radius:8px;box-shadow:0 2px 18px rgba(15,23,42,.06);padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .field{display:flex;flex-direction:column;gap:6px}
-    .field.wide{grid-column:1/-1}
-    label{font-size:13px;font-weight:800;color:#4b5a70}
-    label .hint{font-weight:400;color:#8a96a8;margin-left:6px}
-    label .auto-hint{font-weight:400;color:#2a7a2a;font-size:11px;margin-left:6px}
-    input,select,textarea{width:100%;border:1px solid #cfd8e6;border-radius:7px;padding:11px 12px;font:inherit;background:#fff;color:#172033}
-    textarea{resize:vertical;line-height:1.6}
-    input.auto-filled,textarea.auto-filled{background:#f4fbf4;border-color:#b3d9b3}
-    .body-input{min-height:220px;font-size:13px}
-    .preview-box{grid-column:1/-1;background:#f8faff;border:1px solid #dde3ee;border-radius:7px;padding:14px;font-size:13px;display:none}
-    .preview-box h3{margin:0 0 8px;font-size:14px;color:#263244}
-    .preview-box pre{margin:0;white-space:pre-wrap;color:#4b5a70;font-size:12px;line-height:1.7;font-family:Consolas,"Courier New",monospace}
-    .actions{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .message{grid-column:1/-1;margin:0;font-size:14px;white-space:pre-wrap}
-    .message.ok{color:#14642d}
-    .message.err{color:#a83232}
-    .saved-link{grid-column:1/-1;display:none;padding:12px 14px;border-radius:7px;background:#edf7ed;color:#145b22;font-size:14px}
-    .saved-link a{color:#0f4fcf;font-weight:800;text-decoration:none}
-    .manual-hint{grid-column:1/-1;font-size:12px;color:#6b7a90;background:#fffbe6;border:1px solid #e8d87a;border-radius:6px;padding:10px 14px;line-height:1.6}
-    @media(max-width:760px){form{grid-template-columns:1fr}.top{flex-direction:column}}
-  </style>
+  <title>리딩방 랜딩 대량 생성</title>
+  <link rel="stylesheet" href="/admin/category-bulk.css?v=20260820-1">
 </head>
 <body>
-  <main class="wrap">
-    <div class="top">
-      <div>
-        <h1>리딩방 랜딩 생성</h1>
-        <p class="meta">리딩방피해회수센터.kr 전용 · 주식리딩방사기 피해회복 페이지 생성</p>
+  <main class="bulk-wrap">
+    <header class="bulk-top">
+      <div><h1>리딩방 랜딩 생성</h1><p class="bulk-meta">리딩방피해회수센터.kr 전용 · 유형별 리딩방 피해회복 페이지를 한 번에 최대 30개 생성합니다.</p></div>
+      <div class="bulk-top-actions"><a class="btn sec" href="/admin/dashboard.html">관리자 대시보드</a></div>
+    </header>
+    <section class="bulk-card">
+      <div class="bulk-table-scroll"><table>
+        <thead><tr><th style="width:48px">No.</th><th>사건명</th><th style="width:260px">유형</th><th style="width:220px">URL slug (선택)</th><th style="width:70px">생성</th><th style="width:220px">결과</th></tr></thead>
+        <tbody id="bulkRows"></tbody>
+      </table></div>
+      <p class="bulk-help">사건명과 유형을 선택하면 기존 리딩방 전용 규칙에 따라 제목·원고·메타 정보가 자동 생성됩니다.</p>
+      <div class="bulk-actions">
+        <button id="bulkCreateButton" class="btn" type="button" disabled>선택한 리딩방 랜딩 대량 생성</button>
+        <button id="bulkSelectAllButton" class="btn light" type="button">전체 선택</button><button id="bulkClearAllButton" class="btn light" type="button">전체 해제</button>
+        <button id="bulkRefreshButton" class="btn sec" type="button">🔄 새로고침 (새 30개)</button><span id="bulkMessage" class="bulk-message"></span>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a class="btn sec" href="/admin/dashboard.html">관리자 대시보드</a>
-      </div>
-    </div>
-
-    <form id="rrForm">
-      <div class="field">
-        <label for="caseName">사건명 <span class="hint">예: DB알고울트라, OO증권사, OO HTS</span></label>
-        <input id="caseName" name="caseName" type="text" placeholder="사건명 또는 사칭 명칭" required>
-      </div>
-      <div class="field">
-        <label for="type">유형</label>
-        <select id="type" name="type">
-          <option value="stock-reading-room">주식리딩방사기</option>
-          <option value="coin-reading-room">코인리딩방사기</option>
-          <option value="platform-impersonation">증권사·투자사·플랫폼 사칭 사기</option>
-          <option value="trading-app">HTS/MTS/어플</option>
-        </select>
-      </div>
-      <div class="field wide">
-        <label for="title">생성 제목 <span class="auto-hint" id="titleHint">자동 생성됨</span></label>
-        <input id="title" name="title" type="text" placeholder="사건명과 유형에 따라 자동 생성" readonly>
-      </div>
-      <div class="field">
-        <label for="slug">URL slug</label>
-        <input id="slug" name="slug" type="text" placeholder="제목 입력 시 자동 생성" required>
-      </div>
-      <div class="field">
-        <label for="urlPreview">생성 URL</label>
-        <input id="urlPreview" type="text" readonly>
-      </div>
-      <div class="field wide">
-        <label for="summary">메타 설명 <span class="auto-hint" id="summaryHint">사건명 입력 시 자동 생성</span></label>
-        <textarea id="summary" name="summary" rows="3" placeholder="사건명을 입력하면 자동 생성됩니다"></textarea>
-      </div>
-      <div class="field wide">
-        <label for="imageAlt">이미지 Alt <span class="auto-hint" id="imageAltHint">사건명 입력 시 자동 생성</span></label>
-        <input id="imageAlt" name="imageAlt" type="text" placeholder="사건명을 입력하면 자동 생성됩니다">
-      </div>
-      <div class="field wide">
-        <label for="imageCaption">이미지 Caption <span class="auto-hint" id="imageCaptionHint">사건명 입력 시 자동 생성</span></label>
-        <textarea id="imageCaption" name="imageCaption" rows="2" placeholder="사건명을 입력하면 자동 생성됩니다"></textarea>
-      </div>
-      <div class="field wide">
-        <label for="imageDescription">이미지 Description <span class="auto-hint" id="imageDescriptionHint">사건명 입력 시 자동 생성</span></label>
-        <textarea id="imageDescription" name="imageDescription" rows="3" placeholder="사건명을 입력하면 자동 생성됩니다"></textarea>
-      </div>
-
-      <div class="manual-hint">
-        <strong>생성 규칙</strong><br>
-        주식리딩방사기 유형은 <strong>사건명 + 사칭 사기 주식·투자 리딩방 피해회복 안내</strong>, 코인리딩방사기 유형은 <strong>사건명 + 사칭 사기 코인리딩방 피해회복 안내</strong>로 생성됩니다.<br>
-        증권사·투자사·플랫폼 또는 HTS/MTS/어플 유형은 입력한 명칭 뒤에 <strong>사칭 사기 리딩방 피해회복 안내</strong>가 붙습니다.
-      </div>
-
-      <div class="field wide">
-        <label for="bodyInput">원고 직접 입력 <span class="hint">선택 사항. 비워두면 자동 원고 사용</span></label>
-        <textarea id="bodyInput" name="bodyInput" class="body-input" rows="12" placeholder="비워두면 자동 생성 원고가 사용됩니다. 직접 입력 시 단락은 빈 줄로 구분합니다."></textarea>
-      </div>
-
-      <div id="previewBox" class="preview-box">
-        <h3>자동 생성 원고 미리보기</h3>
-        <p id="extractedInfo" style="font-size:12px;color:#5a6a80;margin:0 0 8px;line-height:1.6"></p>
-        <pre id="previewText"></pre>
-      </div>
-
-      <div id="savedLink" class="saved-link"></div>
-      <p id="message" class="message"></p>
-      <div class="actions">
-        <button id="previewButton" class="btn sec" type="button">원고 미리보기</button>
-        <button id="submitButton" class="btn" type="submit">리딩방 랜딩 생성</button>
-        <button id="resetButton" class="btn sec" type="button">새로 작성</button>
-      </div>
-    </form>
+      <div id="bulkProgress" class="progress"><div class="progress-track"><div id="bulkProgressBar" class="progress-bar"></div></div><span id="bulkProgressText" class="progress-text"></span></div>
+    </section>
   </main>
-
   <script>
-    const API_ORIGIN = location.protocol === "file:" ? "https://gnlaw-criminal.co.kr" : "";
-    const SITE_URL = "https://리딩방피해회수센터.kr";
-    const TYPE_CONFIG = {
-      "stock-reading-room": { label: "주식리딩방사기", suffix: "사칭 사기 주식·투자 리딩방 피해회복 안내", keyword: "주식리딩방사기" },
-      "coin-reading-room": { label: "코인리딩방사기", suffix: "사칭 사기 코인리딩방 피해회복 안내", keyword: "코인리딩방사기" },
-      "platform-impersonation": { label: "증권사·투자사·플랫폼 사칭 사기", suffix: "사칭 사기 리딩방 피해회복 안내", keyword: "리딩방 사칭 사기" },
-      "trading-app": { label: "HTS·MTS·어플", suffix: "사칭 사기 리딩방 피해회복 안내", keyword: "HTS MTS 어플 사칭 사기" },
+    window.CATEGORY_BULK_CONFIG={
+      endpoint:"/api/create-readingroom-landing",
+      placeholder:"사건명 또는 사칭 명칭",
+      mode:"readingroom",
+      typeOptions:[
+        {value:"stock-reading-room",label:"주식리딩방사기"},
+        {value:"coin-reading-room",label:"코인리딩방사기"},
+        {value:"platform-impersonation",label:"증권사·투자사·플랫폼 사칭 사기"},
+        {value:"trading-app",label:"HTS·MTS·어플"}
+      ]
     };
-
-    const form = document.getElementById("rrForm");
-    const caseNameEl = document.getElementById("caseName");
-    const typeEl = document.getElementById("type");
-    const titleEl = document.getElementById("title");
-    const slugEl = document.getElementById("slug");
-    const urlPreviewEl = document.getElementById("urlPreview");
-    const messageEl = document.getElementById("message");
-    const savedLinkEl = document.getElementById("savedLink");
-    const submitButtonEl = document.getElementById("submitButton");
-    const previewButtonEl = document.getElementById("previewButton");
-    const previewBoxEl = document.getElementById("previewBox");
-    const previewTextEl = document.getElementById("previewText");
-    const bodyInputEl = document.getElementById("bodyInput");
-
-    let slugTouched = false;
-    let autoBody = null;
-    const META_FIELD_IDS = ["summary", "imageAlt", "imageCaption", "imageDescription"];
-    const fieldTouched = {};
-
-    META_FIELD_IDS.forEach((id) => {
-      document.getElementById(id).addEventListener("input", () => {
-        fieldTouched[id] = true;
-        markFieldManual(id);
-      });
-    });
-
-    caseNameEl.addEventListener("input", refreshAutoFields);
-    typeEl.addEventListener("change", refreshAutoFields);
-    slugEl.addEventListener("input", () => {
-      slugTouched = true;
-      slugEl.value = normalizeSlug(slugEl.value);
-      refreshUrlPreview();
-    });
-    document.getElementById("resetButton").addEventListener("click", resetForm);
-
-    previewButtonEl.addEventListener("click", async () => {
-      const caseName = cleanSubject(caseNameEl.value);
-      if (!caseName) { setMessage("사건명을 입력하세요.", "err"); return; }
-      setMessage("리딩방 자동 원고를 생성하는 중...", "");
-      previewButtonEl.disabled = true;
-      try {
-        const res = await fetch(API_ORIGIN + "/api/create-readingroom-landing", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ caseName, type: typeEl.value, slug: normalizeSlug(slugEl.value || titleEl.value), preview: true }),
-        });
-        const data = await res.json();
-        if (!data.ok) {
-          setMessage(data.message || "원고 생성 실패", "err");
-          return;
-        }
-        autoBody = data.body;
-        titleEl.value = data.title || buildTitle(caseName, typeEl.value);
-        if (!slugTouched) slugEl.value = normalizeSlug(slugEl.value || titleEl.value);
-        bodyInputEl.value = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
-        document.getElementById("extractedInfo").textContent = `생성 제목: ${data.title || titleEl.value} / 유형: ${data.typeLabel || TYPE_CONFIG[typeEl.value].label}`;
-        previewTextEl.textContent = Array.isArray(data.body) ? data.body.join("\n\n") : data.body;
-        previewBoxEl.style.display = "block";
-        setMessage("원고 생성 완료. 확인 후 '리딩방 랜딩 생성'을 클릭하세요.", "ok");
-        refreshUrlPreview();
-      } catch (error) {
-        setMessage("원고 생성 오류: " + error.message, "err");
-      } finally {
-        previewButtonEl.disabled = false;
-      }
-    });
-
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const caseName = cleanSubject(caseNameEl.value);
-      if (!caseName) { setMessage("사건명을 입력하세요.", "err"); return; }
-
-      const manualText = String(bodyInputEl.value || "").trim();
-      const body = autoBody || (manualText
-        ? manualText.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
-        : null);
-
-      setMessage("저장 중...", "");
-      savedLinkEl.style.display = "none";
-      submitButtonEl.disabled = true;
-
-      try {
-        const payload = {
-          caseName,
-          type: typeEl.value,
-          title: titleEl.value,
-          slug: normalizeSlug(slugEl.value || titleEl.value),
-          summary: String(document.getElementById("summary").value || "").trim(),
-          imageAlt: String(document.getElementById("imageAlt").value || "").trim(),
-          imageCaption: String(document.getElementById("imageCaption").value || "").trim(),
-          imageDescription: String(document.getElementById("imageDescription").value || "").trim(),
-          ...(body && body.length ? { body } : {}),
-        };
-        const res = await fetch(API_ORIGIN + "/api/create-readingroom-landing", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json();
-        if (!data.ok) {
-          setMessage(data.message || "저장 실패", "err");
-          submitButtonEl.disabled = false;
-          return;
-        }
-        setMessage(data.message || "저장되었습니다.", "ok");
-        savedLinkEl.innerHTML = `공개 URL: <a href="${data.url}" target="_blank" rel="noopener">${data.url}</a>`;
-        savedLinkEl.style.display = "block";
-      } catch (error) {
-        setMessage("저장 오류: " + error.message, "err");
-        submitButtonEl.disabled = false;
-      }
-    });
-
-    function refreshAutoFields() {
-      const subject = cleanSubject(caseNameEl.value);
-      const title = subject ? buildTitle(subject, typeEl.value) : "";
-      titleEl.value = title;
-      if (!slugTouched) slugEl.value = title ? normalizeSlug(title) : "";
-      autoBody = null;
-      previewBoxEl.style.display = "none";
-      autoFillMeta(subject, title);
-      refreshUrlPreview();
-      setMessage("", "");
-    }
-
-    function autoFillMeta(subject, title) {
-      if (!subject || !title) return;
-      const generated = generateMeta(subject, title, TYPE_CONFIG[typeEl.value]);
-      META_FIELD_IDS.forEach((id) => {
-        if (!fieldTouched[id]) {
-          document.getElementById(id).value = generated[id] || "";
-          markFieldAuto(id);
-        }
-      });
-    }
-
-    function generateMeta(subject, title, config) {
-      const summary = `${title}. ${subject} 관련 리딩방 사칭 사기 피해가 의심될 때 추가 입금 중단, 증거 보존, 지급정지와 피해회복 절차를 정리합니다.`.slice(0, 180);
-      const imageAlt = `${subject} ${config.label} 피해회복 안내`;
-      const imageCaption = `${subject} 리딩방 사칭 사기 피해회복 절차`;
-      const imageDescription = `${subject} 명칭의 리딩방 사칭 사기 피해가 의심될 때 입금 자료, 대화 기록, 출금 제한 정황을 기준으로 피해회복 절차를 안내하는 대표 이미지입니다.`;
-      return { summary, imageAlt, imageCaption, imageDescription };
-    }
-
-    function buildTitle(subject, type) {
-      const config = TYPE_CONFIG[type] || TYPE_CONFIG["stock-reading-room"];
-      return `${cleanSubject(subject)} ${config.suffix}`.replace(/\s+/g, " ").trim();
-    }
-
-    function cleanSubject(value) {
-      return String(value || "").trim().replace(/\s+/g, " ")
-        .replace(/\s*(?:사칭\s*사기\s*)?(?:주식[·ㆍ]?투자\s*)?리딩방\s*피해회복\s*안내\s*$/i, "")
-        .replace(/\s*(?:사칭\s*사기\s*)?코인리딩방\s*피해회복\s*안내\s*$/i, "")
-        .replace(/\s*사칭\s*사기\s*리딩방\s*피해회복\s*안내\s*$/i, "")
-        .replace(/\s*(?:사칭\s*사기|사칭|사기)\s*$/i, "")
-        .trim();
-    }
-
-    function refreshUrlPreview() {
-      const slug = normalizeSlug(slugEl.value || titleEl.value);
-      urlPreviewEl.value = slug ? `${SITE_URL}/insights/${encodeURIComponent(slug)}-report/` : "";
-    }
-
-    function resetForm() {
-      form.reset();
-      slugTouched = false;
-      autoBody = null;
-      titleEl.value = "";
-      urlPreviewEl.value = "";
-      META_FIELD_IDS.forEach((id) => {
-        delete fieldTouched[id];
-        const el = document.getElementById(id);
-        if (el) el.classList.remove("auto-filled");
-        const hint = document.getElementById(id + "Hint");
-        if (hint) { hint.textContent = "사건명 입력 시 자동 생성"; hint.style.color = "#2a7a2a"; }
-      });
-      savedLinkEl.style.display = "none";
-      previewBoxEl.style.display = "none";
-      submitButtonEl.disabled = false;
-      setMessage("", "");
-      caseNameEl.focus();
-    }
-
-    function markFieldAuto(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.add("auto-filled");
-      const hint = document.getElementById(id + "Hint");
-      if (hint) { hint.textContent = "자동 생성됨"; hint.style.color = "#2a7a2a"; }
-    }
-
-    function markFieldManual(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.remove("auto-filled");
-      const hint = document.getElementById(id + "Hint");
-      if (hint) { hint.textContent = "수동 입력"; hint.style.color = "#8a96a8"; }
-    }
-
-    function normalizeSlug(value) {
-      return String(value || "").trim().toLowerCase()
-        .replace(/[–—]/g, "-").replace(/[^a-z0-9가-힣_-]+/g, "-")
-        .replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 90);
-    }
-
-    function setMessage(text, type) {
-      messageEl.textContent = text || "";
-      messageEl.className = `message ${type || ""}`.trim();
-    }
   </script>
+  <script src="/admin/category-bulk.js?v=20260820-1"></script>
 </body>
 </html>

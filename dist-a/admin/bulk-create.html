@@ -39,9 +39,14 @@
     .result-ok{color:#145b22;font-weight:700}
     .result-err{color:#c0392b;font-weight:700}
     .result-skip{color:#8a96a8}
+    .result-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px}
+    .result-link{color:#1f4fd8;font-size:11px;font-weight:700;text-decoration:none}
+    .copy-url-btn{padding:3px 8px;border:1px solid #c7d4f0;border-radius:4px;background:#e7edf9;color:#1f4fd8;font-size:10px;font-weight:700;cursor:pointer}
+    .copy-url-btn:hover{background:#dce6f8}
     tr.done-ok td{background:#f6fef6}
     tr.done-err td{background:#fff6f6}
     .no-name{color:#ccc;font-style:italic}
+    .duplicate-help{margin:10px 0 0;color:#6b7a90;font-size:12px;line-height:1.6}
   </style>
 </head>
 <body>
@@ -63,11 +68,12 @@
           <th style="width:80px">유사도</th>
           <th style="width:220px">상태</th>
           <th style="width:60px">생성</th>
-          <th style="width:280px">결과</th>
+          <th style="width:180px">결과</th>
         </tr>
       </thead>
       <tbody id="inputBody"></tbody>
     </table>
+    <p class="duplicate-help">100% 중복 항목은 기본적으로 선택되지 않습니다. 필요한 경우 생성 체크박스를 직접 선택할 수 있으며, 유사 항목 옆의 ‘편집’ 링크에서 기존 랜딩페이지를 수정할 수 있습니다.</p>
     <div class="action-row">
       <button class="btn sec" onclick="addRow()">+ 행 추가</button>
       <button class="btn sec" onclick="removeLastRow()">행 삭제</button>
@@ -81,6 +87,7 @@
       <button class="btn" id="createBtn" onclick="runBatchCreate()" disabled>선택한 사건 생성</button>
       <button class="btn sec" onclick="selectAll(true)">전체 선택</button>
       <button class="btn sec" onclick="selectAll(false)">전체 해제</button>
+      <button class="btn sec" id="refreshBtn" onclick="resetBatch()">🔄 새로고침 (새 30개)</button>
       <span class="msg" id="actionMsg"></span>
     </div>
     <div class="progress-row" id="progressRow" style="display:none">
@@ -142,6 +149,7 @@
     document.getElementById(`result-${n}`).textContent = '';
     document.getElementById(`sel-${n}`).disabled = true;
     document.getElementById(`sel-${n}`).checked = false;
+    document.getElementById(`sel-${n}`).dataset.blocked = '';
     delete checkResults[n];
     const tr = document.getElementById(`row-${n}`);
     if (tr) tr.className = '';
@@ -152,8 +160,6 @@
     for (let i = 1; i <= rowCount; i++) {
       const cb = document.getElementById(`sel-${i}`);
       if (!cb || cb.disabled) continue;
-      // 전체 선택 시 중복(blocked) 항목은 자동 포함하지 않는다 — 개별 확인 후 직접 체크해야 함.
-      // 전체 해제는 수동으로 체크해둔 것까지 포함해 그대로 해제한다.
       if (val && cb.dataset.blocked === '1') continue;
       cb.checked = val;
     }
@@ -177,25 +183,21 @@
     isChecking = true;
     document.getElementById('checkBtn').disabled = true;
     document.getElementById('createBtn').disabled = true;
+    document.getElementById('refreshBtn').disabled = true;
     setMsg('중복 검수 중...', 'info');
 
     try {
-      const res = await fetch('/api/batch-check-cases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }),
-      });
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        throw new Error(`서버 응답 파싱 실패 (HTTP ${res.status})`);
+      const results = [];
+      const chunkSize = 5;
+      for (let start = 0; start < items.length; start += chunkSize) {
+        const chunk = items.slice(start, start + chunkSize);
+        setMsg(`중복 검수 중... ${start + 1}-${start + chunk.length} / ${items.length}`, 'info');
+        results.push(...await requestCheckChunk(chunk));
       }
-      if (!data.ok) throw new Error(data.message || '검수 실패');
 
       // 결과 반영
       let passCount = 0;
-      data.results.forEach((result, idx) => {
+      results.forEach((result, idx) => {
         const n = items[idx]._row;
         checkResults[n] = result;
         const scoreEl = document.getElementById(`score-${n}`);
@@ -221,24 +223,22 @@
             const editLink = editHref
               ? ` <a href="${editHref}" target="_blank" rel="noopener" style="color:#1f4fd8;font-weight:700;text-decoration:none">편집</a>`
               : '';
-            return `• ${esc(m.caseName)} (${Math.round(m.score * 100)}%)${editLink}`;
+            const existingUrl = m.url || (m.slug ? `https://gnlaw-criminal.co.kr/prosecute/${encodeURIComponent(m.slug)}-litigation/` : '');
+            const urlActions = existingUrl
+              ? ` <a href="${escAttr(existingUrl)}" target="_blank" rel="noopener" style="color:#1f4fd8;font-weight:700;text-decoration:none">보기</a> <button type="button" class="copy-url-btn duplicate-copy-btn" data-copy-url="${escAttr(existingUrl)}">URL 복사</button>`
+              : '';
+            return `• ${esc(m.caseName)} (${Math.round(m.score * 100)}%)${editLink}${urlActions}`;
           }).join('<br>') + `</div>`;
         }
         statusEl.innerHTML = html;
 
-        // 중복(blocked)이어도 체크박스는 막지 않고 기본 미선택 상태로만 둔다 —
-        // 오탐(예: 서로 다른 사건인데 100% 중복으로 잘못 판정)일 수 있으므로 직접 확인 후 수동 선택 가능해야 한다.
         selEl.disabled = false;
         selEl.checked = result.status !== 'blocked';
         selEl.dataset.blocked = result.status === 'blocked' ? '1' : '';
         if (result.status !== 'blocked') passCount++;
       });
 
-      if (data.truncated) {
-        setMsg(data.message || `검수 완료(일부): ${data.results.length}/${items.length}건 처리, ${passCount}건 선택됨. 나머지는 다시 검수해주세요.`, 'err');
-      } else {
-        setMsg(`검수 완료: ${data.results.length}건 중 ${passCount}건 선택됨.`, 'ok');
-      }
+      setMsg(`검수 완료: ${results.length}건 중 ${passCount}건 선택됨.`, 'ok');
       updateCreateBtn();
     } catch (e) {
       setMsg('검수 오류: ' + (e.message || String(e)), 'err');
@@ -246,7 +246,41 @@
     } finally {
       isChecking = false;
       document.getElementById('checkBtn').disabled = false;
+      document.getElementById('refreshBtn').disabled = false;
     }
+  }
+
+  async function requestCheckChunk(items) {
+    const res = await fetch('/api/batch-check-cases', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items }),
+    });
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (res.status === 503 && items.length > 1) {
+        const middle = Math.ceil(items.length / 2);
+        return [
+          ...await requestCheckChunk(items.slice(0, middle)),
+          ...await requestCheckChunk(items.slice(middle)),
+        ];
+      }
+      throw new Error(`서버 응답 파싱 실패 (HTTP ${res.status})${text ? `: ${text.slice(0, 80)}` : ''}`);
+    }
+    if (!res.ok || !data.ok) {
+      throw new Error(data.message || `검수 실패 (HTTP ${res.status})`);
+    }
+
+    const results = Array.isArray(data.results) ? data.results : [];
+    if (results.length < items.length) {
+      const remaining = items.slice(results.length);
+      if (!remaining.length) return results;
+      return [...results, ...await requestCheckChunk(remaining)];
+    }
+    return results;
   }
 
   async function runBatchCreate() {
@@ -265,6 +299,7 @@
     isCreating = true;
     document.getElementById('createBtn').disabled = true;
     document.getElementById('checkBtn').disabled = true;
+    document.getElementById('refreshBtn').disabled = true;
 
     const total = selected.length;
     let done = 0;
@@ -298,8 +333,10 @@
 
         if (createData.ok || createRes.status === 409) {
           const slug = caseObj.slug;
-          const url = `https://gnlaw-criminal.co.kr/prosecute/${encodeURIComponent(slug)}-litigation/`;
-          renderResultUrl(resultEl, url);
+          const url = createData.case?.landings?.a?.canonical
+            || caseObj.landings?.a?.canonical
+            || `https://gnlaw-criminal.co.kr/prosecute/${encodeURIComponent(slug)}-litigation/`;
+          showResultLink(resultEl, url, createRes.status === 409 ? '✅ 기존 URL' : '✅ 생성');
           if (tr) tr.className = 'done-ok';
         } else {
           throw new Error(createData.message || '저장 실패');
@@ -316,10 +353,74 @@
       if (done < total) await sleep(500);
     }
 
-    setMsg(`완료: ${done}건 처리했습니다.`, 'ok');
+    setMsg(`완료: ${done}건 처리했습니다. 새 항목을 입력하려면 '새로고침'을 누르세요.`, 'ok');
     isCreating = false;
     document.getElementById('checkBtn').disabled = false;
     document.getElementById('createBtn').disabled = false;
+    document.getElementById('refreshBtn').disabled = false;
+  }
+
+  function resetBatch() {
+    if (isChecking || isCreating) return;
+    document.getElementById('inputBody').innerHTML = '';
+    rowCount = 0;
+    checkResults = {};
+    for (let i = 0; i < 30; i++) addRow();
+    document.getElementById('createBtn').disabled = true;
+    document.getElementById('progressRow').style.display = 'none';
+    setMsg('새로운 30개 항목을 불러왔습니다.', 'info');
+  }
+
+  function showResultLink(resultEl, url, label) {
+    resultEl.innerHTML = '';
+
+    const status = document.createElement('span');
+    status.className = 'result-ok';
+    status.textContent = label;
+    resultEl.appendChild(status);
+
+    const actions = document.createElement('div');
+    actions.className = 'result-actions';
+
+    const viewLink = document.createElement('a');
+    viewLink.className = 'result-link';
+    viewLink.href = url;
+    viewLink.target = '_blank';
+    viewLink.rel = 'noopener';
+    viewLink.textContent = '보기';
+    actions.appendChild(viewLink);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'copy-url-btn';
+    copyBtn.textContent = 'URL 복사';
+    copyBtn.addEventListener('click', async () => {
+      const copied = await copyText(url);
+      copyBtn.textContent = copied ? '복사됨' : '복사 실패';
+      setTimeout(() => { copyBtn.textContent = 'URL 복사'; }, 1400);
+    });
+    actions.appendChild(copyBtn);
+    resultEl.appendChild(actions);
+  }
+
+  async function copyText(value) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+      const textarea = document.createElement('textarea');
+      textarea.value = value;
+      textarea.setAttribute('readonly', '');
+      textarea.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand('copy');
+      textarea.remove();
+      return copied;
+    } catch {
+      return false;
+    }
   }
 
   function collectItems() {
@@ -350,42 +451,7 @@
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  function renderResultUrl(resultEl, url) {
-    resultEl.innerHTML = '';
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;gap:3px;align-items:flex-start';
-
-    const status = document.createElement('span');
-    status.className = 'result-ok';
-    status.textContent = '✅ 생성';
-    wrap.appendChild(status);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.textContent = url;
-    a.style.cssText = 'font-size:11px;color:#1f4fd8;word-break:break-all';
-    wrap.appendChild(a);
-
-    const copyBtn = document.createElement('button');
-    copyBtn.type = 'button';
-    copyBtn.textContent = 'URL 복사';
-    copyBtn.style.cssText = 'padding:2px 8px;font-size:10px;background:#e7edf9;color:#1f4fd8;border:1px solid #c7d4f0;border-radius:4px;cursor:pointer';
-    copyBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(url);
-        copyBtn.textContent = '복사됨';
-        setTimeout(() => { copyBtn.textContent = 'URL 복사'; }, 1200);
-      } catch (e) {
-        copyBtn.textContent = '복사 실패';
-      }
-    });
-    wrap.appendChild(copyBtn);
-
-    resultEl.appendChild(wrap);
-  }
+  function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
 
   // 초기 30행 추가
   for (let i = 0; i < 30; i++) addRow();
@@ -393,6 +459,14 @@
   // 체크박스 변경 → 생성 버튼 상태 업데이트
   document.getElementById('inputBody').addEventListener('change', (e) => {
     if (e.target.type === 'checkbox') updateCreateBtn();
+  });
+
+  document.getElementById('inputBody').addEventListener('click', async (e) => {
+    const button = e.target.closest('[data-copy-url]');
+    if (!button) return;
+    const copied = await copyText(button.dataset.copyUrl || '');
+    button.textContent = copied ? '복사됨' : '복사 실패';
+    setTimeout(() => { button.textContent = 'URL 복사'; }, 1400);
   });
 </script>
 </body>

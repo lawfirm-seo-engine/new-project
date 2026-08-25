@@ -195,14 +195,16 @@ for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
   if (GROUPS[host]) GROUPS[host].siteUrl = siteUrl;
 }
 
-const CENTER_FINTECH_STYLE_VERSION = "20260820-nav-fix-v1";
+const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
+const CENTER_FINTECH_IMAGE_VERSION = "20260821-main-slide-03";
 
 function centerFintechHeadLinks(group) {
-  if (!group || String(group.siteUrl || "").replace(/\/$/, "") !== "https://gnlaw-center.co.kr") return [];
+  const siteUrl = String(group?.siteUrl || "").replace(/\/$/, "");
+  if (siteUrl !== "https://gnlaw-center.co.kr") return [];
   return [
-    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp">`,
-    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp">`,
-    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
     `<link rel="stylesheet" href="/assets/center-fintech/style.css?v=${CENTER_FINTECH_STYLE_VERSION}">`,
   ];
 }
@@ -311,7 +313,7 @@ export async function onRequest(context) {
 
   // /[pathPrefix]/[slug]-[suffix]/ 형태의 랜딩 페이지만 처리
   const parts = pathname.replace(/^\/|\/$/g, "").split("/");
-  const isBoardRoute = url.host === "gnlaw-center.co.kr" && parts[0] === "board";
+  const isBoardRoute = isBoardHost(url.host) && parts[0] === "board";
   if (parts.length !== 2 || (!isBoardRoute && parts[0] !== group.pathPrefix) || !parts[1]) {
     return next();
   }
@@ -611,7 +613,11 @@ function renderPowerlinkLanding(landing) {
     ctaText: esc(landing.ctaText || ""),
     ctaLabel: esc(landing.ctaLabel || "상담 접수"),
     footerLinks: "",
-    headerCall: "",
+    headerCall: createCenterHeaderNav(
+      { siteUrl: "https://gnlaw-criminal.co.kr" },
+      { includeCriminal: true },
+    ),
+    styleHref: "/assets/style.css?v=20260821-single-row-navigation",
     bodyScripts: logScanScriptForSite("https://gnlaw-criminal.co.kr"),
   });
 }
@@ -760,7 +766,7 @@ ${createBoardConsultCta(group, title, "board")}`;
     siteName: esc(group.siteName),
     headExtra: boardHeadExtra({ canonical, ogImage, displayOgImage, imageAlt: `${title} 대표 이미지`, description }),
     schema,
-    bodyClass: `${group.bodyClass} board-page`,
+    bodyClass: `${group.bodyClass} center-site center-fintech board-page`,
     tone: "통합 허브 게시판",
     h1: esc(title),
     breadcrumb: `<nav class="breadcrumb" aria-label="breadcrumb"><a href="${group.siteUrl}/">홈</a><strong>게시판</strong></nav>`,
@@ -775,7 +781,7 @@ ${createBoardConsultCta(group, title, "board")}`;
     ctaText: "현재 피해 상황을 기준으로 필요한 대응 경로를 확인합니다.",
     ctaLabel: "상담 접수",
     footerLinks: "",
-    headerCall: createCenterHeaderNav(group),
+    headerCall: createCenterHeaderNav(group, { includeCriminal: true }),
     bodyScripts: "",
   });
 }
@@ -880,7 +886,7 @@ ${createBoardConsultCta(group, title, post.slug)}`;
     siteName: esc(group.siteName),
     headExtra: boardHeadExtra({ canonical, ogImage, displayOgImage, imageAlt, imageCaption, imageDescription, description, publishedDate, modifiedDate }),
     schema,
-    bodyClass: `${group.bodyClass} board-page board-post-page`,
+    bodyClass: `${group.bodyClass} center-site center-fintech board-page board-post-page`,
     tone: "통합 허브 게시글",
     h1: esc(title),
     breadcrumb: `<nav class="breadcrumb" aria-label="breadcrumb"><a href="${group.siteUrl}/">홈</a><a href="${boardListUrl()}">게시판</a><strong>${esc(title)}</strong></nav>`,
@@ -895,7 +901,7 @@ ${createBoardConsultCta(group, title, post.slug)}`;
     ctaText: "현재 피해 상황을 기준으로 필요한 대응 경로를 확인합니다.",
     ctaLabel: "상담 접수",
     footerLinks: "",
-    headerCall: createCenterHeaderNav(group),
+    headerCall: createCenterHeaderNav(group, { includeCriminal: true }),
     bodyScripts: "",
   });
 }
@@ -1213,19 +1219,21 @@ function logScanScriptForSite(siteUrl = "") {
     : "";
 }
 
-function createCenterHeaderNav(group = {}) {
+function createCenterHeaderNav(group = {}, { includeCriminal = true } = {}) {
   const siteUrl = String(group.siteUrl || "").replace(/\/$/, "");
-  if (siteUrl !== "https://gnlaw-center.co.kr") return "";
+  if (siteUrl !== "https://gnlaw-center.co.kr" && !(includeCriminal && siteUrl === "https://gnlaw-criminal.co.kr")) return "";
+  const progressHref = siteUrl === "https://gnlaw-criminal.co.kr" ? "/prosecute/" : "/case/";
   return `<nav class="center-nav" aria-label="주요 메뉴">
-    <div class="center-nav-group">
-      <a class="center-nav-parent" href="/about/greeting/">선린소개</a>
+    <details class="center-nav-group">
+      <summary class="center-nav-parent">선린소개</summary>
       <div class="center-nav-sub" aria-label="선린소개 하위 메뉴">
         <a href="/about/greeting/">인사말</a>
         <a href="/about/members/">선린의 구성원</a>
       </div>
-    </div>
+    </details>
     <a href="/#practice">업무분야</a>
-    <a href="/board/">진행사건</a>
+    <a href="${progressHref}">진행사건</a>
+    <a href="/board/">성공사례</a>
     <a class="center-nav-call" href="tel:0263480406">상담문의</a>
   </nav>`;
 }
@@ -1557,7 +1565,11 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     headExtra,
     schema,
     bodyClass: `${group.bodyClass} landing-page${lk === "c" ? " recovery-landing-page" : ""}`,
-    styleHref: lk === "c" ? "/assets/style.css?v=20260813-recovery-landing-v1" : "/assets/style.css?v=20260820-nav-fix-v1",
+    styleHref: lk === "c"
+      ? "/assets/style.css?v=20260813-recovery-landing-v1"
+      : String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
+        ? "/assets/style.css?v=20260821-single-row-navigation"
+        : "/assets/style.css?v=20260820-nav-fix-v1",
     tone: esc(group.tone),
     h1: esc(pageH1),
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName, pageH1),

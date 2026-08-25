@@ -689,6 +689,10 @@ button{
   transition:background .16s ease, transform .16s ease;
 }
 
+.case-row[hidden]{
+  display:none!important;
+}
+
 .case-row:hover{
   background:color-mix(in srgb, var(--surface-2) 60%, white);
 }
@@ -825,6 +829,78 @@ button{
   border-radius:12px;
   background:#059669;
   color:#fff;
+}
+
+/* Dynamic criminal landing pages keep their existing content design; only the
+   shared site header receives the full desktop navigation. */
+.domain-a.landing-page .center-nav-group{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.domain-a.landing-page .center-nav-parent{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  list-style:none;
+  white-space:nowrap;
+  cursor:pointer;
+  font:inherit;
+  font-weight:inherit;
+  touch-action:manipulation;
+  user-select:none;
+}
+
+.domain-a.landing-page .center-nav-parent::-webkit-details-marker{
+  display:none;
+}
+
+.domain-a.landing-page .center-nav-parent::after{
+  content:"";
+  width:7px;
+  height:7px;
+  border-right:2px solid currentColor;
+  border-bottom:2px solid currentColor;
+  transform:translateY(-2px) rotate(45deg);
+}
+
+.domain-a.landing-page .center-nav-group[open] .center-nav-parent::after{
+  transform:translateY(2px) rotate(225deg);
+}
+
+.domain-a.landing-page .center-nav-sub{
+  position:absolute;
+  top:calc(100% + 12px);
+  left:0;
+  z-index:40;
+  display:none;
+  min-width:178px;
+  padding:8px;
+  border:1px solid #e5e7eb;
+  border-radius:8px;
+  background:#fff;
+  box-shadow:0 12px 30px rgba(15,23,42,.16);
+}
+
+.domain-a.landing-page .center-nav-group:hover .center-nav-sub,
+.domain-a.landing-page .center-nav-group:focus-within .center-nav-sub,
+.domain-a.landing-page .center-nav-group[open] .center-nav-sub{
+  display:grid;
+}
+
+.domain-a.landing-page .center-nav-sub a{
+  display:block;
+  padding:10px 12px;
+  border-radius:8px;
+  color:#334155;
+  font-size:14px;
+}
+
+.domain-a.landing-page .center-nav-sub a:hover,
+.domain-a.landing-page .center-nav-sub a:focus{
+  background:#ecfdf5;
+  color:#047857;
 }
 
 .center-site main{
@@ -1878,6 +1954,66 @@ button{
   .center-nav-call{
     padding:8px 10px;
     border-radius:10px;
+  }
+
+  .domain-a.landing-page .site-header{
+    display:flex;
+    flex-flow:row nowrap;
+    align-items:center;
+    gap:clamp(5px,1.8vw,10px);
+    min-height:58px;
+    padding:6px 10px;
+  }
+
+  .domain-a.landing-page .brand{
+    flex:0 0 clamp(74px,24vw,104px);
+    width:auto;
+    min-width:0;
+  }
+
+  .domain-a.landing-page .brand img{
+    display:block;
+    width:100%;
+    max-height:36px;
+    object-fit:contain;
+    object-position:left center;
+  }
+
+  .domain-a.landing-page .center-nav{
+    flex:1 1 auto;
+    width:auto;
+    min-width:0;
+    justify-content:space-between;
+    gap:clamp(2px,.9vw,8px);
+    overflow:visible;
+    padding:0;
+    font-size:clamp(9.5px,2.75vw,13px);
+  }
+
+  .domain-a.landing-page .center-nav > a:not(.center-nav-call){
+    display:inline-flex;
+  }
+
+  .domain-a.landing-page .center-nav-group[open]{
+    z-index:40;
+  }
+
+  .domain-a.landing-page .center-nav-sub{
+    top:calc(100% + 8px);
+  }
+
+  .domain-a.landing-page .center-nav-parent{
+    gap:2px;
+  }
+
+  .domain-a.landing-page .center-nav-parent::after{
+    width:5px;
+    height:5px;
+    border-width:0 1px 1px 0;
+  }
+
+  .domain-a.landing-page .center-nav-call{
+    padding:5px 4px;
   }
 
   .center-site .page-shell{

@@ -18,23 +18,20 @@ export async function onRequestPost(context) {
     // 일반랜딩만 비교 대상
     const regularCases = cases.filter((c) => !c.createdBy);
 
-    // existing 케이스 쪽 별칭 묶음은 incoming 30건 전체에서 동일하게 재사용되므로 미리 한 번만 계산한다.
-    // (예전에는 이 연산을 항목당 매번 반복해서 5천여 건 x 30항목 규모에서 CPU 타임아웃(503)이 발생했다.)
     const existingBundles = regularCases.map((item) => ({
       item,
       bundle: buildCaseIdentityBundle(item),
     }));
     const tokenCache = new Map();
-
-    // 방어적 시간 예산: 케이스 수가 계속 늘어나는 상황에서도 CPU 타임아웃으로 통째로 503이 나는 대신,
-    // 예산을 넘기면 처리된 만큼만 정상 반환하고 나머지는 truncated로 표시한다.
-    const TIME_BUDGET_MS = 20000;
+    const timeBudgetMs = 20000;
     const startedAt = Date.now();
     let truncated = false;
-
     const results = [];
+
+    console.log("[batch-check-cases] started", { items: items.length, cases: cases.length, regularCases: regularCases.length });
+
     for (const { caseName: rawName, fraudType } of items) {
-      if (Date.now() - startedAt > TIME_BUDGET_MS) {
+      if (Date.now() - startedAt > timeBudgetMs) {
         truncated = true;
         break;
       }
@@ -54,6 +51,7 @@ export async function onRequestPost(context) {
           return {
             slug: item.slug || "",
             caseName: item.caseName || "",
+            url: criminalLandingUrl(item),
             score: Number(identity.score.toFixed(2)),
             exactSlug: identity.exactSlug,
             exactAlias: identity.exactAlias,
@@ -77,12 +75,18 @@ export async function onRequestPost(context) {
       results.push({ caseName, slug, fraudType: fraudType || "", status, score: topScore, matches });
     }
 
+    const elapsedMs = Date.now() - startedAt;
+    console.log("[batch-check-cases] completed", { requested: items.length, processed: results.length, truncated, elapsedMs });
     return json({
       ok: true,
       results,
-      ...(truncated ? { truncated: true, message: `${results.length}/${items.length}건까지 처리 후 시간 예산을 초과해 중단했습니다. 남은 항목은 다시 검수해주세요.` } : {}),
+      ...(truncated ? {
+        truncated: true,
+        message: `${results.length}/${items.length}건까지 처리 후 시간 예산을 초과했습니다. 남은 항목은 다시 검수해주세요.`,
+      } : {}),
     });
   } catch (e) {
+    console.error("[batch-check-cases] failed", { message: e?.message || String(e), stack: e?.stack || "" });
     return json({ ok: false, message: e.message }, 500);
   }
 }
@@ -108,6 +112,13 @@ function slugBase(name) {
   const s = String(name || "").trim();
   const idx = s.search(/\s*사기/);
   return idx > 0 ? s.slice(0, idx).trim() : s;
+}
+
+function criminalLandingUrl(item = {}) {
+  const canonical = String(item?.landings?.a?.canonical || "").trim();
+  if (canonical) return canonical;
+  const slug = String(item.slug || "").trim();
+  return slug ? `https://gnlaw-criminal.co.kr/prosecute/${encodeURIComponent(slug)}-litigation/` : "";
 }
 
 function createSlug(value) {
