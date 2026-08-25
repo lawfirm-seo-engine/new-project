@@ -9,6 +9,27 @@ const criminalAssets = path.join(criminalDir, "assets", "center-fintech");
 const centerIndex = path.join(centerDir, "index.html");
 const criminalIndex = path.join(criminalDir, "index.html");
 const criminalDashboard = path.join(criminalDir, "admin", "dashboard.html");
+const criminalHeroVersion = "20260825-person-hero-v1";
+const criminalHeroImages = [
+  "/assets/center-fintech/main-slide-01-q90.webp",
+  "/assets/center-fintech/main-slide-02-q90.webp",
+  "/assets/center-fintech/main-slide-03-q90.webp",
+];
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function withHeroVersion(src) {
+  return `${src}?v=${criminalHeroVersion}`;
+}
+
+function versionCriminalHeroImages(source) {
+  return criminalHeroImages.reduce((html, src) => {
+    const pattern = new RegExp(`${escapeRegExp(src)}(?:\\?v=[^"'\\s)<>]+)?`, "g");
+    return html.replace(pattern, withHeroVersion(src));
+  }, source);
+}
 
 if (!fs.existsSync(centerIndex)) {
   throw new Error("dist-e/index.html이 없습니다. scripts/generate.js 실행 결과를 확인하세요.");
@@ -17,6 +38,12 @@ if (!fs.existsSync(centerIndex)) {
 if (fs.existsSync(centerAssets)) {
   fs.ensureDirSync(criminalAssets);
   fs.copySync(centerAssets, criminalAssets, { overwrite: true });
+
+  const criminalCenterStyle = path.join(criminalAssets, "style.css");
+  if (fs.existsSync(criminalCenterStyle)) {
+    const css = versionCriminalHeroImages(fs.readFileSync(criminalCenterStyle, "utf8"));
+    fs.writeFileSync(criminalCenterStyle, css);
+  }
 }
 
 let html = fs.readFileSync(centerIndex, "utf8");
@@ -35,10 +62,10 @@ html = html.replace(
 );
 
 // 메인 슬라이드는 사용자가 지정한 3개 파일을 그대로 사용한다.
-html = html
-  .replaceAll('/assets/center-fintech/main-slide-01-q90.webp', '/assets/center-fintech/main-slide-01-q90.webp')
-  .replaceAll('/assets/center-fintech/main-slide-02-q90.webp', '/assets/center-fintech/main-slide-02-q90.webp')
-  .replaceAll('/assets/center-fintech/main-slide-03-q90.webp', '/assets/center-fintech/main-slide-03-q90.webp');
+html = versionCriminalHeroImages(html).replace(
+  /\/assets\/center-fintech\/style\.css\?v=[^"'\s<>]+/g,
+  `/assets/center-fintech/style.css?v=${criminalHeroVersion}`
+);
 
 fs.writeFileSync(criminalIndex, html);
 

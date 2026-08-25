@@ -60,7 +60,7 @@
   background:
     linear-gradient(90deg,rgba(2,6,23,.82) 0%,rgba(2,6,23,.58) 47%,rgba(2,6,23,.22) 100%),
     linear-gradient(180deg,rgba(2,6,23,.08),rgba(2,6,23,.42)),
-    url("/assets/center-fintech/main-slide-01-q90.webp") center center / cover no-repeat;
+    url("/assets/center-fintech/main-slide-01-q90.webp?v=20260825-person-hero-v1") center center / cover no-repeat;
 }
 
 .center-fintech .hero::after{
@@ -572,7 +572,7 @@
   background:
     linear-gradient(90deg,rgba(2,6,23,.82) 0%,rgba(2,6,23,.58) 47%,rgba(2,6,23,.22) 100%),
     linear-gradient(180deg,rgba(2,6,23,.08),rgba(2,6,23,.42)),
-    url("/assets/center-fintech/main-slide-01-q90.webp") center center / cover no-repeat;
+    url("/assets/center-fintech/main-slide-01-q90.webp?v=20260825-person-hero-v1") center center / cover no-repeat;
 }
 
 .center-site.center-fintech.home-page .hero h1{
@@ -907,7 +907,7 @@
   color:#ffffff;
   background:
     linear-gradient(90deg,rgba(2,6,23,.82),rgba(2,6,23,.46)),
-    url("/assets/center-fintech/main-slide-01-q90.webp") center center / cover no-repeat;
+    url("/assets/center-fintech/main-slide-01-q90.webp?v=20260825-person-hero-v1") center center / cover no-repeat;
 }
 
 .center-site.center-fintech.landing-page .hero h1,
