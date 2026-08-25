@@ -1924,7 +1924,7 @@ button{
     gap:10px;
   }
 
-  .center-site .brand{
+  .center-site:not(.center-fintech) .brand{
     flex:0 1 auto;
     min-width:0;
     max-width:70px;
@@ -1939,8 +1939,7 @@ button{
     font-size:11px;
   }
 
-  .center-nav,
-  .center-site.center-fintech .center-nav{
+  .center-nav{
     gap:6px;
     overflow-x:auto;
     padding:10px 0;
