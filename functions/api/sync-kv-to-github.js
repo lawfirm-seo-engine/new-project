@@ -1,5 +1,6 @@
 import { boardPostCaseEntry, listBoardPosts } from "../_board.js";
 import { mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
+import { filterDeletedCases } from "../_caseDeletion.js";
 
 /**
  * POST /api/sync-kv-to-github
@@ -30,7 +31,7 @@ export async function onRequestPost(context) {
     const idxRaw = await env.CASES.get("cases:index");
     if (!idxRaw) return json({ ok: false, message: "KV cases:index 가 비어있습니다." }, 404);
 
-    const index = JSON.parse(idxRaw);
+    const index = await filterDeletedCases(env, JSON.parse(idxRaw));
     if (!Array.isArray(index) || index.length === 0) {
       return json({ ok: false, message: "KV index 가 빈 배열입니다." }, 404);
     }

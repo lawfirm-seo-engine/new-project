@@ -5,6 +5,7 @@
 
 import { buildCaseIdentityBundle, compareIdentityBundles, hangulToRoman } from "../_searchNormalize.js";
 import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
+import { filterDeletedCases } from "../_caseDeletion.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -94,7 +95,7 @@ export async function onRequestPost(context) {
 async function loadCases(env) {
   if (env.CASES) {
     const raw = await env.CASES.get("cases:index");
-    if (raw) return await mergeIndexRepairCases(env, JSON.parse(raw));
+    if (raw) return filterDeletedCases(env, await mergeIndexRepairCases(env, JSON.parse(raw)));
   }
   const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
   if (!owner || !repo || !token) return [];
@@ -105,7 +106,7 @@ async function loadCases(env) {
   if (!res.ok) return [];
   const file = await res.json();
   const content = file.content ? new TextDecoder().decode(Uint8Array.from(atob(file.content.replace(/\n/g, "")), (c) => c.charCodeAt(0))) : "";
-  return mergeIndexRepairCases(env, content ? JSON.parse(content) : []);
+  return filterDeletedCases(env, await mergeIndexRepairCases(env, content ? JSON.parse(content) : []));
 }
 
 function slugBase(name) {

@@ -1,5 +1,6 @@
 import { caseOgImageUrl } from "../_seo.js";
 import { mergeIndexRepairCases } from "../_caseIndexRepair.js";
+import { filterDeletedCases } from "../_caseDeletion.js";
 import { compareCaseIdentity } from "../_searchNormalize.js";
 import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import {
@@ -161,7 +162,7 @@ export async function onRequestPost(context) {
 async function loadCases(env) {
   if (env.CASES) {
     const raw = await env.CASES.get("cases:index");
-    if (raw) return mergeIndexRepairCases(env, JSON.parse(raw));
+    if (raw) return filterDeletedCases(env, await mergeIndexRepairCases(env, JSON.parse(raw)));
   }
 
   const { GITHUB_REPO_OWNER: owner, GITHUB_REPO_NAME: repo, GITHUB_BRANCH: branch = "main", GITHUB_TOKEN: token } = env;
@@ -175,7 +176,7 @@ async function loadCases(env) {
 
   const file = await res.json();
   const raw = await readFileContent(file, token);
-  return mergeIndexRepairCases(env, raw ? JSON.parse(raw) : []);
+  return filterDeletedCases(env, await mergeIndexRepairCases(env, raw ? JSON.parse(raw) : []));
 }
 
 async function createGeneratedData({ caseName, slug, fraudType, duplicateCheck, env }) {

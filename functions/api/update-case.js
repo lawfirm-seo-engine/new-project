@@ -1,3 +1,5 @@
+import { filterDeletedCases } from "../_caseDeletion.js";
+
 const EDITABLE_LANDING_FIELDS = ["body", "victimCases", "suspiciousCompanies", "faq", "h1", "title", "description", "imageAlt", "imageCaption", "imageDescription", "currentProgress"];
 const FRAUD_TYPE_KEYS = new Set(["stock-project", "institution-exchange", "team-mission", "live-dating", "refund-reward"]);
 const LANDING_WRITE_ACTIONS = new Set(["update-landing", "update-landing-fields", "save-landings"]);
@@ -295,7 +297,7 @@ async function syncCasesIndexToGithub(env, owner, repo, branch, token) {
   if (!env.CASES || !owner || !repo || !token) return;
   const idxRaw = await env.CASES.get("cases:index");
   if (!idxRaw) return;
-  const list = JSON.parse(idxRaw).filter((e) => e?.slug);
+  const list = (await filterDeletedCases(env, JSON.parse(idxRaw))).filter((e) => e?.slug);
   list.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
 
   const filePath = "data/cases.json";

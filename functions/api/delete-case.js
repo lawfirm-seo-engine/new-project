@@ -1,4 +1,5 @@
 import { mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
+import { filterDeletedCases, recordCaseDeletion } from "../_caseDeletion.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -12,14 +13,19 @@ export async function onRequestPost(context) {
     // KV 우선 삭제
     if (env.CASES) {
       const raw = await env.CASES.get(`case:${slug}`);
-      if (!raw) return json({ ok: false, message: "사건을 찾을 수 없습니다." }, 404);
-      deletedName = JSON.parse(raw).caseName || slug;
-
-      await env.CASES.delete(`case:${slug}`);
       const idxRaw = await env.CASES.get("cases:index");
+      const indexArr = idxRaw ? JSON.parse(idxRaw) : [];
+      const indexEntry = indexArr.find((entry) => entry.slug === slug);
+      if (!raw && !indexEntry) return json({ ok: false, message: "사건을 찾을 수 없습니다." }, 404);
+
+      deletedName = (raw ? JSON.parse(raw).caseName : indexEntry?.caseName) || slug;
+
+      // Record an independent tombstone first. Bulk creation can rewrite a stale
+      // cases:index snapshot, but get-cases will continue to exclude this slug.
+      await recordCaseDeletion(env, slug, deletedName);
+      await env.CASES.delete(`case:${slug}`);
       if (idxRaw) {
-        const indexArr = JSON.parse(idxRaw).filter((e) => e.slug !== slug);
-        await env.CASES.put("cases:index", JSON.stringify(indexArr));
+        await env.CASES.put("cases:index", JSON.stringify(indexArr.filter((e) => e.slug !== slug)));
       }
 
       // KV 전체를 GitHub에 동기화 (race condition 없음)
@@ -79,7 +85,7 @@ async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
   if (!env.CASES) return;
   const idxRaw = await env.CASES.get("cases:index");
   if (!idxRaw) return;
-  const full = JSON.parse(idxRaw).filter((e) => e.slug);
+  const full = (await filterDeletedCases(env, JSON.parse(idxRaw))).filter((e) => e.slug);
   full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
 
   const filePath = "data/cases.json";

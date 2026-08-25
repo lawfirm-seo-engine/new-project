@@ -196,7 +196,7 @@ for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
 }
 
 const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
-const CENTER_FINTECH_IMAGE_VERSION = "20260821-main-slide-03";
+const CENTER_FINTECH_IMAGE_VERSION = "20260825-main-slide-03-replaced";
 
 function centerFintechHeadLinks(group) {
   const siteUrl = String(group?.siteUrl || "").replace(/\/$/, "");

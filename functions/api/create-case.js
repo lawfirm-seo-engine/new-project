@@ -4,6 +4,7 @@ import { normalizeFraudTypeKey } from "../_standardLanding.js";
 import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import { classifyLdCategory } from "../_readingroomCategory.js";
 import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
+import { clearCaseDeletion, filterDeletedCases } from "../_caseDeletion.js";
 import {
   buildFromTemplate as buildReadingroomBodyFromTemplate,
   generateReadingroomMeta,
@@ -67,6 +68,7 @@ export async function onRequestPost(context) {
       }
 
       await env.CASES.put(`case:${slug}`, JSON.stringify(newCase));
+      await clearCaseDeletion(env, slug);
       await appendToIndexSafely(env, buildIndexEntry(newCase));
 
       // GitHub에도 동기화 — KV 전체를 덮어쓰는 방식으로 race condition 방지
@@ -173,7 +175,7 @@ async function syncAllCasesToGitHub(env, owner, repo, branch, token) {
   if (!env.CASES) return;
   const idxRaw = await env.CASES.get("cases:index");
   if (!idxRaw) return;
-  const full = (await mergeIndexRepairCases(env, JSON.parse(idxRaw))).filter((e) => e.slug);
+  const full = (await filterDeletedCases(env, await mergeIndexRepairCases(env, JSON.parse(idxRaw)))).filter((e) => e.slug);
   full.sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
 
   const filePath = "data/cases.json";
