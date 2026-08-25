@@ -5,6 +5,7 @@ import {
   standardMetaDescription,
   standardPageTitle,
 } from "./_standardLanding.js";
+import { LD_CAROUSEL_ITEMS } from "./_readingroomCategory.js";
 
 export const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
 
@@ -188,6 +189,13 @@ export function buildSitemapXml(group, cases = [], options = {}) {
   const category = prefix
     ? [`  <url><loc>${escapeXml(base)}/${escapeXml(prefix)}/</loc><lastmod>${today}</lastmod><changefreq>hourly</changefreq><priority>${options.recent ? "1.0" : "0.8"}</priority></url>`]
     : [];
+  const ldCategories = includeHome && (group.landingKey || group.key) === "ld"
+    ? LD_CAROUSEL_ITEMS.map((item) => {
+        const loc = `${base}/${prefix}/type/${item.key}/`;
+        const image = `${base}${item.image}`;
+        return `  <url><loc>${escapeXml(loc)}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>${escapeXml(image)}</image:loc><image:title>${escapeXml(item.label)}</image:title></image:image></url>`;
+      })
+    : [];
   const urls = cases
     .filter((item) => item?.slug && isCaseAllowedForGroup(item, group))
     .map((item) => {
@@ -203,7 +211,7 @@ export function buildSitemapXml(group, cases = [], options = {}) {
       return `  <url><loc>${loc}</loc><lastmod>${escapeXml(lastmod)}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority><image:image><image:loc>${imgLoc}</image:loc><image:title>${imgTitle}</image:title></image:image></url>`;
     });
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${[...home, ...category, ...urls].join("\n")}\n</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${[...home, ...category, ...ldCategories, ...urls].join("\n")}\n</urlset>`;
 }
 
 export function buildSitemapIndexXml(group, lastmod = kstDate()) {

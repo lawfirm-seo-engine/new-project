@@ -14,7 +14,7 @@ import {
   isCaseAllowedForGroup,
   landingUrlForItem,
 } from "../functions/_seo.js";
-import { LD_CATEGORY_OPTIONS } from "../functions/_readingroomCategory.js";
+import { LD_CAROUSEL_ITEMS, LD_CATEGORY_OPTIONS } from "../functions/_readingroomCategory.js";
 import { ldPageH1, ldPageTitle } from "../functions/_readingroomTemplate.js";
 import {
   normalizeFraudTypeKey,
@@ -32,6 +32,7 @@ const root = process.cwd();
 const dataPath = path.join(root, "data", "cases.json");
 const publicDir = path.join(root, "public");
 const centerFintechAssetsDir = path.join(root, "center-fintech-assets");
+const readingroomCarouselAssetsDir = path.join(root, "readingroom-carousel-assets");
 const templatesDir = path.join(root, "templates");
 
 const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -2973,10 +2974,69 @@ function createReadingroomHubFaqSection(group) {
 
 function createLdCategoryEntrySection(group) {
   if ((group.landingKey || group.key) !== "ld") return "";
-  const links = LD_CATEGORY_OPTIONS.map((opt) => (
-    `<a class="type-entry-link" href="/${group.pathPrefix}/type/${opt.key}/"><span>유형</span><strong>${escapeHtml(opt.label)}</strong></a>`
+  const links = LD_CAROUSEL_ITEMS.map((item) => (
+    `<a class="readingroom-carousel-card" href="/${group.pathPrefix}/type/${item.key}/">
+      <img src="${item.image}" alt="${escapeHtml(item.label)}" width="1200" height="1200" loading="lazy" decoding="async">
+      <span><strong>${escapeHtml(item.label)}</strong><em>${escapeHtml(item.description)}</em></span>
+    </a>`
   )).join("\n");
-  return `<section class="type-entry-section ld-category-entries" aria-label="주식리딩방사기 유형별 분류">${links}</section>`;
+  return `<section class="readingroom-carousel" aria-labelledby="readingroom-carousel-title">
+    <div class="readingroom-carousel-head">
+      <span>STOCK READING ROOM SCAM TYPES</span>
+      <h2 id="readingroom-carousel-title">주식리딩방사기 주요 유형과 피해 대응</h2>
+      <p>접근 방식과 입금 명목, 출금 거부 사유에 따라 유형별 특징과 확인해야 할 자료가 달라집니다.</p>
+    </div>
+    <div class="readingroom-carousel-track">${links}</div>
+  </section>`;
+}
+
+const LD_CATEGORY_GUIDES = {
+  "stock-reading": {
+    lead: "무료 종목 추천에서 시작해 VIP방, 투자 프로젝트, 고액 입금으로 전환되는 주식리딩방사기의 공통 구조를 확인합니다.",
+    points: ["무료 추천방에서 유료·VIP방으로 전환", "조작된 수익 인증과 일부 출금으로 신뢰 형성", "고액 입금 후 출금 거부와 추가 비용 요구"],
+  },
+  "coin-reading": {
+    lead: "가짜 가상자산 거래소와 지갑 화면을 이용해 수익이 발생한 것처럼 표시하고 출금 비용을 요구하는 유형입니다.",
+    points: ["비공식 거래소·전용 지갑 가입 유도", "USDT 등 가상자산 전송 및 허위 수익 표시", "출금 시 세금·인증비·보증금 추가 요구"],
+  },
+  "institution-impersonation": {
+    lead: "증권사·자산운용사·투자회사 또는 교수·대표·전문가의 명칭과 신분을 도용해 공식 투자처럼 믿게 만드는 유형입니다.",
+    points: ["금융회사 로고와 임직원 프로필 도용", "기관 전용 프로젝트·비공개 정보 강조", "회사 명의가 아닌 개인·대포 계좌로 입금 요구"],
+  },
+  "hts-mts-app": {
+    lead: "정상 증권 프로그램과 비슷하게 만든 가짜 HTS·MTS·전용 앱에서 잔액과 수익을 임의로 표시하는 유형입니다.",
+    points: ["공식 앱스토어가 아닌 설치 파일 전달", "실제 시장과 연동되지 않은 체결·수익 화면", "출금 권한을 운영자가 통제하고 추가 입금 요구"],
+  },
+  "ipo-reading": {
+    lead: "공모주 특별배정, 기관 물량, 청약 우선권을 내세워 청약금과 예치금을 반복해서 요구하는 리딩방사기 유형입니다.",
+    points: ["기관 물량·특별배정 당첨 안내", "청약 증거금과 배정 수수료 입금 요구", "상장·환불·출금 단계에서 추가 비용 요구"],
+  },
+  "ai-auto-trading": {
+    lead: "AI 알고리즘과 자동매매 시스템이 안정적인 수익을 낸다고 홍보한 뒤 가짜 거래 화면으로 투자 증액을 유도하는 유형입니다.",
+    points: ["검증되지 않은 AI 수익률과 백테스트 제시", "자동매매 프로그램·전용 앱 설치 유도", "수익금 출금 시 계정 해제비·세금 요구"],
+  },
+  "legal-response": {
+    lead: "추가 송금을 멈추고 입금 내역, 대화 원본, 사이트 주소와 거래 화면을 보존한 뒤 사건에 맞는 민형사 대응 순서를 검토합니다.",
+    points: ["계좌·지갑·입금증과 전체 대화 원본 보존", "사이트·앱·출금 거부·추가 요구 화면 확보", "형사고소, 지급정지, 가압류와 민사 청구 검토"],
+  },
+};
+
+function createLdCategoryGuide(categoryKey, categoryLabel) {
+  const guide = LD_CATEGORY_GUIDES[categoryKey];
+  if (!guide) return "";
+  const image = LD_CAROUSEL_ITEMS.find((item) => item.key === categoryKey)?.image || "";
+  const imageMarkup = image
+    ? `\n    <img src="${image}" alt="${escapeHtml(categoryLabel)} 대표 이미지" width="1200" height="1200" loading="eager" fetchpriority="high" decoding="async">`
+    : "";
+  return `<section class="ld-category-guide" aria-labelledby="ld-category-guide-title">${imageMarkup}
+    <div>
+      <span>TYPE GUIDE</span>
+      <h2 id="ld-category-guide-title">${escapeHtml(categoryLabel)} 확인 사항</h2>
+      <p>${escapeHtml(guide.lead)}</p>
+      <ul>${guide.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
+      <p class="ld-category-guide-note">출금 지연과 함께 세금·보증금·인증비 등 새로운 명목의 송금을 요구받았다면 추가 입금을 중단하고 현재 남아 있는 자료부터 보존해야 합니다.</p>
+    </div>
+  </section>`;
 }
 
 function createLdCategoryContent(group, categoryKey, categoryLabel) {
@@ -3001,6 +3061,7 @@ function createLdCategoryContent(group, categoryKey, categoryLabel) {
         <span>전체</span><strong>주식리딩방사기 사건 전체 보기</strong>
       </a>
     </section>
+    ${createLdCategoryGuide(categoryKey, categoryLabel)}
     <section class="case-table-wrap" aria-label="${escapeHtml(categoryLabel)}">
       <div class="case-table-title">
         <h2>${escapeHtml(categoryLabel)} 사건 목록</h2>
@@ -3280,6 +3341,71 @@ function createCategorySchema(group, title, description, canonical) {
   });
 }
 
+function createReadingroomHomeSchema(group, title, description) {
+  const home = `${group.siteUrl}/`;
+  const organizationId = `${home}#organization`;
+  const websiteId = `${home}#website`;
+  const webpageId = `${home}#webpage`;
+  const carouselId = `${home}#carousel`;
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": websiteId,
+        name: "주식리딩방사기 센터",
+        url: home,
+        inLanguage: "ko-KR",
+        publisher: { "@id": organizationId },
+      },
+      {
+        "@type": "CollectionPage",
+        "@id": webpageId,
+        name: title,
+        url: home,
+        inLanguage: "ko-KR",
+        description,
+        dateModified: today,
+        isPartOf: { "@id": websiteId },
+        publisher: { "@id": organizationId },
+        mainEntity: { "@id": carouselId },
+      },
+      {
+        "@type": "ItemList",
+        "@id": carouselId,
+        name: "주식리딩방사기 주요 유형과 피해 대응",
+        numberOfItems: LD_CAROUSEL_ITEMS.length,
+        itemListOrder: "https://schema.org/ItemListOrderAscending",
+        itemListElement: LD_CAROUSEL_ITEMS.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.label,
+          image: `${group.siteUrl}${item.image}`,
+          url: `${group.siteUrl}/${group.pathPrefix}/type/${item.key}/`,
+        })),
+      },
+      {
+        "@type": "Organization",
+        "@id": organizationId,
+        name: "주식리딩방사기 센터",
+        legalName: "법무법인 선린",
+        url: home,
+        logo: {
+          "@type": "ImageObject",
+          url: `${group.siteUrl}/assets/logo.png`,
+        },
+        parentOrganization: {
+          "@type": "LegalService",
+          "@id": "https://gnlaw-criminal.co.kr/#legalservice",
+          name: "법무법인 선린",
+          url: "https://gnlaw-criminal.co.kr/",
+          telephone: "02-6348-0406",
+        },
+      },
+    ],
+  });
+}
+
 function createRecoveryHomeSchema(group, title, description) {
   const home = `${group.siteUrl}/`;
   const organizationId = `${home}#organization`;
@@ -3488,6 +3614,13 @@ for (const group of groups) {
     await fs.copy(centerFintechAssetsDir, path.join(group.outDir, "assets", "center-fintech"));
   }
 
+  if ((group.landingKey || group.key) === "ld" && await fs.pathExists(readingroomCarouselAssetsDir)) {
+    await fs.copy(
+      readingroomCarouselAssetsDir,
+      path.join(group.outDir, "assets", "readingroom-carousel"),
+    );
+  }
+
   if (group.key === "a") {
     await fs.copy(path.join(root, "admin"), path.join(root, "dist-a", "admin"));
   }
@@ -3508,7 +3641,11 @@ for (const group of groups) {
     ogDescription: escapeHtml(hubDescription),
     ogImage: `${group.siteUrl}/assets/og-template.png`,
     headExtra: createHeadExtra({ group, isHub: true }),
-    schema: isRecoveryGuide ? createRecoveryHomeSchema(group, hubTitle, hubDescription) : JSON.stringify({
+    schema: isRecoveryGuide
+      ? createRecoveryHomeSchema(group, hubTitle, hubDescription)
+      : (group.landingKey || group.key) === "ld"
+        ? createReadingroomHomeSchema(group, hubTitle, hubDescription)
+        : JSON.stringify({
       "@context": "https://schema.org",
       "@graph": [
         {
