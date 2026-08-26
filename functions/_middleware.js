@@ -63,7 +63,25 @@ export async function onRequest(context) {
     }
   }
 
-  return next();
+  const response = await next();
+  if (
+    request.method === "GET" &&
+    (url.pathname === "/admin/dashboard" || url.pathname === "/admin/dashboard.html") &&
+    response.headers.get("content-type")?.includes("text/html")
+  ) {
+    return new HTMLRewriter()
+      .on(".top-nav", {
+        element(element) {
+          element.append(
+            '<a class="btn" href="/admin/whiteboard.html" style="background:#8c1d18">화이트보드 영상 생성</a>',
+            { html: true }
+          );
+        }
+      })
+      .transform(response);
+  }
+
+  return response;
 }
 
 async function handleLogin(request, env) {
