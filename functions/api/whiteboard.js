@@ -6,8 +6,8 @@ export async function onRequest(context) {
     const { request, env } = context;
     const url = new URL(request.url);
     const owner = env.GITHUB_REPO_OWNER;
-    const token = env.GITHUB_TOKEN;
-    if (!owner || !token) return json({ok:false,message:"Cloudflare Pages에 GITHUB_REPO_OWNER 또는 GITHUB_TOKEN 환경변수가 없습니다."},500);
+    const token = env.WHITEBOARD_GITHUB_TOKEN;
+    if (!owner || !token) return json({ok:false,message:"Cloudflare Pages에 GITHUB_REPO_OWNER 또는 WHITEBOARD_GITHUB_TOKEN 환경변수가 없습니다."},500);
     if (request.method === "POST") {
       let body;
       try { body = await request.json(); } catch { return json({ok:false,message:"요청 JSON을 읽지 못했습니다."},400); }
