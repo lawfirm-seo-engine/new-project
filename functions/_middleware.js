@@ -41,23 +41,93 @@ export async function onRequest(context) {
   }
 
   const response = await next();
-  if (request.method === "GET" && (url.pathname === "/admin/dashboard" || url.pathname === "/admin/dashboard.html") && response.headers.get("content-type")?.includes("text/html")) {
-    return new HTMLRewriter().on(".top-nav", { element(element) { element.append('<a class="btn" href="/admin/whiteboard.html" style="background:#8c1d18">화이트보드 영상 생성</a>', { html: true }); } }).transform(response);
+  const isHtml = request.method === "GET" && response.headers.get("content-type")?.includes("text/html");
+
+  if (isHtml && (url.pathname === "/admin/dashboard" || url.pathname === "/admin/dashboard.html")) {
+    return new HTMLRewriter()
+      .on(".top-nav", {
+        element(element) {
+          element.append('<a class="btn" href="/admin/whiteboard.html" style="background:#8c1d18">화이트보드 영상 생성</a>', { html: true });
+        }
+      })
+      .transform(response);
   }
+
+  if (isHtml && (url.pathname === "/admin/whiteboard" || url.pathname === "/admin/whiteboard.html")) {
+    return new HTMLRewriter()
+      .on("head", {
+        element(element) {
+          element.append('<link rel="stylesheet" href="/admin/whiteboard-presets.css">', { html: true });
+        }
+      })
+      .on("body", {
+        element(element) {
+          element.append('<script src="/admin/whiteboard-presets.js"></script>', { html: true });
+        }
+      })
+      .transform(response);
+  }
+
   return response;
 }
 
 async function handleLogin(request, env) {
   const { id, pw } = await request.json();
   if (!id || !pw || !ADMIN_IDS[id]) return json({ ok: false, message: "로그인 정보가 올바르지 않습니다." }, 401);
-  const inputHash = await sha256(pw); const savedHash = env[ADMIN_IDS[id]];
+  const inputHash = await sha256(pw);
+  const savedHash = env[ADMIN_IDS[id]];
   if (inputHash !== savedHash) return json({ ok: false, message: "로그인 정보가 올바르지 않습니다." }, 401);
-  const expires = Date.now() + 1000 * 60 * 60 * 6; const payload = `${id}.${expires}`; const sig = await hmac(payload, env.ADMIN_SESSION_SECRET); const token = `${payload}.${sig}`;
-  return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json; charset=utf-8", "Set-Cookie": `admin_session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=21600` } });
+  const expires = Date.now() + 1000 * 60 * 60 * 6;
+  const payload = `${id}.${expires}`;
+  const sig = await hmac(payload, env.ADMIN_SESSION_SECRET);
+  const token = `${payload}.${sig}`;
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Set-Cookie": `admin_session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=21600`
+    }
+  });
 }
-function handleLogout(url) { return new Response(null, { status: 302, headers: { "Location": `${url.origin}/admin/login.html`, "Set-Cookie": "admin_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0" } }); }
-async function verifySession(request, env) { const cookie=request.headers.get("Cookie")||""; const match=cookie.match(/admin_session=([^;]+)/); if(!match)return false; const parts=match[1].split("."); if(parts.length!==3)return false; const [id,expires,sig]=parts; if(!ADMIN_IDS[id]||Date.now()>Number(expires))return false; return timingSafeEqual(sig,await hmac(`${id}.${expires}`,env.ADMIN_SESSION_SECRET)); }
-async function sha256(text) { const hash=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text)); return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join(""); }
-async function hmac(text,secret) { const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign"]); const sig=await crypto.subtle.sign("HMAC",key,new TextEncoder().encode(text)); return [...new Uint8Array(sig)].map(b=>b.toString(16).padStart(2,"0")).join(""); }
-function timingSafeEqual(a,b){if(a.length!==b.length)return false;let result=0;for(let i=0;i<a.length;i++)result|=a.charCodeAt(i)^b.charCodeAt(i);return result===0}
-function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{"Content-Type":"application/json; charset=utf-8"}})}
+
+function handleLogout(url) {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      "Location": `${url.origin}/admin/login.html`,
+      "Set-Cookie": "admin_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0"
+    }
+  });
+}
+
+async function verifySession(request, env) {
+  const cookie = request.headers.get("Cookie") || "";
+  const match = cookie.match(/admin_session=([^;]+)/);
+  if (!match) return false;
+  const parts = match[1].split(".");
+  if (parts.length !== 3) return false;
+  const [id, expires, sig] = parts;
+  if (!ADMIN_IDS[id] || Date.now() > Number(expires)) return false;
+  return timingSafeEqual(sig, await hmac(`${id}.${expires}`, env.ADMIN_SESSION_SECRET));
+}
+
+async function sha256(text) {
+  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function hmac(text, secret) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(text));
+  return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return result === 0;
+}
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json; charset=utf-8" } });
+}
