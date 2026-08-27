@@ -313,33 +313,23 @@
 
       try {
         // 1단계: AI 원고 생성
-        const draftRes = await fetch('/api/generate-draft', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ caseName: item.caseName, fraudType: item.fraudType }),
-        });
-        const draftData = await draftRes.json();
-        if (!draftData.ok) throw new Error(draftData.message || '원고 생성 실패');
+        const draft = await postJsonSafe('/api/generate-draft', { caseName: item.caseName, fraudType: item.fraudType });
+        if (!draft.data.ok) throw new Error(draft.data.message || '원고 생성 실패');
 
-        const caseObj = { ...draftData.case, fraudType: item.fraudType };
+        const caseObj = { ...draft.data.case, fraudType: item.fraudType };
 
         // 2단계: 사건 저장
-        const createRes = await fetch('/api/create-case', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(caseObj),
-        });
-        const createData = await createRes.json();
+        const create = await postJsonSafe('/api/create-case', caseObj);
 
-        if (createData.ok || createRes.status === 409) {
+        if (create.data.ok || create.status === 409) {
           const slug = caseObj.slug;
-          const url = createData.case?.landings?.a?.canonical
+          const url = create.data.case?.landings?.a?.canonical
             || caseObj.landings?.a?.canonical
             || `https://gnlaw-criminal.co.kr/prosecute/${encodeURIComponent(slug)}-litigation/`;
-          showResultLink(resultEl, url, createRes.status === 409 ? '✅ 기존 URL' : '✅ 생성');
+          showResultLink(resultEl, url, create.status === 409 ? '✅ 기존 URL' : '✅ 생성');
           if (tr) tr.className = 'done-ok';
         } else {
-          throw new Error(createData.message || '저장 실패');
+          throw new Error(create.data.message || '저장 실패');
         }
       } catch (e) {
         resultEl.innerHTML = `<span class="result-err">❌ ${esc(e.message.slice(0, 40))}</span>`;
@@ -449,6 +439,34 @@
   }
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // fetch + JSON 파싱을 안전하게 처리. 서버가 일시적으로 HTML 오류 페이지(예: 503)를
+  // 반환해도 원시 SyntaxError("Unexpected token '<' ...")가 그대로 노출되지 않도록
+  // 감싸고, 503은 자동 재시도한다 (requestCheckChunk / category-bulk.js postJson과 동일 패턴).
+  async function postJsonSafe(path, payload, attempt) {
+    const retry = Number(attempt || 0);
+    const res = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+    const text = await res.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      if (res.status === 503 && retry < 2) {
+        await sleep(900 * (retry + 1));
+        return postJsonSafe(path, payload, retry + 1);
+      }
+      throw new Error(`서버 응답 파싱 실패 (HTTP ${res.status})${text ? `: ${text.slice(0, 80)}` : ''}`);
+    }
+    if (res.status === 503 && retry < 2) {
+      await sleep(900 * (retry + 1));
+      return postJsonSafe(path, payload, retry + 1);
+    }
+    return { status: res.status, data };
+  }
 
   function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
