@@ -101240,7 +101240,7 @@
     "caseName": "에이치비투자그룹 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-06",
-    "updatedAt": "2026-08-06",
+    "updatedAt": "2026-08-28",
     "thumbnailUrl": "",
     "landingViews": 1018,
     "reports": 29,
@@ -101254,10 +101254,19 @@
       "증거보존"
     ],
     "memo": "",
-    "noindex": false,
+    "noindex": true,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "institution-exchange"
+    "fraudType": "institution-exchange",
+    "memos": [
+      {
+        "id": 1786780730440,
+        "text": "에이치비투자그룹 사칭 사기 사건 현재 접수중 입니다.",
+        "createdAt": "2026-08-15 16:58"
+      }
+    ]
   },
   {
     "slug": "koinnyuseu-teureideo",
@@ -106260,7 +106269,8 @@
       {
         "id": 1786780507418,
         "text": "milestone 사칭 사기 사건 현재 접수중 입니다.",
-        "createdAt": "2026-08-15 16:55"
+        "createdAt": "2026-08-15 16:55",
+        "editedAt": "2026-08-21 23:52"
       }
     ]
   },
@@ -132026,5 +132036,30 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "team-mission"
+  },
+  {
+    "slug": "z-88-bibijeon-keurreob",
+    "caseName": "Z-88 비비전 클럽 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-08-28",
+    "updatedAt": "2026-08-28",
+    "thumbnailUrl": "",
+    "landingViews": 4222,
+    "reports": 25,
+    "summary": "Z-88 비비전 클럽 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "88",
+      "비비전",
+      "클럽",
+      "사칭",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
   }
 ]
