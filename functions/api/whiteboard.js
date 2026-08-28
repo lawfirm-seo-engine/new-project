@@ -1,5 +1,6 @@
 const RENDER_REPO = "srt-whiteboard-animation";
 const WORKFLOW = "sunrin-render.yml";
+const RENDER_STYLES = ["hand","slide","zoom","parallax","cinematic","callout","card-stack","news","glitch"];
 
 export async function onRequest(context) {
   try {
@@ -17,7 +18,7 @@ export async function onRequest(context) {
         if (body.project) {
           const project = normalizeProject(body.project);
           await putFile(owner,token,`projects/${job}/project.json`,JSON.stringify(project,null,2),`project: ${job}`);
-          await putFile(owner,token,`projects/${job}/status.json`,JSON.stringify({stage:"project-ready",imagesReady:false,previewReady:false,finalReady:false,error:null},null,2),`status: ${job}`);
+          await putFile(owner,token,`projects/${job}/status.json`,JSON.stringify({stage:"project-ready",imagesReady:false,previewReady:false,finalReady:false,error:null,renderMode:project.renderMode,useHandDrawing:project.useHandDrawing},null,2),`status: ${job}`);
         }
         if (action === "direct") {
           await dispatch(owner,token,"direct",job);
@@ -41,7 +42,23 @@ export async function onRequest(context) {
     return json({ok:false,message:e?.message||String(e)},500);
   }
 }
-function normalizeProject(p){const scenes=Array.isArray(p.scenes)?p.scenes:[];if(!scenes.length)throw new Error("장면이 없습니다.");return{title:p.title||"화이트보드 영상",durationMs:Number(p.durationMs)||30000,aspect:["16:9","9:16","1:1"].includes(p.aspect)?p.aspect:"16:9",brand:{name:"법무법인 선린",canvasColor:"#F5EBD7",handAsset:"assets/drawing-hand.png",renderer:"scripts/render_stream_whiteboard.py",finalCta:"지금 바로 법무법인 선린 사기피해 특화 전문 TF팀에 상담 받으세요"},scenes}}
+function normalizeProject(p){
+  const scenes=Array.isArray(p.scenes)?p.scenes:[];
+  if(!scenes.length)throw new Error("장면이 없습니다.");
+  let renderMode=String(p.renderMode||"").trim();
+  if(!RENDER_STYLES.includes(renderMode)) renderMode=p.useHandDrawing===false?"slide":"hand";
+  const useHandDrawing=renderMode==="hand";
+  return{
+    title:p.title||"화이트보드 영상",
+    durationMs:Number(p.durationMs)||30000,
+    aspect:["16:9","9:16","1:1"].includes(p.aspect)?p.aspect:"16:9",
+    source:p.source||"admin",
+    renderMode,
+    useHandDrawing,
+    brand:{name:"법무법인 선린",canvasColor:"#F5EBD7",handAsset:"assets/drawing-hand.png",renderer:"scripts/render_stream_whiteboard.py",finalCta:"지금 바로 법무법인 선린 사기피해 특화 전문 TF팀에 상담 받으세요"},
+    scenes
+  }
+}
 function safeJob(v){return String(v).replace(/[^0-9a-zA-Z_-]/g,"-").replace(/-+/g,"-").slice(0,80)}
 function headers(token){return{Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json","Content-Type":"application/json","User-Agent":"sunrin-whiteboard-admin"}}
 async function putFile(owner,token,path,content,message){const url=`https://api.github.com/repos/${owner}/${RENDER_REPO}/contents/${path}`;let sha;const old=await fetch(url+"?ref=main",{headers:headers(token)});if(old.ok)sha=(await old.json()).sha;const r=await fetch(url,{method:"PUT",headers:headers(token),body:JSON.stringify({message,content:b64(content),branch:"main",...(sha?{sha}:{})})});if(!r.ok)throw new Error(`GitHub 저장 실패 ${r.status}: ${await r.text()}`)}
