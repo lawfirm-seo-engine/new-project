@@ -43,6 +43,28 @@ const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
 <!-- End LogScan Code -->`;
 
+const GA_MEASUREMENT_IDS = {
+  "https://gnlaw-criminal.co.kr": "G-KK457HFNPS",
+  "https://gnlaw-recovery.co.kr": "G-SZJ79TBPYX",
+  // 금융사기대응센터.kr — group.siteUrl is normalized to this punycode form
+  // for law-* groups above (see canonicalLawSiteUrlByLandingKey) before this runs.
+  "https://xn--jj0b0cw1o75qwua31zyfp19e.kr": "G-NMBMWDLL5P",
+};
+
+function gaTagForSite(siteUrl = "") {
+  const id = GA_MEASUREMENT_IDS[String(siteUrl).replace(/\/$/, "")];
+  if (!id) return "";
+  return `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '${id}');
+</script>`;
+}
+
 const ORGANIZATION = {
   "@type": "Organization",
   "@id": "https://gnlaw-criminal.co.kr/#organization",
@@ -3422,6 +3444,7 @@ function buildPage(template, group, data) {
     ctaLabel: escapeHtml(group.ctaLabel),
     receiptBadge: "",
     breadcrumb: "",
+    gaTag: gaTagForSite(group.siteUrl),
     bodyScripts: logScanScriptForSite(group.siteUrl),
     ogType: group.ogType,
     ...data,

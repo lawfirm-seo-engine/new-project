@@ -3042,10 +3042,33 @@ function createFloatingWidgets(cn, siteName, slug) {
 
 // ─── Template ─────────────────────────────────────────────────────────────────
 
+const GA_MEASUREMENT_IDS = {
+  "https://gnlaw-criminal.co.kr": "G-KK457HFNPS",
+  "https://gnlaw-recovery.co.kr": "G-SZJ79TBPYX",
+  "https://xn--jj0b0cw1o75qwua31zyfp19e.kr": "G-NMBMWDLL5P", // 금융사기대응센터.kr
+};
+
+function gaTagForCanonical(canonical = "") {
+  let origin = "";
+  try { origin = new URL(canonical).origin; } catch { return ""; }
+  const id = GA_MEASUREMENT_IDS[origin];
+  if (!id) return "";
+  return `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '${id}');
+</script>`;
+}
+
 function pageTemplate(d) {
   return `<!doctype html>
 <html lang="ko">
 <head>
+  ${gaTagForCanonical(d.canonical)}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${d.title}</title>

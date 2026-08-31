@@ -34,8 +34,18 @@ function renderPost(post) {
   return layout({ title: `${title} | 법무법인 선린`, description, canonical: criminalBoardPostUrl(post.slug), body: `<main class="article"><nav><a href="/board/">법률정보</a> / ${esc(post.category || "피해 대응")}</nav><header><span class="category">${esc(post.category || "피해 대응")}</span><h1>${esc(post.title)}</h1><div class="date">${esc(post.publishedAt || criminalBoardLastModified(post))}</div></header>${post.thumbnailUrl ? `<figure><img src="${esc(post.thumbnailUrl)}" alt="${esc(post.title)}" loading="eager"></figure>` : ""}<section class="content">${body}</section><div class="back"><a href="/board/">← 목록으로</a></div></main>` });
 }
 
+const GA_TAG = `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KK457HFNPS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-KK457HFNPS');
+</script>`;
+
 function layout({ title, description, canonical, body }) {
-  return `<!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${esc(canonical)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical)}"><meta property="og:type" content="article"><link rel="stylesheet" href="/assets/style.css?v=20260825-mobile-header-match"><style>${styles()}</style></head><body class="domain-a">${siteHeader()}${body}${siteFooter()}</body></html>`;
+  return `<!doctype html><html lang="ko"><head>${GA_TAG}<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${esc(canonical)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical)}"><meta property="og:type" content="article"><link rel="stylesheet" href="/assets/style.css?v=20260825-mobile-header-match"><style>${styles()}</style></head><body class="domain-a">${siteHeader()}${body}${siteFooter()}</body></html>`;
 }
 
 function siteHeader() {
