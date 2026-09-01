@@ -132606,5 +132606,90 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "team-mission"
+  },
+  {
+    "slug": "oneloop-co-kr-wonrupeu-syopingmor",
+    "caseName": "oneloop.co.kr 원루프 쇼핑몰 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-01",
+    "updatedAt": "2026-09-01",
+    "thumbnailUrl": "",
+    "landingViews": 7791,
+    "reports": 15,
+    "summary": "oneloop.co.kr 원루프 쇼핑몰 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "oneloop.co.kr",
+      "원루프",
+      "쇼핑몰",
+      "사칭",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "ensocon",
+    "caseName": "ENSOCON 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-01",
+    "updatedAt": "2026-09-01",
+    "thumbnailUrl": "",
+    "landingViews": 7612,
+    "reports": 18,
+    "summary": "ENSOCON 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "ENSOCON",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "gachiissneun-seontaeg-ridingbang-hanyangjeunggwon-hgjeunggwo",
+    "caseName": "가치있는 선택 리딩방 한양증권 HG증권 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-01",
+    "updatedAt": "2026-09-01",
+    "thumbnailUrl": "",
+    "landingViews": 2223,
+    "reports": 15,
+    "summary": "가치있는 선택 리딩방 한양증권 HG증권 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "가치있는",
+      "선택",
+      "리딩방",
+      "한양증권",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project",
+    "hasReadingroomLanding": true,
+    "ldCategory": "institution-impersonation",
+    "landings": {
+      "ld": {
+        "createdBy": "readingroom-manual",
+        "title": "가치있는 선택 리딩방 한양증권 HG증권 사칭 사기 증권사·투자사 사칭 리딩방 피해회복 안내",
+        "h1": "가치있는 선택 리딩방 한양증권 HG증권 사칭 사기",
+        "description": "가치있는 선택 리딩방 한양증권 HG증권 사기 피해가 의심되나요? 주식 리딩방 출금거부, 추가입금 요구, 가짜 HTS·거래소 정황과 피해금 회수 가능성, 형사고소 및 민사 대응 절차를 02-6348-0406 24시간 안내합니다.",
+        "canonical": "https://리딩방피해회수센터.kr/insights/gachiissneun-seontaeg-ridingbang-hanyangjeunggwon-hgjeunggwo-report/"
+      }
+    }
   }
 ]
