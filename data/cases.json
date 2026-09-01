@@ -106269,7 +106269,8 @@
       {
         "id": 1786780507418,
         "text": "milestone 사칭 사기 사건 현재 접수중 입니다.",
-        "createdAt": "2026-08-15 16:55"
+        "createdAt": "2026-08-15 16:55",
+        "editedAt": "2026-08-21 23:52"
       }
     ]
   },
@@ -119017,7 +119018,7 @@
     "caseName": "콜렉터스 티어원 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-19",
-    "updatedAt": "2026-08-19",
+    "updatedAt": "2026-09-01",
     "thumbnailUrl": "",
     "landingViews": 4924,
     "reports": 15,
@@ -119033,9 +119034,18 @@
     ],
     "memo": "",
     "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1788237665147,
+        "text": "콜렉터스티어원 투자 리딩방 사기 사건 접수중 입니다.",
+        "createdAt": "2026-09-01 13:41"
+      }
+    ]
   },
   {
     "slug": "jeraseumor",
