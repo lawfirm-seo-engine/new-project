@@ -103629,7 +103629,7 @@
     "caseName": "로버트더블유베어드 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-07",
-    "updatedAt": "2026-08-07",
+    "updatedAt": "2026-09-01",
     "thumbnailUrl": "",
     "landingViews": 7715,
     "reports": 15,
@@ -103644,9 +103644,23 @@
     ],
     "memo": "",
     "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1786780566667,
+        "text": "로버트더블유베어드 사칭 사기 사건 현재 접수중 입니다.",
+        "createdAt": "2026-08-15 16:55"
+      },
+      {
+        "id": 1788239796678,
+        "text": "Robert W. Baird 사칭 리딩방 사기 사건 접수중 입니다.",
+        "createdAt": "2026-09-01 14:16"
+      }
+    ]
   },
   {
     "slug": "suigryur-peurojegteu",
@@ -106283,7 +106297,8 @@
       {
         "id": 1786780507418,
         "text": "milestone 사칭 사기 사건 현재 접수중 입니다.",
-        "createdAt": "2026-08-15 16:55"
+        "createdAt": "2026-08-15 16:55",
+        "editedAt": "2026-08-21 23:52"
       }
     ]
   },
