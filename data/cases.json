@@ -95275,7 +95275,7 @@
     "caseName": "김재학 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-05",
-    "updatedAt": "2026-08-05",
+    "updatedAt": "2026-09-01",
     "thumbnailUrl": "",
     "landingViews": 6612,
     "reports": 28,
@@ -95290,9 +95290,23 @@
     ],
     "memo": "",
     "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1786780830896,
+        "text": "김재학 사칭 사기 사건 현재 접수중 입니다.",
+        "createdAt": "2026-08-15 17:00"
+      },
+      {
+        "id": 1788238758408,
+        "text": "김재학 전문가 사칭 리딩방 사건 상담 접수중 입니다.",
+        "createdAt": "2026-09-01 13:59"
+      }
+    ]
   },
   {
     "slug": "lshagseubseongjangpeurraen",
