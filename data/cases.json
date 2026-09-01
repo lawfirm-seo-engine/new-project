@@ -84119,7 +84119,7 @@
     "caseName": "TEFDE 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-23",
-    "updatedAt": "2026-07-23",
+    "updatedAt": "2026-09-01",
     "thumbnailUrl": "",
     "landingViews": 3887,
     "reports": 24,
@@ -84134,9 +84134,23 @@
     ],
     "memo": "",
     "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "institution-exchange"
+    "fraudType": "institution-exchange",
+    "memos": [
+      {
+        "id": 1786781353430,
+        "text": "TEFDE 사칭 사기 사건 현재 접수중 입니다.",
+        "createdAt": "2026-08-15 17:09"
+      },
+      {
+        "id": 1788242787640,
+        "text": "tefde.com 투자 사칭 사건 상담 접수중 입니다.",
+        "createdAt": "2026-09-01 15:06"
+      }
+    ]
   },
   {
     "slug": "meureobkinmorsyob",
@@ -106297,7 +106311,8 @@
       {
         "id": 1786780507418,
         "text": "milestone 사칭 사기 사건 현재 접수중 입니다.",
-        "createdAt": "2026-08-15 16:55"
+        "createdAt": "2026-08-15 16:55",
+        "editedAt": "2026-08-21 23:52"
       }
     ]
   },
