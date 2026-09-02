@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>이미지 문구 자동 삽입</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6f9;color:#172033;font-family:system-ui,-apple-system,sans-serif}.wrap{max-width:1200px;margin:auto;padding:30px 20px 60px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.desc{color:#748196;font-size:13px;margin:0 0 18px;line-height:1.6}.grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.panel{background:#fff;border:1px solid #e1e6ef;border-radius:10px;padding:20px;box-shadow:0 3px 16px rgba(0,0,0,.05)}h1{font-size:24px;margin:0}h2{font-size:17px;margin:0 0 14px}label{display:block;font-size:13px;font-weight:800;margin:13px 0 6px;color:#4b5a70}input[type=text],input[type=file]{width:100%;padding:11px 12px;border:1px solid #cfd8e6;border-radius:7px;font:inherit}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border:0;border-radius:7px;background:#123d58;color:#fff;font-weight:800;text-decoration:none;cursor:pointer}.btn.sec{background:#4b5a70}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.msg{margin-top:12px;font-size:13px;font-weight:800}.ok{color:#16723a}.err{color:#b52a2a}.hint{font-size:12px;color:#748196}.canvas-wrap{background:#0d1117;border-radius:10px;min-height:280px;display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}canvas{max-width:100%;height:auto;display:block;border-radius:4px}.drop-hint{color:#8a96a8;font-size:13px;text-align:center;padding:40px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="top"><h1>이미지 문구 자동 삽입</h1><a class="btn sec" href="/admin/dashboard.html">관리자 대시보드</a></div>
+<p class="desc">로컬 이미지를 불러온 뒤 사건명(상호)을 입력하면, 이미지 안의 실제 흰색 공란 위치(상단·중단·하단 어디든)를 픽셀 분석해 그 안에 문구가 자동으로 삽입됩니다(화이트보드 영상 생성의 흰색 공란 탐지 방식을 참조). 이미지는 서버로 업로드되지 않고 브라우저에서만 처리되며, 완성된 이미지를 그대로 PC에 다운로드할 수 있습니다.</p>
+<div class="grid">
+  <section class="panel">
+    <h2>이미지 및 문구</h2>
+    <label>이미지 불러오기</label>
+    <input type="file" id="imageFile" accept="image/*">
+    <label>사건명(상호)</label>
+    <input type="text" id="caseName" placeholder="예: OO투자 리딩방 사기">
+    <div class="actions">
+      <button class="btn" id="downloadBtn" disabled>PC로 다운로드</button>
+    </div>
+    <div id="msg" class="msg"></div>
+    <p class="hint">문구를 입력하면 미리보기가 실시간으로 갱신됩니다. 문구 없이도 원본 이미지를 그대로 다운로드할 수 있습니다.</p>
+  </section>
+  <section class="panel">
+    <h2>미리보기</h2>
+    <div class="canvas-wrap" id="canvasWrap">
+      <span class="drop-hint" id="hint">이미지를 불러오면 여기에 미리보기가 표시됩니다.</span>
+      <canvas id="canvas" hidden></canvas>
+    </div>
+  </section>
+</div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+let img = null;
+
+const fontReady = (async () => {
+  try {
+    const face = new FontFace('Pretendard-Caption', 'url(https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Black.otf)');
+    await face.load();
+    document.fonts.add(face);
+    return true;
+  } catch (e) {
+    return false;
+  }
+})();
+
+$('imageFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const image = new Image();
+  image.onload = () => {
+    img = image;
+    URL.revokeObjectURL(url);
+    render();
+    setMsg('이미지를 불러왔습니다.', true);
+  };
+  image.onerror = () => {
+    img = null;
+    URL.revokeObjectURL(url);
+    setMsg('이미지를 불러오지 못했습니다.', false);
+  };
+  image.src = url;
+});
+
+$('caseName').addEventListener('input', render);
+$('downloadBtn').addEventListener('click', downloadImage);
+
+async function render() {
+  if (!img) return;
+  await fontReady;
+
+  const canvas = $('canvas');
+  const MAX_DIM = 2000;
+  let w = img.naturalWidth, h = img.naturalHeight;
+  if (Math.max(w, h) > MAX_DIM) {
+    const scale = MAX_DIM / Math.max(w, h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+  }
+  canvas.width = w;
+  canvas.height = h;
+  canvas.hidden = false;
+  $('hint').hidden = true;
+  $('downloadBtn').disabled = false;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+  ctx.drawImage(img, 0, 0, w, h);
+
+  const text = $('caseName').value.trim();
+  if (text) drawCaptionInBlank(ctx, w, h, text, img);
+}
+
+// 화이트보드 영상 생성(admin/whiteboard-local-v2.js)의 detectBlank()가 쓰는 것과 동일한
+// 픽셀 판정(밝기 214 이상·채도 낮음=RGB 편차 42 미만)을 그대로 가져오되, 그 도구는 캡션판이
+// 항상 하단에 있는 소품 사진 전용이라 하단 42% 안쪽으로만 찾았던 것과 달리, 여기서는 이미지
+// 전체(상/중/하 어디든)를 스캔해서 가장 넓은 흰색 여백 사각형을 찾는다.
+function detectBlank(img) {
+  const sw = 640, sh = Math.round(sw * img.naturalHeight / img.naturalWidth);
+  const c = document.createElement('canvas');
+  c.width = sw;
+  c.height = sh;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, 0, 0, sw, sh);
+  const d = g.getImageData(0, 0, sw, sh).data;
+  const bright = (x, y) => {
+    const k = (y * sw + x) * 4, r = d[k], gg = d[k + 1], b = d[k + 2];
+    const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
+    return r > 214 && gg > 214 && b > 214 && (mx - mn) < 42;
+  };
+  const ratios = [];
+  for (let y = 0; y < sh; y++) {
+    let n = 0;
+    for (let x = 0; x < sw; x++) if (bright(x, y)) n++;
+    ratios[y] = n / sw;
+  }
+
+  // 밝은 픽셀 비율이 높은 가로 줄들을 이미지 전체 범위에서 구간(run)으로 묶는다 (위치 제한 없음).
+  const runs = [];
+  let s = -1;
+  for (let y = 0; y <= sh; y++) {
+    const ok = y < sh && ratios[y] > .70;
+    if (ok && s < 0) s = y;
+    if ((!ok || y === sh) && s >= 0) {
+      const e = y - 1, len = e - s + 1;
+      if (len > sh * .05) runs.push({ s, e, len, cy: (s + e) / 2 });
+      s = -1;
+    }
+  }
+
+  function widestSegment(y) {
+    let segs = [], a = -1;
+    for (let x = 0; x <= sw; x++) {
+      const ok = x < sw && bright(x, y);
+      if (ok && a < 0) a = x;
+      if ((!ok || x === sw) && a >= 0) {
+        const e = x - 1;
+        if (e - a > sw * .35) segs.push({ a, e, len: e - a + 1 });
+        a = -1;
+      }
+    }
+    return segs.sort((u, v) => v.len - u.len)[0] || null;
+  }
+
+  // 각 구간마다 실제 가로 폭(중앙 줄 기준)까지 반영한 면적으로 비교해, 상/중/하 어디에 있든
+  // 가장 넓은 흰색 사각형을 고른다 — 세로로 길기만 한 좁은 줄무늬가 뽑히지 않도록 한다.
+  let best = null, bestHseg = null, bestArea = 0;
+  for (const run of runs) {
+    const y = Math.max(0, Math.min(sh - 1, Math.round(run.cy)));
+    const hseg = widestSegment(y);
+    if (!hseg) continue;
+    const area = run.len * hseg.len;
+    if (area > bestArea) { bestArea = area; best = run; bestHseg = hseg; }
+  }
+  if (!best) {
+    best = { s: Math.round(sh * .82), e: Math.round(sh * .95), len: Math.round(sh * .13) };
+    bestHseg = { a: Math.round(sw * .07), e: Math.round(sw * .93) };
+  }
+
+  const padx = Math.max(12, Math.round((bestHseg.e - bestHseg.a) * .045));
+  const pady = Math.max(7, Math.round(best.len * .15));
+  return {
+    x: (bestHseg.a + padx) / sw,
+    y: (best.s + pady) / sh,
+    w: (bestHseg.e - bestHseg.a + 1 - 2 * padx) / sw,
+    h: (best.len - 2 * pady) / sh,
+  };
+}
+
+function drawCaptionInBlank(ctx, w, h, text, img) {
+  const f = detectBlank(img);
+  const x = w * f.x, y = h * f.y, bw = w * f.w, bh = h * f.h;
+  const family = "'Pretendard-Caption', 'Pretendard', system-ui, sans-serif";
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, bw, bh);
+  ctx.clip();
+  ctx.fillStyle = '#111827';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  let fontSize = Math.floor(Math.min(w * .068, bh * .52));
+  const setFont = (size) => { ctx.font = `700 ${size}px ${family}`; };
+  setFont(fontSize);
+  while (ctx.measureText(text).width > bw * .92 && fontSize > 24) {
+    fontSize -= 2;
+    setFont(fontSize);
+  }
+  ctx.fillText(text, x + bw / 2, y + bh / 2, bw * .92);
+  ctx.restore();
+}
+
+function downloadImage() {
+  const canvas = $('canvas');
+  if (!canvas || canvas.hidden) return;
+  canvas.toBlob((blob) => {
+    if (!blob) { setMsg('다운로드용 이미지를 만들지 못했습니다.', false); return; }
+    const url = URL.createObjectURL(blob);
+    const safeName = ($('caseName').value.trim() || 'image').replace(/[\\/:*?"<>|]+/g, '_');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    setMsg('다운로드되었습니다.', true);
+  }, 'image/png');
+}
+
+function setMsg(text, ok) {
+  const el = $('msg');
+  el.textContent = text;
+  el.className = 'msg ' + (ok ? 'ok' : 'err');
+}
+</script>
+</body>
+</html>
