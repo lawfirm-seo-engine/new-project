@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>네이버카페 원고 생성</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#f4f6fb;color:#172033;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}
+    .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 60px}
+    .back{display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:7px;background:#263244;color:#fff;font-size:13px;font-weight:700;text-decoration:none}
+    h1{margin:22px 0 6px;font-size:26px}
+    .lead{margin:0 0 22px;color:#66758b;font-size:14px}
+    .panel{padding:22px;background:#fff;border:1px solid #dce3ee;border-radius:12px;box-shadow:0 3px 14px rgba(22,42,75,.06)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    label{display:flex;flex-direction:column;gap:7px;color:#445269;font-size:13px;font-weight:800}
+    input,select,textarea,button{font:inherit}
+    input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e3;border-radius:8px;background:#fff;color:#172033}
+    button{border:0;border-radius:8px;background:#1f4fd8;color:#fff;font-weight:800;cursor:pointer}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .generate{grid-column:1/-1;min-height:46px;margin-top:2px}
+    #message{min-height:22px;margin:14px 2px 0;color:#3f5f91;font-size:13px;white-space:pre-wrap}
+    .result{display:none;margin-top:22px}
+    .result.visible{display:block}
+    .result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .result-head h2{margin:0;font-size:18px}
+    .copy-group{display:flex;gap:8px}
+    .copy{padding:9px 13px;background:#263244;font-size:13px}
+    .copy.primary{background:#03c75a}
+    #titleOutput{margin-bottom:12px;font-weight:800}
+    #bodyOutput{min-height:720px;line-height:1.75;resize:vertical;white-space:pre-wrap}
+    .note{margin:12px 0 0;padding:12px 14px;border-radius:8px;background:#f0faf4;color:#246b42;font-size:13px;line-height:1.55}
+    @media(max-width:720px){.form-grid{grid-template-columns:1fr}.wrap{padding:20px 14px 40px}.result-head{align-items:flex-start;flex-direction:column}.copy-group{width:100%}.copy{flex:1}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
+  <h1>네이버카페 게시글 원고 생성</h1>
+  <p class="lead">사건명과 사건 유형을 선택하면 법무법인 선린 카페 게시글 형식의 제목·본문·해시태그를 생성합니다.</p>
+
+  <section class="panel">
+    <div class="form-grid">
+      <label>사건명
+        <input id="caseName" type="text" placeholder="예: OO투자자문" autocomplete="off">
+      </label>
+      <label>사건 유형
+        <select id="fraudType">
+          <option value="">사건 유형 선택</option>
+          <option value="stock-project">주식 리딩방 사기·투자 프로젝트 사칭형</option>
+          <option value="institution-exchange">증권사·은행·거래소 사기 사칭형</option>
+          <option value="team-mission">팀미션 사기(쇼핑몰 구매대행·공동구매·부업·영상 시청)형</option>
+          <option value="live-dating">라이브 방송·만남 플랫폼 사칭형</option>
+          <option value="refund-reward">환불·보상금 지급 사칭형</option>
+        </select>
+      </label>
+      <button id="generate" class="generate" type="button">네이버카페 원고 생성</button>
+    </div>
+    <div id="message" aria-live="polite"></div>
+  </section>
+
+  <section id="result" class="panel result">
+    <div class="result-head">
+      <h2>생성된 원고</h2>
+      <div class="copy-group">
+        <button id="copyTitle" class="copy" type="button">제목 복사</button>
+        <button id="copyBody" class="copy primary" type="button">본문 전체 복사</button>
+      </div>
+    </div>
+    <label>게시글 제목
+      <input id="titleOutput" type="text">
+    </label>
+    <label>게시글 본문
+      <textarea id="bodyOutput"></textarea>
+    </label>
+    <p class="note">특정 업체나 인물을 사기 주체로 단정하지 않도록 “사칭 및 유사 피해 정황” 기준으로 작성됩니다. 복사 후 실제 제보 내용에 맞지 않는 부분은 게시 전에 수정하세요.</p>
+  </section>
+</main>
+<script>
+  const caseNameEl = document.getElementById("caseName");
+  const fraudTypeEl = document.getElementById("fraudType");
+  const generateEl = document.getElementById("generate");
+  const messageEl = document.getElementById("message");
+  const resultEl = document.getElementById("result");
+  const titleOutputEl = document.getElementById("titleOutput");
+  const bodyOutputEl = document.getElementById("bodyOutput");
+  const API_ORIGIN = location.protocol === "file:" ? "https://gnlaw-criminal.co.kr" : "";
+
+  async function requestDraft() {
+    const caseName = caseNameEl.value.trim().replace(/\s+/g, " ");
+    const fraudType = fraudTypeEl.value;
+    resultEl.classList.remove("visible");
+    if (!caseName) return showMessage("사건명을 입력해주세요.", true);
+    if (!fraudType) return showMessage("사건 유형을 선택해주세요.", true);
+
+    generateEl.disabled = true;
+    showMessage("네이버카페 원고 생성 중...");
+    try {
+      const response = await fetch(`${API_ORIGIN}/api/generate-cafe-draft`, {
+        method: "POST",
+        credentials: API_ORIGIN ? "include" : "same-origin",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ caseName, fraudType }),
+      });
+      const text = await response.text();
+      let data;
+      try { data = JSON.parse(text); }
+      catch { throw new Error(`서버 응답 형식 오류 (${response.status})`); }
+      if (!response.ok || !data.ok) throw new Error(data.message || "원고 생성 실패");
+
+      titleOutputEl.value = data.draft.title;
+      bodyOutputEl.value = data.draft.body;
+      resultEl.classList.add("visible");
+      showMessage("원고 생성 완료. 제목과 본문을 검토한 뒤 복사하세요.");
+      resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      showMessage(`원고 생성 오류: ${error.message}`, true);
+    } finally {
+      generateEl.disabled = false;
+    }
+  }
+
+  function showMessage(text, isError = false) {
+    messageEl.textContent = text;
+    messageEl.style.color = isError ? "#b42318" : "#3f5f91";
+  }
+
+  async function copyText(value, button) {
+    try {
+      await navigator.clipboard.writeText(value);
+      const before = button.textContent;
+      button.textContent = "복사됨";
+      setTimeout(() => { button.textContent = before; }, 1500);
+    } catch {
+      showMessage("자동 복사가 차단되었습니다. 원고를 직접 선택해 복사해주세요.", true);
+    }
+  }
+
+  generateEl.addEventListener("click", requestDraft);
+  caseNameEl.addEventListener("keydown", (event) => { if (event.key === "Enter") requestDraft(); });
+  document.getElementById("copyTitle").addEventListener("click", (event) => copyText(titleOutputEl.value, event.currentTarget));
+  document.getElementById("copyBody").addEventListener("click", (event) => copyText(bodyOutputEl.value, event.currentTarget));
+</script>
+</body>
+</html>
