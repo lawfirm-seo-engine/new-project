@@ -119,9 +119,15 @@ async function render() {
 }
 
 // 화이트보드 영상 생성(admin/whiteboard-local-v2.js)의 detectBlank()가 쓰는 것과 동일한
-// 픽셀 판정(밝기 214 이상·채도 낮음=RGB 편차 42 미만)을 그대로 가져오되, 그 도구는 캡션판이
-// 항상 하단에 있는 소품 사진 전용이라 하단 42% 안쪽으로만 찾았던 것과 달리, 여기서는 이미지
-// 전체(상/중/하 어디든)를 스캔해서 가장 넓은 흰색 여백 사각형을 찾는다.
+// 픽셀 판정(밝기 214 이상·채도 낮음=RGB 편차 42 미만)을 가져오되, 두 가지를 다시 손봤다:
+// 1) 그 도구는 캡션판이 항상 하단에 있는 소품 사진 전용이라 하단 42% 안쪽으로만 찾았지만,
+//    여기서는 이미지 전체(상/중/하 어디든)를 스캔한다.
+// 2) 처음 버전은 "줄 전체 폭의 70% 이상이 밝아야" 후보 줄로 쳤는데, 실제 카드형 디자인의
+//    흰색 박스는 이미지 전체 폭을 꽉 채우지 않고 40~65%만 차지하는 경우가 많아 이 기준을
+//    넘지 못해 후보에서 아예 빠지고, 결과적으로 엉뚱한 위치(하단 고정 폴백)로 빠졌었다.
+//    그래서 "줄 전체 폭 대비 밝은 픽셀 개수" 대신, 각 줄에서 실제 연속된 흰 구간의 폭이
+//    이미지 폭의 30% 이상인지로 판정 기준을 바꿨다 — 흩어진 밝은 픽셀(하이라이트 등)이
+//    우연히 합쳐서 기준을 넘는 일도 막아준다.
 function detectBlank(img) {
   const sw = 640, sh = Math.round(sw * img.naturalHeight / img.naturalWidth);
   const c = document.createElement('canvas');
@@ -135,26 +141,8 @@ function detectBlank(img) {
     const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
     return r > 214 && gg > 214 && b > 214 && (mx - mn) < 42;
   };
-  const ratios = [];
-  for (let y = 0; y < sh; y++) {
-    let n = 0;
-    for (let x = 0; x < sw; x++) if (bright(x, y)) n++;
-    ratios[y] = n / sw;
-  }
 
-  // 밝은 픽셀 비율이 높은 가로 줄들을 이미지 전체 범위에서 구간(run)으로 묶는다 (위치 제한 없음).
-  const runs = [];
-  let s = -1;
-  for (let y = 0; y <= sh; y++) {
-    const ok = y < sh && ratios[y] > .70;
-    if (ok && s < 0) s = y;
-    if ((!ok || y === sh) && s >= 0) {
-      const e = y - 1, len = e - s + 1;
-      if (len > sh * .05) runs.push({ s, e, len, cy: (s + e) / 2 });
-      s = -1;
-    }
-  }
-
+  const MIN_SEG_RATIO = .30;
   function widestSegment(y) {
     let segs = [], a = -1;
     for (let x = 0; x <= sw; x++) {
@@ -162,19 +150,36 @@ function detectBlank(img) {
       if (ok && a < 0) a = x;
       if ((!ok || x === sw) && a >= 0) {
         const e = x - 1;
-        if (e - a > sw * .35) segs.push({ a, e, len: e - a + 1 });
+        if (e - a + 1 > sw * MIN_SEG_RATIO) segs.push({ a, e, len: e - a + 1 });
         a = -1;
       }
     }
     return segs.sort((u, v) => v.len - u.len)[0] || null;
   }
 
-  // 각 구간마다 실제 가로 폭(중앙 줄 기준)까지 반영한 면적으로 비교해, 상/중/하 어디에 있든
+  // 줄마다 가장 넓은 연속 흰 구간을 미리 구해 캐시해둔다(중복 계산 방지 + 아래 두 단계에서 재사용).
+  const rowSeg = new Array(sh);
+  for (let y = 0; y < sh; y++) rowSeg[y] = widestSegment(y);
+
+  // 연속 흰 구간이 기준 폭(30%) 이상인 줄들을 이미지 전체 범위에서 구간(run)으로 묶는다.
+  const runs = [];
+  let s = -1;
+  for (let y = 0; y <= sh; y++) {
+    const ok = y < sh && !!rowSeg[y];
+    if (ok && s < 0) s = y;
+    if ((!ok || y === sh) && s >= 0) {
+      const e = y - 1, len = e - s + 1;
+      if (len > sh * .04) runs.push({ s, e, len, cy: (s + e) / 2 });
+      s = -1;
+    }
+  }
+
+  // 각 구간마다 중앙 줄의 흰 구간 폭까지 반영한 면적으로 비교해, 상/중/하 어디에 있든
   // 가장 넓은 흰색 사각형을 고른다 — 세로로 길기만 한 좁은 줄무늬가 뽑히지 않도록 한다.
   let best = null, bestHseg = null, bestArea = 0;
   for (const run of runs) {
     const y = Math.max(0, Math.min(sh - 1, Math.round(run.cy)));
-    const hseg = widestSegment(y);
+    const hseg = rowSeg[y];
     if (!hseg) continue;
     const area = run.len * hseg.len;
     if (area > bestArea) { bestArea = area; best = run; bestHseg = hseg; }
