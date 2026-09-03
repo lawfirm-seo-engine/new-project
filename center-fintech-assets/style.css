@@ -818,8 +818,13 @@
   flex-direction:column;
 }
 
-.center-site.center-fintech .center-member-team-person img{
-  margin-bottom:8px;
+.center-site.center-fintech .center-member-team-grid .center-member-team-person img{
+  /* 팀 카드는 2열 span이라 패딩 비중이 낮아지면서, 사진이 개인 카드 사진보다
+     자연히 더 넓게(그래서 aspect-ratio에 따라 더 크게) 렌더링된다. 개인 카드
+     사진과 같은 크기로 보이도록 폭을 줄이고 가운데 정렬한다. 아래의
+     .center-member-card img(width:100%)보다 더 구체적인 선택자로 덮어써야 한다. */
+  width:89%;
+  margin:0 auto 8px;
 }
 
 .center-site.center-fintech .center-member-team-person span{
