@@ -23,8 +23,9 @@ const categoryApis = [
   "create-readingroom-landing.js",
 ];
 const expectedHeroHashes = {
-  "main-slide-01-q90.webp": "806E8F9CD2BFAFA24928078AD3C73023044D16E8A248CB10B3AD829D3A7915AC",
-  "main-slide-02-q90.webp": "EBE229D2091ADF71DFA19C489F12E24760AC9DF5716796600D65D4EE4D7D338E",
+  // gnlaw-criminal.co.kr 전용(문구를 "법무법인 선린 - 금융사기피해연구소"로 다시 그린 버전)
+  "main-slide-01-criminal-q90.webp": "8AB13150AF654B227054A48F767D6D8B1668FE52ECF2A21C4B7ED4117EB4033B",
+  "main-slide-02-criminal-q90.webp": "D784ADFA2035C3FBB3D539C03489E803C9A6DF4EA25C517CDFA69D4FF249A131",
   "main-slide-03-q90.webp": "6AE0FE87D42E73C8DB8005D16B8BB41FF6AC6CE8EA15B571DFCB9289AEE220D5",
 };
 
@@ -58,7 +59,7 @@ const checks = [
   [categorySources.every(([, html]) => html.includes("category-bulk.js") && html.includes("새로고침 (새 30개)")), "전용 랜딩 5개 메뉴 중 30행 대량생성 화면이 누락되었습니다."],
   [categoryApiSources.every(([, code]) => code.includes("body.batchMode === true") && code.includes("if (!batchMode)")), "전용 랜딩 API의 대량 저장 모드가 누락되었습니다."],
   [generator.includes('href: "tel:0263480406"'), "메인 2·3번 이미지 전화 연결이 없습니다."],
-  [generator.includes('20260825-main-slide-03-replaced'), "교체된 3번 메인 이미지 캐시 버전이 없습니다."],
+  [generator.includes('20260903-brand-text-replaced'), "교체된 메인 이미지 캐시 버전이 없습니다."],
   [generator.includes("CRIMINAL_PUBLIC_STYLE_VERSION"), "진행사건 검색 스타일 캐시 갱신이 없습니다."],
   [publicStyle.includes(".case-row[hidden]") && publicStyle.includes("display:none!important"), "진행사건 검색 결과 외 행 숨김 스타일이 없습니다."],
   [centerStyle.includes("flex-flow:row nowrap"), "모바일 상단 메뉴 한 줄 고정 스타일이 없습니다."],

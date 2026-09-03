@@ -802,6 +802,17 @@
   line-height:1.7;
 }
 
+.center-site.center-fintech .center-member-card img{
+  display:block;
+  width:100%;
+  aspect-ratio:3/4;
+  margin:0 0 16px;
+  border-radius:8px;
+  object-fit:cover;
+  object-position:top center;
+  background:#eef2f6;
+}
+
 .center-site.center-fintech .center-progress-section{
   display:flex;
   gap:28px;

@@ -2284,17 +2284,24 @@ function isCenterBoardSite(group) {
   return siteUrl === "https://gnlaw-criminal.co.kr" || siteUrl === "https://gnlaw-center.co.kr";
 }
 
+function isCriminalSite(group) {
+  return String(group?.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr";
+}
+
 const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
-const CENTER_FINTECH_IMAGE_VERSION = "20260825-main-slide-03-replaced";
+const CENTER_FINTECH_IMAGE_VERSION = "20260903-brand-text-replaced";
 const CRIMINAL_PUBLIC_STYLE_VERSION = "20260825-mobile-header-match";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
 
 function centerFintechHeadExtra(group) {
   if (!isCenterBoardSite(group)) return "";
+  const isCriminal = isCriminalSite(group);
+  const slide01 = isCriminal ? "main-slide-01-criminal-q90.webp" : "main-slide-01-q90.webp";
+  const slide02 = isCriminal ? "main-slide-02-criminal-q90.webp" : "main-slide-02-q90.webp";
   return [
-    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-01-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
-    `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-02-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/${slide01}?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
+    `<link rel="preload" as="image" href="/assets/center-fintech/${slide02}?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
     `<link rel="preload" as="image" href="/assets/center-fintech/main-slide-03-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}">`,
     `<link rel="stylesheet" href="/assets/center-fintech/style.css?v=${CENTER_FINTECH_STYLE_VERSION}">`,
   ].join("\n");
@@ -2324,14 +2331,20 @@ function createCenterHeaderNav(group) {
   </nav>`;
 }
 
-function createCenterMainHeroSlider() {
+function createCenterMainHeroSlider(group) {
+  const isCriminal = isCriminalSite(group);
+  const brandName = isCriminal ? "법무법인 선린 - 금융사기피해연구소" : "법무법인 선린 핀테크센터";
+  // main-slide-01/02는 이미지 그래픽 안에 브랜드 문구가 그려져 있어, gnlaw-criminal.co.kr
+  // 전용으로 문구를 다시 그린 별도 파일(-criminal)을 사용한다. gnlaw-center.co.kr은 원본 유지.
+  const slide01 = isCriminal ? "main-slide-01-criminal-q90.webp" : "main-slide-01-q90.webp";
+  const slide02 = isCriminal ? "main-slide-02-criminal-q90.webp" : "main-slide-02-q90.webp";
   const slides = [
     {
-      image: `/assets/center-fintech/main-slide-01-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}`,
-      title: "법무법인 선린 핀테크센터 회의 및 사건 전략 수립",
+      image: `/assets/center-fintech/${slide01}?v=${CENTER_FINTECH_IMAGE_VERSION}`,
+      title: `${brandName} 회의 및 사건 전략 수립`,
     },
     {
-      image: `/assets/center-fintech/main-slide-02-q90.webp?v=${CENTER_FINTECH_IMAGE_VERSION}`,
+      image: `/assets/center-fintech/${slide02}?v=${CENTER_FINTECH_IMAGE_VERSION}`,
       title: "금융 투자 사기 피해자를 위한 사건 진행",
       href: "tel:0263480406",
     },
@@ -2420,6 +2433,7 @@ function createStaticHeaders() {
 }
 
 function createCenterFintechHomeContent(group, stats = {}) {
+  const brandName = isCriminalSite(group) ? "법무법인 선린 - 금융사기피해연구소" : "법무법인 선린 핀테크센터";
   const progressHref = centerProgressHref(group);
   const trustPoints = [
     "금융·투자사기 유형별 사건 정리",
@@ -2508,7 +2522,7 @@ function createCenterFintechHomeContent(group, stats = {}) {
       <div>
         <p class="center-fintech-eyebrow">FINANCIAL FRAUD RESPONSE</p>
         <h2>금융사기 피해 대응은 사건 유형을 정확히 나누는 것에서 시작됩니다.</h2>
-        <p>법무법인 선린 핀테크센터는 업체명, 도메인, 리딩방명, 앱과 입금 경로를 기준으로 피해 구조를 정리하고 초기 대응 방향을 안내합니다.</p>
+        <p>${brandName}는 업체명, 도메인, 리딩방명, 앱과 입금 경로를 기준으로 피해 구조를 정리하고 초기 대응 방향을 안내합니다.</p>
       </div>
       <div class="center-fintech-checklist">
         <strong>상담 전 핵심 확인</strong>
@@ -2554,8 +2568,8 @@ function createCenterFintechHomeContent(group, stats = {}) {
     <section id="sunlin-intro" class="center-intro-section" aria-label="법무법인 선린 소개">
       <div id="greeting" class="center-greeting">
         <p class="center-kicker">SUNLIN FINTECH CENTER</p>
-        <h2>금융사기 피해자의 권리 회복을 위한 법무법인 선린 핀테크센터입니다.</h2>
-        <p>법무법인 선린 핀테크센터는 의뢰인의 입금 경위, 대화 기록, 플랫폼 화면, 계좌 흐름을 기준으로 형사고소와 민사상 회수 가능성을 함께 검토합니다.</p>
+        <h2>금융사기 피해자의 권리 회복을 위한 ${brandName}입니다.</h2>
+        <p>${brandName}는 의뢰인의 입금 경위, 대화 기록, 플랫폼 화면, 계좌 흐름을 기준으로 형사고소와 민사상 회수 가능성을 함께 검토합니다.</p>
         <p>피해 유형이 빠르게 바뀌는 금융사기 사건에서는 초기 증거 보존과 2차 피해 차단이 중요합니다. 선린은 사건의 구조를 법률 쟁점으로 정리하고 필요한 절차를 단계별로 안내합니다.</p>
       </div>
       <div class="center-office-note">
@@ -2590,13 +2604,13 @@ function createCenterFintechHomeContent(group, stats = {}) {
     </section>`;
 }
 
-function createCenterGreetingContent() {
+function createCenterGreetingContent(brandName = "법무법인 선린 핀테크센터") {
   return `
-    <section id="sunlin-intro" class="center-intro-section center-about-detail" aria-label="법무법인 선린 핀테크센터 인사말">
+    <section id="sunlin-intro" class="center-intro-section center-about-detail" aria-label="${escapeHtml(brandName)} 인사말">
       <div id="greeting" class="center-greeting">
         <p class="center-kicker">GREETING</p>
-        <h2>금융사기 피해자의 권리 회복을 위한 법무법인 선린 핀테크센터입니다.</h2>
-        <p>법무법인 선린 핀테크센터는 의뢰인의 입금 경위, 대화 기록, 플랫폼 화면, 계좌 흐름을 기준으로 형사고소와 민사상 회수 가능성을 함께 검토합니다.</p>
+        <h2>금융사기 피해자의 권리 회복을 위한 ${escapeHtml(brandName)}입니다.</h2>
+        <p>${escapeHtml(brandName)}는 의뢰인의 입금 경위, 대화 기록, 플랫폼 화면, 계좌 흐름을 기준으로 형사고소와 민사상 회수 가능성을 함께 검토합니다.</p>
         <p>피해 유형이 빠르게 바뀌는 금융사기 사건에서는 초기 증거 보존과 2차 피해 차단이 중요합니다. 선린은 사건의 구조를 법률 쟁점으로 정리하고 필요한 절차를 단계별로 안내합니다.</p>
       </div>
       <div class="center-office-note">
@@ -2608,8 +2622,38 @@ function createCenterGreetingContent() {
     </section>`;
 }
 
-function createCenterMembersContent() {
-  const members = [
+const CRIMINAL_TEAM_MEMBERS = [
+  {
+    name: "김상수 대표변호사",
+    description: "법무법인 선린 대표변호사로 금융·경제범죄 피해 대응과 사건 전략 수립을 이끕니다.",
+    photo: "kim-sangsu",
+  },
+  {
+    name: "전강진 대표변호사",
+    description: "지청장 출신 변호사로 복잡한 자금 흐름과 다수 피해자 사건의 형사·민사 쟁점을 점검합니다.",
+    photo: "jeon-gangjin",
+  },
+  {
+    name: "안형준 대표변호사",
+    description: "부장검사 출신의 형사 사건 경험을 바탕으로 고소 절차와 수사 대응 방향을 검토합니다.",
+    photo: "ahn-hyungjun",
+  },
+  {
+    name: "형사·민사 대응팀",
+    description: "자료 정리, 사실관계 구성, 고소·보전·회수 절차를 사건 유형에 맞게 지원합니다.",
+  },
+  {
+    name: "류종민 파트너 변호사",
+    photo: "ryu-jongmin",
+  },
+  {
+    name: "박지훈 파트너 변호사",
+    photo: "park-jihoon",
+  },
+];
+
+function createCenterMembersContent(group) {
+  const members = isCriminalSite(group) ? CRIMINAL_TEAM_MEMBERS : [
     {
       name: "김상수 대표변호사",
       description: "법무법인 선린 대표변호사로 금융·경제범죄 피해 대응과 사건 전략 수립을 이끕니다.",
@@ -2637,8 +2681,9 @@ function createCenterMembersContent() {
       </div>
       <div class="center-member-grid">
         ${members.map((member) => `<article class="center-member-card">
+          ${member.photo ? `<img src="/assets/center-fintech/members/${member.photo}.webp" alt="${escapeHtml(member.name)}" loading="lazy">` : ""}
           <strong>${escapeHtml(member.name)}</strong>
-          <p>${escapeHtml(member.description)}</p>
+          ${member.description ? `<p>${escapeHtml(member.description)}</p>` : ""}
         </article>`).join("\n")}
       </div>
     </section>`;
@@ -2672,20 +2717,21 @@ function createCenterAboutSchema(group, title, description, canonical) {
 
 async function writeCenterAboutPages(template, group) {
   if (!isCenterBoardSite(group)) return;
+  const brandName = isCriminalSite(group) ? "법무법인 선린 - 금융사기피해연구소" : "법무법인 선린 핀테크센터";
   const pages = [
     {
       slug: "greeting",
       label: "인사말",
-      title: "법무법인 선린 핀테크센터 인사말",
-      description: "법무법인 선린 핀테크센터가 금융사기 피해자의 권리 회복과 2차 피해 예방을 위해 사건을 검토하는 기준을 안내합니다.",
-      content: createCenterGreetingContent(),
+      title: `${brandName} 인사말`,
+      description: `${brandName}가 금융사기 피해자의 권리 회복과 2차 피해 예방을 위해 사건을 검토하는 기준을 안내합니다.`,
+      content: createCenterGreetingContent(brandName),
     },
     {
       slug: "members",
       label: "선린의 구성원",
-      title: "법무법인 선린 핀테크센터 구성원",
-      description: "금융사기 피해 사건의 형사·민사 쟁점을 함께 검토하는 법무법인 선린 핀테크센터 구성원을 소개합니다.",
-      content: createCenterMembersContent(),
+      title: `${brandName} 구성원`,
+      description: `금융사기 피해 사건의 형사·민사 쟁점을 함께 검토하는 ${brandName} 구성원을 소개합니다.`,
+      content: createCenterMembersContent(group),
     },
   ];
 
@@ -3833,7 +3879,7 @@ for (const group of groups) {
       ],
     }),
     h1: escapeHtml(hubH1),
-    ogThumbnail: isCenterBoardSite(group) ? createCenterMainHeroSlider() : "",
+    ogThumbnail: isCenterBoardSite(group) ? createCenterMainHeroSlider(group) : "",
     summary: isRecoveryGuide ? escapeHtml(hubDescription) : "",
     content: createHubContent(group),
     headerCall: isRecoveryGuide

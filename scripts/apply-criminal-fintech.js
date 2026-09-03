@@ -53,7 +53,8 @@ html = html
   .replaceAll("domain-e center-site center-fintech", "domain-a center-site center-fintech")
   .replaceAll('href="/board/">진행사건 보기</a>', 'href="/board/">성공사례 보기</a>')
   .replaceAll('/case/', '/prosecute/')
-  .replaceAll('-issue/', '-litigation/');
+  .replaceAll('-issue/', '-litigation/')
+  .replaceAll("법무법인 선린 핀테크센터", "법무법인 선린 - 금융사기피해연구소");
 
 // 형사 사이트의 기존 좌측 상단 로고 경로는 그대로 /assets/logo.png 를 사용한다.
 html = html.replace(

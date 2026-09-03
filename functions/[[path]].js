@@ -598,7 +598,7 @@ function renderPowerlinkLanding(landing) {
     siteName: "피해금 추적 법률센터",
     headExtra,
     schema,
-    bodyClass: "domain-a landing-page powerlink-page",
+    bodyClass: "domain-a center-site center-fintech landing-page powerlink-page",
     tone: "NAVER POWERLINK",
     h1: esc(h1),
     breadcrumb: `<nav class="breadcrumb" aria-label="breadcrumb"><a href="https://gnlaw-criminal.co.kr/">홈</a><strong>${esc(title)}</strong></nav>`,
@@ -1564,7 +1564,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     siteName: esc(group.siteName),
     headExtra,
     schema,
-    bodyClass: `${group.bodyClass} landing-page${lk === "c" ? " recovery-landing-page" : ""}`,
+    bodyClass: `${group.bodyClass}${String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr" ? " center-site center-fintech" : ""} landing-page${lk === "c" ? " recovery-landing-page" : ""}`,
     styleHref: lk === "c"
       ? "/assets/style.css?v=20260813-recovery-landing-v1"
       : String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"

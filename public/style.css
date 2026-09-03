@@ -803,12 +803,57 @@ button{
   letter-spacing:0;
 }
 
+.center-site.domain-a .brand{
+  gap:8px;
+}
+
 .center-site.domain-a .brand img{
   display:block;
 }
 
 .center-site.domain-a .brand::after{
-  display:none;
+  content:"- 금융사기피해연구소";
+  display:block;
+  max-width:none;
+  overflow:visible;
+  white-space:nowrap;
+  font-size:18px;
+  font-weight:800;
+}
+
+@media(max-width:900px){
+  .center-site.domain-a .brand::after{
+    display:none;
+  }
+}
+
+/* 진행사건/구성원 등 정적 허브 페이지와 동적 랜딩페이지(functions/[[path]].js)가
+   서로 다른 스타일시트 조합을 로드해도 동일한 헤더로 보이도록, 허브 전용
+   center-fintech 스타일시트에만 있던 헤더 치수를 domain-a 전역에 맞춘다. */
+.center-site.domain-a .site-header{
+  min-height:94px;
+  padding:0 clamp(28px,4vw,72px);
+}
+
+.center-site.domain-a .brand{
+  flex:0 1 auto;
+  min-width:0;
+  max-width:none;
+  white-space:nowrap;
+}
+
+.center-site.domain-a .center-nav{
+  flex:1 1 auto;
+  justify-content:space-between;
+  gap:clamp(24px,3.4vw,68px);
+  margin-left:clamp(38px,5vw,96px);
+  font-size:clamp(20px,1.7vw,26px);
+}
+
+.center-site.domain-a .center-nav-call{
+  border-radius:8px;
+  background:#059669;
+  padding:12px 18px;
 }
 
 .center-nav{
