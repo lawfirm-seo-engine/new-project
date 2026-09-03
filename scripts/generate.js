@@ -2433,7 +2433,9 @@ function createStaticHeaders() {
 }
 
 function createCenterFintechHomeContent(group, stats = {}) {
-  const brandName = isCriminalSite(group) ? "법무법인 선린 - 금융사기피해연구소" : "법무법인 선린 핀테크센터";
+  const isCriminal = isCriminalSite(group);
+  const brandName = isCriminal ? "법무법인 선린 - 금융사기피해연구소" : "법무법인 선린 핀테크센터";
+  const brandShort = isCriminal ? "금융사기피해연구소" : "핀테크센터";
   const progressHref = centerProgressHref(group);
   const trustPoints = [
     "금융·투자사기 유형별 사건 정리",
@@ -2518,7 +2520,7 @@ function createCenterFintechHomeContent(group, stats = {}) {
   const todayCases = Number(stats.todayCases || 0).toLocaleString("ko-KR");
 
   return `
-    <section class="center-fintech-overview" aria-label="핀테크센터 개요">
+    <section class="center-fintech-overview" aria-label="${brandShort} 개요">
       <div>
         <p class="center-fintech-eyebrow">FINANCIAL FRAUD RESPONSE</p>
         <h2>금융사기 피해 대응은 사건 유형을 정확히 나누는 것에서 시작됩니다.</h2>
@@ -2536,7 +2538,7 @@ function createCenterFintechHomeContent(group, stats = {}) {
       </div>
     </section>
 
-    <section id="practice" class="center-fintech-types" aria-label="핀테크센터 업무분야">
+    <section id="practice" class="center-fintech-types" aria-label="${brandShort} 업무분야">
       <div class="center-fintech-section-head">
         <p>CASE TYPES</p>
         <h2>주요 사건 유형</h2>
@@ -2598,7 +2600,7 @@ function createCenterFintechHomeContent(group, stats = {}) {
       <div>
         <p class="center-kicker">CASE STATUS</p>
         <h2>진행 중인 사건은 별도 메뉴에서 확인합니다.</h2>
-        <p>메인 화면은 핀테크센터 소개와 업무분야 중심으로 운영하고, 기존 사건 페이지는 진행사건 메뉴에서 분리해 확인할 수 있습니다. 현재 ${totalCases}개 사건이 정리되어 있으며 오늘 추가·갱신된 항목은 ${todayCases}개입니다.</p>
+        <p>메인 화면은 ${brandShort} 소개와 업무분야 중심으로 운영하고, 기존 사건 페이지는 진행사건 메뉴에서 분리해 확인할 수 있습니다. 현재 ${totalCases}개 사건이 정리되어 있으며 오늘 추가·갱신된 항목은 ${todayCases}개입니다.</p>
       </div>
       <a class="center-progress-button" href="${progressHref}">진행사건 보기</a>
     </section>`;
@@ -2641,19 +2643,17 @@ const CRIMINAL_TEAM_MEMBERS = [
   {
     name: "형사·민사 대응팀",
     description: "자료 정리, 사실관계 구성, 고소·보전·회수 절차를 사건 유형에 맞게 지원합니다.",
-  },
-  {
-    name: "류종민 파트너 변호사",
-    photo: "ryu-jongmin",
-  },
-  {
-    name: "박지훈 파트너 변호사",
-    photo: "park-jihoon",
+    team: [
+      { name: "류종민 파트너 변호사", photo: "ryu-jongmin" },
+      { name: "박지훈 파트너 변호사", photo: "park-jihoon" },
+    ],
   },
 ];
 
 function createCenterMembersContent(group) {
-  const members = isCriminalSite(group) ? CRIMINAL_TEAM_MEMBERS : [
+  const isCriminal = isCriminalSite(group);
+  const brandShort = isCriminal ? "금융사기피해연구소" : "핀테크센터";
+  const members = isCriminal ? CRIMINAL_TEAM_MEMBERS : [
     {
       name: "김상수 대표변호사",
       description: "법무법인 선린 대표변호사로 금융·경제범죄 피해 대응과 사건 전략 수립을 이끕니다.",
@@ -2677,10 +2677,19 @@ function createCenterMembersContent(group) {
       <div class="center-section-head">
         <p class="center-kicker">SUNLIN MEMBERS</p>
         <h2>형사·민사 쟁점을 함께 검토하는 구성원</h2>
-        <p>법무법인 선린의 사건 수행 경험을 핀테크센터 업무에 접목해 피해자의 권리 구제 절차를 점검합니다.</p>
+        <p>법무법인 선린의 사건 수행 경험을 ${brandShort} 업무에 접목해 피해자의 권리 구제 절차를 점검합니다.</p>
       </div>
       <div class="center-member-grid">
-        ${members.map((member) => `<article class="center-member-card">
+        ${members.map((member) => member.team ? `<article class="center-member-card center-member-team-card">
+          <strong>${escapeHtml(member.name)}</strong>
+          <p>${escapeHtml(member.description)}</p>
+          <div class="center-member-team-grid">
+            ${member.team.map((tm) => `<div class="center-member-team-person">
+              <img src="/assets/center-fintech/members/${tm.photo}.webp" alt="${escapeHtml(tm.name)}" loading="lazy">
+              <span>${escapeHtml(tm.name)}</span>
+            </div>`).join("\n")}
+          </div>
+        </article>` : `<article class="center-member-card">
           ${member.photo ? `<img src="/assets/center-fintech/members/${member.photo}.webp" alt="${escapeHtml(member.name)}" loading="lazy">` : ""}
           <strong>${escapeHtml(member.name)}</strong>
           ${member.description ? `<p>${escapeHtml(member.description)}</p>` : ""}

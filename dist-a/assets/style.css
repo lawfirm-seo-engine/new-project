@@ -817,7 +817,7 @@ button{
   max-width:none;
   overflow:visible;
   white-space:nowrap;
-  font-size:18px;
+  font-size:clamp(20px,1.7vw,26px);
   font-weight:800;
 }
 

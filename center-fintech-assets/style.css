@@ -802,6 +802,35 @@
   line-height:1.7;
 }
 
+.center-site.center-fintech .center-member-team-card{
+  grid-column:span 2;
+}
+
+.center-site.center-fintech .center-member-team-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+
+.center-site.center-fintech .center-member-team-person{
+  display:flex;
+  flex-direction:column;
+}
+
+.center-site.center-fintech .center-member-team-person img{
+  margin-bottom:8px;
+}
+
+.center-site.center-fintech .center-member-team-person span{
+  display:block;
+  color:#0f172a;
+  font-size:14px;
+  font-weight:800;
+  line-height:1.35;
+  text-align:center;
+}
+
 .center-site.center-fintech .center-member-card img{
   display:block;
   width:100%;
@@ -1225,6 +1254,10 @@
   .center-site.center-fintech .center-practice-grid,
   .center-site.center-fintech .center-member-grid{
     grid-template-columns:1fr;
+  }
+
+  .center-site.center-fintech .center-member-team-card{
+    grid-column:span 1;
   }
 
   .center-site.center-fintech .center-progress-section{
