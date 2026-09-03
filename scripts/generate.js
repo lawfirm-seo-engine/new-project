@@ -2681,14 +2681,14 @@ function createCenterMembersContent(group) {
       </div>
       <div class="center-member-grid">
         ${members.map((member) => member.team ? `<article class="center-member-card center-member-team-card">
-          <strong>${escapeHtml(member.name)}</strong>
-          <p>${escapeHtml(member.description)}</p>
           <div class="center-member-team-grid">
             ${member.team.map((tm) => `<div class="center-member-team-person">
               <img src="/assets/center-fintech/members/${tm.photo}.webp" alt="${escapeHtml(tm.name)}" loading="lazy">
               <span>${escapeHtml(tm.name)}</span>
             </div>`).join("\n")}
           </div>
+          <strong>${escapeHtml(member.name)}</strong>
+          <p>${escapeHtml(member.description)}</p>
         </article>` : `<article class="center-member-card">
           ${member.photo ? `<img src="/assets/center-fintech/members/${member.photo}.webp" alt="${escapeHtml(member.name)}" loading="lazy">` : ""}
           <strong>${escapeHtml(member.name)}</strong>
