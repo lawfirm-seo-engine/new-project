@@ -129329,7 +129329,7 @@
     "caseName": "HB투자그룹 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-27",
-    "updatedAt": "2026-08-27",
+    "updatedAt": "2026-09-04",
     "thumbnailUrl": "",
     "landingViews": 5402,
     "reports": 8,
@@ -129343,7 +129343,9 @@
       "증거보존"
     ],
     "memo": "",
-    "noindex": false,
+    "noindex": true,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
