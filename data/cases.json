@@ -60003,7 +60003,7 @@
     "caseName": "SK AI 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-07-09",
-    "updatedAt": "2026-07-09",
+    "updatedAt": "2026-09-04",
     "thumbnailUrl": "",
     "landingViews": 6068,
     "reports": 28,
@@ -60018,8 +60018,19 @@
       "증거보존"
     ],
     "memo": "",
+    "noindex": true,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "fraudType": "",
+    "memos": [
+      {
+        "id": 1786781411314,
+        "text": "SK AI 사칭 사기 사건 현재 접수중 입니다.",
+        "createdAt": "2026-08-15 17:09"
+      }
+    ]
   },
   {
     "slug": "erriteu-peuraim13gi",
@@ -106351,7 +106362,8 @@
       {
         "id": 1786780507418,
         "text": "milestone 사칭 사기 사건 현재 접수중 입니다.",
-        "createdAt": "2026-08-15 16:55"
+        "createdAt": "2026-08-15 16:55",
+        "editedAt": "2026-08-21 23:52"
       }
     ]
   },
