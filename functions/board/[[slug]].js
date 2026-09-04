@@ -32,7 +32,8 @@ async function renderList(env) {
 function renderPost(post) {
   const title = criminalBoardTitle(post);
   const description = criminalBoardDescription(post);
-  const body = renderMarkdown(post.body || "");
+  const rawBody = post.body || "";
+  const body = isRichHtmlBody(rawBody) ? sanitizeRichHtml(rawBody) : renderMarkdown(rawBody);
   return layout({ title: `${title} | 법무법인 선린`, description, canonical: criminalBoardPostUrl(post.slug), body: `<main class="article"><nav><a href="/board/">법률정보</a> / ${esc(post.category || "피해 대응")}</nav><header><span class="category">${esc(post.category || "피해 대응")}</span><h1>${esc(post.title)}</h1><div class="date">${esc(post.publishedAt || criminalBoardLastModified(post))}</div></header>${post.thumbnailUrl ? `<figure><img src="${esc(post.thumbnailUrl)}" alt="${esc(post.title)}" loading="eager"></figure>` : ""}<section class="content">${body}</section><div class="back"><a href="/board/">← 목록으로</a></div></main>` });
 }
 
@@ -102,6 +103,66 @@ function renderMarkdown(source) {
     closeList(); out += `<p>${esc(line)}</p>`;
   }
   closeList(); return out;
+}
+
+// 관리자 게시글 작성 화면의 서식 툴바(폰트크기·줄간격·문장간격·볼드·색상·밑줄·정렬)는
+// 결과물을 HTML로 저장한다. 기존 게시글(순수 텍스트/마크다운)은 renderMarkdown으로
+// 계속 처리하고, HTML 태그가 포함된 새 게시글만 이 경로로 렌더링한다.
+function isRichHtmlBody(value = "") {
+  return /<\/?[a-z][\s\S]*>/i.test(String(value || ""));
+}
+
+const RICH_ALLOWED_TAGS = new Set([
+  "p", "div", "span", "br", "strong", "b", "em", "i", "u",
+  "a", "img", "ul", "ol", "li", "h2", "h3", "h4", "blockquote", "figure", "figcaption",
+]);
+const RICH_ALLOWED_ATTRS = new Set(["style", "href", "src", "alt", "loading"]);
+const RICH_SAFE_STYLE_PROP = /^(color|background-color|font-size|font-weight|font-style|text-decoration(-line)?|text-align|line-height|letter-spacing)$/i;
+const RICH_SAFE_STYLE_VALUE = /^[a-zA-Z0-9#.,%\-\s()]+$/;
+
+function sanitizeRichStyle(styleValue = "") {
+  return String(styleValue)
+    .split(";")
+    .map((rule) => {
+      const idx = rule.indexOf(":");
+      if (idx < 0) return "";
+      const prop = rule.slice(0, idx).trim().toLowerCase();
+      const value = rule.slice(idx + 1).trim();
+      if (!RICH_SAFE_STYLE_PROP.test(prop) || !value || !RICH_SAFE_STYLE_VALUE.test(value)) return "";
+      return `${prop}:${value}`;
+    })
+    .filter(Boolean)
+    .join(";");
+}
+
+function sanitizeRichHtml(source = "") {
+  let out = String(source || "")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<(script|style|iframe|object|embed|link|meta|form|button|input|textarea|select)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
+    .replace(/<(script|style|iframe|object|embed|link|meta|form|button|input|textarea|select)\b[^>]*\/?>/gi, "");
+
+  out = out.replace(/<\/?([a-zA-Z0-9]+)([^>]*)>/g, (match, tagRaw, attrsRaw) => {
+    const tag = tagRaw.toLowerCase();
+    if (!RICH_ALLOWED_TAGS.has(tag)) return "";
+    if (match.startsWith("</")) return `</${tag}>`;
+
+    let attrs = "";
+    const attrRe = /([a-zA-Z-]+)\s*=\s*"([^"]*)"|([a-zA-Z-]+)\s*=\s*'([^']*)'/g;
+    let m;
+    while ((m = attrRe.exec(attrsRaw))) {
+      const name = (m[1] || m[3] || "").toLowerCase();
+      let value = m[2] ?? m[4] ?? "";
+      if (!RICH_ALLOWED_ATTRS.has(name)) continue;
+      if ((name === "href" || name === "src") && /^\s*javascript:/i.test(value)) continue;
+      if (name === "style") value = sanitizeRichStyle(value);
+      if (!value) continue;
+      attrs += ` ${name}="${value.replace(/"/g, "&quot;")}"`;
+    }
+    const selfClosing = tag === "br" || tag === "img";
+    return `<${tag}${attrs}${selfClosing ? " /" : ""}>`;
+  });
+
+  return out;
 }
 
 function notFound() { return layout({ title:"게시글을 찾을 수 없습니다 | 법무법인 선린", description:"요청하신 게시글을 찾을 수 없습니다.", canonical:`${CRIMINAL_BOARD_SITE_URL}/board/`, body:`<main class="article"><h1>게시글을 찾을 수 없습니다.</h1><div class="back"><a href="/board/">게시판으로 이동</a></div></main>` }); }
