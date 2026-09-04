@@ -122,9 +122,7 @@ export async function onRequestPost(context) {
 
     if (env.CASES) {
       await env.CASES.put(`case:${slug}`, JSON.stringify(item));
-      const index = await loadIndexFromKv(env);
-      upsertIndex(index, item);
-      await env.CASES.put("cases:index", JSON.stringify(index));
+      await upsertIndexSafely(env, item);
       if (!batchMode) context.waitUntil?.(upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} readingroom landing ${slug}`).catch(() => {}));
 
       const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
@@ -195,6 +193,26 @@ function upsertIndex(index, item) {
   if (pos >= 0) index[pos] = entry;
   else index.push(entry);
   index.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+}
+
+// cases:index는 "읽기 → 메모리에서 갱신 → 통째로 쓰기" 방식이라, 리딩방 랜딩을 대량
+// 생성/수정할 때 요청이 겹치면 나중에 쓰는 쪽이 먼저 쓴 쪽의 변경분을 덮어써 인덱스에서
+// 유실될 수 있다(case:{slug} 본문은 살아있는데 목록·통계·사이트맵에서만 사라지는 증상 —
+// 실제로 리딩방 대량 생성 시 발생 확인됨). 쓰기 직후 재조회로 반영을 확인하고, 실패하면
+// 최신 인덱스를 다시 읽어 재시도한다. functions/api/create-case.js의 appendToIndexSafely와
+// 동일한 패턴을 upsert(기존 항목 갱신도 가능)로 일반화했다.
+async function upsertIndexSafely(env, item, maxAttempts = 5) {
+  const entry = buildIndexEntry(item);
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const index = await loadIndexFromKv(env);
+    upsertIndex(index, item);
+    await env.CASES.put("cases:index", JSON.stringify(index));
+
+    const verifyRaw = await env.CASES.get("cases:index");
+    const verifyIndex = verifyRaw ? JSON.parse(verifyRaw) : [];
+    const verifyEntry = verifyIndex.find((c) => c.slug === entry.slug);
+    if (verifyEntry && JSON.stringify(verifyEntry) === JSON.stringify(entry)) return;
+  }
 }
 
 function buildIndexEntry(item) {
