@@ -13,7 +13,9 @@ export async function onRequest({ request, env, params }) {
   const url = new URL(request.url);
   if (url.hostname !== "gnlaw-criminal.co.kr" && url.hostname !== "www.gnlaw-criminal.co.kr") return new Response("Not Found", { status: 404 });
 
-  const slug = String(params?.slug || "").replace(/^\/+|\/+$/g, "");
+  const rawSlug = String(params?.slug || "").replace(/^\/+|\/+$/g, "");
+  let slug = rawSlug;
+  try { slug = decodeURIComponent(rawSlug); } catch { /* keep raw slug if malformed */ }
   if (!slug) return renderList(env);
 
   const post = await getCriminalBoardPost(env, slug);
