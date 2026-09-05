@@ -19,7 +19,9 @@
     input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e3;border-radius:8px;background:#fff;color:#172033}
     button{border:0;border-radius:8px;background:#1f4fd8;color:#fff;font-weight:800;cursor:pointer}
     button:disabled{opacity:.55;cursor:not-allowed}
-    .generate{grid-column:1/-1;min-height:46px;margin-top:2px}
+    .form-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:2px}
+    .generate,.reset{min-height:46px}
+    .reset{padding:0 20px;background:#66758b}
     #message{min-height:22px;margin:14px 2px 0;color:#3f5f91;font-size:13px;white-space:pre-wrap}
     .result{display:none;margin-top:22px}
     .result.visible{display:block}
@@ -31,7 +33,7 @@
     #titleOutput{margin-bottom:12px;font-weight:800}
     #bodyOutput{min-height:720px;line-height:1.75;resize:vertical;white-space:pre-wrap}
     .note{margin:12px 0 0;padding:12px 14px;border-radius:8px;background:#f0faf4;color:#246b42;font-size:13px;line-height:1.55}
-    @media(max-width:720px){.form-grid{grid-template-columns:1fr}.wrap{padding:20px 14px 40px}.result-head{align-items:flex-start;flex-direction:column}.copy-group{width:100%}.copy{flex:1}}
+    @media(max-width:720px){.form-grid{grid-template-columns:1fr}.form-actions{grid-template-columns:1fr}.wrap{padding:20px 14px 40px}.result-head{align-items:flex-start;flex-direction:column}.copy-group{width:100%}.copy{flex:1}}
   </style>
 </head>
 <body>
@@ -55,7 +57,10 @@
           <option value="refund-reward">환불·보상금 지급 사칭형</option>
         </select>
       </label>
-      <button id="generate" class="generate" type="button">네이버카페 원고 생성</button>
+      <div class="form-actions">
+        <button id="generate" class="generate" type="button">네이버카페 원고 생성</button>
+        <button id="reset" class="reset" type="button">초기화</button>
+      </div>
     </div>
     <div id="message" aria-live="polite"></div>
   </section>
@@ -81,13 +86,16 @@
   const caseNameEl = document.getElementById("caseName");
   const fraudTypeEl = document.getElementById("fraudType");
   const generateEl = document.getElementById("generate");
+  const resetEl = document.getElementById("reset");
   const messageEl = document.getElementById("message");
   const resultEl = document.getElementById("result");
   const titleOutputEl = document.getElementById("titleOutput");
   const bodyOutputEl = document.getElementById("bodyOutput");
   const API_ORIGIN = location.protocol === "file:" ? "https://gnlaw-criminal.co.kr" : "";
+  let requestVersion = 0;
 
   async function requestDraft() {
+    const currentRequest = ++requestVersion;
     const caseName = caseNameEl.value.trim().replace(/\s+/g, " ");
     const fraudType = fraudTypeEl.value;
     resultEl.classList.remove("visible");
@@ -107,6 +115,7 @@
       let data;
       try { data = JSON.parse(text); }
       catch { throw new Error(`서버 응답 형식 오류 (${response.status})`); }
+      if (currentRequest !== requestVersion) return;
       if (!response.ok || !data.ok) throw new Error(data.message || "원고 생성 실패");
 
       titleOutputEl.value = data.draft.title;
@@ -115,10 +124,23 @@
       showMessage("원고 생성 완료. 제목과 본문을 검토한 뒤 복사하세요.");
       resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
+      if (currentRequest !== requestVersion) return;
       showMessage(`원고 생성 오류: ${error.message}`, true);
     } finally {
-      generateEl.disabled = false;
+      if (currentRequest === requestVersion) generateEl.disabled = false;
     }
+  }
+
+  function resetDraft() {
+    requestVersion += 1;
+    caseNameEl.value = "";
+    fraudTypeEl.value = "";
+    titleOutputEl.value = "";
+    bodyOutputEl.value = "";
+    resultEl.classList.remove("visible");
+    generateEl.disabled = false;
+    showMessage("");
+    caseNameEl.focus();
   }
 
   function showMessage(text, isError = false) {
@@ -138,6 +160,7 @@
   }
 
   generateEl.addEventListener("click", requestDraft);
+  resetEl.addEventListener("click", resetDraft);
   caseNameEl.addEventListener("keydown", (event) => { if (event.key === "Enter") requestDraft(); });
   document.getElementById("copyTitle").addEventListener("click", (event) => copyText(titleOutputEl.value, event.currentTarget));
   document.getElementById("copyBody").addEventListener("click", (event) => copyText(bodyOutputEl.value, event.currentTarget));

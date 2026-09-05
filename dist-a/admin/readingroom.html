@@ -5,7 +5,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>리딩방 랜딩 대량 생성</title>
-  <link rel="stylesheet" href="/admin/category-bulk.css?v=20260820-1">
+  <link rel="stylesheet" href="/admin/category-bulk.css?v=20260905-1">
 </head>
 <body>
   <main class="bulk-wrap">
@@ -15,11 +15,12 @@
     </header>
     <section class="bulk-card">
       <div class="bulk-table-scroll"><table>
-        <thead><tr><th style="width:48px">No.</th><th>사건명</th><th style="width:260px">유형</th><th style="width:220px">URL slug (선택)</th><th style="width:70px">생성</th><th style="width:220px">결과</th></tr></thead>
+        <thead><tr><th style="width:48px">No.</th><th>사건명</th><th style="width:240px">유형</th><th style="width:190px">URL slug (선택)</th><th style="width:72px">유사도</th><th style="width:250px">중복 검사</th><th style="width:70px">생성</th><th style="width:200px">결과</th></tr></thead>
         <tbody id="bulkRows"></tbody>
       </table></div>
-      <p class="bulk-help">사건명과 유형을 선택하면 기존 리딩방 전용 규칙에 따라 제목·원고·메타 정보가 자동 생성됩니다.</p>
+      <p class="bulk-help">먼저 중복 검사를 실행하세요. 100% 중복 항목은 기본 선택에서 제외되지만, 실제로 다른 사건이라고 판단한 경우 생성 체크박스를 직접 선택해 만들 수 있습니다. 같은 URL slug가 이미 있다면 별도 slug를 입력하세요.</p>
       <div class="bulk-actions">
+        <button id="bulkCheckButton" class="btn sec" type="button" disabled>중복 검사</button>
         <button id="bulkCreateButton" class="btn" type="button" disabled>선택한 리딩방 랜딩 대량 생성</button>
         <button id="bulkSelectAllButton" class="btn light" type="button">전체 선택</button><button id="bulkClearAllButton" class="btn light" type="button">전체 해제</button>
         <button id="bulkRefreshButton" class="btn sec" type="button">🔄 새로고침 (새 30개)</button><span id="bulkMessage" class="bulk-message"></span>
@@ -30,6 +31,8 @@
   <script>
     window.CATEGORY_BULK_CONFIG={
       endpoint:"/api/create-readingroom-landing",
+      duplicateCheck:true,
+      duplicateEndpoint:"/api/batch-check-cases",
       placeholder:"사건명 또는 사칭 명칭",
       mode:"readingroom",
       typeOptions:[
@@ -40,6 +43,6 @@
       ]
     };
   </script>
-  <script src="/admin/category-bulk.js?v=20260820-1"></script>
+  <script src="/admin/category-bulk.js?v=20260905-1"></script>
 </body>
 </html>

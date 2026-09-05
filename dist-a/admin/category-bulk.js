@@ -4,9 +4,12 @@
   const config = window.CATEGORY_BULK_CONFIG || {};
   const INITIAL_ROWS = 30;
   const MAX_ROWS = 30;
+  const duplicateCheckEnabled = config.duplicateCheck === true;
+  const duplicateEndpoint = config.duplicateEndpoint || "/api/batch-check-cases";
   const API_ORIGIN = location.protocol === "file:" ? "https://gnlaw-criminal.co.kr" : "";
   const tbody = document.getElementById("bulkRows");
   const createButton = document.getElementById("bulkCreateButton");
+  const checkButton = document.getElementById("bulkCheckButton");
   const refreshButton = document.getElementById("bulkRefreshButton");
   const selectAllButton = document.getElementById("bulkSelectAllButton");
   const clearAllButton = document.getElementById("bulkClearAllButton");
@@ -15,6 +18,7 @@
   const progressBar = document.getElementById("bulkProgressBar");
   const progressText = document.getElementById("bulkProgressText");
   let isCreating = false;
+  let isChecking = false;
 
   if (!tbody || !createButton || !config.endpoint) return;
 
@@ -28,6 +32,7 @@
         <td><input type="text" id="bulk-value-${index}" placeholder="${escapeAttribute(config.placeholder || "생성할 제목 입력")}" autocomplete="off"></td>
         ${renderTypeCell(index)}
         <td><input type="text" id="bulk-slug-${index}" placeholder="비워두면 자동 생성" autocomplete="off"></td>
+        ${renderDuplicateCells(index)}
         <td style="text-align:center"><input type="checkbox" id="bulk-select-${index}" aria-label="${index}번 항목 생성" disabled></td>
         <td class="bulk-result" id="bulk-result-${index}"></td>`;
       tbody.appendChild(row);
@@ -36,8 +41,8 @@
       const checkbox = document.getElementById(`bulk-select-${index}`);
       input.addEventListener("input", function(){
         const hasValue = Boolean(clean(input.value));
-        checkbox.disabled = !hasValue;
-        checkbox.checked = hasValue;
+        checkbox.disabled = duplicateCheckEnabled || !hasValue;
+        checkbox.checked = duplicateCheckEnabled ? false : hasValue;
         clearResult(index);
         updateCreateButton();
       });
@@ -61,6 +66,22 @@
     }).join("")}</select></td>`;
   }
 
+  function renderDuplicateCells(index){
+    if (!duplicateCheckEnabled) return "";
+    return `<td class="bulk-score" id="bulk-score-${index}">-</td><td class="bulk-duplicate" id="bulk-duplicate-${index}"></td>`;
+  }
+
+  function collectCheckItems(){
+    const items = [];
+    for (let index = 1; index <= MAX_ROWS; index += 1) {
+      const value = clean(document.getElementById(`bulk-value-${index}`)?.value || "");
+      if (!value) continue;
+      const fraudType = document.getElementById(`bulk-type-${index}`)?.value || "";
+      items.push({ caseName: value, fraudType, _row: index });
+    }
+    return items;
+  }
+
   function collectSelected(){
     const items = [];
     for (let index = 1; index <= MAX_ROWS; index += 1) {
@@ -71,25 +92,27 @@
       if (!value) continue;
       const slug = normalizeSlug(document.getElementById(`bulk-slug-${index}`)?.value || "");
       const type = document.getElementById(`bulk-type-${index}`)?.value || "";
-      items.push({ index, value, slug, type });
+      items.push({ index, value, slug, type, manualDuplicateOverride: checkbox.dataset.blocked === "1" });
     }
     return items;
   }
 
   function buildPayload(item){
     if (config.mode === "readingroom") {
-      return { caseName: item.value, type: item.type, ...(item.slug ? { slug: item.slug } : {}), batchMode: true };
+      return { caseName: item.value, type: item.type, ...(item.slug ? { slug: item.slug } : {}), batchMode: true, ...(item.manualDuplicateOverride ? { manualDuplicateOverride: true } : {}) };
     }
     return { title: item.value, ...(item.slug ? { slug: item.slug } : {}), batchMode: true };
   }
 
   async function runBulkCreate(){
-    if (isCreating) return;
+    if (isCreating || isChecking) return;
     const items = collectSelected();
     if (!items.length) {
       setMessage("생성할 항목을 1개 이상 입력하고 선택하세요.", "err");
       return;
     }
+    const manualOverrides = items.filter((item) => item.manualDuplicateOverride);
+    if (manualOverrides.length && !window.confirm(`100% 중복으로 표시된 ${manualOverrides.length}개 항목을 수동 판단으로 생성합니다. 실제로 다른 사건인지 확인했습니까?`)) return;
 
     isCreating = true;
     setControlsDisabled(true);
@@ -137,6 +160,83 @@
     isCreating = false;
     setControlsDisabled(false);
     updateCreateButton();
+  }
+
+  async function runDuplicateCheck(){
+    if (!duplicateCheckEnabled || isChecking || isCreating) return;
+    const items = collectCheckItems();
+    if (!items.length) {
+      setMessage("중복 검사할 사건명을 1개 이상 입력하세요.", "err");
+      return;
+    }
+
+    isChecking = true;
+    setControlsDisabled(true);
+    setMessage("중복 검사 중...", "info");
+
+    try {
+      const results = [];
+      const chunkSize = 5;
+      for (let start = 0; start < items.length; start += chunkSize) {
+        const chunk = items.slice(start, start + chunkSize);
+        setMessage(`중복 검사 중... ${start + 1}-${start + chunk.length} / ${items.length}`, "info");
+        results.push(...await requestCheckChunk(chunk));
+      }
+
+      let selectedCount = 0;
+      results.forEach(function(result, position){
+        const index = items[position]._row;
+        const score = document.getElementById(`bulk-score-${index}`);
+        const duplicate = document.getElementById(`bulk-duplicate-${index}`);
+        const checkbox = document.getElementById(`bulk-select-${index}`);
+        const row = document.getElementById(`bulk-row-${index}`);
+        if (!score || !duplicate || !checkbox) return;
+
+        const percentage = result.score > 0 ? `${Math.round(result.score * 100)}%` : "-";
+        const statusClass = { pass: "st-pass", warning: "st-warning", blocked: "st-blocked" }[result.status] || "st-pass";
+        const statusLabel = { pass: "✅ 통과", warning: "⚠️ 주의", blocked: "🚫 중복" }[result.status] || "검사 완료";
+        score.textContent = percentage;
+        let html = `<span class="status-badge ${statusClass}">${statusLabel}</span>`;
+        if (Array.isArray(result.matches) && result.matches.length) {
+          html += `<div class="similar-list">${result.matches.map(function(match){
+            const url = match.url || "";
+            const link = url ? ` <a href="${escapeAttribute(url)}" target="_blank" rel="noopener">보기</a>` : "";
+            return `• ${escapeHtml(match.caseName || "기존 사건")} (${Math.round(Number(match.score || 0) * 100)}%)${link}`;
+          }).join("<br>")}</div>`;
+        }
+        if (result.status === "blocked") {
+          html += '<div class="manual-note">다른 사건이면 생성 체크박스를 직접 선택하세요.</div>';
+        }
+        duplicate.innerHTML = html;
+
+        checkbox.disabled = false;
+        checkbox.checked = result.status !== "blocked";
+        checkbox.dataset.blocked = result.status === "blocked" ? "1" : "";
+        if (row) row.className = result.status === "blocked" ? "duplicate-blocked" : "";
+        if (checkbox.checked) selectedCount += 1;
+      });
+
+      setMessage(`중복 검사 완료: ${results.length}건 중 ${selectedCount}건 자동 선택됨. 100% 중복 항목도 수동 선택할 수 있습니다.`, "ok");
+    } catch (error) {
+      setMessage(`중복 검사 오류: ${error.message || error}`, "err");
+    } finally {
+      isChecking = false;
+      setControlsDisabled(false);
+      updateCreateButton();
+    }
+  }
+
+  async function requestCheckChunk(items){
+    const response = await postJson(duplicateEndpoint, {
+      items: items.map(function(item){ return { caseName: item.caseName, fraudType: item.fraudType }; }),
+    });
+    if (!response.data.ok) throw new Error(response.data.message || `중복 검사 실패 (HTTP ${response.status})`);
+    const results = Array.isArray(response.data.results) ? response.data.results : [];
+    if (results.length < items.length) {
+      const remaining = items.slice(results.length);
+      return [...results, ...await requestCheckChunk(remaining)];
+    }
+    return results;
   }
 
   async function postJson(path, payload, attempt){
@@ -211,7 +311,9 @@
   function selectAll(value){
     for (let index = 1; index <= MAX_ROWS; index += 1) {
       const checkbox = document.getElementById(`bulk-select-${index}`);
-      if (checkbox && !checkbox.disabled) checkbox.checked = value;
+      if (!checkbox || checkbox.disabled) continue;
+      if (value && checkbox.dataset.blocked === "1") continue;
+      checkbox.checked = value;
     }
     updateCreateButton();
   }
@@ -228,6 +330,18 @@
     const result = document.getElementById(`bulk-result-${index}`);
     if (row) row.className = "";
     if (result) result.innerHTML = "";
+    if (duplicateCheckEnabled) {
+      const score = document.getElementById(`bulk-score-${index}`);
+      const duplicate = document.getElementById(`bulk-duplicate-${index}`);
+      const checkbox = document.getElementById(`bulk-select-${index}`);
+      if (score) score.textContent = "-";
+      if (duplicate) duplicate.innerHTML = "";
+      if (checkbox) {
+        checkbox.disabled = true;
+        checkbox.checked = false;
+        checkbox.dataset.blocked = "";
+      }
+    }
   }
 
   function setControlsDisabled(disabled){
@@ -235,10 +349,12 @@
     refreshButton.disabled = disabled;
     selectAllButton.disabled = disabled;
     clearAllButton.disabled = disabled;
+    if (checkButton) checkButton.disabled = disabled;
   }
 
   function updateCreateButton(){
     createButton.disabled = isCreating || collectSelected().length === 0;
+    if (checkButton) checkButton.disabled = isCreating || isChecking || collectCheckItems().length === 0;
   }
 
   function showProgress(done, total){
@@ -269,6 +385,7 @@
   function escapeAttribute(value){ return escapeHtml(value).replace(/"/g, "&quot;"); }
 
   createButton.addEventListener("click", runBulkCreate);
+  if (checkButton) checkButton.addEventListener("click", runDuplicateCheck);
   refreshButton.addEventListener("click", resetRows);
   selectAllButton.addEventListener("click", function(){ selectAll(true); });
   clearAllButton.addEventListener("click", function(){ selectAll(false); });

@@ -9,6 +9,8 @@ import {
   standardVictimCases,
 } from "../_standardLanding.js";
 
+const RELATED_READINGROOM_CTA = "다른 리딩방 사기 사건 보기는 이곳 📌 https://gnlaw-criminal.co.kr/prosecute/jusigridingbang-litigation/";
+
 export async function onRequestPost(context) {
   try {
     const body = await context.request.json();
@@ -133,6 +135,7 @@ function renderPlainText(sections, hashtags) {
     (section.bullets || []).forEach((item) => blocks.push(`- ${item}`));
   });
   blocks.push(hashtags.map((tag) => `#${tag}`).join(" "));
+  blocks.push(RELATED_READINGROOM_CTA);
   return blocks.join("\n\n");
 }
 
