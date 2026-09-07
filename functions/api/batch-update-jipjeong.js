@@ -133,10 +133,10 @@ export async function onRequestPost(context) {
     const updated = [];
     const errors = [];
 
-    for (const entry of targets) {
+    await Promise.all(targets.map(async (entry) => {
       try {
         const raw = await env.CASES.get(`case:${entry.slug}`);
-        if (!raw) { errors.push({ slug: entry.slug, error: "KV 데이터 없음" }); continue; }
+        if (!raw) { errors.push({ slug: entry.slug, error: "KV 데이터 없음" }); return; }
 
         const caseData = JSON.parse(raw);
         const title = removeJongnoLawyerPhrase(caseData.caseName || entry.caseName || "");
@@ -181,7 +181,7 @@ export async function onRequestPost(context) {
       } catch (e) {
         errors.push({ slug: entry.slug, error: e.message });
       }
-    }
+    }));
 
     // 갱신된 index를 KV에 저장
     if (updated.length) {
