@@ -104,21 +104,29 @@ const TEMPLATE_BODY = [
 const TEMPLATE_SUMMARY = `${TPLB} ${TPLA}은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. ${TPLB} ${TPLA} ${TPLR}변호사가 지급정지 원인, ${TPLA} 절차, 준비해야 할 자료와 주요 유의사항을 자세히 안내합니다.`;
 
 export async function onRequestPost(context) {
-  const { env } = context;
+  const { request, env } = context;
 
   if (!env.CASES) {
     return json({ ok: false, message: "KV 바인딩 없음" }, 500);
   }
 
   try {
+    const body = await request.json().catch(() => ({}));
+    const offset = Math.max(0, Number.parseInt(body.offset, 10) || 0);
+    const limit = Math.min(200, Math.max(1, Number.parseInt(body.limit, 10) || 100));
     const idxRaw = await env.CASES.get("cases:index");
     if (!idxRaw) return json({ ok: false, message: "cases:index 없음" }, 500);
 
     const index = JSON.parse(idxRaw);
-    const targets = index.filter((c) => c.createdBy === "jipjeong-manual");
+    const allTargets = index.filter((c) => c.createdBy === "jipjeong-manual");
+    const targets = allTargets.slice(offset, offset + limit);
+
+    if (!allTargets.length) {
+      return json({ ok: true, total: 0, updated: 0, message: "jipjeong-manual 케이스 없음" });
+    }
 
     if (!targets.length) {
-      return json({ ok: true, total: 0, updated: 0, message: "jipjeong-manual 케이스 없음" });
+      return json({ ok: true, total: allTargets.length, offset, processed: 0, updated: 0, errors: 0, nextOffset: null });
     }
 
     const now = today();
@@ -164,6 +172,7 @@ export async function onRequestPost(context) {
             index[idxPos].summary = newMeta.summary;
             index[idxPos].tags = (Array.isArray(index[idxPos].tags) ? index[idxPos].tags : [])
               .filter((tag) => !String(tag || "").includes("종로변호사"));
+            if (index[idxPos].landings?.c) index[idxPos].landings.c = caseData.landings.c;
             index[idxPos].updatedAt = now;
           }
 
@@ -176,18 +185,23 @@ export async function onRequestPost(context) {
 
     // 갱신된 index를 KV에 저장
     if (updated.length) {
-      index.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+      const isLastChunk = offset + targets.length >= allTargets.length;
+      if (isLastChunk) index.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
       await env.CASES.put("cases:index", JSON.stringify(index));
 
-      // GitHub 동기화 (waitUntil 없이 백그라운드 시도)
-      context.waitUntil?.(syncToGitHub(env, index).catch(() => {}));
+      if (isLastChunk) context.waitUntil?.(syncToGitHub(env, index).catch(() => {}));
     }
+
+    const nextOffset = offset + targets.length < allTargets.length ? offset + targets.length : null;
 
     return json({
       ok: true,
-      total: targets.length,
+      total: allTargets.length,
+      offset,
+      processed: targets.length,
       updated: updated.length,
       errors: errors.length,
+      nextOffset,
       cases: updated,
       errorList: errors,
     });

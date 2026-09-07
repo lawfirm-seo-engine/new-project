@@ -53,10 +53,25 @@
       button.disabled = true;
       button.textContent = "업데이트 중...";
       try {
-        const response = await fetch("/api/batch-update-jipjeong", { method: "POST" });
-        const data = await response.json();
-        if (!data.ok) throw new Error(data.message || "업데이트 실패");
-        alert(`완료!\n총 ${data.total}건 중 ${data.updated}건 업데이트${data.errors ? ` / 오류 ${data.errors}건` : ""}`);
+        let offset = 0;
+        let total = 0;
+        let updated = 0;
+        let errors = 0;
+        do {
+          const response = await fetch("/api/batch-update-jipjeong", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ offset, limit: 100 })
+          });
+          const data = await response.json();
+          if (!response.ok || !data.ok) throw new Error(data.message || "업데이트 실패");
+          total = data.total;
+          updated += data.updated;
+          errors += data.errors;
+          offset = data.nextOffset;
+          button.textContent = offset === null ? "업데이트 완료" : `업데이트 중... ${Math.min(offset, total)}/${total}`;
+        } while (offset !== null);
+        alert(`완료!\n총 ${total}건 중 ${updated}건 업데이트${errors ? ` / 오류 ${errors}건` : ""}`);
       } catch (error) {
         alert("오류: " + error.message);
       } finally {
