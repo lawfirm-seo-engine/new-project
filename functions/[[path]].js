@@ -1566,7 +1566,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     schema,
     bodyClass: `${group.bodyClass}${String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr" ? " center-site center-fintech" : ""} landing-page${lk === "c" ? " recovery-landing-page" : ""}`,
     styleHref: lk === "c"
-      ? "/assets/style.css?v=20260813-recovery-landing-v1"
+      ? "/assets/style.css?v=20260907-recovery-heading-v2"
       : String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
         ? "/assets/style.css?v=20260825-mobile-header-match"
         : "/assets/style.css?v=20260820-nav-fix-v1",
@@ -1671,8 +1671,8 @@ function normalizeManualBodyText(value = "") {
     );
 }
 
-function renderManualBodyArray(items) {
-  return renderManualArticleParts(items);
+function renderManualBodyArray(items, options = {}) {
+  return renderManualArticleParts(items, options);
   const parts = [];
   let listBuf = [];
   function flushList() {
@@ -1693,7 +1693,7 @@ function renderManualBodyArray(items) {
   return parts.join("\n");
 }
 
-function renderManualArticleParts(input) {
+function renderManualArticleParts(input, { preferExplicitLists = false } = {}) {
   const lines = manualInputToLines(input);
   const parts = [];
   let paragraph = [];
@@ -1725,7 +1725,7 @@ function renderManualArticleParts(input) {
     const line = normalizeManualBodyText(String(lines[index] || "").trim());
     if (!line) {
       flushParagraph();
-      flushList();
+      if (!preferExplicitLists) flushList();
       previousBlank = true;
       continue;
     }
@@ -1753,6 +1753,14 @@ function renderManualArticleParts(input) {
       continue;
     }
 
+    const explicitList = line.match(/^(?:[-*•·ㆍ✔☐]|[①-⑳])\s+(.+)/u);
+    if (preferExplicitLists && explicitList) {
+      flushParagraph();
+      listBuf.push(explicitList[1]);
+      previousBlank = false;
+      continue;
+    }
+
     const nextLine = nextManualLine(lines, index);
     const inferredHeading = inferManualHeadingLevel(line, { previousBlank, nextLine, hasH2 });
     if (inferredHeading) {
@@ -1761,7 +1769,7 @@ function renderManualArticleParts(input) {
       continue;
     }
 
-    const bullet = line.match(/^(?:[-*•·ㆍ]|[①-⑳])\s+(.+)/u);
+    const bullet = explicitList;
     if (bullet) {
       flushParagraph();
       listBuf.push(bullet[1]);
@@ -1939,15 +1947,15 @@ function createRecoveryManualContent(landing, group, caseData) {
   const slug = esc(caseData.slug);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
   const manualTitle = landing.h1 || landing.title || caseData.caseName || "";
+  const isRecoveryLanding = (group.landingKey || group.key) === "c";
   const rawManualBody = Array.isArray(landing.body)
     ? stripLeadingDuplicateManualTitle(landing.body, manualTitle)
     : landing.body;
   const bodyHtml = Array.isArray(rawManualBody)
-    ? renderManualBodyArray(rawManualBody)
+    ? renderManualBodyArray(rawManualBody, { preferExplicitLists: isRecoveryLanding })
     : renderManualArticle(String(rawManualBody || ""));
   const memoSection = renderOperatorMemos(caseData);
   const currentProgressSection = renderCurrentProgressSection(landing, caseData, group.landingKey || group.key);
-  const isRecoveryLanding = (group.landingKey || group.key) === "c";
   return [
     MANUAL_BODY_STYLE,
     isRecoveryLanding ? createRecoveryLandingUpdatedNote() : "",

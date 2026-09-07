@@ -16,77 +16,109 @@ const CREATED_BY = "jipjeong-manual";
 
 // ─── 기준 템플릿 식별자 ─────────────────────────────────────────────────────
 // 참조 페이지: 한국산업은행-지급정지-해결-중랑변호사
-// BANK / REGION / ACTION 플레이스홀더를 치환하여 원고 생성
+// BANK / ACTION 플레이스홀더를 치환하여 원고 생성
 const TPLB = "BANK";    // 은행명
-const TPLR = "REGION";  // 지역명
 const TPLA = "ACTION";  // 행위 키워드 (지급정지 해결 / 지급정지 이의신청 / 계좌 지급정지 해제 등)
 
 const TEMPLATE_BODY = [
-  `${TPLB} ${TPLA} ${TPLR}변호사 — ${TPLB} ${TPLA}이란?`,
+  `## ${TPLB} ${TPLA}이란?`,
   `${TPLB} ${TPLA}은 금융사기 피해 신고 등으로 인해 지급정지된 계좌의 사실관계를 확인하고, 거래의 정당성을 객관적으로 설명하기 위한 절차를 의미합니다.`,
   `최근에는 보이스피싱, 투자사기, 가상자산 거래, 팀미션 사기, 중고거래 사기 등 다양한 유형의 금융사기로 인해 정상적인 거래를 한 계좌도 지급정지 대상이 되는 사례가 증가하고 있습니다. 따라서 지급정지 통보를 받았다면 지급정지 사유와 거래 경위를 먼저 확인하는 것이 중요합니다.`,
-  `${TPLB} ${TPLA} ${TPLR}변호사는 거래 구조와 지급정지 사유를 종합적으로 검토하여 필요한 자료를 준비하고 대응 방향을 안내합니다.`,
+  `### 법률 검토에서 확인하는 핵심`,
+  `${TPLB} ${TPLA}은 거래 구조와 지급정지 사유를 종합적으로 검토하여 필요한 자료를 준비하고 대응 방향을 정하는 과정이 중요합니다.`,
   `## ${TPLB} 지급정지가 발생하는 대표적인 원인`,
+  `### 자주 확인되는 지급정지 경위`,
   `다음과 같은 경우 지급정지가 이루어지는 사례가 자주 발생합니다.`,
-  `보이스피싱 피해금이 입금된 계좌로 확인된 경우 / 투자금 또는 리딩방 피해금이 유입된 경우 / 가상자산 거래 과정에서 피해금이 이동한 경우 / 중고거래 거래대금이 피해금으로 신고된 경우 / 타인에게 계좌를 제공하거나 명의를 빌려준 경우 / 오픈채팅·메신저 거래가 피해 신고와 연결된 경우`,
+  `- 보이스피싱 피해금이 입금된 계좌로 확인된 경우`,
+  `- 투자금 또는 리딩방 피해금이 유입된 경우`,
+  `- 가상자산 거래 과정에서 피해금이 이동한 경우`,
+  `- 중고거래 거래대금이 피해금으로 신고된 경우`,
+  `- 타인에게 계좌를 제공하거나 명의를 빌려준 경우`,
+  `- 오픈채팅·메신저 거래가 피해 신고와 연결된 경우`,
   `실제 거래 당사자가 범죄를 의도하지 않았더라도 거래 구조에 따라 지급정지가 이루어질 수 있으므로 자금 흐름과 거래 경위를 객관적으로 설명하는 자료가 중요합니다.`,
   `## ${TPLB} ${TPLA} 절차`,
+  `### 초기 확인 단계`,
   `지급정지 통보를 받았다면 일반적으로 다음과 같은 순서로 진행하는 것이 도움이 됩니다.`,
-  `✔ 지급정지 사유 확인`,
-  `✔ 신고 기관 확인`,
-  `✔ 계좌 거래내역 확보`,
-  `✔ 거래 상대방 정보 확인`,
-  `✔ 계약서 및 거래자료 정리`,
-  `✔ 자금 흐름 분석`,
-  `✔ 객관적인 소명자료 준비`,
-  `✔ ${TPLA} 절차 진행`,
+  `- 지급정지 사유 확인`,
+  `- 신고 기관 확인`,
+  `- 계좌 거래내역 확보`,
+  `- 거래 상대방 정보 확인`,
+  `### 자료와 대응 정리 단계`,
+  `- 계약서 및 거래자료 정리`,
+  `- 자금 흐름 분석`,
+  `- 객관적인 소명자료 준비`,
+  `- ${TPLA} 절차 진행`,
   `사안에 따라 금융기관의 검토와 수사기관의 절차가 함께 진행될 수 있으므로 초기 단계에서 충분한 자료를 확보하는 것이 중요합니다.`,
   `## ${TPLA}을 위해 준비해야 하는 자료`,
+  `### 기본 거래자료`,
   `${TPLB} ${TPLA}에서는 거래를 객관적으로 설명할 수 있는 자료를 충분히 준비하는 것이 중요합니다.`,
-  `대표적으로 다음과 같은 자료가 도움이 될 수 있습니다.`,
-  `계좌 거래내역 / 송금 영수증 / 계약서 / 거래명세서 / 세금계산서 / 문자 및 카카오톡 대화 / 이메일 기록 / 거래 상대방 정보 / 입금 요청 내역 / 사업 관련 증빙자료`,
+  `- 계좌 거래내역과 송금 영수증`,
+  `- 계약서, 거래명세서와 세금계산서`,
+  `- 문자, 카카오톡과 이메일 기록`,
+  `- 거래 상대방 정보와 입금 요청 내역`,
+  `- 사업 관련 증빙자료`,
+  `### 사실관계 설명자료`,
   `자료를 임의로 수정하거나 삭제하지 말고 원본 그대로 보관하는 것이 좋으며, 거래가 이루어진 과정을 시간순으로 정리하면 사실관계를 설명하는 데 도움이 될 수 있습니다.`,
   `## ${TPLA}을 위해 중요하게 확인하는 사항`,
+  `### 거래 목적과 자금 흐름 점검`,
   `${TPLB} ${TPLA}에서는 단순히 지급정지를 해제해 달라는 요청보다 거래의 실제 내용을 객관적으로 설명하는 것이 중요합니다.`,
-  `다음 사항을 미리 점검해 두는 것이 도움이 됩니다.`,
-  `거래 목적은 무엇이었는가 / 거래 상대방과 어떤 관계였는가 / 자금이 입금된 경위는 무엇인가 / 자금은 이후 어떻게 이동했는가 / 거래를 입증할 자료가 충분한가 / 일반적인 상거래로 설명할 수 있는 구조인가`,
+  `- 거래 목적은 무엇이었는가`,
+  `- 거래 상대방과 어떤 관계였는가`,
+  `- 자금이 입금된 경위는 무엇인가`,
+  `- 자금은 이후 어떻게 이동했는가`,
+  `- 거래를 입증할 자료가 충분한가`,
+  `- 일반적인 상거래로 설명할 수 있는 구조인가`,
   `위 내용을 객관적인 자료와 함께 정리하면 ${TPLA} 과정에서 사실관계를 설명하는 데 도움이 될 수 있습니다.`,
-  `## ${TPLR}변호사의 검토가 필요한 이유`,
+  `## 법률 검토가 필요한 이유`,
+  `### 민사·형사 절차와 연결될 가능성`,
   `${TPLB} ${TPLA}은 단순히 금융기관에 서류를 제출하는 것으로 마무리되는 경우도 있지만, 거래 구조와 사실관계에 따라 민사상 분쟁이나 형사절차와 연결될 가능성도 있습니다.`,
   `특히 보이스피싱, 투자사기, 가상자산 거래, 팀미션 사기, 오픈채팅 투자방 등에서는 여러 계좌를 거쳐 자금이 이동하는 경우가 많아 거래 경위와 자금 흐름을 객관적으로 설명할 수 있는 자료가 중요합니다.`,
-  `${TPLB} ${TPLA} ${TPLR}변호사는 지급정지 사유를 검토하고 거래 구조를 분석하여 필요한 증빙자료를 정리하고, 사건의 특성에 맞는 대응 방향을 안내합니다.`,
+  `${TPLB} ${TPLA}은 지급정지 사유와 거래 구조를 함께 분석하여 필요한 증빙자료를 정리하고, 사건의 특성에 맞는 대응 방향을 검토해야 합니다.`,
   `## ${TPLA}을 위해 확인해야 할 체크리스트`,
+  `### 우선 점검할 사항`,
   `지급정지 통보를 받았다면 다음 사항을 우선 점검하는 것이 좋습니다.`,
-  `☐ 지급정지 사유를 확인했는가`,
-  `☐ 신고 기관을 확인했는가`,
-  `☐ 계좌 거래내역을 확보했는가`,
-  `☐ 거래 상대방 정보를 정리했는가`,
-  `☐ 계약서와 거래명세서를 확보했는가`,
-  `☐ 문자·카카오톡·이메일을 삭제하지 않았는가`,
-  `☐ 송금 영수증을 보관하고 있는가`,
-  `☐ 거래 경위를 시간순으로 정리했는가`,
-  `☐ 자금 흐름을 설명할 자료를 확보했는가`,
-  `☐ 사실과 다른 내용을 임의로 작성하지 않았는가`,
+  `- 지급정지 사유를 확인했는가`,
+  `- 신고 기관을 확인했는가`,
+  `- 계좌 거래내역을 확보했는가`,
+  `- 거래 상대방 정보를 정리했는가`,
+  `- 계약서와 거래명세서를 확보했는가`,
+  `- 문자·카카오톡·이메일을 삭제하지 않았는가`,
+  `- 송금 영수증을 보관하고 있는가`,
+  `- 거래 경위를 시간순으로 정리했는가`,
+  `- 자금 흐름을 설명할 자료를 확보했는가`,
+  `- 사실과 다른 내용을 임의로 작성하지 않았는가`,
   `## ${TPLA} 과정에서 주의해야 할 사항`,
+  `### 피해야 할 행동`,
   `지급정지 상태에서는 거래와 관련된 자료를 보존하는 것이 매우 중요합니다.`,
-  `다음과 같은 행동은 신중하게 판단해야 합니다.`,
-  `거래자료 삭제 / 메신저 대화 삭제 / 거래 화면 수정 / 사실과 다른 거래 경위 작성 / 상대방 요구에 따른 추가 송금 / 계좌 사용 목적을 임의로 변경하여 설명하는 행위`,
-  `반대로 아래 자료는 가능한 한 원본 그대로 보관하는 것이 좋습니다.`,
-  `✔ 계좌 거래내역`,
-  `✔ 계약서 및 거래명세서`,
-  `✔ 문자 및 카카오톡 대화`,
-  `✔ 이메일 기록`,
-  `✔ 송금 영수증`,
-  `✔ 거래 화면 캡처`,
-  `✔ 상대방 연락처 및 계좌번호`,
+  `- 거래자료 또는 메신저 대화 삭제`,
+  `- 거래 화면 수정이나 사실과 다른 거래 경위 작성`,
+  `- 상대방 요구에 따른 추가 송금`,
+  `- 계좌 사용 목적을 임의로 변경하여 설명하는 행위`,
+  `### 원본으로 보관할 자료`,
+  `- 계좌 거래내역`,
+  `- 계약서 및 거래명세서`,
+  `- 문자 및 카카오톡 대화`,
+  `- 이메일 기록`,
+  `- 송금 영수증`,
+  `- 거래 화면 캡처`,
+  `- 상대방 연락처 및 계좌번호`,
   `## 실제 ${TPLB} ${TPLA} 과정에서 자주 확인되는 사례`,
+  `### 반복되는 지급정지 사례`,
   `${TPLB} ${TPLA} 과정에서는 다음과 같은 사례가 반복적으로 발생합니다.`,
-  `정상적인 중고거래를 진행했지만 상대방이 사기 사건과 연결된 경우 / 투자금을 송금했는데 해당 계좌가 피해금 계좌로 신고된 경우 / 가상자산 거래 과정에서 피해금이 계좌를 거쳐 이동한 경우 / 사업 거래 대금이 피해금으로 오인된 경우 / 가족이나 지인의 부탁으로 계좌를 사용했다가 지급정지가 이루어진 경우`,
+  `- 정상적인 중고거래를 진행했지만 상대방이 사기 사건과 연결된 경우`,
+  `- 투자금을 송금했는데 해당 계좌가 피해금 계좌로 신고된 경우`,
+  `- 가상자산 거래 과정에서 피해금이 계좌를 거쳐 이동한 경우`,
+  `- 사업 거래 대금이 피해금으로 오인된 경우`,
+  `- 가족이나 지인의 부탁으로 계좌를 사용했다가 지급정지가 이루어진 경우`,
   `같은 지급정지 사건이라도 거래 목적과 자금 흐름은 모두 다르므로 개별적인 사실관계 확인과 자료 정리가 중요합니다.`,
   `## 핵심 요약`,
   `${TPLB} ${TPLA}은 지급정지 사유를 정확히 확인하고 거래의 정당성을 객관적인 자료로 설명하는 과정입니다.`,
-  `특히 다음 사항을 우선 준비하는 것이 도움이 될 수 있습니다.`,
-  `지급정지 사유 확인 / 신고 기관 확인 / 계좌 거래내역 확보 / 계약서 및 거래자료 준비 / 문자·카카오톡 대화 보관 / 송금 영수증 확보 / 거래 경위 정리 / 자금 흐름 분석 / 객관적인 증빙자료 준비`,
+  `### 우선 준비할 핵심 자료`,
+  `- 지급정지 사유와 신고 기관 확인`,
+  `- 계좌 거래내역과 송금 영수증 확보`,
+  `- 계약서 및 거래자료 준비`,
+  `- 문자·카카오톡 대화 보관`,
+  `- 거래 경위와 자금 흐름 정리`,
   `사건마다 지급정지 원인과 거래 구조가 다르므로 현재 상황을 정확하게 분석하고 사실관계를 체계적으로 정리하는 것이 중요합니다.`,
   `## 자주 묻는 질문 (FAQ)`,
   `### Q1. ${TPLB} ${TPLA}은 무엇부터 시작해야 하나요?`,
@@ -107,19 +139,19 @@ const TEMPLATE_BODY = [
   `추가 송금 요구가 있다면 그 경위와 내용을 충분히 확인하고, 관련 기록을 모두 보관하는 것이 중요합니다.`,
   `### Q9. ${TPLB} ${TPLA}에서 가장 중요한 자료는 무엇인가요?`,
   `계좌 거래내역, 계약서, 거래명세서, 송금 영수증, 문자 및 메신저 대화 등 거래의 실제 경위를 설명할 수 있는 객관적인 자료가 중요합니다.`,
-  `### Q10. ${TPLB} ${TPLA} ${TPLR}변호사를 찾는 이유는 무엇인가요?`,
+  `### Q10. ${TPLB} ${TPLA}에 법률 검토가 필요한 이유는 무엇인가요?`,
   `사건마다 지급정지 원인과 거래 구조가 다르므로 사실관계를 종합적으로 검토하고 필요한 자료를 체계적으로 준비하는 것이 적절한 대응에 도움이 될 수 있기 때문입니다.`,
 ];
 
-const TEMPLATE_SUMMARY = `${TPLB} ${TPLA}은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. ${TPLB} ${TPLA} ${TPLR}변호사가 지급정지 원인, ${TPLA} 절차, 준비해야 할 자료와 주요 유의사항을 자세히 안내합니다.`;
+const TEMPLATE_SUMMARY = `${TPLB} ${TPLA}은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, ${TPLA} 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.`;
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
     const body = await request.json();
-    const title = normalizeSpace(body.title);
-    const slug = normalizeSlug(body.slug || title);
+    const title = removeJongnoLawyerPhrase(normalizeSpace(body.title));
+    const slug = normalizeSlug(removeJongnoLawyerPhrase(body.slug || title));
     const isPreview = body.preview === true;
     const batchMode = body.batchMode === true;
 
@@ -129,26 +161,25 @@ export async function onRequestPost(context) {
 
     // 제목에서 은행명 / 지역명 / 행위 키워드 추출
     const newBank   = extractBank(title);
-    const newRegion = extractRegion(title);
     const newAction = extractAction(title, newBank);
 
-    const generatedBody = appendStockReadingroomCta(buildFromTemplate(newBank, newRegion, newAction));
+    const generatedBody = appendStockReadingroomCta(buildJipjeongTemplate(newBank, newAction));
 
     if (isPreview) {
-      return json({ ok: true, body: generatedBody, bank: newBank, region: newRegion, action: newAction });
+      return json({ ok: true, body: generatedBody, bank: newBank, action: newAction });
     }
 
     // ── 저장 단계 ──────────────────────────────────────────────────────────
     const confirmedBody = appendStockReadingroomCta(Array.isArray(body.body) && body.body.length
       ? body.body
-      : generatedBody);
+      : generatedBody).map((line) => removeJongnoLawyerPhrase(line));
 
-    const generatedMeta = generateMeta(newBank, newRegion, newAction);
-    const imageAlt        = normalizeSpace(body.imageAlt).slice(0, 160) || generatedMeta.imageAlt;
-    const imageCaption    = normalizeSpace(body.imageCaption).slice(0, 220) || generatedMeta.imageCaption;
-    const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300) || generatedMeta.imageDescription;
+    const generatedMeta = generateJipjeongMeta(newBank, newAction);
+    const imageAlt        = removeJongnoLawyerPhrase(normalizeSpace(body.imageAlt)).slice(0, 160) || generatedMeta.imageAlt;
+    const imageCaption    = removeJongnoLawyerPhrase(normalizeSpace(body.imageCaption)).slice(0, 220) || generatedMeta.imageCaption;
+    const imageDescription = removeJongnoLawyerPhrase(normalizeSpace(body.imageDescription)).slice(0, 300) || generatedMeta.imageDescription;
 
-    const summary = normalizeSpace(body.summary).slice(0, 180) || generatedMeta.summary;
+    const summary = removeJongnoLawyerPhrase(normalizeSpace(body.summary)).slice(0, 180) || generatedMeta.summary;
 
     const existing = await loadExisting(env, slug);
     if (existing && !isJipjeongManual(existing)) {
@@ -189,7 +220,7 @@ export async function onRequestPost(context) {
       landingViews: Number.isInteger(existing?.landingViews) ? existing.landingViews : randomInt(140, 8000, slug),
       reports: Number.isInteger(existing?.reports) ? existing.reports : 0,
       summary,
-      tags: ["지급정지", "이의신청", "종로변호사"],
+      tags: ["지급정지", "이의신청"],
       landings: { ...(existing?.landings || {}), c: landing },
     };
 
@@ -232,25 +263,23 @@ export async function onRequestPost(context) {
 
 // ─── 원고 생성 ──────────────────────────────────────────────────────────────
 
-function buildFromTemplate(bank, region, action) {
-  return TEMPLATE_BODY.map((para) => applySubstitutions(para, bank, region, action));
+export function buildJipjeongTemplate(bank, action) {
+  return TEMPLATE_BODY.map((para) => applySubstitutions(para, bank, action));
 }
 
-function applySubstitutions(str, bank, region, action) {
+function applySubstitutions(str, bank, action) {
   let s = str;
   s = replaceAll(s, TPLB, bank);
-  s = replaceAll(s, TPLR, region || "종로");
   s = replaceAll(s, TPLA, action);
   return s;
 }
 
-function generateMeta(bank, region, action) {
-  const r = region || "종로";
+export function generateJipjeongMeta(bank, action) {
   const subject = `${bank} ${action}`.trim();
-  const summary = `${subject}${topicParticle(subject)} 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. ${subject} ${r}변호사가 지급정지 원인, ${action} 절차, 준비해야 할 자료와 주요 유의사항을 자세히 안내합니다.`.slice(0, 180);
-  const imageAlt = `${bank} ${action} ${r}변호사`;
-  const imageCaption = `${bank} ${action} — ${r}변호사가 절차와 준비자료를 안내합니다`;
-  const imageDescription = `${bank} ${action}에 관한 법적 절차, 준비서류, ${action} 과정을 ${r}변호사가 자세히 안내합니다. 지급정지 사유 확인부터 소명자료 준비까지 체계적으로 진행합니다.`;
+  const summary = `${subject}${topicParticle(subject)} 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, ${action} 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.`.slice(0, 180);
+  const imageAlt = `${bank} ${action} 절차 안내`;
+  const imageCaption = `${bank} ${action} 절차와 준비자료 안내`;
+  const imageDescription = `${bank} ${action}에 관한 법적 절차와 준비서류를 정리한 안내 이미지입니다. 지급정지 사유 확인부터 소명자료 준비까지 체계적으로 안내합니다.`;
   return { summary, imageAlt, imageCaption, imageDescription };
 }
 
@@ -317,7 +346,7 @@ function extractBank(title) {
 }
 
 function extractRegion(title) {
-  // "중랑변호사가..." → "중랑" / "- 종로변호사" → "종로"
+  // "중랑변호사가..." → "중랑" / "- 지역변호사" → "지역"
   const s = normalizeSpace(title);
   const separated = s.match(/[,·\-–—]\s*([가-힣A-Za-z0-9]{1,10})\s*변호사/);
   if (separated) return separated[1].trim();
@@ -326,7 +355,7 @@ function extractRegion(title) {
 }
 
 function extractAction(title, bank) {
-  // "한국산업은행 [지급정지 이의신청] - 종로변호사"
+  // "한국산업은행 [지급정지 이의신청] - 지역변호사"
   // "한국산업은행 [계좌 지급정지 해제], 용산변호사..."
   const s = normalizeSpace(title);
   let rest = s.startsWith(bank) ? s.slice(bank.length).trim() : s;
@@ -343,6 +372,12 @@ function extractAction(title, bank) {
 function replaceAll(str, from, to) {
   if (!from || from === to) return str;
   return str.split(from).join(to);
+}
+
+export function removeJongnoLawyerPhrase(value = "") {
+  return normalizeSpace(String(value || "")
+    .replace(/종로\s*변호사(?:가|는|은|의|와|과|를|을)?/g, "")
+    .replace(/\s*[,·\-–—]\s*$/, ""));
 }
 
 function isJipjeongManual(item = {}) {

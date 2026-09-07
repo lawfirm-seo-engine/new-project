@@ -3117,7 +3117,8 @@ button{
 .recovery-manual-body h2{position:relative;margin-top:48px!important;padding:20px 22px 20px 62px;border-radius:16px;background:#edf5ef}
 .recovery-manual-body h2:first-child{margin-top:0!important}
 .recovery-manual-body h2::before{content:"§";position:absolute;left:22px;top:16px;display:flex;align-items:center;justify-content:center;width:29px;height:29px;border-radius:9px;background:var(--rl-deep);color:#fff;font:700 16px/1 serif}
-.recovery-manual-body h3{margin-top:28px;padding-left:14px;border-left:4px solid var(--rl-gold)}
+.recovery-landing-page .recovery-manual-body>h2{font-size:clamp(20px,2vw,26px);line-height:1.38}
+.recovery-manual-body h3{margin-top:28px;padding-left:14px;border-left:4px solid var(--rl-gold);font-size:18px;line-height:1.5}
 .recovery-manual-body ul,.recovery-manual-body ol{padding:20px 24px 20px 44px;border:1px solid #dce5de;border-radius:16px;background:#fff}
 .recovery-manual-body blockquote{margin:24px 0;padding:22px 24px;border-left:4px solid var(--rl-gold);border-radius:0 14px 14px 0;background:#fffaf0;color:#605a4d}
 
@@ -3151,6 +3152,7 @@ button{
   .recovery-landing-faq summary::after{right:16px;top:11px}
   .recovery-landing-faq details p{padding:0 18px 20px}
   .recovery-manual-body h2{padding:17px 16px 17px 51px}
+  .recovery-landing-page .recovery-manual-body>h2{font-size:22px}
   .recovery-manual-body h2::before{left:15px;top:14px}
 }
 

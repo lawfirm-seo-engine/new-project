@@ -1,5 +1,11 @@
 // 기존 jipjeong-manual 케이스들의 body를 최신 템플릿으로 일괄 갱신
 
+import {
+  buildJipjeongTemplate,
+  generateJipjeongMeta,
+  removeJongnoLawyerPhrase,
+} from "./create-jipjeong-landing.js";
+
 const GITHUB_FILE_PATH = "data/cases.json";
 const TPLB = "BANK";
 const TPLR = "REGION";
@@ -125,27 +131,43 @@ export async function onRequestPost(context) {
         if (!raw) { errors.push({ slug: entry.slug, error: "KV 데이터 없음" }); continue; }
 
         const caseData = JSON.parse(raw);
-        const title = caseData.caseName || entry.caseName || "";
+        const title = removeJongnoLawyerPhrase(caseData.caseName || entry.caseName || "");
 
         const bank   = extractBank(title);
-        const region = extractRegion(title);
         const action = extractAction(title, bank);
 
-        const newBody    = buildFromTemplate(bank, region, action);
-        const newSummary = applySubstitutions(TEMPLATE_SUMMARY, bank, region, action);
+        const newBody = buildJipjeongTemplate(bank, action);
+        const newMeta = generateJipjeongMeta(bank, action);
 
         if (caseData.landings?.c) {
-          caseData.landings.c.body        = newBody;
-          caseData.landings.c.description = caseData.landings.c.description || newSummary;
+          caseData.caseName = title;
+          caseData.summary = newMeta.summary;
+          caseData.tags = (Array.isArray(caseData.tags) ? caseData.tags : [])
+            .filter((tag) => !String(tag || "").includes("종로변호사"));
+          caseData.landings.c.title = removeJongnoLawyerPhrase(caseData.landings.c.title || title);
+          caseData.landings.c.h1 = removeJongnoLawyerPhrase(caseData.landings.c.h1 || title);
+          caseData.landings.c.ogTitle = removeJongnoLawyerPhrase(caseData.landings.c.ogTitle || title);
+          caseData.landings.c.description = newMeta.summary;
+          caseData.landings.c.ogDescription = newMeta.summary;
+          caseData.landings.c.imageAlt = newMeta.imageAlt;
+          caseData.landings.c.imageCaption = newMeta.imageCaption;
+          caseData.landings.c.imageDescription = newMeta.imageDescription;
+          caseData.landings.c.body = newBody;
           caseData.updatedAt = now;
 
           await env.CASES.put(`case:${entry.slug}`, JSON.stringify(caseData));
 
           // index도 updatedAt 갱신
           const idxPos = index.findIndex((i) => i.slug === entry.slug);
-          if (idxPos >= 0) index[idxPos].updatedAt = now;
+          if (idxPos >= 0) {
+            index[idxPos].caseName = title;
+            index[idxPos].summary = newMeta.summary;
+            index[idxPos].tags = (Array.isArray(index[idxPos].tags) ? index[idxPos].tags : [])
+              .filter((tag) => !String(tag || "").includes("종로변호사"));
+            index[idxPos].updatedAt = now;
+          }
 
-          updated.push({ slug: entry.slug, bank, region, action });
+          updated.push({ slug: entry.slug, bank, action });
         }
       } catch (e) {
         errors.push({ slug: entry.slug, error: e.message });
