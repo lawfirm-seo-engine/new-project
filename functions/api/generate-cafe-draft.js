@@ -10,24 +10,105 @@ import {
 } from "../_standardLanding.js";
 
 const RELATED_READINGROOM_CTA = "다른 리딩방 사기 사건 보기는 이곳 📌 https://gnlaw-criminal.co.kr/prosecute/jusigridingbang-litigation/";
+const PAYMENT_SUSPENSION_RELEASE_TYPE = "payment-suspension-release";
 
 export async function onRequestPost(context) {
   try {
     const body = await context.request.json();
     const rawCaseName = normalizeSpace(body.caseName);
-    const fraudType = normalizeFraudTypeKey(body.fraudType, { caseName: rawCaseName });
+    const isPaymentSuspensionRelease = body.fraudType === PAYMENT_SUSPENSION_RELEASE_TYPE;
+    const fraudType = isPaymentSuspensionRelease
+      ? PAYMENT_SUSPENSION_RELEASE_TYPE
+      : normalizeFraudTypeKey(body.fraudType, { caseName: rawCaseName });
 
     if (!rawCaseName) return json({ ok: false, message: "사건명을 입력해주세요." }, 400);
-    if (!FRAUD_TYPE_OPTIONS.some((item) => item.key === body.fraudType)) {
+    if (!isPaymentSuspensionRelease && !FRAUD_TYPE_OPTIONS.some((item) => item.key === body.fraudType)) {
       return json({ ok: false, message: "사건 유형을 선택해주세요." }, 400);
     }
 
-    const caseName = normalizeCaseName(rawCaseName);
-    const draft = createCafeDraft(caseName, fraudType);
+    const draft = isPaymentSuspensionRelease
+      ? createPaymentSuspensionReleaseDraft(rawCaseName)
+      : createCafeDraft(normalizeCaseName(rawCaseName), fraudType);
     return json({ ok: true, draft });
   } catch (error) {
     return json({ ok: false, message: error.message || "원고 생성에 실패했습니다." }, 500);
   }
+}
+
+function createPaymentSuspensionReleaseDraft(caseName) {
+  const keyword = normalizeSpace(caseName);
+  const typeLabel = "지급정지해제";
+  const title = `${keyword} 지급정지해제, 채무부존재확인소송으로 대응하는 방법`;
+  const sections = [
+    {
+      heading: `${keyword} 지급정지, 왜 해제 절차가 필요한가`,
+      paragraphs: [
+        "계좌가 지급정지되면 단순히 금융회사에 해제를 요청하는 것만으로 해결되지 않는 경우가 있습니다. 특히 본인이 사기 거래에 관여하지 않았거나, 지급정지를 신청한 상대방에게 반환할 채무가 존재하지 않는다고 다투어야 하는 사안이라면 지급정지의 원인이 된 법률관계를 명확히 정리할 필요가 있습니다.",
+        "이때 검토할 수 있는 주요 민사 절차가 채무부존재확인소송입니다. 핵심은 ‘지급정지를 신청한 상대방에 대하여 반환해야 할 채무가 존재하지 않는다’는 점을 법원의 절차를 통해 확인받는 것입니다.",
+      ],
+    },
+    {
+      heading: "지급정지해제의 핵심 대응, 채무부존재확인소송",
+      paragraphs: [
+        "채무부존재확인소송은 상대방이 주장하는 채무가 실제로 존재하는지 여부를 법원에서 판단받는 절차입니다. 지급정지 사안에서는 단순히 ‘나는 잘못이 없다’고 주장하는 것보다, 지급정지를 신청한 당사자를 정확히 특정하고 그 상대방에 대한 채무가 존재하지 않는다는 점을 소송상 쟁점으로 구성하는 것이 중요합니다.",
+        "소송을 제기하면 금융회사가 진행 중인 분쟁과 소송의 존재를 확인할 수 있도록 사건번호, 당사자 관계, 청구취지 등 필요한 자료를 갖추어 제시하는 방향을 검토할 수 있습니다. 이후 판결이나 조정 등 사건 진행 결과와 금융회사의 내부 절차에 따라 지급정지 해제를 요청하게 됩니다.",
+        "다만 소송을 제기했다는 사실만으로 지급정지가 자동 해제되는 것은 아닙니다. 지급정지의 근거, 신청인과 계좌명의인의 관계, 입금 경위, 관련 법률관계에 따라 필요한 절차와 제출 자료가 달라질 수 있으므로 사건별 검토가 필요합니다.",
+      ],
+      numbered: [
+        "지급정지를 신청한 당사자와 문제된 거래를 정확히 특정합니다.",
+        "입금 경위와 자금의 성격을 확인할 수 있는 계좌내역·이체확인증·계약자료·대화내역을 정리합니다.",
+        "상대방에게 반환할 채무가 존재하지 않는 법률상·사실상 근거를 정리합니다.",
+        "필요한 경우 지급정지 신청인을 상대로 채무부존재확인소송을 제기합니다.",
+        "소송 계속 사실과 사건 진행 자료를 금융회사에 제출하고 지급정지 해제 절차를 진행합니다.",
+      ],
+    },
+    {
+      heading: "채무부존재확인소송에서 확인해야 할 자료",
+      paragraphs: [
+        "지급정지해제를 목표로 채무부존재확인소송을 진행하려면 계좌에 돈이 들어온 사실만 볼 것이 아니라, 왜 입금되었는지와 본인이 해당 거래에 어떤 지위로 관여했는지를 객관적인 자료로 설명할 수 있어야 합니다.",
+      ],
+      bullets: [
+        "지급정지된 계좌의 거래내역과 문제된 입금의 이체확인증",
+        "입금 전후 상대방 또는 관련자와 주고받은 문자·카카오톡·텔레그램 등 대화내역",
+        "물품대금·대여금·정산금 등 입금 원인을 확인할 수 있는 계약서·주문내역·정산자료",
+        "지급정지 사실을 확인할 수 있는 금융회사 안내 내용과 신청 관련 자료",
+        "본인이 사기 또는 편취 행위에 관여하지 않았음을 뒷받침하는 객관적인 자료",
+      ],
+    },
+    {
+      heading: "소송 제기 전 특히 확인할 점",
+      paragraphs: [
+        "채무부존재확인소송은 누구를 상대로 제기할 것인지가 매우 중요합니다. 지급정지를 신청한 당사자를 제대로 특정하지 못하면 소송을 진행하더라도 금융회사가 해당 지급정지 건과 연결된 분쟁으로 확인하기 어려울 수 있습니다.",
+        "따라서 지급정지 통지 내용, 금융회사에서 확인 가능한 정보, 입금 내역 등을 바탕으로 상대방 특정 가능성과 청구의 적절성을 먼저 검토한 뒤 소송을 진행하는 것이 필요합니다.",
+      ],
+    },
+    {
+      heading: "법무법인 선린의 지급정지해제 대응 방향",
+      paragraphs: [
+        "법무법인 선린은 지급정지의 발생 원인과 입금 경위, 신청인과의 법률관계, 계좌 사용 경위를 함께 검토한 뒤 채무부존재확인소송 필요 여부를 판단합니다.",
+        "채무부존재확인소송이 필요한 사안이라면 지급정지 신청 당사자를 특정하고, 채무가 존재하지 않는다는 점을 뒷받침할 자료를 정리하여 소송을 진행한 뒤 금융회사에 소송 계속 사실과 관련 자료를 제시하는 방향으로 지급정지해제 절차를 검토합니다.",
+      ],
+    },
+  ];
+
+  const hashtags = [
+    "지급정지해제",
+    "계좌지급정지",
+    "채무부존재확인소송",
+    "채무부존재확인",
+    "지급정지대응",
+    "법무법인선린",
+  ];
+
+  return {
+    caseName: keyword,
+    fraudType: PAYMENT_SUSPENSION_RELEASE_TYPE,
+    typeLabel,
+    title,
+    sections,
+    hashtags,
+    body: renderPlainText(sections, hashtags, false),
+  };
 }
 
 function createCafeDraft(caseName, fraudType) {
@@ -126,7 +207,7 @@ function createHashtags(caseName, fraudType) {
   return [...new Set([`${base}사기`, ...(typeTags[fraudType] || []), "출금거부", "사기피해대응", "법무법인선린"])];
 }
 
-function renderPlainText(sections, hashtags) {
+function renderPlainText(sections, hashtags, includeReadingroomCta = true) {
   const blocks = [];
   sections.forEach((section) => {
     blocks.push(section.heading);
@@ -135,7 +216,7 @@ function renderPlainText(sections, hashtags) {
     (section.bullets || []).forEach((item) => blocks.push(`- ${item}`));
   });
   blocks.push(hashtags.map((tag) => `#${tag}`).join(" "));
-  blocks.push(RELATED_READINGROOM_CTA);
+  if (includeReadingroomCta) blocks.push(RELATED_READINGROOM_CTA);
   return blocks.join("\n\n");
 }
 
