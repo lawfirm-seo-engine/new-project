@@ -154694,6 +154694,30 @@
     "fraudType": "team-mission"
   },
   {
+    "slug": "byeorsupsyab",
+    "caseName": "별숲샵 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-08",
+    "updatedAt": "2026-09-08",
+    "thumbnailUrl": "",
+    "landingViews": 7911,
+    "reports": 28,
+    "summary": "별숲샵 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "별숲샵",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
     "slug": "speakzenmarket-com",
     "caseName": "speakzenmarket.com 사칭 사기",
     "category": "형사대응",
@@ -154716,5 +154740,103 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "team-mission"
+  },
+  {
+    "slug": "seupijenmakes",
+    "caseName": "스피젠마켓 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-08",
+    "updatedAt": "2026-09-08",
+    "thumbnailUrl": "",
+    "landingViews": 1298,
+    "reports": 4,
+    "summary": "스피젠마켓 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "스피젠마켓",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "jinju-tv-com",
+    "caseName": "jinju-tv.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-08",
+    "updatedAt": "2026-09-08",
+    "thumbnailUrl": "",
+    "landingViews": 310,
+    "reports": 32,
+    "summary": "jinju-tv.com 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "jinju",
+      "tv.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
+  },
+  {
+    "slug": "jinju-tibi",
+    "caseName": "진주 티비 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-08",
+    "updatedAt": "2026-09-08",
+    "thumbnailUrl": "",
+    "landingViews": 3715,
+    "reports": 24,
+    "summary": "진주 티비 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "진주",
+      "티비",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
+  },
+  {
+    "slug": "noonnug-com",
+    "caseName": "noonnug.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-08",
+    "updatedAt": "2026-09-08",
+    "thumbnailUrl": "",
+    "landingViews": 6367,
+    "reports": 29,
+    "summary": "noonnug.com 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "noonnug.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
   }
 ]
