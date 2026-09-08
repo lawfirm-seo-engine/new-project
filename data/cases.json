@@ -158941,5 +158941,68 @@
       "c"
     ],
     "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "코인환전-계좌-지급정지-해제-이의신청",
+    "caseName": "코인환전 계좌 지급정지 해제 이의신청",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-09-08",
+    "updatedAt": "2026-09-08",
+    "thumbnailUrl": "",
+    "landingViews": 3707,
+    "reports": 0,
+    "summary": "코인환전 계좌 지급정지 해제 이의신청은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, 계좌 지급정지 해제 이의신청 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "코인환전-통장-지급정지-해제-이의신청",
+    "caseName": "코인환전 통장 지급정지 해제 이의신청",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-09-08",
+    "updatedAt": "2026-09-08",
+    "thumbnailUrl": "",
+    "landingViews": 5173,
+    "reports": 0,
+    "summary": "코인환전 통장 지급정지 해제 이의신청은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, 지급정지 해제 이의신청 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "코인사기-은행-지급정지-해제-이의신청",
+    "caseName": "코인사기 은행 지급정지 해제 이의신청",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-09-08",
+    "updatedAt": "2026-09-08",
+    "thumbnailUrl": "",
+    "landingViews": 5333,
+    "reports": 0,
+    "summary": "코인사기 은행 지급정지 해제 이의신청은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, 지급정지 해제 이의신청 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
   }
 ]
