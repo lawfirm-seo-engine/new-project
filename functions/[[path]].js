@@ -1904,13 +1904,6 @@ function renderStockReadingroomCtaSection(caseData = {}) {
   return `<section class="article-block readingroom-referral"><p>${withSentenceBreaks(STOCK_READINGROOM_CTA_TEXT)}</p></section>`;
 }
 
-function createRecoveryLandingUpdatedNote() {
-  return `<div class="recovery-landing-updated" aria-label="콘텐츠 수정일">
-    <span>법률·절차 안내 업데이트</span>
-    <time datetime="2026-08-13">2026. 08. 13.</time>
-  </div>`;
-}
-
 function createRecoveryDebtNonexistenceSection() {
   return `<section class="article-block recovery-lawsuit-guide" id="debt-nonexistence-lawsuit">
     <header class="recovery-lawsuit-guide-head">
@@ -1958,7 +1951,6 @@ function createRecoveryManualContent(landing, group, caseData) {
   const currentProgressSection = renderCurrentProgressSection(landing, caseData, group.landingKey || group.key);
   return [
     MANUAL_BODY_STYLE,
-    isRecoveryLanding ? createRecoveryLandingUpdatedNote() : "",
     `<section class="article-block manual-body${isRecoveryLanding ? " recovery-manual-body" : ""}">${bodyHtml}</section>`,
     isRecoveryLanding ? createRecoveryDebtNonexistenceSection() : "",
     renderStockReadingroomCtaSection(caseData),
@@ -2028,7 +2020,6 @@ function createRecoveryCaseLandingContent(landing, group, caseData) {
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
 
   return [
-    createRecoveryLandingUpdatedNote(),
     renderOperatorMemos(caseData),
     `<section class="aeo-summary recovery-landing-direct" id="aeo-summary" aria-label="${keyword} 지급정지 핵심 답변">
       <p>먼저 확인할 답</p>

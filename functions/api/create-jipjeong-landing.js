@@ -152,6 +152,7 @@ export async function onRequestPost(context) {
     const body = await request.json();
     const title = removeJongnoLawyerPhrase(normalizeSpace(body.title));
     const slug = normalizeSlug(removeJongnoLawyerPhrase(body.slug || title));
+    const h1 = removeJongnoLawyerPhrase(normalizeSpace(body.h1)) || title;
     const isPreview = body.preview === true;
     const batchMode = body.batchMode === true;
 
@@ -197,7 +198,7 @@ export async function onRequestPost(context) {
       ogTitle: title,
       ogDescription: summary,
       ogImage: caseOgImageUrl(slug, RECOVERY_SITE_URL, "png"),
-      h1: title,
+      h1,
       ...(imageAlt        ? { imageAlt }        : {}),
       ...(imageCaption    ? { imageCaption }    : {}),
       ...(imageDescription ? { imageDescription } : {}),
