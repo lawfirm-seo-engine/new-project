@@ -229,6 +229,69 @@ const LOGSCAN_SCRIPT = `<!-- LogScan -->
 <!-- End LogScan Code -->`;
 const READ_REPAIR_SLUGS = new Set(["jusigridingbang"]);
 
+// 카카오톡 상담 채널 실제 이동 대상
+const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_WkdxfX";
+
+// /kakao_redirect/ : 카카오톡 상담 링크가 곧바로 채널로 가지 않고 이 페이지를 거치게 해서
+// GA로 카카오톡채널 상담 전환을 집계한 뒤 채널로 자동 이동시키는 브리지 페이지.
+// GA가 연결된 3개 도메인(gnlaw-criminal / gnlaw-recovery / 금융사기대응센터.kr)에서만 계측하고,
+// 그 외 호스트에서는 그냥 302로 채널로 보낸다.
+function handleKakaoRedirectRoute(url) {
+  if (url.pathname !== "/kakao_redirect" && url.pathname !== "/kakao_redirect/") return null;
+
+  const gaId = GA_MEASUREMENT_IDS[`https://${url.host}`];
+  if (!gaId) {
+    return new Response(null, { status: 302, headers: { Location: KAKAO_CHANNEL_URL } });
+  }
+
+  const body = `<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>카카오톡 상담 채널로 이동합니다</title>
+<link rel="canonical" href="${KAKAO_CHANNEL_URL}">
+<script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${gaId}');
+(function(){
+  var TARGET = ${JSON.stringify(KAKAO_CHANNEL_URL)};
+  var moved = false;
+  function go(){ if (moved) return; moved = true; location.replace(TARGET); }
+  try {
+    gtag('event', 'kakao_consult_click', {
+      event_category: 'consult',
+      event_label: 'kakao_channel',
+      transport_type: 'beacon',
+      event_callback: go
+    });
+  } catch (e) {}
+  setTimeout(go, 1500);
+})();
+</script>
+<meta http-equiv="refresh" content="2;url=${KAKAO_CHANNEL_URL}">
+</head>
+<body style="margin:0;font:16px/1.7 system-ui,-apple-system,sans-serif;color:#172033;background:#f4f6f9">
+<div style="max-width:440px;margin:80px auto;padding:0 20px;text-align:center">
+<p>카카오톡 상담 채널로 이동하고 있습니다…</p>
+<p><a href="${KAKAO_CHANNEL_URL}" style="color:#123d58;font-weight:700">이동되지 않으면 여기를 눌러 주세요</a></p>
+</div>
+</body>
+</html>`;
+
+  return new Response(body, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=300",
+      "X-Robots-Tag": "noindex, nofollow",
+    },
+  });
+}
+
 async function handleSeoXmlRoute({ pathname, url, env }) {
   if (!SEO_XML_ROUTES.has(pathname)) return null;
 
@@ -280,6 +343,9 @@ export async function onRequest(context) {
   const pathname = url.pathname;
   const seoXmlResponse = await handleSeoXmlRoute({ pathname, url, env });
   if (seoXmlResponse) return seoXmlResponse;
+
+  const kakaoRedirectResponse = handleKakaoRedirectRoute(url);
+  if (kakaoRedirectResponse) return kakaoRedirectResponse;
 
   // 정적 파일·다른 Worker로 패스스루
   if (
@@ -3064,7 +3130,7 @@ function gaTagForCanonical(canonical = "") {
 }
 
 function pageTemplate(d) {
-  return `<!doctype html>
+  let html = `<!doctype html>
 <html lang="ko">
 <head>
   ${gaTagForCanonical(d.canonical)}
@@ -3118,6 +3184,14 @@ function pageTemplate(d) {
   ${d.bodyScripts || ""}
 </body>
 </html>`;
+
+  // GA가 연결된 3개 도메인은 카카오톡 상담 클릭을 /kakao_redirect/ 브리지 페이지로 보내 전환을 집계한다.
+  let origin = "";
+  try { origin = new URL(d.canonical).origin; } catch { origin = ""; }
+  if (GA_MEASUREMENT_IDS[origin]) {
+    html = html.replaceAll('href="https://pf.kakao.com/_WkdxfX/chat"', 'href="/kakao_redirect/"');
+  }
+  return html;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

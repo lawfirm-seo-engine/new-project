@@ -3519,6 +3519,11 @@ function buildPage(template, group, data) {
     ? RECOVERY_HOME_STYLE_VERSION
     : STYLE_CSS_VERSION;
   html = html.replace('href="/assets/style.css"', `href="/assets/style.css?v=${styleVersion}"`);
+  // GA가 연결된 3개 도메인(gnlaw-criminal / gnlaw-recovery / 금융사기대응센터.kr)은
+  // 카카오톡 상담 클릭을 /kakao_redirect/ 브리지 페이지를 거쳐 채널로 보내 전환을 집계한다.
+  if (GA_MEASUREMENT_IDS[String(group.siteUrl || "").replace(/\/$/, "")]) {
+    html = html.replaceAll('href="https://pf.kakao.com/_WkdxfX/chat"', 'href="/kakao_redirect/"');
+  }
   return html;
 }
 
