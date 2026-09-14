@@ -305,7 +305,7 @@ const groups = [
     titleSuffix: "리딩방 피해회복",
     descriptionSuffix: "주식 리딩방 사기와 코인 리딩방 피해, 출금거부, 추가입금 요구, 계좌·지갑 추적과 민형사 대응 절차를 정리합니다.",
     ogSuffix: "리딩방 피해회복",
-    hubTitle: "주식리딩방사기 센터",
+    hubTitle: "주식리딩방사기 유형·피해 대응 센터 | 법무법인 선린",
     hubLead: "주식·코인 리딩방 피해자가 출금거부, 추가입금 요구, 가짜 거래소·HTS 정황을 빠르게 확인하고 민형사 회수 절차를 검토할 수 있도록 사건별 정보를 정리합니다.",
     tone: "리딩방 피해 회수 브리핑",
     ctaTitle: "리딩방 피해 회수 가능성 검토",
@@ -2006,6 +2006,7 @@ function createHubContent(group) {
         </div>
       </div>
     </section>
+    ${createReadingroomDiagnosisSection(group)}
     ${createReadingroomPillarSection(group)}
     ${createLdCategoryEntrySection(group)}
     ${typeEntrySection}
@@ -2293,6 +2294,7 @@ const CENTER_FINTECH_IMAGE_VERSION = "20260903-brand-text-replaced";
 const CRIMINAL_PUBLIC_STYLE_VERSION = "20260825-mobile-header-match";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
+const READINGROOM_HOME_STYLE_VERSION = "20260914-readingroom-carousel-v2";
 
 function centerFintechHeadExtra(group) {
   if (!isCenterBoardSite(group)) return "";
@@ -3195,22 +3197,214 @@ function createReadingroomHubFaqSection(group) {
     </section>`;
 }
 
+
+const READINGROOM_DIAGNOSIS_ITEMS = [
+  {
+    key: "hts-mts-app",
+    label: "가짜 HTS·MTS·전용 앱",
+    signal: "공식 앱스토어가 아닌 설치 파일이나 전용 거래 화면을 안내받았습니다.",
+    result: "가짜 거래 화면으로 수익과 잔액을 조작한 뒤 출금을 막는 유형에 가깝습니다.",
+  },
+  {
+    key: "ipo-reading",
+    label: "공모주 특별배정",
+    signal: "기관 물량, 청약 우선권 또는 특별배정을 이유로 예치금을 요구받았습니다.",
+    result: "공모주 배정 권한이 있는 것처럼 속여 청약금과 추가 비용을 요구하는 유형에 가깝습니다.",
+  },
+  {
+    key: "institution-impersonation",
+    label: "증권사·전문가 사칭",
+    signal: "증권사 임직원, 교수, 애널리스트 또는 투자회사 관계자라고 소개했습니다.",
+    result: "금융회사와 전문가의 명칭·프로필을 도용해 신뢰를 만드는 사칭 유형에 가깝습니다.",
+  },
+  {
+    key: "ai-auto-trading",
+    label: "AI 자동매매",
+    signal: "AI 알고리즘이나 자동매매 프로그램으로 안정적인 수익을 보장한다고 했습니다.",
+    result: "검증되지 않은 자동매매 수익률과 조작된 거래 화면으로 증액을 유도하는 유형에 가깝습니다.",
+  },
+  {
+    key: "coin-reading",
+    label: "코인 거래소·지갑",
+    signal: "비공식 거래소나 지갑으로 코인을 보내고 출금 비용을 추가로 요구받았습니다.",
+    result: "가짜 가상자산 거래소 또는 지갑 화면을 이용해 추가 송금을 요구하는 유형에 가깝습니다.",
+  },
+];
+
+function createReadingroomDiagnosisSection(group) {
+  if ((group.landingKey || group.key) !== "ld") return "";
+  const buttons = READINGROOM_DIAGNOSIS_ITEMS.map((item) => (
+    `<button type="button" class="ld-diagnosis-choice" data-ld-type="${item.key}" aria-pressed="false">
+      <span aria-hidden="true"></span>
+      <strong>${escapeHtml(item.label)}</strong>
+      <em>${escapeHtml(item.signal)}</em>
+    </button>`
+  )).join("");
+  const guideData = Object.fromEntries(READINGROOM_DIAGNOSIS_ITEMS.map((item) => [
+    item.key,
+    {
+      title: item.label,
+      description: item.result,
+      href: `/${group.pathPrefix}/type/${item.key}/`,
+    },
+  ]));
+  return `<section class="ld-diagnosis" id="type-diagnosis" aria-labelledby="ld-diagnosis-title">
+    <div class="ld-diagnosis-copy">
+      <span class="ld-section-kicker">TYPE CHECK · 1 MINUTE</span>
+      <h2 id="ld-diagnosis-title">현재 상황과 가까운<br><em>피해 신호를 선택하세요</em></h2>
+      <p>접근 방식과 입금 명목을 기준으로 먼저 살펴볼 주식리딩방사기 유형을 안내합니다. 복수 선택할 수 있습니다.</p>
+      <a href="#readingroom-carousel-title">전체 사기 유형 바로 보기</a>
+    </div>
+    <div class="ld-diagnosis-panel" data-ld-diagnosis>
+      <div class="ld-diagnosis-status">
+        <div><strong>의심되는 정황</strong><small>해당 항목을 모두 선택하세요</small></div>
+        <b><span data-ld-count>0</span>/5</b>
+      </div>
+      <div class="ld-diagnosis-choices">${buttons}</div>
+      <button type="button" class="ld-diagnosis-submit" data-ld-submit disabled>선택한 유형의 대응 확인</button>
+      <div class="ld-diagnosis-result" data-ld-result hidden aria-live="polite">
+        <small>먼저 확인할 피해 유형</small>
+        <strong data-ld-result-title></strong>
+        <p data-ld-result-description></p>
+        <a data-ld-result-link href="/${group.pathPrefix}/type/legal-response/">유형별 특징과 대응 자료 보기</a>
+      </div>
+      <p class="ld-diagnosis-note">간편 진단은 사실관계 확인을 위한 안내이며 개별 사건의 법률적 판단을 대신하지 않습니다.</p>
+    </div>
+  </section>
+  <script>
+  (function () {
+    var root = document.querySelector('[data-ld-diagnosis]');
+    if (!root) return;
+    var choices = Array.prototype.slice.call(root.querySelectorAll('[data-ld-type]'));
+    var submit = root.querySelector('[data-ld-submit]');
+    var count = root.querySelector('[data-ld-count]');
+    var result = root.querySelector('[data-ld-result]');
+    var title = root.querySelector('[data-ld-result-title]');
+    var description = root.querySelector('[data-ld-result-description]');
+    var link = root.querySelector('[data-ld-result-link]');
+    var guide = ${JSON.stringify(guideData)};
+    var selected = [];
+    var lastKey = "";
+
+    choices.forEach(function (button) {
+      button.addEventListener('click', function () {
+        var key = button.getAttribute('data-ld-type');
+        var index = selected.indexOf(key);
+        if (index >= 0) {
+          selected.splice(index, 1);
+          button.classList.remove('is-selected');
+          button.setAttribute('aria-pressed', 'false');
+          if (lastKey === key) lastKey = selected[selected.length - 1] || "";
+        } else {
+          selected.push(key);
+          lastKey = key;
+          button.classList.add('is-selected');
+          button.setAttribute('aria-pressed', 'true');
+        }
+        count.textContent = String(selected.length);
+        submit.disabled = selected.length === 0;
+        result.hidden = true;
+      });
+    });
+
+    submit.addEventListener('click', function () {
+      var data = guide[lastKey || selected[0]];
+      if (!data) return;
+      title.textContent = data.title;
+      description.textContent = data.description;
+      link.setAttribute('href', data.href);
+      result.hidden = false;
+      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  })();
+  </script>`;
+}
+
+
 function createLdCategoryEntrySection(group) {
   if ((group.landingKey || group.key) !== "ld") return "";
-  const links = LD_CAROUSEL_ITEMS.map((item) => (
-    `<a class="readingroom-carousel-card" href="/${group.pathPrefix}/type/${item.key}/">
-      <img src="${item.image}" alt="${escapeHtml(item.label)}" width="1200" height="1200" loading="lazy" decoding="async">
-      <span><strong>${escapeHtml(item.label)}</strong><em>${escapeHtml(item.description)}</em></span>
+  const links = LD_CAROUSEL_ITEMS.map((item, index) => (
+    `<a class="readingroom-carousel-card" data-ld-carousel-card href="/${group.pathPrefix}/type/${item.key}/" aria-label="${escapeHtml(item.label)} 상세 대응 보기">
+      <img src="${item.image}" alt="${escapeHtml(item.label)} 피해 유형 안내" width="1200" height="1200" loading="lazy" decoding="async">
+      <span class="readingroom-card-index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+      <span class="readingroom-card-copy"><strong>${escapeHtml(item.label)}</strong><em>${escapeHtml(item.description)}</em><b>자세히 보기 <i aria-hidden="true">→</i></b></span>
     </a>`
   )).join("\n");
-  return `<section class="readingroom-carousel" aria-labelledby="readingroom-carousel-title">
+  const dots = LD_CAROUSEL_ITEMS.map((item, index) => (
+    `<button type="button" data-ld-carousel-dot="${index}" aria-label="${escapeHtml(item.label)} 카드로 이동" aria-pressed="${index === 0 ? "true" : "false"}"></button>`
+  )).join("");
+  return `<section class="readingroom-carousel" data-ld-carousel aria-labelledby="readingroom-carousel-title">
     <div class="readingroom-carousel-head">
-      <span>STOCK READING ROOM SCAM TYPES</span>
-      <h2 id="readingroom-carousel-title">주식리딩방사기 주요 유형과 피해 대응</h2>
-      <p>접근 방식과 입금 명목, 출금 거부 사유에 따라 유형별 특징과 확인해야 할 자료가 달라집니다.</p>
+      <div>
+        <span class="ld-section-kicker">SCAM TYPE LIBRARY</span>
+        <h2 id="readingroom-carousel-title">주식리딩방사기 주요 유형과 피해 대응</h2>
+        <p>접근 방식과 입금 명목, 출금 거부 사유에 따라 필요한 증거와 대응 순서가 달라집니다.</p>
+      </div>
+      <div class="readingroom-carousel-nav" aria-label="캐러셀 탐색">
+        <span class="readingroom-carousel-count" aria-live="polite"><b data-ld-carousel-current>01</b> / ${String(LD_CAROUSEL_ITEMS.length).padStart(2, "0")}</span>
+        <button type="button" data-ld-carousel-prev aria-label="이전 유형" disabled>←</button>
+        <button type="button" data-ld-carousel-next aria-label="다음 유형">→</button>
+      </div>
     </div>
-    <div class="readingroom-carousel-track">${links}</div>
-  </section>`;
+    <div class="readingroom-carousel-track" data-ld-carousel-track tabindex="0">${links}</div>
+    <div class="readingroom-carousel-dots" aria-label="유형별 카드 선택">${dots}</div>
+  </section>
+  <script>
+  (function () {
+    var root = document.querySelector('[data-ld-carousel]');
+    if (!root) return;
+    var track = root.querySelector('[data-ld-carousel-track]');
+    var cards = Array.prototype.slice.call(root.querySelectorAll('[data-ld-carousel-card]'));
+    var dots = Array.prototype.slice.call(root.querySelectorAll('[data-ld-carousel-dot]'));
+    var previous = root.querySelector('[data-ld-carousel-prev]');
+    var next = root.querySelector('[data-ld-carousel-next]');
+    var current = root.querySelector('[data-ld-carousel-current]');
+    var activeIndex = 0;
+    var ticking = false;
+
+    function update(index) {
+      activeIndex = Math.max(0, Math.min(cards.length - 1, index));
+      current.textContent = String(activeIndex + 1).padStart(2, '0');
+      previous.disabled = activeIndex === 0;
+      next.disabled = activeIndex === cards.length - 1;
+      dots.forEach(function (dot, dotIndex) {
+        dot.setAttribute('aria-pressed', dotIndex === activeIndex ? 'true' : 'false');
+      });
+    }
+
+    function move(index) {
+      var target = Math.max(0, Math.min(cards.length - 1, index));
+      track.scrollTo({ left: cards[target].offsetLeft - track.offsetLeft, behavior: 'smooth' });
+      update(target);
+    }
+
+    previous.addEventListener('click', function () { move(activeIndex - 1); });
+    next.addEventListener('click', function () { move(activeIndex + 1); });
+    dots.forEach(function (dot, index) {
+      dot.addEventListener('click', function () { move(index); });
+    });
+    track.addEventListener('keydown', function (event) {
+      if (event.key === 'ArrowLeft') { event.preventDefault(); move(activeIndex - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); move(activeIndex + 1); }
+    });
+    track.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () {
+        var trackLeft = track.getBoundingClientRect().left;
+        var nearest = 0;
+        var distance = Infinity;
+        cards.forEach(function (card, index) {
+          var currentDistance = Math.abs(card.getBoundingClientRect().left - trackLeft);
+          if (currentDistance < distance) { distance = currentDistance; nearest = index; }
+        });
+        update(nearest);
+        ticking = false;
+      });
+    }, { passive: true });
+    update(0);
+  })();
+  </script>`;
 }
 
 const LD_CATEGORY_GUIDES = {
@@ -3517,7 +3711,9 @@ function buildPage(template, group, data) {
   }
   const styleVersion = group.key === "c" && String(data.pageKind || "").includes("recovery-guide-home")
     ? RECOVERY_HOME_STYLE_VERSION
-    : STYLE_CSS_VERSION;
+    : (group.landingKey || group.key) === "ld" && String(data.pageKind || "").includes("readingroom-home")
+      ? READINGROOM_HOME_STYLE_VERSION
+      : STYLE_CSS_VERSION;
   html = html.replace('href="/assets/style.css"', `href="/assets/style.css?v=${styleVersion}"`);
   // GA가 연결된 3개 도메인(gnlaw-criminal / gnlaw-recovery / 금융사기대응센터.kr)은
   // 카카오톡 상담 클릭을 /kakao_redirect/ 브리지 페이지를 거쳐 채널로 보내 전환을 집계한다.
@@ -3573,12 +3769,15 @@ function createCategorySchema(group, title, description, canonical) {
   });
 }
 
+
 function createReadingroomHomeSchema(group, title, description) {
   const home = `${group.siteUrl}/`;
   const organizationId = `${home}#organization`;
   const websiteId = `${home}#website`;
   const webpageId = `${home}#webpage`;
   const carouselId = `${home}#carousel`;
+  const faqId = `${home}#faq`;
+  const serviceId = `${home}#legal-service`;
   return JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -3586,6 +3785,7 @@ function createReadingroomHomeSchema(group, title, description) {
         "@type": "WebSite",
         "@id": websiteId,
         name: "주식리딩방사기 센터",
+        alternateName: "법무법인 선린 주식리딩방사기 센터",
         url: home,
         inLanguage: "ko-KR",
         publisher: { "@id": organizationId },
@@ -3600,7 +3800,12 @@ function createReadingroomHomeSchema(group, title, description) {
         dateModified: today,
         isPartOf: { "@id": websiteId },
         publisher: { "@id": organizationId },
-        mainEntity: { "@id": carouselId },
+        about: [
+          { "@type": "Thing", name: "주식리딩방사기" },
+          { "@type": "Thing", name: "코인 리딩방 사기" },
+          { "@type": "Thing", name: "가짜 HTS·MTS" },
+        ],
+        mainEntity: [{ "@id": carouselId }, { "@id": faqId }],
       },
       {
         "@type": "ItemList",
@@ -3612,9 +3817,41 @@ function createReadingroomHomeSchema(group, title, description) {
           "@type": "ListItem",
           position: index + 1,
           name: item.label,
+          description: item.description,
           image: `${group.siteUrl}${item.image}`,
           url: `${group.siteUrl}/${group.pathPrefix}/type/${item.key}/`,
         })),
+      },
+      {
+        "@type": "FAQPage",
+        "@id": faqId,
+        name: "주식리딩방사기 자주 묻는 질문",
+        url: `${home}#faq`,
+        inLanguage: "ko-KR",
+        mainEntity: READINGROOM_HUB_FAQ.map((item) => ({
+          "@type": "Question",
+          name: item.q,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: item.a,
+          },
+        })),
+      },
+      {
+        "@type": "LegalService",
+        "@id": serviceId,
+        name: "법무법인 선린 주식리딩방사기 피해 대응",
+        url: home,
+        telephone: "02-6348-0406",
+        areaServed: { "@type": "Country", name: "대한민국" },
+        provider: { "@id": organizationId },
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "반포대로 108 양원빌딩 4층",
+          addressLocality: "서초구",
+          addressRegion: "서울특별시",
+          addressCountry: "KR",
+        },
       },
       {
         "@type": "Organization",
@@ -3622,17 +3859,19 @@ function createReadingroomHomeSchema(group, title, description) {
         name: "주식리딩방사기 센터",
         legalName: "법무법인 선린",
         url: home,
+        telephone: "02-6348-0406",
         logo: {
           "@type": "ImageObject",
           url: `${group.siteUrl}/assets/logo.png`,
         },
-        parentOrganization: {
-          "@type": "LegalService",
-          "@id": "https://gnlaw-criminal.co.kr/#legalservice",
-          name: "법무법인 선린",
-          url: "https://gnlaw-criminal.co.kr/",
-          telephone: "02-6348-0406",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "반포대로 108 양원빌딩 4층",
+          addressLocality: "서초구",
+          addressRegion: "서울특별시",
+          addressCountry: "KR",
         },
+        sameAs: ["https://gnlaw-criminal.co.kr/"],
       },
     ],
   });
@@ -3864,7 +4103,9 @@ for (const group of groups) {
   const hubDescription = group.hubLead;
   const hubH1 = isRecoveryGuide
     ? "계좌 지급정지, 왜 발생하고 어떻게 해제하나요?"
-    : hubTitle;
+    : (group.landingKey || group.key) === "ld"
+      ? "주식리딩방사기 센터"
+      : hubTitle;
   const hubHtml = buildPage(template, group, {
     title: escapeHtml(hubTitle),
     description: escapeHtml(hubDescription),
@@ -3902,7 +4143,11 @@ for (const group of groups) {
     floatingWidgets: isCenterBoardSite(group) ? "" : createHubFloatingWidgets(group),
     pageKind: isCenterBoardSite(group)
       ? (String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr" ? "center-site center-fintech hub-page home-page" : "hub-page home-page")
-      : isRecoveryGuide ? "hub-page recovery-guide-home" : "hub-page",
+      : isRecoveryGuide
+        ? "hub-page recovery-guide-home"
+        : (group.landingKey || group.key) === "ld"
+          ? "hub-page readingroom-home"
+          : "hub-page",
     omitConsultCta: isCenterBoardSite(group) || isRecoveryGuide,
     omitCenterHomeAbout: isCenterBoardSite(group),
   });

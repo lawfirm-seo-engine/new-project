@@ -3231,3 +3231,587 @@ button{
   .recovery-archive-search label{display:none}
   .domain-c.category-page .page-shell{width:calc(100% - 24px)}
 }
+
+
+/* 주식리딩방사기 센터 홈: 진단·유형 캐러셀 (domain-ld only) */
+.readingroom-home {
+  --ld-ink: #0b1931;
+  --ld-navy: #102b52;
+  --ld-blue: #236ed4;
+  --ld-sky: #79bfff;
+  --ld-pale: #edf5ff;
+  --ld-gold: #ffd36b;
+}
+
+.readingroom-home .hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(58px, 9vw, 112px) clamp(22px, 5vw, 70px);
+  color: #fff;
+  background:
+    radial-gradient(circle at 83% 12%, rgba(121, 191, 255, .24), transparent 31%),
+    linear-gradient(135deg, #09182f 0%, #102b52 54%, #164275 100%);
+  border: 0;
+  border-radius: 0 0 28px 28px;
+  box-shadow: 0 22px 55px rgba(11, 25, 49, .18);
+}
+
+.readingroom-home .hero::after {
+  content: "";
+  position: absolute;
+  right: -74px;
+  bottom: -150px;
+  width: 360px;
+  height: 360px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 50%;
+  box-shadow: 0 0 0 52px rgba(255,255,255,.035), 0 0 0 104px rgba(255,255,255,.025);
+  pointer-events: none;
+}
+
+.readingroom-home .hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.readingroom-home .hero h1 {
+  max-width: 760px;
+  margin: 0 0 18px;
+  color: #fff;
+  font-size: clamp(38px, 6.5vw, 68px);
+  line-height: 1.08;
+  letter-spacing: -.055em;
+}
+
+.readingroom-home .hero p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(255,255,255,.8);
+  font-size: clamp(16px, 2vw, 20px);
+  line-height: 1.75;
+}
+
+.readingroom-home .hub-stats-section {
+  margin-top: -1px;
+  padding: 0;
+  background: transparent;
+}
+
+.readingroom-home .hub-stats {
+  position: relative;
+  z-index: 2;
+  width: min(760px, calc(100% - 32px));
+  margin: -36px auto 42px;
+  border: 1px solid rgba(20, 62, 111, .12);
+  border-radius: 18px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 18px 45px rgba(11,25,49,.12);
+  backdrop-filter: blur(12px);
+}
+
+.readingroom-home .hub-stats > div + div {
+  border-left-color: #dbe8f7;
+}
+
+.readingroom-home .hub-stats span,
+.readingroom-home .hub-stats em {
+  color: #62728c;
+}
+
+.readingroom-home .hub-stats strong {
+  color: var(--ld-navy);
+}
+
+.ld-section-kicker {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: #72baff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .15em;
+}
+
+.readingroom-home .ld-diagnosis {
+  display: grid;
+  grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr);
+  gap: clamp(26px, 5vw, 64px);
+  align-items: center;
+  margin: 42px 0 58px;
+  padding: clamp(28px, 5vw, 58px);
+  color: #fff;
+  background:
+    radial-gradient(circle at 8% 10%, rgba(121,191,255,.2), transparent 28%),
+    linear-gradient(145deg, #0a1b35, #123a68);
+  border-radius: 26px;
+  box-shadow: 0 28px 70px rgba(9,24,47,.2);
+}
+
+.ld-diagnosis-copy h2 {
+  margin: 0 0 20px;
+  color: #fff;
+  font-size: clamp(30px, 4.5vw, 48px);
+  line-height: 1.15;
+  letter-spacing: -.05em;
+}
+
+.ld-diagnosis-copy h2 em {
+  color: var(--ld-gold);
+  font-style: normal;
+}
+
+.ld-diagnosis-copy p {
+  margin: 0 0 24px;
+  color: rgba(255,255,255,.73);
+  line-height: 1.75;
+}
+
+.ld-diagnosis-copy > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 17px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px;
+}
+
+.ld-diagnosis-panel {
+  padding: clamp(20px, 3vw, 30px);
+  color: var(--ld-ink);
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.18);
+}
+
+.ld-diagnosis-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.ld-diagnosis-status div {
+  display: grid;
+  gap: 3px;
+}
+
+.ld-diagnosis-status strong {
+  color: var(--ld-ink);
+  font-size: 18px;
+}
+
+.ld-diagnosis-status small {
+  color: #6a7890;
+}
+
+.ld-diagnosis-status > b {
+  color: var(--ld-blue);
+  font-size: 19px;
+}
+
+.ld-diagnosis-choices {
+  display: grid;
+  gap: 9px;
+}
+
+.readingroom-home .ld-diagnosis-choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 2px 11px;
+  width: 100%;
+  padding: 14px 15px;
+  color: var(--ld-ink);
+  text-align: left;
+  border: 1px solid #dce7f4;
+  border-radius: 13px;
+  background: #f8fbff;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.readingroom-home .ld-diagnosis-choice:hover {
+  transform: translateY(-1px);
+  border-color: #94bce9;
+}
+
+.ld-diagnosis-choice > span {
+  grid-row: 1 / 3;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border: 1.5px solid #9eb0c6;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.ld-diagnosis-choice.is-selected {
+  border-color: var(--ld-blue);
+  background: #edf5ff;
+}
+
+.ld-diagnosis-choice.is-selected > span {
+  border-color: var(--ld-blue);
+  background: var(--ld-blue);
+  box-shadow: inset 0 0 0 4px #fff;
+}
+
+.ld-diagnosis-choice strong {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.ld-diagnosis-choice em {
+  color: #697891;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+.readingroom-home .ld-diagnosis-submit {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 14px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  border: 0;
+  border-radius: 12px;
+  background: var(--ld-blue);
+  cursor: pointer;
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.readingroom-home .ld-diagnosis-submit:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.readingroom-home .ld-diagnosis-submit:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+.ld-diagnosis-result {
+  margin-top: 14px;
+  padding: 17px;
+  border: 1px solid #bdd8f8;
+  border-radius: 13px;
+  background: var(--ld-pale);
+}
+
+.ld-diagnosis-result[hidden] {
+  display: none;
+}
+
+.ld-diagnosis-result small {
+  display: block;
+  margin-bottom: 3px;
+  color: #547093;
+}
+
+.ld-diagnosis-result strong {
+  display: block;
+  color: var(--ld-navy);
+  font-size: 20px;
+}
+
+.ld-diagnosis-result p {
+  margin: 8px 0 12px;
+  color: #43546c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ld-diagnosis-result a {
+  color: #145dbd;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.ld-diagnosis-note {
+  margin: 12px 2px 0;
+  color: #7a8799;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.readingroom-home .article-block {
+  border: 1px solid #e0e9f4;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(28,61,101,.055);
+}
+
+.readingroom-home .readingroom-carousel {
+  margin: 58px 0 64px;
+  padding: clamp(24px, 4vw, 42px);
+  overflow: hidden;
+  border: 1px solid #dce7f3;
+  border-radius: 24px;
+  background: #f8fbff;
+  box-shadow: 0 18px 48px rgba(21,54,94,.08);
+}
+
+.readingroom-home .readingroom-carousel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 26px;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+
+.readingroom-home .readingroom-carousel-head > div:first-child {
+  max-width: 720px;
+}
+
+.readingroom-home .readingroom-carousel-head .ld-section-kicker {
+  color: #3979c6;
+}
+
+.readingroom-home .readingroom-carousel-head h2 {
+  margin: 0 0 9px;
+  color: var(--ld-ink);
+  font-size: clamp(27px, 4vw, 40px);
+  line-height: 1.18;
+  letter-spacing: -.045em;
+}
+
+.readingroom-home .readingroom-carousel-head p {
+  margin: 0;
+  color: #63738a;
+  line-height: 1.65;
+}
+
+.readingroom-carousel-nav {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.readingroom-carousel-count {
+  min-width: 58px;
+  color: #718096;
+  font-size: 13px;
+  letter-spacing: .08em;
+}
+
+.readingroom-carousel-count b {
+  color: var(--ld-blue);
+  font-size: 18px;
+}
+
+.readingroom-home .readingroom-carousel-nav button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: var(--ld-ink);
+  font-size: 19px;
+  border: 1px solid #cddaea;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+}
+
+.readingroom-home .readingroom-carousel-nav button:disabled {
+  opacity: .32;
+  cursor: not-allowed;
+}
+
+.readingroom-home .readingroom-carousel-track {
+  display: flex;
+  gap: 16px;
+  padding: 3px 1px 16px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 1px;
+  scrollbar-width: none;
+}
+
+.readingroom-home .readingroom-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.readingroom-home .readingroom-carousel-card {
+  position: relative;
+  flex: 0 0 calc((100% - 32px) / 3);
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ld-ink);
+  text-decoration: none;
+  border: 1px solid #dce6f2;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(17,49,87,.075);
+  scroll-snap-align: start;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.readingroom-home .readingroom-carousel-card:hover {
+  transform: translateY(-4px);
+  border-color: #9fc3ee;
+  box-shadow: 0 15px 30px rgba(17,49,87,.13);
+}
+
+.readingroom-home .readingroom-carousel-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10.5;
+  object-fit: cover;
+  border-bottom: 1px solid #e3ebf5;
+}
+
+.readingroom-card-index {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 28px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  border-radius: 8px;
+  background: rgba(8,25,50,.82);
+  backdrop-filter: blur(5px);
+}
+
+.readingroom-card-copy {
+  display: block;
+  padding: 18px;
+}
+
+.readingroom-card-copy strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.readingroom-card-copy em {
+  display: -webkit-box;
+  min-height: 3.1em;
+  overflow: hidden;
+  color: #66758a;
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.55;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.readingroom-card-copy b {
+  display: block;
+  margin-top: 15px;
+  color: #2168c5;
+  font-size: 13px;
+}
+
+.readingroom-card-copy i {
+  font-style: normal;
+  transition: margin-left .18s ease;
+}
+
+.readingroom-carousel-card:hover .readingroom-card-copy i {
+  margin-left: 5px;
+}
+
+.readingroom-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.readingroom-home .readingroom-carousel-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #bac8d8;
+  cursor: pointer;
+  transition: width .18s ease, background .18s ease;
+}
+
+.readingroom-home .readingroom-carousel-dots button[aria-pressed="true"] {
+  width: 24px;
+  background: var(--ld-blue);
+}
+
+@media (max-width: 860px) {
+  .readingroom-home .ld-diagnosis {
+    grid-template-columns: 1fr;
+  }
+
+  .readingroom-home .readingroom-carousel-card {
+    flex-basis: calc((100% - 16px) / 2);
+  }
+}
+
+@media (max-width: 620px) {
+  .readingroom-home .hero {
+    padding: 48px 21px 72px;
+    border-radius: 0 0 22px 22px;
+  }
+
+  .readingroom-home .hero h1 {
+    font-size: 39px;
+  }
+
+  .readingroom-home .hub-stats {
+    margin-top: -28px;
+    margin-bottom: 30px;
+  }
+
+  .readingroom-home .ld-diagnosis {
+    margin: 30px 0 44px;
+    padding: 24px 17px;
+    border-radius: 20px;
+  }
+
+  .ld-diagnosis-copy h2 {
+    font-size: 31px;
+  }
+
+  .ld-diagnosis-panel {
+    padding: 18px 14px;
+  }
+
+  .readingroom-home .readingroom-carousel {
+    margin: 44px 0 50px;
+    padding: 23px 16px;
+    border-radius: 20px;
+  }
+
+  .readingroom-home .readingroom-carousel-head {
+    display: grid;
+    align-items: start;
+  }
+
+  .readingroom-home .readingroom-carousel-nav {
+    justify-content: space-between;
+  }
+
+  .readingroom-home .readingroom-carousel-card {
+    flex-basis: 84%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .readingroom-home .readingroom-carousel-track {
+    scroll-behavior: auto;
+  }
+
+  .readingroom-home .readingroom-carousel-card,
+  .readingroom-home .ld-diagnosis-choice,
+  .readingroom-home .ld-diagnosis-submit {
+    transition: none;
+  }
+}
