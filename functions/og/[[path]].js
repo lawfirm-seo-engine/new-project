@@ -216,8 +216,6 @@ function shortTitle(title = "", max = 28) {
 
 function buildSvg(title, templateHref, seed = "", badge = "") {
   const lines = splitTitle(title);
-  const variant = variantForImage(title, seed);
-  const topLabel = shortTitle(title);
   const maxUnits = Math.max(...lines.map(textUnits), 1);
   const fontSize = lines.length > 1
     ? Math.min(86, Math.max(58, Math.floor(920 / maxUnits)))
@@ -228,34 +226,23 @@ function buildSvg(title, templateHref, seed = "", badge = "") {
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" viewBox="0 0 ${TEMPLATE_WIDTH} ${TEMPLATE_HEIGHT}">
 <defs>
+  <linearGradient id="plaqueFill" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#15130f"/>
+    <stop offset="48%" stop-color="#070706"/>
+    <stop offset="100%" stop-color="#11100d"/>
+  </linearGradient>
   <linearGradient id="goldText" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="#ffd86f"/>
     <stop offset="52%" stop-color="#f0b430"/>
     <stop offset="100%" stop-color="#c97912"/>
   </linearGradient>
-  <linearGradient id="caseAccent" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0%" stop-color="${variant.base}"/>
-    <stop offset="68%" stop-color="${variant.accent}"/>
-    <stop offset="100%" stop-color="${variant.stripe}"/>
-  </linearGradient>
-  <pattern id="casePattern" patternUnits="userSpaceOnUse" width="96" height="96" patternTransform="rotate(-18 ${variant.stripeOffset} 0)">
-    <path d="M0 24H96M0 72H96" stroke="${variant.stripe}" stroke-width="7" opacity="0.38"/>
-  </pattern>
   <filter id="textShadow" x="-12%" y="-22%" width="124%" height="144%">
     <feDropShadow dx="0" dy="4" stdDeviation="1.8" flood-color="#000000" flood-opacity="0.86"/>
   </filter>
 </defs>
 <image href="${templateHref}" x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" preserveAspectRatio="xMidYMid slice"/>
-<rect x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" fill="${variant.base}" opacity="0.075"/>
-<rect x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" fill="url(#casePattern)" opacity="0.09"/>
-<path d="M0 0H1254V150H0Z" fill="url(#caseAccent)" opacity="${variant.bandOpacity.toFixed(2)}"/>
-<rect x="44" y="37" width="156" height="76" rx="0" fill="#ffffff" opacity="0.92"/>
-<text x="122" y="77" font-family="Pretendard,sans-serif" font-size="24" font-weight="900" letter-spacing="0" fill="${variant.base}" text-anchor="middle" dominant-baseline="middle">CASE</text>
-<text x="122" y="101" font-family="Pretendard,sans-serif" font-size="20" font-weight="900" letter-spacing="0" fill="${variant.accent}" text-anchor="middle" dominant-baseline="middle">${variant.code}</text>
-<text x="234" y="77" font-family="Pretendard,sans-serif" font-size="42" font-weight="900" letter-spacing="0" fill="#fff8df" text-anchor="start" dominant-baseline="middle" filter="url(#textShadow)">${escSvg(topLabel)}</text>
+<rect x="131" y="1044" width="992" height="160" fill="url(#plaqueFill)"/>
 ${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="900" letter-spacing="0" fill="url(#goldText)" stroke="#120800" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" text-rendering="geometricPrecision" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
-${badge ? `<rect x="${1210 - (badge.length * 15 + 40)}" y="37" width="${badge.length * 15 + 40}" height="46" rx="23" fill="#0f2745" opacity="0.92"/>
-<text x="${1210 - (badge.length * 15 + 40) / 2}" y="61" font-family="Pretendard,sans-serif" font-size="22" font-weight="900" letter-spacing="0" fill="#7ec2ff" text-anchor="middle" dominant-baseline="middle">${escSvg(badge)}</text>` : ""}
 </svg>`;
 }
 
