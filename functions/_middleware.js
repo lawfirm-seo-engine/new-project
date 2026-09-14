@@ -62,7 +62,7 @@ export async function onRequest(context) {
       })
       .on("body", {
         element(element) {
-          element.append('<script src="/admin/whiteboard-presets.js"></script>', { html: true });
+          element.append('<script src="/admin/whiteboard-presets.js?v=20260914-1"></script>', { html: true });
         }
       })
       .transform(response);
