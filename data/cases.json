@@ -20589,8 +20589,8 @@
     ],
     "memo": "",
     "noindex": true,
-    "hideFromListing": false,
-    "searchHidden": false,
+    "hideFromListing": true,
+    "searchHidden": true,
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "",
@@ -151252,7 +151252,7 @@
     "caseName": "한국투자증권 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-09-04",
-    "updatedAt": "2026-09-04",
+    "updatedAt": "2026-09-15",
     "thumbnailUrl": "",
     "landingViews": 7235,
     "reports": 20,
@@ -151267,9 +151267,18 @@
     ],
     "memo": "",
     "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project"
+    "fraudType": "stock-project",
+    "memos": [
+      {
+        "id": 1789456646885,
+        "text": "한국투자증권을 사칭한 사기 사이트 https://d2xxkrsy.krinvest.org/ 를 조심하시기 바랍니다.",
+        "createdAt": "2026-09-15 16:17"
+      }
+    ]
   },
   {
     "slug": "mannameopeur-hwanbur",
@@ -166816,5 +166825,79 @@
       "c"
     ],
     "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "c7-riseukeu-gwanri-seuteodi",
+    "caseName": "C7 리스크 관리 스터디 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-15",
+    "updatedAt": "2026-09-15",
+    "thumbnailUrl": "",
+    "landingViews": 1347,
+    "reports": 31,
+    "summary": "C7 리스크 관리 스터디 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "C7",
+      "리스크",
+      "관리",
+      "스터디",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "jusigsijang-gyoryubangvip9",
+    "caseName": "주식시장 교류방VIP9 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-15",
+    "updatedAt": "2026-09-15",
+    "thumbnailUrl": "",
+    "landingViews": 7294,
+    "reports": 7,
+    "summary": "주식시장 교류방VIP9 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "주식시장",
+      "교류방VIP9",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "d2xxkrsy-krinvest-org",
+    "caseName": "d2xxkrsy.krinvest.org 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-15",
+    "updatedAt": "2026-09-15",
+    "thumbnailUrl": "",
+    "landingViews": 3482,
+    "reports": 29,
+    "summary": "d2xxkrsy.krinvest.org 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "d2xxkrsy.krinvest.org",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "institution-exchange"
   }
 ]
