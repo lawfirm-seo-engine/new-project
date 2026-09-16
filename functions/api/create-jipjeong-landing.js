@@ -7,6 +7,7 @@ import {
 import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
 import { recoveryRepresentativeSlug } from "../_recoverySeo.js";
+import { correctKoreanParticles } from "../_koreanParticles.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const RECOVERY_HOST = "gnlaw-recovery.co.kr";
@@ -174,7 +175,7 @@ export async function onRequestPost(context) {
     // ── 저장 단계 ──────────────────────────────────────────────────────────
     const confirmedBody = appendStockReadingroomCta(Array.isArray(body.body) && body.body.length
       ? body.body
-      : generatedBody).map((line) => removeJongnoLawyerPhrase(line));
+      : generatedBody).map((line) => correctKoreanParticles(removeJongnoLawyerPhrase(line)));
 
     const generatedMeta = generateJipjeongMeta(newBank, newAction);
     const imageAlt        = removeJongnoLawyerPhrase(normalizeSpace(body.imageAlt)).slice(0, 160) || generatedMeta.imageAlt;
@@ -274,7 +275,7 @@ function applySubstitutions(str, bank, action) {
   let s = str;
   s = replaceAll(s, TPLB, bank);
   s = replaceAll(s, TPLA, action);
-  return s;
+  return correctKoreanParticles(s);
 }
 
 export function generateJipjeongMeta(bank, action) {
