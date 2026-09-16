@@ -544,8 +544,9 @@ function renderPowerlinkLanding(landing) {
   const robots = normalizePowerlinkRobots(landing);
   const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = landing.updatedAt || publishedDate;
-  const ogImage = powerlinkOgImageUrl(slug || "landing", "png");
-  const displayOgImage = powerlinkOgImageUrl(slug || "landing", "webp");
+  const ogRevision = landing.ogRevision || landing.updatedAt || "";
+  const ogImage = appendOgRevision(powerlinkOgImageUrl(slug || "landing", "png"), ogRevision);
+  const displayOgImage = appendOgRevision(powerlinkOgImageUrl(slug || "landing", "webp"), ogRevision);
   const imageAlt = landing.imageAlt || criminalLandingCaseTitle(rawTitle);
   const imageCaption = landing.imageCaption || imageAlt;
   const imageDescription = landing.imageDescription || description;
