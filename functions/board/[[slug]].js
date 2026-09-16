@@ -48,7 +48,7 @@ const GA_TAG = `<!-- Google tag (gtag.js) -->
 </script>`;
 
 function layout({ title, description, canonical, body }) {
-  return `<!doctype html><html lang="ko"><head>${GA_TAG}<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${esc(canonical)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical)}"><meta property="og:type" content="article"><link rel="stylesheet" href="/assets/style.css?v=20260915-logo-header-v1"><style>${styles()}</style></head><body class="domain-a center-site center-fintech board-page">${siteHeader()}${body}${siteFooter()}</body></html>`;
+  return `<!doctype html><html lang="ko"><head>${GA_TAG}<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${esc(canonical)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical)}"><meta property="og:type" content="article"><link rel="stylesheet" href="/assets/style.css?v=20260916-header-thumb-v1"><style>${styles()}</style></head><body class="domain-a center-site center-fintech board-page">${siteHeader()}${body}${siteFooter()}</body></html>`;
 }
 
 function siteHeader() {

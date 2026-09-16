@@ -2296,7 +2296,7 @@ function isCriminalSite(group) {
 
 const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
 const CENTER_FINTECH_IMAGE_VERSION = "20260903-brand-text-replaced";
-const CRIMINAL_PUBLIC_STYLE_VERSION = "20260915-logo-header-v1";
+const CRIMINAL_PUBLIC_STYLE_VERSION = "20260916-header-thumb-v1";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
 const READINGROOM_HOME_STYLE_VERSION = "20260914-readingroom-carousel-v2";

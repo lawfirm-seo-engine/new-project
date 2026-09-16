@@ -196,6 +196,7 @@ for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
 }
 
 const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
+const CRIMINAL_PUBLIC_STYLE_VERSION = "20260916-header-thumb-v1";
 const CENTER_FINTECH_IMAGE_VERSION = "20260825-main-slide-03-replaced";
 
 function centerFintechHeadLinks(group) {
@@ -536,15 +537,16 @@ async function loadPowerlinkLanding(env, slug) {
 function renderPowerlinkLanding(landing) {
   const slug = landing.slug || "";
   const canonical = `https://gnlaw-criminal.co.kr/powerlink/${encodeURIComponent(slug)}/`;
-  const title = landing.title || landing.h1 || "파워링크 랜딩";
-  const h1 = landing.h1 || title;
+  const rawTitle = landing.h1 || landing.title || slug || "파워링크 랜딩";
+  const title = criminalLandingPageTitle(rawTitle);
+  const h1 = criminalLandingH1Html(rawTitle);
   const description = landing.description || `${title} 관련 신규 사건 진행 내용을 정리했습니다.`;
   const robots = normalizePowerlinkRobots(landing);
   const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = landing.updatedAt || publishedDate;
   const ogImage = powerlinkOgImageUrl(slug || "landing", "png");
   const displayOgImage = powerlinkOgImageUrl(slug || "landing", "webp");
-  const imageAlt = landing.imageAlt || title;
+  const imageAlt = landing.imageAlt || criminalLandingCaseTitle(rawTitle);
   const imageCaption = landing.imageCaption || imageAlt;
   const imageDescription = landing.imageDescription || description;
   const imageObject = {
@@ -666,7 +668,7 @@ function renderPowerlinkLanding(landing) {
     schema,
     bodyClass: "domain-a center-site center-fintech landing-page powerlink-page",
     tone: "NAVER POWERLINK",
-    h1: esc(h1),
+    h1,
     breadcrumb: `<nav class="breadcrumb" aria-label="breadcrumb"><a href="https://gnlaw-criminal.co.kr/">홈</a><strong>${esc(title)}</strong></nav>`,
     ogThumbnail: "",
     summary: "",
@@ -683,7 +685,7 @@ function renderPowerlinkLanding(landing) {
       { siteUrl: "https://gnlaw-criminal.co.kr" },
       { includeCriminal: true },
     ),
-    styleHref: "/assets/style.css?v=20260915-logo-header-v1",
+    styleHref: `/assets/style.css?v=${CRIMINAL_PUBLIC_STYLE_VERSION}`,
     bodyScripts: logScanScriptForSite("https://gnlaw-criminal.co.kr"),
   });
 }
@@ -1371,16 +1373,18 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const rawCaseName = caseData.caseName || "";
   const useManualTitle = isManualLandingForGroup(caseData, group);
   const useStandardTemplate = !useManualTitle && isStandardLandingCase(caseData) && lk === "a";
-  const pageTitle = useManualTitle
+  const useCriminalTitle = isCriminalSite(group);
+  const criminalPageTitle = useCriminalTitle ? criminalLandingPageTitle(rawCaseName) : "";
+  const pageTitle = criminalPageTitle || (useManualTitle
     ? (landing.title || groupPageTitle(rawCaseName, lk, caseData))
     : useStandardTemplate
       ? standardPageTitle(rawCaseName)
-      : groupPageTitle(rawCaseName, lk, caseData);
-  const pageH1 = useManualTitle
+      : groupPageTitle(rawCaseName, lk, caseData));
+  const pageH1 = criminalPageTitle || (useManualTitle
     ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk))
     : useStandardTemplate
       ? standardPageTitle(rawCaseName)
-      : groupPageH1(rawCaseName, lk);
+      : groupPageH1(rawCaseName, lk));
   const NO_SUFFIX_SLUGS_RENDER = ["soiraeb-sagi-syopingmor", "grucompany-sagi-syopingmor", "geuruaenkeompeoni-sagi-syopingmor"];
   const ALL_DOMAINS_NO_SUFFIX_RENDER = ["baidogseu-georaeso-litigation-noindex", "bydoxe-litigation-noidex"];
   const OLD_URL_CANONICAL = { "mediacastlekr-com-sagi-tikesyemae-bueob": "prosecute" };
@@ -1637,10 +1641,10 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     styleHref: lk === "c"
       ? "/assets/style.css?v=20260907-recovery-heading-v3"
       : String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
-        ? "/assets/style.css?v=20260915-logo-header-v1"
+        ? `/assets/style.css?v=${CRIMINAL_PUBLIC_STYLE_VERSION}`
         : "/assets/style.css?v=20260820-nav-fix-v1",
     tone: esc(group.tone),
-    h1: esc(pageH1),
+    h1: useCriminalTitle ? criminalLandingH1Html(rawCaseName) : esc(pageH1),
     breadcrumb: createHtmlBreadcrumb(group, rawCaseName, pageH1),
     ogThumbnail,
     summary: pageSummary,
@@ -3154,7 +3158,7 @@ function pageTemplate(d) {
   <meta property="og:locale" content="ko_KR">
   ${d.headExtra}
   <script type="application/ld+json">${d.schema}</script>
-  <link rel="stylesheet" href="${d.styleHref || "/assets/style.css?v=20260820-nav-fix-v1"}">
+  <link rel="stylesheet" href="${d.styleHref || `/assets/style.css?v=${CRIMINAL_PUBLIC_STYLE_VERSION}`}">
 </head>
 <body class="${d.bodyClass}">
   <header class="site-header">
@@ -3278,6 +3282,27 @@ function groupPageH1(name, key) {
   // ld는 "사건명 + 사칭 사기"의 짧은 H1을 별도로 사용 — <title> 태그(groupPageTitle)와 분리
   if (key === "ld") return ldPageH1(name);
   return groupPageTitle(name, key);
+}
+
+function isCriminalSite(group = {}) {
+  return String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr";
+}
+
+function criminalLandingCaseTitle(name = "") {
+  const clean = baseCaseName(name);
+  const impersonation = clean.match(/^(.+?사칭\s*사기)(?:\s|,|$)/i);
+  if (impersonation) return normalizeSpace(impersonation[1]);
+  const scam = clean.match(/^(.+?)\s*사기(?:\s|,|$)/i);
+  if (scam) return normalizeSpace(`${scam[1]} 사칭 사기`);
+  return clean ? `${clean} 사칭 사기` : "사칭 사기";
+}
+
+function criminalLandingPageTitle(name = "") {
+  return `${criminalLandingCaseTitle(name)}, 출금 불가 피해 회복 방법`;
+}
+
+function criminalLandingH1Html(name = "") {
+  return `<span class="landing-title-line">${esc(criminalLandingCaseTitle(name))},</span><span class="landing-title-line">출금 불가 피해 회복 방법</span>`;
 }
 
 function joinSeoPhrase(base = "", suffix = "") {

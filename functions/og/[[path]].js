@@ -214,12 +214,27 @@ function shortTitle(title = "", max = 28) {
   return chars.length > max ? `${chars.slice(0, max).join("")}...` : chars.join("");
 }
 
+function normalizeOgCaseTitle(raw = "") {
+  let text = cleanTitle(raw)
+    .replace(/\s*,?\s*(출금\s*불가\s*피해\s*회복\s*방법|피해\s*회복\s*방법|형사고소|민사소송|성공사례|사건브리핑|사건현황|법적조치|피해회복|해결사례|진행현황).*$/i, "")
+    .replace(/\s*(출금\s*거부|출금\s*불가|피해금\s*회수|피해\s*회복).*$/i, "")
+    .trim();
+  const impersonation = text.match(/^(.+?사칭\s*사기)(?:\s|,|$)/i);
+  if (impersonation) return cleanTitle(impersonation[1].replace(/\s+/g, " "));
+  const scam = text.match(/^(.+?)\s*사기(?:\s|,|$)/i);
+  if (scam) return cleanTitle(`${scam[1].trim()} 사칭 사기`);
+  text = text.replace(/\s*(사칭\s*사기|사칭|사기|탈출|스캠|scam)\s*$/i, "").trim();
+  return cleanTitle(text ? `${text} 사칭 사기` : "법무법인 선린");
+}
+
 function buildSvg(title, templateHref, seed = "", badge = "") {
   const lines = splitTitle(title);
+  const variant = variantForImage(title, seed);
+  const topLabel = shortTitle(title);
   const maxUnits = Math.max(...lines.map(textUnits), 1);
   const fontSize = lines.length > 1
-    ? Math.min(86, Math.max(58, Math.floor(920 / maxUnits)))
-    : Math.min(120, Math.max(66, Math.floor(1080 / maxUnits)));
+    ? Math.min(74, Math.max(52, Math.floor(780 / maxUnits)))
+    : Math.min(94, Math.max(58, Math.floor(900 / maxUnits)));
   const lineHeight = Math.round(fontSize * 1.08);
   const firstY = PLAQUE_TEXT_CENTER_Y - ((lines.length - 1) * lineHeight) / 2;
   const strokeWidth = Math.max(5, Math.round(fontSize * 0.075));
@@ -239,10 +254,27 @@ function buildSvg(title, templateHref, seed = "", badge = "") {
   <filter id="textShadow" x="-12%" y="-22%" width="124%" height="144%">
     <feDropShadow dx="0" dy="4" stdDeviation="1.8" flood-color="#000000" flood-opacity="0.86"/>
   </filter>
+  <linearGradient id="caseAccent" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="${variant.base}"/>
+    <stop offset="68%" stop-color="${variant.accent}"/>
+    <stop offset="100%" stop-color="${variant.stripe}"/>
+  </linearGradient>
+  <pattern id="casePattern" patternUnits="userSpaceOnUse" width="96" height="96" patternTransform="rotate(-18 ${variant.stripeOffset} 0)">
+    <path d="M0 24H96M0 72H96" stroke="${variant.stripe}" stroke-width="7" opacity="0.38"/>
+  </pattern>
 </defs>
 <image href="${templateHref}" x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" preserveAspectRatio="xMidYMid slice"/>
+<rect x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" fill="${variant.base}" opacity="0.075"/>
+<rect x="0" y="0" width="${TEMPLATE_WIDTH}" height="${TEMPLATE_HEIGHT}" fill="url(#casePattern)" opacity="0.09"/>
+<path d="M0 0H1254V150H0Z" fill="url(#caseAccent)" opacity="${variant.bandOpacity.toFixed(2)}"/>
+<rect x="44" y="37" width="156" height="76" rx="0" fill="#ffffff" opacity="0.92"/>
+<text x="122" y="77" font-family="Pretendard,sans-serif" font-size="24" font-weight="900" letter-spacing="0" fill="${variant.base}" text-anchor="middle" dominant-baseline="middle">CASE</text>
+<text x="122" y="101" font-family="Pretendard,sans-serif" font-size="20" font-weight="900" letter-spacing="0" fill="${variant.accent}" text-anchor="middle" dominant-baseline="middle">${variant.code}</text>
+<text x="234" y="77" font-family="Pretendard,sans-serif" font-size="42" font-weight="900" letter-spacing="0" fill="#fff8df" text-anchor="start" dominant-baseline="middle" filter="url(#textShadow)">${escSvg(topLabel)}</text>
 <rect x="131" y="1044" width="992" height="160" fill="url(#plaqueFill)"/>
 ${lines.map((line, index) => `<text x="627" y="${Math.round(firstY + index * lineHeight)}" font-family="Pretendard,sans-serif" font-size="${fontSize}" font-weight="900" letter-spacing="0" fill="url(#goldText)" stroke="#120800" stroke-width="${strokeWidth}" paint-order="stroke fill" text-anchor="middle" dominant-baseline="middle" text-rendering="geometricPrecision" filter="url(#textShadow)">${escSvg(line)}</text>`).join("\n")}
+${badge ? `<rect x="${1210 - (badge.length * 15 + 40)}" y="37" width="${badge.length * 15 + 40}" height="46" rx="23" fill="#0f2745" opacity="0.92"/>
+<text x="${1210 - (badge.length * 15 + 40) / 2}" y="61" font-family="Pretendard,sans-serif" font-size="22" font-weight="900" letter-spacing="0" fill="#7ec2ff" text-anchor="middle" dominant-baseline="middle">${escSvg(badge)}</text>` : ""}
 </svg>`;
 }
 
@@ -313,6 +345,7 @@ export async function onRequest(context) {
   const previewTitle = cleanTitle(url.searchParams.get("t") || "");
   const revision = url.searchParams.get("r") || "";
   const isLdHost = url.hostname === LD_HOST;
+  const isCriminalHost = url.hostname === "gnlaw-criminal.co.kr" || url.hostname === "www.gnlaw-criminal.co.kr";
   // 같은 slug라도 리딩방피해회수센터.kr 요청에는 유형 뱃지가 추가로 그려지므로,
   // 다른 도메인 요청과 캐시 키를 분리해 뱃지 있는 이미지가 다른 사이트에 잘못 캐시되지 않게 한다.
   const cacheKey = previewTitle ? "" : `og:img:v${OG_IMAGE_VERSION}:${format}:${rawSlug}:${revision}${isLdHost ? ":ld" : ""}`;
@@ -343,18 +376,20 @@ export async function onRequest(context) {
         const group = groupForHost(url.hostname);
         const landingKey = group?.landingKey || group?.key || "";
         const landing = landingKey ? data.landings?.[landingKey] : null;
-        title = cleanTitle(
+        const sourceTitle =
           landing?.ogText ||
           data.ogText ||
-          data.title ||
-          data.h1 ||
+          data.caseName ||
+          data.name ||
           landing?.ogTitle ||
           landing?.title ||
           landing?.h1 ||
-          data.caseName ||
-          data.name ||
-          title,
-        );
+          data.title ||
+          data.h1 ||
+          title;
+        title = isCriminalHost || isPowerlink
+          ? normalizeOgCaseTitle(sourceTitle)
+          : cleanTitle(sourceTitle);
         ldCategory = landing?.ldCategory || data.ldCategory || "";
       }
     }
