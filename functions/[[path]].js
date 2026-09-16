@@ -45,7 +45,9 @@ import { ldPageH1, ldPageTitle } from "./_readingroomTemplate.js";
 import {
   isRecoveryRepresentative,
   recoveryBankForCase,
+  recoveryIntentForCase,
   recoveryRepresentativeSlug,
+  recoveryRepresentativeTitle,
   shouldConsolidateRecoveryCase,
 } from "./_recoverySeo.js";
 import {
@@ -1468,13 +1470,14 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const useCriminalTitle = isCriminalSite(group);
   const criminalPageTitle = useCriminalTitle ? criminalLandingPageTitle(rawCaseName) : "";
   const recoveryBank = lk === "c" && isRecoveryRepresentative(caseData) ? recoveryBankForCase(caseData) : null;
-  const recoveryRepresentativeTitle = recoveryBank ? `${recoveryBank.name} 계좌지급정지 해제 방법·준비자료` : "";
-  const pageTitle = recoveryRepresentativeTitle || criminalPageTitle || (useManualTitle
+  const recoveryIntent = lk === "c" && isRecoveryRepresentative(caseData) ? recoveryIntentForCase(caseData) : null;
+  const representativeTitle = lk === "c" && isRecoveryRepresentative(caseData) ? recoveryRepresentativeTitle(caseData) : "";
+  const pageTitle = representativeTitle || criminalPageTitle || (useManualTitle
     ? (landing.title || groupPageTitle(rawCaseName, lk, caseData))
     : useStandardTemplate
       ? standardPageTitle(rawCaseName)
       : groupPageTitle(rawCaseName, lk, caseData));
-  const pageH1 = recoveryRepresentativeTitle || criminalPageTitle || (useManualTitle
+  const pageH1 = representativeTitle || criminalPageTitle || (useManualTitle
     ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk))
     : useStandardTemplate
       ? standardPageTitle(rawCaseName)
@@ -1500,8 +1503,8 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const keyword = searchKeyword(rawCaseName);
   const renderedFaq = renderFaqForLanding(landing, { ...group, key: lk }, caseData);
   const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
-  const seoDescription = recoveryBank
-    ? `${recoveryBank.name} 계좌지급정지 원인, 이의제기와 해제 절차, 준비자료, 채권소멸절차 및 채무부존재확인소송 대응을 법무법인 선린이 정리합니다.`
+  const seoDescription = representativeTitle
+    ? `${representativeTitle}. ${recoveryBank ? `${recoveryBank.name} 관련 ` : ""}${recoveryIntent?.label || "계좌지급정지"}의 확인사항, 준비자료와 대응 순서를 법무법인 선린이 정리합니다.`.slice(0, 155)
     : lk === "c"
     ? `${primaryCaseKeyword(rawCaseName) || normalizeCaseName(rawCaseName)} 관련 계좌 지급정지 원인, 이의제기·해제 절차, 준비자료와 채무부존재확인소송 대응 방법을 정리합니다.`.slice(0, 150)
     : useStandardTemplate
@@ -2107,19 +2110,49 @@ function createRecoveryDebtNonexistenceSection() {
 
 function createRecoveryRepresentativeGuide(caseData = {}) {
   const bank = recoveryBankForCase(caseData);
-  if (!bank || !isRecoveryRepresentative(caseData)) return "";
-  const bankName = esc(bank.name);
-  return `<section class="aeo-summary recovery-representative-guide" id="aeo-summary" aria-label="${bankName} 계좌지급정지 해제 핵심 답변">
+  if (!isRecoveryRepresentative(caseData)) return "";
+  const intent = recoveryIntentForCase(caseData);
+  const bankName = esc(bank?.name || "은행");
+  const title = esc(recoveryRepresentativeTitle(caseData));
+  const guides = {
+    release: {
+      answer: "지급정지 해제를 검토하려면 통지된 조치의 근거와 문제 된 거래를 먼저 특정해야 합니다. 정당한 거래였다는 자료를 시간순으로 정리한 뒤 이의신청 또는 필요한 법원 절차를 선택합니다.",
+      steps: ["조치명·요청기관·대상 금액 확인", "입금 전후 거래내역과 거래 원인 정리", "이의신청서와 객관적 소명자료 제출", "채권소멸절차 및 추가 법적 절차 확인"],
+    },
+    objection: {
+      answer: "이의신청은 단순한 해제 요청이 아니라 문제 된 입금이 사기 피해금이 아니거나 정당한 거래대금이라는 점을 자료로 소명하는 절차입니다. 제출 기한과 보완 요청 여부를 함께 확인해야 합니다.",
+      steps: ["이의신청 가능 사유와 제출 기한 확인", "계약·주문·배송·세금자료 등 원인자료 확보", "입금자와의 대화 및 전체 거래내역 정리", "접수증 보관과 보완 요청 대응"],
+    },
+    objection_rejected: {
+      answer: "이의신청이 불수용되었다면 같은 자료를 반복 제출하기보다 불수용 사유를 서면으로 확인해야 합니다. 부족한 입증 부분을 보완하고 채권소멸절차 또는 채무부존재확인소송의 필요성을 검토합니다.",
+      steps: ["불수용 사유와 결정일 확인", "부족하다고 판단된 자료 특정", "추가 거래자료와 상대방 관계 보완", "채권소멸절차·법원 절차 진행 여부 검토"],
+    },
+    notice: {
+      answer: "지급정지 사실 통지서에서는 지급정지 요청기관, 대상 계좌와 금액, 피해구제 신청 여부 및 이의신청 안내를 확인해야 합니다. 통지서 수령일은 이후 대응 기한을 계산하는 기준이 될 수 있습니다.",
+      steps: ["통지서의 조치명과 수령일 확인", "요청기관·피해구제 신청인·대상 금액 확인", "채권소멸절차 공고 여부 확인", "이의신청 제출처와 준비자료 정리"],
+    },
+    non_face_to_face: {
+      answer: "비대면거래제한은 특정 입금액의 지급정지와 적용 범위가 다를 수 있습니다. 모바일·인터넷뱅킹 제한인지, 계좌 전체 출금 제한인지 구분하고 제한을 시행한 금융회사에 해제 요건을 확인해야 합니다.",
+      steps: ["제한된 채널과 거래 범위 확인", "지급정지와 비대면거래제한 구분", "본인확인·거래목적 관련 자료 준비", "해제 접수 결과와 잔여 제한 확인"],
+    },
+    telecom_fraud: {
+      answer: "전기통신금융사기 관련 지급정지는 피해구제 신청과 채권소멸절차가 연결될 수 있습니다. 문제 된 입금의 성격, 피해 신고 내용, 공고 진행 여부를 구분해 대응해야 합니다.",
+      steps: ["사기이용계좌 지정 및 피해구제 신청 여부 확인", "문제 된 입금의 원인과 자금 흐름 정리", "채권소멸절차 공고·이의제기 기한 확인", "환급절차와 민사상 채무 관계를 구분해 검토"],
+    },
+    debt_nonexistence: {
+      answer: "채무부존재확인소송은 피해구제 신청인에게 반환할 채무가 존재하지 않는다는 확인을 구하는 법원 절차입니다. 상대방, 대상 금액과 거래 원인을 특정하고 소송계속 사실을 금융회사에 알릴 자료를 준비해야 합니다.",
+      steps: ["피해구제 신청인과 대상 금액 특정", "반환채무가 없다는 거래 원인자료 정리", "관할·청구취지·입증계획 검토 후 소장 제출", "사건번호와 소송계속 증빙을 금융회사에 제출"],
+    },
+  };
+  const guide = guides[intent.key] || guides.release;
+  const steps = guide.steps.map((step) => `<li>${esc(step)}</li>`).join("");
+  return `<section class="aeo-summary recovery-representative-guide" id="aeo-summary" aria-label="${title} 핵심 답변">
     <p>핵심 답변</p>
-    <h2>${bankName} 계좌지급정지 해제는 통지 내용과 거래 원인부터 확인해야 합니다</h2>
-    <blockquote>지급정지는 원인과 적용 절차에 따라 준비자료가 달라집니다. 은행 통지서에서 요청기관, 문제 된 입금액, 채권소멸절차 공고 여부를 확인하고 계약·주문·배송·대화·거래내역으로 정당한 거래였음을 설명해야 합니다.</blockquote>
-    <h3>확인 순서</h3>
-    <ol>
-      <li>${bankName}에서 조치명, 요청기관, 대상 금액과 접수일을 확인합니다.</li>
-      <li>문제 된 입금 전후의 전체 거래내역과 거래 상대방 자료를 시간순으로 정리합니다.</li>
-      <li>이의제기 제출처, 양식, 보완 기한을 확인해 객관적인 원인자료와 함께 제출합니다.</li>
-      <li>이의제기로 해결되지 않으면 채권소멸절차 진행 상태와 채무부존재확인소송 필요성을 검토합니다.</li>
-    </ol>
+    <h2>${title}</h2>
+    <blockquote>${esc(guide.answer)}</blockquote>
+    <h3>${esc(intent.label)} 확인 순서</h3>
+    <ol>${steps}</ol>
+    ${bank ? `<p>${bankName}에 제출할 세부 양식과 추가 확인자료는 실제 통지 내용 및 제한 사유에 따라 달라질 수 있습니다.</p>` : ""}
     <p class="content-review-note"><strong>작성·검토:</strong> 법무법인 선린 금융사기 대응팀 · 담당 변호사 김상수<br><strong>최종 검토일:</strong> ${esc(caseData.updatedAt || caseData.createdAt || "")}</p>
   </section>`;
 }
