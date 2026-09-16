@@ -6,6 +6,7 @@ import {
   standardPageTitle,
 } from "./_standardLanding.js";
 import { LD_CAROUSEL_ITEMS } from "./_readingroomCategory.js";
+import { isRecoveryRepresentative, shouldConsolidateRecoveryCase } from "./_recoverySeo.js";
 
 export const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
 
@@ -42,7 +43,7 @@ export function powerlinkOgImageUrl(slug = "landing", format = "webp") {
 export const GROUPS = [
   { host: "gnlaw-criminal.co.kr", key: "a", landingKey: "a", prefix: "prosecute", suffix: "litigation", label: "형사고소", siteUrl: "https://gnlaw-criminal.co.kr" },
   { host: "gnlaw-civil.co.kr", key: "b", landingKey: "b", prefix: "civil", suffix: "settlement", label: "민사소송", siteUrl: "https://gnlaw-civil.co.kr" },
-  { host: "gnlaw-recovery.co.kr", key: "c", landingKey: "c", prefix: "success", suffix: "result", label: "성공사례", siteUrl: "https://gnlaw-recovery.co.kr", naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"] },
+  { host: "gnlaw-recovery.co.kr", key: "c", landingKey: "c", prefix: "success", suffix: "result", label: "계좌 지급정지 대응", siteUrl: "https://gnlaw-recovery.co.kr", naverVerification: ["c6bcb9fcd45bfd0c4306d625e2484f60f7f96099", "96d9e412da6e059fd252f0e877270b0f457bd0f7"] },
   { host: "gnlaw-case.co.kr", key: "d", landingKey: "d", prefix: "briefing", suffix: "review", label: "사건브리핑", siteUrl: "https://gnlaw-case.co.kr" },
   { host: "gnlaw-center.co.kr", key: "e", landingKey: "e", prefix: "case", suffix: "issue", label: "사건현황", siteUrl: "https://gnlaw-center.co.kr" },
   { host: "xn--jj0b0cw1o75qwua31zyfp19e.kr", key: "la", landingKey: "la", prefix: "criminal", suffix: "legal-action", label: "법적조치", siteUrl: "https://금융사기대응센터.kr" },
@@ -146,6 +147,9 @@ export function isCaseAllowedForGroup(item = {}, group = {}) {
       item.createdBy !== "jipjeong-manual") {
     return false;
   }
+  if (lk === "c" && shouldConsolidateRecoveryCase(item) && !isRecoveryRepresentative(item)) {
+    return false;
+  }
   // 금융사기대응센터.kr(lk="la")는 voicephishing-manual 전용
   if (lk === "la" && item.createdBy !== "voicephishing-manual") {
     return false;
@@ -200,9 +204,7 @@ export function buildSitemapXml(group, cases = [], options = {}) {
     .filter((item) => item?.slug && isCaseAllowedForGroup(item, group))
     .map((item) => {
       const sourceLastmod = isStandardLandingCase(item) ? standardLastModified(item) : (item.updatedAt || item.createdAt || today);
-      const lastmod = (group.landingKey || group.key) === "c"
-        ? today
-        : options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
+      const lastmod = options.recent ? maxDate(sourceLastmod, SEO_STABILIZED_AT) : sourceLastmod;
       const priority = options.recent ? "1.0" : "0.9";
       const changefreq = options.recent ? "hourly" : "daily";
       const loc = escapeXml(landingUrlForItem(group, item));
@@ -233,7 +235,7 @@ export function buildRssXml(group, cases = [], options = {}) {
 const RSS_TITLE_SUFFIXES = {
   a: "형사고소",
   b: "민사소송",
-  c: "성공사례",
+  c: "계좌 지급정지 대응",
   d: "사건브리핑",
   e: "사건현황",
   la: "법적조치",
