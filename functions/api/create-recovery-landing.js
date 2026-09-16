@@ -6,6 +6,7 @@ import {
 } from "../_seo.js";
 import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
+import { recoveryRepresentativeSlug } from "../_recoverySeo.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const RECOVERY_HOST = "gnlaw-recovery.co.kr";
@@ -78,6 +79,7 @@ export async function onRequestPost(context) {
         c: landing,
       },
     };
+    const publicSlug = recoveryRepresentativeSlug(item) || slug;
 
     if (env.CASES) {
       await env.CASES.put(`case:${slug}`, JSON.stringify(item));
@@ -87,28 +89,28 @@ export async function onRequestPost(context) {
       context.waitUntil?.(upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} recovery landing ${slug}`).catch(() => {}));
 
       const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
-      context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
-      context.waitUntil?.(warmRecoveryCache(slug).catch(() => {}));
+      context.waitUntil?.(pingIndexNow(publicSlug, indexNowKey).catch(() => {}));
+      context.waitUntil?.(warmRecoveryCache(publicSlug).catch(() => {}));
 
       return json({
         ok: true,
         message: existing ? "리커버리 랜딩이 갱신되었습니다." : "리커버리 랜딩이 생성되었습니다.",
         landing: item,
-        url: buildLandingUrl(RECOVERY_GROUP, slug),
+        url: buildLandingUrl(RECOVERY_GROUP, publicSlug),
         storage: "kv+github",
       });
     }
 
     await upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} recovery landing ${slug}`);
     const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
-    context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
-    context.waitUntil?.(warmRecoveryCache(slug).catch(() => {}));
+    context.waitUntil?.(pingIndexNow(publicSlug, indexNowKey).catch(() => {}));
+    context.waitUntil?.(warmRecoveryCache(publicSlug).catch(() => {}));
 
     return json({
       ok: true,
       message: existing ? "리커버리 랜딩이 갱신되었습니다." : "리커버리 랜딩이 생성되었습니다.",
       landing: item,
-      url: buildLandingUrl(RECOVERY_GROUP, slug),
+      url: buildLandingUrl(RECOVERY_GROUP, publicSlug),
       storage: "github",
     });
   } catch (error) {
