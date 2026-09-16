@@ -76,7 +76,7 @@ const ORGANIZATION = {
 const crossLinks = [
   { key: "a", label: "형사고소", url: "https://gnlaw-criminal.co.kr", prefix: "prosecute" },
   { key: "b", label: "민사소송", url: "https://gnlaw-civil.co.kr", prefix: "civil" },
-  { key: "c", label: "성공사례", url: "https://gnlaw-recovery.co.kr", prefix: "success" },
+  { key: "c", label: "계좌 지급정지 대응", url: "https://gnlaw-recovery.co.kr", prefix: "success" },
   { key: "d", label: "사건브리핑", url: "https://gnlaw-case.co.kr", prefix: "briefing" },
   { key: "e", label: "사건현황", url: "https://gnlaw-center.co.kr", prefix: "case" },
 ];
@@ -1525,7 +1525,7 @@ function breadcrumbLabel(groupOrKey) {
   return {
     a: "형사고소",
     b: "민사소송",
-    c: "성공사례",
+    c: "계좌 지급정지 대응",
     d: "사건브리핑",
     e: "사건현황",
     la: "법적조치",
@@ -1554,7 +1554,7 @@ function randomInt(min, max) {
 const HUB_SUFFIX = {
   a: "형사고소",
   b: "민사소송",
-  c: "성공사례",
+  c: "계좌 지급정지 대응",
   d: "사건브리핑",
   e: "사건현황",
   la: "법적조치",
@@ -3635,7 +3635,7 @@ function groupPageTitle(name, groupKey, caseItem = {}) {
   const suffixes = {
     a: "형사고소",
     b: "민사소송",
-    c: "성공사례",
+    c: "계좌 지급정지 해제",
     d: "사건브리핑",
     e: "사건현황",
     la: "법적조치",

@@ -43,6 +43,12 @@ import {
 } from "./_stockReadingroomCta.js";
 import { ldPageH1, ldPageTitle } from "./_readingroomTemplate.js";
 import {
+  isRecoveryRepresentative,
+  recoveryBankForCase,
+  recoveryRepresentativeSlug,
+  shouldConsolidateRecoveryCase,
+} from "./_recoverySeo.js";
+import {
   BOARD_HOST,
   BOARD_REFRESHED_AT,
   boardDescription,
@@ -214,7 +220,7 @@ function centerFintechHeadLinks(group) {
 const CROSS_LINKS = [
   { key: "a", label: "형사고소", url: "https://gnlaw-criminal.co.kr", prefix: "prosecute" },
   { key: "b", label: "민사소송", url: "https://gnlaw-civil.co.kr", prefix: "civil" },
-  { key: "c", label: "성공사례", url: "https://gnlaw-recovery.co.kr", prefix: "success" },
+  { key: "c", label: "계좌 지급정지 대응", url: "https://gnlaw-recovery.co.kr", prefix: "success" },
   { key: "d", label: "사건정보", url: "https://gnlaw-case.co.kr", prefix: "briefing" },
   { key: "e", label: "전체허브", url: "https://gnlaw-center.co.kr", prefix: "case" },
 ];
@@ -456,6 +462,15 @@ export async function onRequest(context) {
   if (!caseData) {
     caseData = await fetchCaseFromHubAPI(slug);
   }
+  if ((group.landingKey || group.key) === "c" && shouldConsolidateRecoveryCase(caseData)) {
+    const representativeSlug = recoveryRepresentativeSlug(caseData);
+    if (representativeSlug && representativeSlug !== caseData.slug) {
+      return new Response(null, {
+        status: 301,
+        headers: { Location: buildLandingUrl(group, representativeSlug) },
+      });
+    }
+  }
 
   if (!caseData) {
     return new Response("사건을 찾을 수 없습니다.", { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -470,7 +485,7 @@ export async function onRequest(context) {
     return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
   }
 
-  const relatedCases = (!isManualLandingForGroup(caseData, group) && isStandardLandingCase(caseData)) || (group.landingKey || group.key) === "ld"
+  const relatedCases = (!isManualLandingForGroup(caseData, group) && isStandardLandingCase(caseData)) || ["c", "ld"].includes(group.landingKey || group.key)
     ? await loadSeoCases(env).catch(() => [])
     : [];
   const html = renderLanding(caseData, group, url.origin, relatedCases);
@@ -1330,6 +1345,9 @@ function isCaseAllowedForGroup(caseData = {}, group = {}) {
   if (allowedCreatedBy && !allowedCreatedBy.includes(caseData.createdBy)) {
     return false;
   }
+  if (lk === "c" && shouldConsolidateRecoveryCase(caseData) && !isRecoveryRepresentative(caseData)) {
+    return false;
+  }
   const targets = Array.isArray(caseData.targetGroups) ? caseData.targetGroups.filter(Boolean) : [];
   if (!targets.length) return true;
   return targets.includes(lk);
@@ -1369,6 +1387,78 @@ function appendOgRevision(imageUrl = "", revision = "") {
   return `${imageUrl}${separator}r=${encodeURIComponent(value.slice(0, 80))}`;
 }
 
+
+function recoveryBankName(caseData = {}) {
+  return recoveryBankForCase(caseData)?.name || "";
+}
+
+function isRecoveryTopicCase(caseData = {}) {
+  const text = `${caseData.caseName || ""} ${caseData.slug || ""} ${caseData.summary || ""}`;
+  return /(지급정지|계좌정지|출금정지|이의제기|이의신청|채무부존재|계좌.*해제|해제.*계좌)/.test(text);
+}
+
+function selectRecoveryCarouselCases(caseData = {}, group = {}, relatedCases = []) {
+  if ((group.landingKey || group.key) !== "c") return [];
+  const currentSlug = caseData.slug || "";
+  const bankName = recoveryBankName(caseData);
+  const eligible = (Array.isArray(relatedCases) ? relatedCases : [])
+    .filter((item) => item?.slug && item.slug !== currentSlug)
+    .filter((item) => isCaseAllowedForGroup(item, group))
+    .filter(isRecoveryTopicCase)
+    .filter((item) => !shouldConsolidateRecoveryCase(item) || isRecoveryRepresentative(item));
+  const sameBank = bankName ? eligible.filter((item) => recoveryBankName(item) === bankName) : [];
+  const sameBankSlugs = new Set(sameBank.map((item) => item.slug));
+  const otherBanks = eligible.filter((item) => !sameBankSlugs.has(item.slug));
+  const seen = new Set();
+  return [...sameBank, ...otherBanks]
+    .filter((item) => {
+      if (seen.has(item.slug)) return false;
+      seen.add(item.slug);
+      return true;
+    })
+    .sort((a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")))
+    .slice(0, 6);
+}
+
+function recoveryCarouselTitle(caseData = {}, group = {}) {
+  const landing = caseData.landings?.[group.landingKey || group.key] || {};
+  return landing.title || groupPageTitle(caseData.caseName || caseData.slug || "", "c", caseData);
+}
+
+function createRecoveryCarouselSchema(caseData, group, relatedCases, canonical) {
+  const rows = selectRecoveryCarouselCases(caseData, group, relatedCases);
+  if (rows.length < 4) return null;
+  const bankName = recoveryBankName(caseData);
+  return {
+    "@type": "ItemList",
+    "@id": `${canonical}#naver-carousel`,
+    name: bankName ? `${bankName} 계좌 지급정지 해제 관련 안내` : "계좌 지급정지 해제 관련 안내",
+    numberOfItems: rows.length,
+    itemListOrder: "https://schema.org/ItemListOrderDescending",
+    itemListElement: rows.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: recoveryCarouselTitle(item, group),
+      image: caseOgPngImageUrl(item.slug, group.siteUrl),
+      url: buildLandingUrl(group, item.slug),
+    })),
+  };
+}
+
+function createRecoveryCarouselSection(caseData, group, relatedCases = []) {
+  const rows = selectRecoveryCarouselCases(caseData, group, relatedCases);
+  if (rows.length < 4) return "";
+  const bankName = recoveryBankName(caseData);
+  const heading = bankName ? `${bankName} 계좌 지급정지 관련 안내 더 보기` : "은행 계좌 지급정지 관련 안내 더 보기";
+  const cards = rows.map((item) => {
+    const title = recoveryCarouselTitle(item, group);
+    const url = buildLandingUrl(group, item.slug);
+    const image = caseOgWebpImageUrl(item.slug, group.siteUrl);
+    return `<li style="flex:0 0 210px;scroll-snap-align:start"><a href="${esc(url)}" style="display:block;color:inherit;text-decoration:none"><img src="${esc(image)}" alt="${esc(title)}" width="1200" height="630" loading="lazy" decoding="async" style="display:block;width:100%;height:118px;object-fit:cover;border-radius:12px"><strong style="display:block;margin-top:10px;font-size:15px;line-height:1.45">${esc(title)}</strong></a></li>`;
+  }).join("");
+  return `<section class="article-block recovery-related-carousel" aria-labelledby="recovery-carousel-title"><p class="section-kicker">RELATED GUIDE</p><h2 id="recovery-carousel-title">${esc(heading)}</h2><ul style="display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;list-style:none;margin:0;padding:4px 0 12px">${cards}</ul></section>`;
+}
+
 function renderLanding(caseData, group, origin, relatedCases = []) {
   const lk = group.landingKey ?? group.key;
   const landing = caseData.landings?.[lk] || createFallbackLanding(caseData, group, lk);
@@ -1377,12 +1467,14 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const useStandardTemplate = !useManualTitle && isStandardLandingCase(caseData) && lk === "a";
   const useCriminalTitle = isCriminalSite(group);
   const criminalPageTitle = useCriminalTitle ? criminalLandingPageTitle(rawCaseName) : "";
-  const pageTitle = criminalPageTitle || (useManualTitle
+  const recoveryBank = lk === "c" && isRecoveryRepresentative(caseData) ? recoveryBankForCase(caseData) : null;
+  const recoveryRepresentativeTitle = recoveryBank ? `${recoveryBank.name} 계좌지급정지 해제 방법·준비자료` : "";
+  const pageTitle = recoveryRepresentativeTitle || criminalPageTitle || (useManualTitle
     ? (landing.title || groupPageTitle(rawCaseName, lk, caseData))
     : useStandardTemplate
       ? standardPageTitle(rawCaseName)
       : groupPageTitle(rawCaseName, lk, caseData));
-  const pageH1 = criminalPageTitle || (useManualTitle
+  const pageH1 = recoveryRepresentativeTitle || criminalPageTitle || (useManualTitle
     ? (landing.h1 || landing.title || groupPageH1(rawCaseName, lk))
     : useStandardTemplate
       ? standardPageTitle(rawCaseName)
@@ -1401,14 +1493,16 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const displayOgImage = appendOgRevision(caseOgWebpImageUrl(caseData.slug || "landing", group.siteUrl), ogRevision);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = lk === "c"
-    ? latestSeoDate("2026-08-13", OG_TEMPLATE_REFRESHED_AT)
+    ? (caseData.updatedAt || publishedDate)
     : latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), SEO_STABILIZED_AT, OG_TEMPLATE_REFRESHED_AT);
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
   const keyword = searchKeyword(rawCaseName);
   const renderedFaq = renderFaqForLanding(landing, { ...group, key: lk }, caseData);
   const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
-  const seoDescription = lk === "c"
+  const seoDescription = recoveryBank
+    ? `${recoveryBank.name} 계좌지급정지 원인, 이의제기와 해제 절차, 준비자료, 채권소멸절차 및 채무부존재확인소송 대응을 법무법인 선린이 정리합니다.`
+    : lk === "c"
     ? `${primaryCaseKeyword(rawCaseName) || normalizeCaseName(rawCaseName)} 관련 계좌 지급정지 원인, 이의제기·해제 절차, 준비자료와 채무부존재확인소송 대응 방법을 정리합니다.`.slice(0, 150)
     : useStandardTemplate
       ? standardMetaDescription(rawCaseName)
@@ -1480,6 +1574,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const caseKeywordForSchema = primaryCaseKeyword(rawCaseName) || rawCaseName;
   const breadcrumbCategory = breadcrumbLabel(group);
   const breadcrumbPageName = pageTitle;
+  const recoveryCarouselSchema = createRecoveryCarouselSchema(caseData, group, relatedCases, canonical);
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -1546,6 +1641,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
           { "@type": "ListItem", position: 3, name: breadcrumbPageName, item: canonical },
         ],
       },
+      recoveryCarouselSchema,
       {
         "@type": "LegalService",
         "@id": `${group.siteUrl}/#legalservice`,
@@ -1602,7 +1698,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
       },
       { ...ORGANIZATION },
       { ...PERSON_ATTORNEY },
-    ],
+    ].filter(Boolean),
   }, null, 2);
 
   const ogThumbnail = createRepresentativeImageMarkup({
@@ -1614,7 +1710,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
 
   const useManualBodyRenderer = isManualLandingCase(caseData) && lk !== "ld";
   const rawContent = useManualBodyRenderer
-    ? createRecoveryManualContent(landing, group, caseData)
+    ? createRecoveryManualContent(landing, group, caseData, relatedCases)
     : createLandingContent(landing, group, caseData, relatedCases);
   const content = useManualBodyRenderer ? rawContent : softenRepeatedContextTerms(rawContent);
   const footerLinks = CROSS_LINKS.map((l) => {
@@ -2009,7 +2105,26 @@ function createRecoveryDebtNonexistenceSection() {
   </section>`;
 }
 
-function createRecoveryManualContent(landing, group, caseData) {
+function createRecoveryRepresentativeGuide(caseData = {}) {
+  const bank = recoveryBankForCase(caseData);
+  if (!bank || !isRecoveryRepresentative(caseData)) return "";
+  const bankName = esc(bank.name);
+  return `<section class="aeo-summary recovery-representative-guide" id="aeo-summary" aria-label="${bankName} 계좌지급정지 해제 핵심 답변">
+    <p>핵심 답변</p>
+    <h2>${bankName} 계좌지급정지 해제는 통지 내용과 거래 원인부터 확인해야 합니다</h2>
+    <blockquote>지급정지는 원인과 적용 절차에 따라 준비자료가 달라집니다. 은행 통지서에서 요청기관, 문제 된 입금액, 채권소멸절차 공고 여부를 확인하고 계약·주문·배송·대화·거래내역으로 정당한 거래였음을 설명해야 합니다.</blockquote>
+    <h3>확인 순서</h3>
+    <ol>
+      <li>${bankName}에서 조치명, 요청기관, 대상 금액과 접수일을 확인합니다.</li>
+      <li>문제 된 입금 전후의 전체 거래내역과 거래 상대방 자료를 시간순으로 정리합니다.</li>
+      <li>이의제기 제출처, 양식, 보완 기한을 확인해 객관적인 원인자료와 함께 제출합니다.</li>
+      <li>이의제기로 해결되지 않으면 채권소멸절차 진행 상태와 채무부존재확인소송 필요성을 검토합니다.</li>
+    </ol>
+    <p class="content-review-note"><strong>작성·검토:</strong> 법무법인 선린 금융사기 대응팀 · 담당 변호사 김상수<br><strong>최종 검토일:</strong> ${esc(caseData.updatedAt || caseData.createdAt || "")}</p>
+  </section>`;
+}
+
+function createRecoveryManualContent(landing, group, caseData, relatedCases = []) {
   const cn = esc(normalizeCaseName(caseData.caseName));
   const siteName = esc(group.siteName);
   const slug = esc(caseData.slug);
@@ -2026,8 +2141,10 @@ function createRecoveryManualContent(landing, group, caseData) {
   const currentProgressSection = renderCurrentProgressSection(landing, caseData, group.landingKey || group.key);
   return [
     MANUAL_BODY_STYLE,
+    isRecoveryLanding ? createRecoveryRepresentativeGuide(caseData) : "",
     `<section class="article-block manual-body${isRecoveryLanding ? " recovery-manual-body" : ""}">${bodyHtml}</section>`,
     isRecoveryLanding ? createRecoveryDebtNonexistenceSection() : "",
+    isRecoveryLanding ? createRecoveryCarouselSection(caseData, group, relatedCases) : "",
     renderStockReadingroomCtaSection(caseData),
     currentProgressSection,
     memoSection,
@@ -2079,7 +2196,7 @@ function createRecoveryEvidenceChecklist() {
   </aside>`;
 }
 
-function createRecoveryCaseLandingContent(landing, group, caseData) {
+function createRecoveryCaseLandingContent(landing, group, caseData, relatedCases = []) {
   const rawCaseName = caseData.caseName || "";
   const replacementContext = createReplacementContext(rawCaseName);
   const keyword = esc(seoCaseKeyword(rawCaseName));
@@ -2107,6 +2224,7 @@ function createRecoveryCaseLandingContent(landing, group, caseData) {
     `<section class="article-block recovery-landing-response"><p class="section-kicker">RESPONSE</p><h2>지급정지 해제와 이의제기 대응</h2>${paragraphs(methodBody)}${createRecoveryEvidenceChecklist()}</section>`,
     renderCurrentProgressSection(landing, caseData, "c"),
     createRecoveryDebtNonexistenceSection(),
+    createRecoveryCarouselSection(caseData, group, relatedCases),
     `<section class="article-block faq recovery-landing-faq" id="faq-list"><p class="section-kicker">FAQ</p><h2>${keyword} 자주 묻는 질문</h2>${faqHtml(faq, rawCaseName)}</section>`,
     createLiveReceiptStatus(caseData),
     renderComments(caseData),
@@ -2119,7 +2237,7 @@ function createRecoveryCaseLandingContent(landing, group, caseData) {
 function createLandingContent(landing, group, caseData, relatedCases = []) {
   const templateContentKey = group.landingKey || group.key;
   if (templateContentKey === "c") {
-    return createRecoveryCaseLandingContent(landing, group, caseData);
+    return createRecoveryCaseLandingContent(landing, group, caseData, relatedCases);
   }
   if (isStandardLandingCase(caseData) && templateContentKey === "a") {
     return createStandardLandingContent(landing, group, caseData, relatedCases);
@@ -3269,7 +3387,7 @@ function groupPageTitle(name, key, caseData = {}) {
   const suffixes = {
     a: "형사고소",
     b: "민사소송",
-    c: "성공사례",
+    c: "계좌 지급정지 해제",
     d: "사건브리핑",
     e: "사건현황",
     la: "법적조치",
@@ -3342,7 +3460,7 @@ function breadcrumbLabel(groupOrKey) {
   return {
     a: "형사고소",
     b: "민사소송",
-    c: "성공사례",
+    c: "계좌 지급정지 대응",
     d: "사건브리핑",
     e: "사건현황",
     la: "법적조치",
