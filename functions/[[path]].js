@@ -1745,7 +1745,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     schema,
     bodyClass: `${group.bodyClass}${String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr" ? " center-site center-fintech" : ""} landing-page${lk === "c" ? " recovery-landing-page" : ""}`,
     styleHref: lk === "c"
-      ? "/assets/style.css?v=20260907-recovery-heading-v3"
+      ? "/assets/style.css?v=20260916-recovery-heading-v4"
       : String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
         ? `/assets/style.css?v=${CRIMINAL_PUBLIC_STYLE_VERSION}`
         : "/assets/style.css?v=20260820-nav-fix-v1",
