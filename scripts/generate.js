@@ -27,6 +27,7 @@ import {
   appendStockReadingroomCta,
   shouldAppendStockReadingroomCta,
 } from "../functions/_stockReadingroomCta.js";
+import { recoveryListingDescription } from "../functions/_recoverySeo.js";
 
 const root = process.cwd();
 const dataPath = path.join(root, "data", "cases.json");
@@ -3057,8 +3058,7 @@ function createCenterProgressArchiveContent(group, sortedCases, caseNoMap, suffi
 function createRecoveryArchiveContent(group, sortedCases, caseNoMap, suffix) {
   const links = sortedCases.map((item) => {
     const title = landingDisplayTitle(item, suffix, group);
-    const landing = getLanding(item, group);
-    const summary = compactText(landing.description || item.summary || group.hubLead || "").slice(0, 150);
+    const summary = compactText(recoveryListingDescription(item)).slice(0, 150);
     const search = [title, item.caseName, item.slug, summary].filter(Boolean).join(" ");
     return `<a class="recovery-archive-card" href="${buildRelativeLandingPath(group, item)}" data-recovery-search="${escapeHtml(search)}">
       <span>No. ${caseNoMap.get(item.slug) ?? ""}</span>
