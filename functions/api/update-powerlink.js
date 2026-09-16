@@ -1,7 +1,4 @@
-// Admin API: create or update one Naver Powerlink landing page.
-// Storage is intentionally separate from normal case landings.
-
-import { INDEXNOW_KEY as DEFAULT_INDEXNOW_KEY, powerlinkOgImageUrl } from "../_seo.js";
+// Admin API: update visibility flags for one Naver Powerlink landing page.
 
 const GITHUB_FILE_PATH = "data/powerlinks.json";
 const SITE_URL = "https://gnlaw-criminal.co.kr";
@@ -13,84 +10,41 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const title = normalizeSpace(body.title);
-    const slug = normalizeSlug(body.slug || title);
-    const h1 = normalizeSpace(body.h1) || title;
-    const description = normalizeSpace(body.description).slice(0, 170);
-    const imageAlt = normalizeSpace(body.imageAlt).slice(0, 160);
-    const imageCaption = normalizeSpace(body.imageCaption).slice(0, 220);
-    const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300);
-    const articleBody = normalizeBody(body.body);
-    const hasRobotsField = Object.prototype.hasOwnProperty.call(body, "robots");
-    const robots = normalizeRobots(body.robots);
-    const ctaTitle = normalizeSpace(body.ctaTitle) || "피해 자료 검토 요청";
-    const ctaText = normalizeSpace(body.ctaText) || "입금 내역, 대화 캡처, 사이트 주소를 남겨주시면 담당자가 확인 후 연락드립니다.";
-    const ctaLabel = normalizeSpace(body.ctaLabel) || "상담 접수";
-    const now = today();
+    const slug = normalizeSlug(body.slug);
+    const action = String(body.action || "").trim();
+    const value = toBoolean(body.value);
 
-    if (!title || !slug || !articleBody) {
-      return json({ ok: false, message: "제목, URL slug, 원고는 필수입니다." }, 400);
-    }
+    if (!slug) return json({ ok: false, message: "slug is required" }, 400);
 
     const existing = await loadExisting(env, slug);
-    const searchHidden = Boolean(existing?.searchHidden || existing?.hideFromListing);
-    const existingNoindex = Boolean(existing?.noindex || String(existing?.robots || "").toLowerCase().includes("noindex"));
-    const noindex = Boolean(searchHidden || (hasRobotsField ? robots.includes("noindex") : existingNoindex));
-    const item = {
-      slug,
-      title,
-      h1,
-      description: description || `${title} 관련 신규 사건 진행 내용을 정리했습니다.`,
-      imageAlt,
-      imageCaption,
-      imageDescription,
-      body: articleBody,
-      robots: noindex ? NOINDEX_ROBOTS : DEFAULT_ROBOTS,
-      noindex,
-      searchHidden,
-      hideFromListing: searchHidden,
-      ctaTitle,
-      ctaText,
-      ctaLabel,
-      createdAt: existing?.createdAt || now,
-      updatedAt: now,
-    };
+    if (!existing) return json({ ok: false, message: "파워링크 랜딩을 찾을 수 없습니다." }, 404);
+
+    const item = { ...existing, updatedAt: today() };
+    if (action === "set-noindex") {
+      item.noindex = value;
+      item.robots = value || isSearchHidden(item) ? NOINDEX_ROBOTS : DEFAULT_ROBOTS;
+    } else if (action === "set-search-hidden") {
+      item.searchHidden = value;
+      item.hideFromListing = value;
+      item.noindex = value;
+      item.robots = value ? NOINDEX_ROBOTS : DEFAULT_ROBOTS;
+    } else {
+      return json({ ok: false, message: "지원하지 않는 작업입니다." }, 400);
+    }
 
     if (env.CASES) {
       await env.CASES.put(`powerlink:${slug}`, JSON.stringify(item));
-      const idx = await loadIndexFromKv(env);
-      upsertIndex(idx, item);
-      await env.CASES.put("powerlink:index", JSON.stringify(idx));
-      context.waitUntil?.(syncPowerlinksToGitHub(env).catch(() => {}));
-
-      const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
-      context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
-      context.waitUntil?.(warmPowerlinkCache(slug).catch(() => {}));
-
-      return json({
-        ok: true,
-        message: existing ? "파워링크 랜딩이 갱신되었습니다." : "파워링크 랜딩이 생성되었습니다.",
-        landing: item,
-        url: `${SITE_URL}/powerlink/${encodeURIComponent(slug)}/`,
-        storage: "kv+github",
-      });
+      const index = await loadIndexFromKv(env);
+      upsertIndex(index, item);
+      await env.CASES.put("powerlink:index", JSON.stringify(index));
+      context.waitUntil?.(syncPowerlinksToGitHub(env, index).catch(() => {}));
+      return json({ ok: true, landing: item, storage: "kv+github" });
     }
 
     const all = await loadPowerlinksFromGitHub(env);
     upsertFull(all, item);
-    await savePowerlinksToGitHub(env, all, existing ? `Update powerlink landing ${slug}` : `Add powerlink landing ${slug}`);
-
-    const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
-    context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
-    context.waitUntil?.(warmPowerlinkCache(slug).catch(() => {}));
-
-    return json({
-      ok: true,
-      message: existing ? "파워링크 랜딩이 갱신되었습니다." : "파워링크 랜딩이 생성되었습니다.",
-      landing: item,
-      url: `${SITE_URL}/powerlink/${encodeURIComponent(slug)}/`,
-      storage: "github",
-    });
+    await savePowerlinksToGitHub(env, all, `Update powerlink visibility ${slug}`);
+    return json({ ok: true, landing: item, storage: "github" });
   } catch (error) {
     return json({ ok: false, message: error.message }, 500);
   }
@@ -127,7 +81,7 @@ function upsertFull(list, item) {
 }
 
 function buildIndexEntry(item) {
-  const searchHidden = Boolean(item.searchHidden || item.hideFromListing);
+  const searchHidden = isSearchHidden(item);
   const noindex = Boolean(item.noindex || searchHidden || String(item.robots || "").toLowerCase().includes("noindex"));
   return {
     slug: item.slug,
@@ -148,9 +102,8 @@ function buildIndexEntry(item) {
   };
 }
 
-async function syncPowerlinksToGitHub(env) {
+async function syncPowerlinksToGitHub(env, index) {
   if (!env.CASES) return;
-  const index = await loadIndexFromKv(env);
   const full = [];
 
   for (const entry of index) {
@@ -193,23 +146,31 @@ async function savePowerlinksToGitHub(env, list, message) {
     throw new Error("GitHub powerlinks.json 상태 확인 실패");
   }
 
-  const body = {
+  const putBody = {
     message,
     content: encodeBase64(JSON.stringify(list, null, 2)),
     branch,
   };
-  if (sha) body.sha = sha;
+  if (sha) putBody.sha = sha;
 
   const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${GITHUB_FILE_PATH}`, {
     method: "PUT",
     headers: githubHeaders(token),
-    body: JSON.stringify(body),
+    body: JSON.stringify(putBody),
   });
 
   if (!putRes.ok) {
     const detail = await putRes.text();
     throw new Error(`GitHub powerlinks.json 저장 실패: ${detail.slice(0, 180)}`);
   }
+}
+
+function isSearchHidden(item = {}) {
+  return Boolean(item.searchHidden || item.hideFromListing);
+}
+
+function toBoolean(value) {
+  return value === true || value === 1 || value === "true" || value === "1";
 }
 
 function normalizeSlug(value = "") {
@@ -221,30 +182,6 @@ function normalizeSlug(value = "") {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 90);
-}
-
-function normalizeRobots(value = "") {
-  return String(value).toLowerCase().includes("noindex") ? "noindex, follow" : DEFAULT_ROBOTS;
-}
-
-function normalizeBody(value = "") {
-  return String(value || "").replace(/\r\n/g, "\n").trim();
-}
-
-function normalizeSpace(value = "") {
-  return String(value || "").trim().replace(/\s+/g, " ");
-}
-
-function today() {
-  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
-}
-
-async function warmPowerlinkCache(slug) {
-  await Promise.allSettled([
-    fetch(powerlinkOgImageUrl(slug, "png"), { method: "GET" }),
-    fetch(powerlinkOgImageUrl(slug, "webp"), { method: "GET" }),
-    fetch(`${SITE_URL}/powerlink/${encodeURIComponent(slug)}/`, { method: "GET" }),
-  ]);
 }
 
 function githubEnv(env) {
@@ -268,18 +205,14 @@ function githubHeaders(token) {
 
 async function readFileContent(file, token) {
   if (file.content && file.encoding !== "none") {
-    return decodeBase64(file.content).trim();
+    const clean = file.content.replace(/\n/g, "");
+    return new TextDecoder().decode(Uint8Array.from(atob(clean), (char) => char.charCodeAt(0))).trim();
   }
   if (file.download_url) {
     const res = await fetch(file.download_url, { headers: githubHeaders(token) });
     if (res.ok) return (await res.text()).trim();
   }
   return "";
-}
-
-function decodeBase64(value) {
-  const clean = value.replace(/\n/g, "");
-  return new TextDecoder().decode(Uint8Array.from(atob(clean), (char) => char.charCodeAt(0)));
 }
 
 function encodeBase64(value) {
@@ -289,17 +222,8 @@ function encodeBase64(value) {
   return btoa(binary);
 }
 
-async function pingIndexNow(slug, key) {
-  const host = new URL(SITE_URL).hostname;
-  const urlList = [
-    `${SITE_URL}/powerlink/${encodeURIComponent(slug)}/`,
-    `${SITE_URL}/`,
-  ];
-  await fetch("https://searchadvisor.naver.com/indexnow", {
-    method: "POST",
-    headers: { "Content-Type": "application/json; charset=utf-8" },
-    body: JSON.stringify({ host, key, keyLocation: `${SITE_URL}/${key}.txt`, urlList }),
-  });
+function today() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 function json(data, status = 200) {

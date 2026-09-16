@@ -514,7 +514,7 @@ async function handlePowerlinkRoute({ context, url, pathname }) {
   }
 
   const html = renderPowerlinkLanding(landing);
-  const robots = normalizePowerlinkRobots(landing.robots);
+  const robots = normalizePowerlinkRobots(landing);
   return new Response(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
@@ -539,7 +539,7 @@ function renderPowerlinkLanding(landing) {
   const title = landing.title || landing.h1 || "파워링크 랜딩";
   const h1 = landing.h1 || title;
   const description = landing.description || `${title} 관련 신규 사건 진행 내용을 정리했습니다.`;
-  const robots = normalizePowerlinkRobots(landing.robots);
+  const robots = normalizePowerlinkRobots(landing);
   const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = landing.updatedAt || publishedDate;
   const ogImage = powerlinkOgImageUrl(slug || "landing", "png");
@@ -683,7 +683,7 @@ function renderPowerlinkLanding(landing) {
       { siteUrl: "https://gnlaw-criminal.co.kr" },
       { includeCriminal: true },
     ),
-    styleHref: "/assets/style.css?v=20260821-single-row-navigation",
+    styleHref: "/assets/style.css?v=20260915-logo-header-v1",
     bodyScripts: logScanScriptForSite("https://gnlaw-criminal.co.kr"),
   });
 }
@@ -1276,7 +1276,10 @@ function createPowerlinkFloatingWidgets(landing) {
 }
 
 function normalizePowerlinkRobots(value = "") {
-  return String(value).toLowerCase().includes("noindex") ? "noindex, follow" : "index, follow";
+  const landing = value && typeof value === "object" ? value : null;
+  if (landing?.noindex || landing?.searchHidden || landing?.hideFromListing) return "noindex, follow";
+  const robots = landing ? landing.robots : value;
+  return String(robots).toLowerCase().includes("noindex") ? "noindex, follow" : "index, follow";
 }
 
 function logScanScriptForSite(siteUrl = "") {
@@ -1634,7 +1637,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     styleHref: lk === "c"
       ? "/assets/style.css?v=20260907-recovery-heading-v3"
       : String(group.siteUrl || "").replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
-        ? "/assets/style.css?v=20260825-mobile-header-match"
+        ? "/assets/style.css?v=20260915-logo-header-v1"
         : "/assets/style.css?v=20260820-nav-fix-v1",
     tone: esc(group.tone),
     h1: esc(pageH1),
@@ -3130,6 +3133,9 @@ function gaTagForCanonical(canonical = "") {
 }
 
 function pageTemplate(d) {
+  const logoSrc = String(d.logoSrc || d.canonical || "").startsWith("https://gnlaw-criminal.co.kr")
+    ? "/assets/logo-criminal.png"
+    : "/assets/logo.png";
   let html = `<!doctype html>
 <html lang="ko">
 <head>
@@ -3153,7 +3159,7 @@ function pageTemplate(d) {
 <body class="${d.bodyClass}">
   <header class="site-header">
     <a class="brand" href="/" aria-label="법무법인 선린 홈페이지">
-      <img src="/assets/logo.png" alt="법무법인 선린" loading="lazy" decoding="async">
+      <img src="${logoSrc}" alt="법무법인 선린" loading="lazy" decoding="async">
     </a>
     ${d.headerCall}
   </header>
@@ -3201,7 +3207,7 @@ const ORGANIZATION = {
   "@id": "https://gnlaw-criminal.co.kr/#organization",
   name: "법무법인 선린",
   url: "https://gnlaw-criminal.co.kr",
-  logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo.png" },
+  logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo-criminal.png" },
 };
 
 const PERSON_ATTORNEY = {

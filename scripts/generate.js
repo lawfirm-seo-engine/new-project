@@ -70,7 +70,7 @@ const ORGANIZATION = {
   "@id": "https://gnlaw-criminal.co.kr/#organization",
   name: "법무법인 선린",
   url: "https://gnlaw-criminal.co.kr",
-  logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo.png" },
+  logo: { "@type": "ImageObject", url: "https://gnlaw-criminal.co.kr/assets/logo-criminal.png" },
 };
 
 const crossLinks = [
@@ -359,6 +359,7 @@ for (const group of groups) {
 const cases = await fs.readJson(dataPath);
 const powerlinksDataPath = path.join(root, "data", "powerlinks.json");
 const powerlinks = await fs.readJson(powerlinksDataPath).catch(() => []);
+const visiblePowerlinks = powerlinks.filter((item) => isVisiblePowerlink(item));
 
 function escapeHtml(value = "") {
   return String(value)
@@ -367,6 +368,10 @@ function escapeHtml(value = "") {
     .replaceAll("'", "&#039;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+function isVisiblePowerlink(item = {}) {
+  return Boolean(item?.slug) && !item.searchHidden && !item.hideFromListing;
 }
 
 function replaceAllPlaceholders(template, data) {
@@ -1653,7 +1658,7 @@ function createHubContent(group) {
   const todayCases   = groupCases.filter((c) => c.createdAt === today).length;
   const todayReports = groupCases.filter((c) => c.createdAt === today).reduce((s, c) => s + (c.reports || 0), 0);
   const suffix = HUB_SUFFIX[group.landingKey || group.key] || HUB_SUFFIX[group.key] || "";
-  const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { maxItems: HOME_FRESH_LIST_LIMIT, powerlinks: group.key === "a" ? powerlinks : [] });
+  const freshSection = createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { maxItems: HOME_FRESH_LIST_LIMIT, powerlinks: group.key === "a" ? visiblePowerlinks : [] });
   const typeEntrySection = createTypeEntrySection(group);
 
   if (group.key === "c" && !group.landingKey) {
@@ -1662,7 +1667,7 @@ function createHubContent(group) {
 
   const showPL = group.key === "a" && !group.landingKey;
   const caseEntries = sortedCases.map((c) => ({ type: "case", data: c, date: c.updatedAt || c.createdAt || "" }));
-  const plEntries = showPL ? powerlinks.filter((p) => p?.slug).map((p) => ({ type: "pl", data: p, date: p.updatedAt || p.createdAt || "" })) : [];
+  const plEntries = showPL ? visiblePowerlinks.map((p) => ({ type: "pl", data: p, date: p.updatedAt || p.createdAt || "" })) : [];
   const mergedEntries = [...caseEntries, ...plEntries].sort((a, b) => b.date.localeCompare(a.date));
 
   const rows = mergedEntries.map((entry) => {
@@ -1909,7 +1914,7 @@ function createHubContent(group) {
       var orig=d.cases.filter(allowed);
       var noMap={};orig.forEach(function(c,i){noMap[c.slug]=i+1;});
       var all=orig.slice().reverse();
-      var pls=(pd&&pd.ok&&Array.isArray(pd.landings))?pd.landings:[];
+      var pls=(pd&&pd.ok&&Array.isArray(pd.landings))?pd.landings.filter(function(p){return p&&p.slug&&!p.searchHidden&&!p.hideFromListing;}):[];
       updateFreshList(all,noMap,pls);
       var existing=new Set([].map.call(document.querySelectorAll('.case-row[data-slug]:not([data-type="pl"])'),function(el){return el.dataset.slug;}));
       var newItems=all.filter(function(c){return!existing.has(c.slug);});
@@ -2291,7 +2296,7 @@ function isCriminalSite(group) {
 
 const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
 const CENTER_FINTECH_IMAGE_VERSION = "20260903-brand-text-replaced";
-const CRIMINAL_PUBLIC_STYLE_VERSION = "20260825-mobile-header-match";
+const CRIMINAL_PUBLIC_STYLE_VERSION = "20260915-logo-header-v1";
 const RECOVERY_HOME_STYLE_VERSION = "20260813-section-design-v2";
 const STYLE_CSS_VERSION = "20260820-nav-fix-v1";
 const READINGROOM_HOME_STYLE_VERSION = "20260914-readingroom-carousel-v2";
@@ -2335,7 +2340,7 @@ function createCenterHeaderNav(group) {
 
 function createCenterMainHeroSlider(group) {
   const isCriminal = isCriminalSite(group);
-  const brandName = isCriminal ? "법무법인 선린 - 금융사기피해연구소" : "법무법인 선린 핀테크센터";
+  const brandName = isCriminal ? "법무법인 선린 금융사기피해연구소" : "법무법인 선린 핀테크센터";
   // main-slide-01/02는 이미지 그래픽 안에 브랜드 문구가 그려져 있어, gnlaw-criminal.co.kr
   // 전용으로 문구를 다시 그린 별도 파일(-criminal)을 사용한다. gnlaw-center.co.kr은 원본 유지.
   const slide01 = isCriminal ? "main-slide-01-criminal-q90.webp" : "main-slide-01-q90.webp";
@@ -2436,7 +2441,7 @@ function createStaticHeaders() {
 
 function createCenterFintechHomeContent(group, stats = {}) {
   const isCriminal = isCriminalSite(group);
-  const brandName = isCriminal ? "법무법인 선린 - 금융사기피해연구소" : "법무법인 선린 핀테크센터";
+  const brandName = isCriminal ? "법무법인 선린 금융사기피해연구소" : "법무법인 선린 핀테크센터";
   const brandShort = isCriminal ? "금융사기피해연구소" : "핀테크센터";
   const progressHref = centerProgressHref(group);
   const trustPoints = [
@@ -2728,7 +2733,7 @@ function createCenterAboutSchema(group, title, description, canonical) {
 
 async function writeCenterAboutPages(template, group) {
   if (!isCenterBoardSite(group)) return;
-  const brandName = isCriminalSite(group) ? "법무법인 선린 - 금융사기피해연구소" : "법무법인 선린 핀테크센터";
+  const brandName = isCriminalSite(group) ? "법무법인 선린 금융사기피해연구소" : "법무법인 선린 핀테크센터";
   const pages = [
     {
       slug: "greeting",
@@ -2903,7 +2908,7 @@ function createCategoryContent(group) {
   }
   return [
     createCategoryHeroCta(group),
-    createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { powerlinks: group.key === "a" ? powerlinks : [] }),
+    createFreshLandingSection(group, sortedCases, caseNoMap, suffix, { powerlinks: group.key === "a" ? visiblePowerlinks : [] }),
   ].join("\n");
 }
 
@@ -3517,7 +3522,7 @@ function latestFreshDate(items = []) {
 }
 
 function createFreshLandingSection(group, sortedCases, caseNoMap, suffix, options = {}) {
-  const extraPowerlinks = (options.powerlinks || []).filter((p) => p?.slug);
+  const extraPowerlinks = (options.powerlinks || []).filter((p) => isVisiblePowerlink(p));
   const todays = sortedCases
     .filter((item) => item.createdAt === today || item.updatedAt === today);
   const hasTodayPL = extraPowerlinks.some((p) => p.createdAt === today || p.updatedAt === today);
@@ -3693,6 +3698,7 @@ function buildPage(template, group, data) {
     ctaLabel: escapeHtml(group.ctaLabel),
     receiptBadge: "",
     breadcrumb: "",
+    logoSrc: isCriminalSite(group) ? "/assets/logo-criminal.png" : "/assets/logo.png",
     gaTag: gaTagForSite(group.siteUrl),
     bodyScripts: logScanScriptForSite(group.siteUrl),
     ogType: group.ogType,

@@ -54,12 +54,12 @@ html = html
   .replaceAll('href="/board/">진행사건 보기</a>', 'href="/board/">성공사례 보기</a>')
   .replaceAll('/case/', '/prosecute/')
   .replaceAll('-issue/', '-litigation/')
-  .replaceAll("법무법인 선린 핀테크센터", "법무법인 선린 - 금융사기피해연구소");
+  .replaceAll("법무법인 선린 핀테크센터", "법무법인 선린 금융사기피해연구소");
 
-// 형사 사이트의 기존 좌측 상단 로고 경로는 그대로 /assets/logo.png 를 사용한다.
+// 형사 사이트는 전용 로고 경로를 사용한다.
 html = html.replace(
   /<a class="brand" href="\/" aria-label="법무법인 선린 홈">[\s\S]*?<\/a>/,
-  '<a class="brand" href="/" aria-label="법무법인 선린 홈">\n      <img src="/assets/logo.png" alt="법무법인 선린">\n    </a>'
+  '<a class="brand" href="/" aria-label="법무법인 선린 홈">\n      <img src="/assets/logo-criminal.png" alt="법무법인 선린">\n    </a>'
 );
 
 // 메인 슬라이드는 사용자가 지정한 3개 파일을 그대로 사용한다.

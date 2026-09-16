@@ -240,6 +240,9 @@
         slug: p.slug || '',
         createdAt: p.createdAt || '',
         updatedAt: p.updatedAt || '',
+        noindex: p.noindex || String(p.robots || '').toLowerCase().includes('noindex') || false,
+        hideFromListing: p.hideFromListing || false,
+        searchHidden: p.searchHidden || p.hideFromListing || false,
       })),
     ].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '') || (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 
@@ -289,16 +292,22 @@
       const globalNo = start + i + 1;
       const isPl = e.type === 'pl';
       const typeBadge = renderTypeCell(e);
-      const noindexBadge = (!isPl && e.noindex) ? '<span class="noindex-badge">NOINDEX</span>' : '';
-      const hidden = !isPl && (e.searchHidden || e.hideFromListing);
+      const noindexBadge = e.noindex ? '<span class="noindex-badge">NOINDEX</span>' : '';
+      const hidden = e.searchHidden || e.hideFromListing;
       const hiddenBadge = hidden ? '<span class="search-hidden-badge">검색숨김</span>' : '';
       const nameCell = `<div class="name-cell"><strong>${esc(e.name)}${noindexBadge}${hiddenBadge}</strong><span class="slug">${esc(e.slug)}</span></div>`;
 
       let actions;
       if (isPl) {
+        const niLabel = e.noindex ? 'noindex 해제' : 'noindex';
+        const niStyle = e.noindex ? 'background:#8a96a8' : 'background:#c0392b';
+        const hiddenLabel = hidden ? '검색 숨김 해제' : '검색 숨김';
+        const hiddenStyle = hidden ? 'background:#8a96a8' : 'background:#5b43d6';
         actions = `
           <a href="/admin/powerlink.html?edit=${encodeURIComponent(e.slug)}">편집</a>
           <a href="${PL_SITE}/powerlink/${encodeURIComponent(e.slug)}/" target="_blank">보기</a>
+          <button class="btn sm" style="${niStyle};color:#fff" onclick="togglePowerlinkNoindex('${encodeURIComponent(e.slug)}',${e.noindex})">${niLabel}</button>
+          <button class="btn sm" style="${hiddenStyle};color:#fff" onclick="togglePowerlinkSearchHidden('${encodeURIComponent(e.slug)}',${hidden})">${hiddenLabel}</button>
           <a href="#" class="del" onclick="deletePl('${esc(e.slug)}','${esc(e.name)}');return false;">삭제</a>`;
       } else {
         const domainLinks = DOMAINS.filter(d =>
@@ -607,6 +616,50 @@
       if (data.ok) {
         const entry = allEntries.find(e => e.type === 'case' && e.slug === slug);
         const updated = data.updatedCase || {};
+        if (entry) {
+          entry.searchHidden = typeof updated.searchHidden === 'boolean' ? updated.searchHidden : newValue;
+          entry.hideFromListing = typeof updated.hideFromListing === 'boolean' ? updated.hideFromListing : newValue;
+          entry.noindex = typeof updated.noindex === 'boolean' ? updated.noindex : newValue;
+          entry.updatedAt = updated.updatedAt || entry.updatedAt;
+        }
+        filterEntries();
+      } else { alert('실패: ' + (data.message || '')); }
+    } catch (e) { alert('오류: ' + e.message); }
+  }
+
+  async function togglePowerlinkNoindex(encodedSlug, currentValue) {
+    const slug = decodeURIComponent(encodedSlug);
+    const newValue = !currentValue;
+    const label = newValue ? 'noindex로 설정' : 'noindex 해제';
+    if (!confirm(`"${slug}" 파워링크 랜딩을 ${label}하시겠습니까?`)) return;
+    try {
+      const res = await fetch('/api/update-powerlink', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug, action:'set-noindex', value:newValue}) });
+      const data = await res.json();
+      if (data.ok) {
+        const entry = allEntries.find(e => e.type === 'pl' && e.slug === slug);
+        const updated = data.landing || {};
+        if (entry) {
+          entry.noindex = typeof updated.noindex === 'boolean' ? updated.noindex : newValue;
+          entry.searchHidden = typeof updated.searchHidden === 'boolean' ? updated.searchHidden : entry.searchHidden;
+          entry.hideFromListing = typeof updated.hideFromListing === 'boolean' ? updated.hideFromListing : entry.hideFromListing;
+          entry.updatedAt = updated.updatedAt || entry.updatedAt;
+        }
+        filterEntries();
+      } else { alert('실패: ' + (data.message || '')); }
+    } catch (e) { alert('오류: ' + e.message); }
+  }
+
+  async function togglePowerlinkSearchHidden(encodedSlug, currentValue) {
+    const slug = decodeURIComponent(encodedSlug);
+    const newValue = !currentValue;
+    const label = newValue ? '검색 숨김' : '검색 숨김 해제';
+    if (!confirm(`"${slug}" 파워링크 랜딩을 ${label}하시겠습니까?\n\n검색 숨김 상태에서는 홈, 오늘 추가/갱신된 목록, 사이트맵, RSS에서 제외되고 페이지에는 noindex가 적용됩니다.`)) return;
+    try {
+      const res = await fetch('/api/update-powerlink', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug, action:'set-search-hidden', value:newValue}) });
+      const data = await res.json();
+      if (data.ok) {
+        const entry = allEntries.find(e => e.type === 'pl' && e.slug === slug);
+        const updated = data.landing || {};
         if (entry) {
           entry.searchHidden = typeof updated.searchHidden === 'boolean' ? updated.searchHidden : newValue;
           entry.hideFromListing = typeof updated.hideFromListing === 'boolean' ? updated.hideFromListing : newValue;

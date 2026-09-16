@@ -356,11 +356,16 @@ export async function loadPowerlinks(env) {
   if (env?.CASES) {
     const raw = await env.CASES.get("powerlink:index");
     if (raw) {
-      try { return JSON.parse(raw); } catch { /* fall through */ }
+      try { return JSON.parse(raw).filter((item) => isPowerlinkVisible(item)); } catch { /* fall through */ }
     }
   }
 
-  return loadPowerlinksFromRawGitHub({ owner, repo, branch });
+  const items = await loadPowerlinksFromRawGitHub({ owner, repo, branch });
+  return items.filter((item) => isPowerlinkVisible(item));
+}
+
+function isPowerlinkVisible(item = {}) {
+  return Boolean(item?.slug) && !item.searchHidden && !item.hideFromListing;
 }
 
 async function loadPowerlinksFromRawGitHub({ owner, repo, branch }) {

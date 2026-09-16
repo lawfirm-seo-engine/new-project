@@ -2,6 +2,8 @@
 
 const GITHUB_FILE_PATH = "data/powerlinks.json";
 const SITE_URL = "https://gnlaw-criminal.co.kr";
+const DEFAULT_ROBOTS = "index, follow";
+const NOINDEX_ROBOTS = "noindex, follow";
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -35,7 +37,7 @@ async function loadOne(env, slug) {
 async function loadIndex(env) {
   if (env.CASES) {
     const raw = await env.CASES.get("powerlink:index");
-    if (raw) return JSON.parse(raw);
+    if (raw) return JSON.parse(raw).map(buildIndexEntry).sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
   }
 
   const all = await loadPowerlinksFromGitHub(env);
@@ -43,6 +45,8 @@ async function loadIndex(env) {
 }
 
 function buildIndexEntry(item) {
+  const searchHidden = Boolean(item.searchHidden || item.hideFromListing);
+  const noindex = Boolean(item.noindex || searchHidden || String(item.robots || "").toLowerCase().includes("noindex"));
   return {
     slug: item.slug,
     title: item.title,
@@ -51,7 +55,10 @@ function buildIndexEntry(item) {
     imageAlt: item.imageAlt,
     imageCaption: item.imageCaption,
     imageDescription: item.imageDescription,
-    robots: item.robots,
+    robots: noindex ? NOINDEX_ROBOTS : DEFAULT_ROBOTS,
+    noindex,
+    searchHidden,
+    hideFromListing: searchHidden,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
     landingViews: item.landingViews || 0,

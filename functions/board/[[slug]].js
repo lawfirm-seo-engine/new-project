@@ -48,13 +48,13 @@ const GA_TAG = `<!-- Google tag (gtag.js) -->
 </script>`;
 
 function layout({ title, description, canonical, body }) {
-  return `<!doctype html><html lang="ko"><head>${GA_TAG}<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${esc(canonical)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical)}"><meta property="og:type" content="article"><link rel="stylesheet" href="/assets/style.css?v=20260825-mobile-header-match"><style>${styles()}</style></head><body class="domain-a">${siteHeader()}${body}${siteFooter()}</body></html>`;
+  return `<!doctype html><html lang="ko"><head>${GA_TAG}<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${esc(canonical)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonical)}"><meta property="og:type" content="article"><link rel="stylesheet" href="/assets/style.css?v=20260915-logo-header-v1"><style>${styles()}</style></head><body class="domain-a center-site center-fintech board-page">${siteHeader()}${body}${siteFooter()}</body></html>`;
 }
 
 function siteHeader() {
   return `<header class="site-header">
     <a class="brand" href="/" aria-label="법무법인 선린 홈페이지">
-      <img src="/assets/logo.png" alt="법무법인 선린" loading="lazy" decoding="async">
+      <img src="/assets/logo-criminal.png" alt="법무법인 선린" loading="lazy" decoding="async">
     </a>
     <nav class="center-nav" aria-label="주요 메뉴">
       <details class="center-nav-group">
