@@ -24,8 +24,15 @@ export async function onRequest({ request, env, params }) {
 }
 
 async function renderList(env) {
-  const posts = sortCriminalBoardPosts((await listCriminalBoardPosts(env)).filter((p) => p.status === "published"));
-  const cards = posts.length ? posts.map((post) => `<article class="row"><a href="${esc(criminalBoardPostUrl(post.slug))}"><span class="category">${esc(post.category || "피해 대응")}</span><h2>${esc(post.title)}</h2><p>${esc(post.excerpt || "")}</p><time>${esc(post.publishedAt || post.updatedAt || "")}</time></a></article>`).join("") : `<div class="empty">등록된 게시글이 없습니다.</div>`;
+  const indexPosts = sortCriminalBoardPosts((await listCriminalBoardPosts(env)).filter((p) => p.status === "published"));
+  const posts = await Promise.all(indexPosts.map(async (post) => {
+    const full = await getCriminalBoardPost(env, post.slug);
+    return full && full.status === "published" ? { ...post, ...full } : post;
+  }));
+  const cards = posts.length ? posts.map((post) => {
+    const thumbnail = firstPostImage(post);
+    return `<article class="row${thumbnail ? " has-thumb" : ""}"><a href="${esc(criminalBoardPostUrl(post.slug))}">${thumbnail ? `<span class="thumb"><img src="${esc(thumbnail)}" alt="${esc(post.title)}" loading="lazy" decoding="async"></span>` : ""}<span class="row-body"><span class="category">${esc(post.category || "피해 대응")}</span><h2>${esc(post.title)}</h2><p>${esc(post.excerpt || "")}</p><time>${esc(post.publishedAt || post.updatedAt || "")}</time></span></a></article>`;
+  }).join("") : `<div class="empty">등록된 게시글이 없습니다.</div>`;
   return html(layout({ title: "법률정보 게시판 | 법무법인 선린", description: "법무법인 선린의 금융·투자사기 피해 대응 및 사건 진행 관련 법률정보 게시판입니다.", canonical: `${CRIMINAL_BOARD_SITE_URL}/board/`, body: `<section class="hero"><div><span>LEGAL INSIGHT</span><h1>법률정보 게시판</h1><p>금융·투자사기 피해 대응과 사건 진행에 필요한 정보를 안내합니다.</p></div></section><main class="list"><div class="list-head"><strong>전체 게시글</strong><span>${posts.length}건</span></div>${cards}</main>` }));
 }
 
@@ -165,7 +172,22 @@ function sanitizeRichHtml(source = "") {
   return out;
 }
 
+function firstPostImage(post = {}) {
+  if (isSafeImageUrl(post.thumbnailUrl)) return String(post.thumbnailUrl).trim();
+  const body = String(post.body || "");
+  const htmlImage = body.match(/<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i);
+  if (htmlImage && isSafeImageUrl(htmlImage[1])) return htmlImage[1].replace(/&amp;/g, "&").trim();
+  const markdownImage = body.match(/!\[[^\]]*]\((https?:\/\/[^\s)]+|\/[^\s)]+)(?:\s+"[^"]*")?\)/i);
+  if (markdownImage && isSafeImageUrl(markdownImage[1])) return markdownImage[1].trim();
+  return "";
+}
+
+function isSafeImageUrl(value = "") {
+  const text = String(value || "").trim();
+  return /^https?:\/\//i.test(text) || text.startsWith("/");
+}
+
 function notFound() { return layout({ title:"게시글을 찾을 수 없습니다 | 법무법인 선린", description:"요청하신 게시글을 찾을 수 없습니다.", canonical:`${CRIMINAL_BOARD_SITE_URL}/board/`, body:`<main class="article"><h1>게시글을 찾을 수 없습니다.</h1><div class="back"><a href="/board/">게시판으로 이동</a></div></main>` }); }
 function html(body,status=200){return new Response(body,{status,headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"public, max-age=60, s-maxage=300"}})}
 function esc(v=""){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function styles(){return `*{box-sizing:border-box}body{margin:0;color:#18202a;font-family:Arial,'Noto Sans KR',sans-serif;background:#fff}.hero{background:#102f42;color:#fff;padding:78px 24px}.hero>div{max-width:1180px;margin:auto}.hero span{font-size:12px;letter-spacing:2px;color:#9eb9c9}.hero h1{font-size:44px;margin:12px 0}.hero p{color:#d8e2e8}.list,.article{max-width:1040px;margin:0 auto;padding:55px 24px 90px}.list-head{display:flex;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #153e55}.row{border-bottom:1px solid #e6e9ed}.row a{display:block;padding:25px 4px;text-decoration:none;color:inherit}.row h2{font-size:22px;margin:8px 0}.row p{margin:0 0 10px;color:#64707d}.row time,.date{font-size:13px;color:#89939d}.category{font-size:12px;font-weight:800;color:#17618a}.article nav{font-size:13px;color:#7a8792;margin-bottom:32px}.article nav a,.back a{color:#164d6b}.article header{padding-bottom:30px;border-bottom:1px solid #e6e9ed}.article h1{font-size:38px;line-height:1.35;margin:10px 0 14px}.article>figure img,.content figure img{max-width:100%;height:auto}.content{font-size:17px;line-height:1.9;padding-top:35px}.content h2{font-size:27px;margin-top:48px}.content h3{font-size:22px;margin-top:38px}.content li{margin:8px 0}.back{margin-top:60px;padding-top:24px;border-top:1px solid #e6e9ed}.empty{padding:60px;text-align:center;color:#8a949d}@media(max-width:700px){.hero{padding:55px 20px}.hero h1{font-size:34px}.article h1{font-size:30px}.list,.article{padding-left:20px;padding-right:20px}}`}
+function styles(){return `*{box-sizing:border-box}body{margin:0;color:#18202a;font-family:Arial,'Noto Sans KR',sans-serif;background:#fff}.hero{background:#102f42;color:#fff;padding:78px 24px}.hero>div{max-width:1180px;margin:auto}.hero span{font-size:12px;letter-spacing:2px;color:#9eb9c9}.hero h1{font-size:44px;margin:12px 0}.hero p{color:#d8e2e8}.list,.article{max-width:1040px;margin:0 auto;padding:55px 24px 90px}.list-head{display:flex;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #153e55}.row{border-bottom:1px solid #e6e9ed}.row a{display:block;padding:25px 4px;text-decoration:none;color:inherit}.row.has-thumb a{display:grid;grid-template-columns:168px minmax(0,1fr);gap:18px;align-items:center}.thumb{display:block;overflow:hidden;aspect-ratio:4/3;background:#eef2f5}.thumb img{display:block;width:100%;height:100%;object-fit:cover}.row h2{font-size:22px;margin:8px 0}.row p{margin:0 0 10px;color:#64707d}.row time,.date{font-size:13px;color:#89939d}.category{font-size:12px;font-weight:800;color:#17618a}.article nav{font-size:13px;color:#7a8792;margin-bottom:32px}.article nav a,.back a{color:#164d6b}.article header{padding-bottom:30px;border-bottom:1px solid #e6e9ed}.article h1{font-size:38px;line-height:1.35;margin:10px 0 14px}.article>figure img,.content figure img{max-width:100%;height:auto}.content{font-size:17px;line-height:1.9;padding-top:35px}.content h2{font-size:27px;margin-top:48px}.content h3{font-size:22px;margin-top:38px}.content li{margin:8px 0}.back{margin-top:60px;padding-top:24px;border-top:1px solid #e6e9ed}.empty{padding:60px;text-align:center;color:#8a949d}@media(max-width:700px){.hero{padding:55px 20px}.hero h1{font-size:34px}.article h1{font-size:30px}.list,.article{padding-left:20px;padding-right:20px}.row.has-thumb a{grid-template-columns:96px minmax(0,1fr);gap:12px}.row h2{font-size:18px}}`}
