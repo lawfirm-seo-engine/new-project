@@ -6,6 +6,7 @@ import {
 } from "../_seo.js";
 import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
+import { recoveryRepresentativeSlug } from "../_recoverySeo.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const RECOVERY_HOST = "gnlaw-recovery.co.kr";
@@ -224,6 +225,7 @@ export async function onRequestPost(context) {
       tags: ["지급정지", "이의신청"],
       landings: { ...(existing?.landings || {}), c: landing },
     };
+    const publicSlug = recoveryRepresentativeSlug(item) || slug;
 
     if (env.CASES) {
       await env.CASES.put(`case:${slug}`, JSON.stringify(item));
@@ -233,28 +235,28 @@ export async function onRequestPost(context) {
       if (!batchMode) context.waitUntil?.(upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} jipjeong landing ${slug}`).catch(() => {}));
 
       const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
-      context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
-      context.waitUntil?.(warmRecoveryCache(slug).catch(() => {}));
+      context.waitUntil?.(pingIndexNow(publicSlug, indexNowKey).catch(() => {}));
+      context.waitUntil?.(warmRecoveryCache(publicSlug).catch(() => {}));
 
       return json({
         ok: true,
         message: existing ? "지급정지 랜딩이 갱신되었습니다." : "지급정지 랜딩이 생성되었습니다.",
         landing: item,
-        url: buildLandingUrl(RECOVERY_GROUP, slug),
+        url: buildLandingUrl(RECOVERY_GROUP, publicSlug),
         storage: "kv+github",
       });
     }
 
     await upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} jipjeong landing ${slug}`);
     const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
-    context.waitUntil?.(pingIndexNow(slug, indexNowKey).catch(() => {}));
-    context.waitUntil?.(warmRecoveryCache(slug).catch(() => {}));
+    context.waitUntil?.(pingIndexNow(publicSlug, indexNowKey).catch(() => {}));
+    context.waitUntil?.(warmRecoveryCache(publicSlug).catch(() => {}));
 
     return json({
       ok: true,
       message: existing ? "지급정지 랜딩이 갱신되었습니다." : "지급정지 랜딩이 생성되었습니다.",
       landing: item,
-      url: buildLandingUrl(RECOVERY_GROUP, slug),
+      url: buildLandingUrl(RECOVERY_GROUP, publicSlug),
       storage: "github",
     });
   } catch (error) {
