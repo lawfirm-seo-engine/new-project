@@ -42,6 +42,7 @@ import {
   shouldAppendStockReadingroomCta,
 } from "./_stockReadingroomCta.js";
 import { ldPageH1, ldPageTitle } from "./_readingroomTemplate.js";
+import { correctKoreanParticles } from "./_koreanParticles.js";
 import {
   isRecoveryRepresentative,
   recoveryBankForCase,
@@ -1578,6 +1579,9 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const breadcrumbCategory = breadcrumbLabel(group);
   const breadcrumbPageName = pageTitle;
   const recoveryCarouselSchema = createRecoveryCarouselSchema(caseData, group, relatedCases, canonical);
+  const recoveryOfficialSourceUrls = lk === "c" && isRecoveryRepresentative(caseData)
+    ? createRecoveryOfficialSourceItems(caseData).map((item) => item.url)
+    : [];
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -1633,6 +1637,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
         image: { "@id": `${canonical}#primaryimage` },
         about: [searchKeyword(rawCaseName), group.intent].filter(Boolean),
         keywords: keyword,
+        ...(recoveryOfficialSourceUrls.length ? { citation: recoveryOfficialSourceUrls } : {}),
         speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", ".aeo-summary", ".article-block > p", "#faq-list"] },
       },
       {
@@ -1761,7 +1766,8 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     headerCall: createCenterHeaderNav(group),
     bodyScripts: logScanScriptForSite(group.siteUrl),
   });
-  return useManualTitle ? renderedHtml : cleanStandardLandingText(renderedHtml);
+  const particleCheckedHtml = lk === "c" ? correctKoreanParticles(renderedHtml) : renderedHtml;
+  return useManualTitle ? particleCheckedHtml : cleanStandardLandingText(particleCheckedHtml);
 }
 
 function cleanStandardLandingText(value = "") {
@@ -2157,6 +2163,37 @@ function createRecoveryRepresentativeGuide(caseData = {}) {
   </section>`;
 }
 
+const RECOVERY_LAW_URL = "https://www.law.go.kr/법령/전기통신금융사기피해방지및피해자산환급에관한특별법";
+const RECOVERY_FSS_URL = "https://www.fss.or.kr/fss/main/contents.do?menuNo=200354";
+
+function createRecoveryOfficialSourceItems(caseData = {}) {
+  const bank = recoveryBankForCase(caseData);
+  return [
+    {
+      label: "국가법령정보센터 — 전기통신금융사기 피해 방지 및 피해자산 환급에 관한 특별법",
+      url: RECOVERY_LAW_URL,
+    },
+    {
+      label: "금융감독원 — 보이스피싱·금융사기 피해 예방 및 신고 안내",
+      url: RECOVERY_FSS_URL,
+    },
+    ...(bank?.officialUrl ? [{ label: `${bank.name} 공식 홈페이지·고객센터 안내`, url: bank.officialUrl }] : []),
+  ];
+}
+
+function createRecoveryOfficialSourcesSection(caseData = {}) {
+  if (!isRecoveryRepresentative(caseData)) return "";
+  const links = createRecoveryOfficialSourceItems(caseData)
+    .map((item) => `<li><a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">${esc(item.label)}</a></li>`)
+    .join("");
+  return `<section class="article-block recovery-official-sources" aria-labelledby="recovery-official-sources-title">
+    <p class="section-kicker">OFFICIAL SOURCES</p>
+    <h2 id="recovery-official-sources-title">금융감독원·법령·은행 공식 안내 출처</h2>
+    <p>지급정지와 전자금융거래 제한의 적용 범위 및 제출자료는 통지 내용과 처리 시점에 따라 달라질 수 있습니다. 아래 공식 출처에서 최신 법령과 해당 금융기관 안내를 함께 확인하시기 바랍니다.</p>
+    <ul>${links}</ul>
+  </section>`;
+}
+
 function createRecoveryManualContent(landing, group, caseData, relatedCases = []) {
   const cn = esc(normalizeCaseName(caseData.caseName));
   const siteName = esc(group.siteName);
@@ -2175,6 +2212,7 @@ function createRecoveryManualContent(landing, group, caseData, relatedCases = []
   return [
     MANUAL_BODY_STYLE,
     isRecoveryLanding ? createRecoveryRepresentativeGuide(caseData) : "",
+    isRecoveryLanding ? createRecoveryOfficialSourcesSection(caseData) : "",
     `<section class="article-block manual-body${isRecoveryLanding ? " recovery-manual-body" : ""}">${bodyHtml}</section>`,
     isRecoveryLanding ? createRecoveryDebtNonexistenceSection() : "",
     isRecoveryLanding ? createRecoveryCarouselSection(caseData, group, relatedCases) : "",

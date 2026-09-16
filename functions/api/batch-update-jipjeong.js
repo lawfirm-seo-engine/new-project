@@ -1,5 +1,6 @@
 // 기존 jipjeong-manual 케이스들의 body를 최신 템플릿으로 일괄 갱신
 
+import { correctKoreanParticles } from "../_koreanParticles.js";
 import {
   buildJipjeongTemplate,
   generateJipjeongMeta,
@@ -221,7 +222,7 @@ function applySubstitutions(str, bank, region, action) {
   s = replaceAll(s, TPLB, bank);
   s = replaceAll(s, TPLR, region || "종로");
   s = replaceAll(s, TPLA, action);
-  return s;
+  return correctKoreanParticles(s);
 }
 
 // ─── 제목 파싱 ──────────────────────────────────────────────────────────────
