@@ -197,6 +197,7 @@ for (const [host, siteUrl] of Object.entries(CANONICAL_SITE_URL_BY_HOST)) {
 
 const CENTER_FINTECH_STYLE_VERSION = "20260821-single-row-navigation";
 const CRIMINAL_PUBLIC_STYLE_VERSION = "20260916-header-thumb-v1";
+const OG_TEMPLATE_REFRESHED_AT = "2026-09-16";
 const CENTER_FINTECH_IMAGE_VERSION = "20260825-main-slide-03-replaced";
 
 function centerFintechHeadLinks(group) {
@@ -543,8 +544,8 @@ function renderPowerlinkLanding(landing) {
   const description = landing.description || `${title} 관련 신규 사건 진행 내용을 정리했습니다.`;
   const robots = normalizePowerlinkRobots(landing);
   const publishedDate = landing.createdAt || landing.updatedAt || new Date().toISOString().slice(0, 10);
-  const modifiedDate = landing.updatedAt || publishedDate;
-  const ogRevision = landing.ogRevision || landing.updatedAt || "";
+  const modifiedDate = latestSeoDate(landing.updatedAt || publishedDate, OG_TEMPLATE_REFRESHED_AT);
+  const ogRevision = latestSeoDate(landing.ogRevision, landing.updatedAt, OG_TEMPLATE_REFRESHED_AT);
   const ogImage = appendOgRevision(powerlinkOgImageUrl(slug || "landing", "png"), ogRevision);
   const displayOgImage = appendOgRevision(powerlinkOgImageUrl(slug || "landing", "webp"), ogRevision);
   const imageAlt = landing.imageAlt || criminalLandingCaseTitle(rawTitle);
@@ -1395,13 +1396,13 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
   const urlSuffix = isAllDomainsNoSuffix ? "" : isNoSuffixSlug ? "" : oldSuffixOverride ? `-${oldSuffixOverride}` : (group.urlSlugSuffix ? `-${group.urlSlugSuffix}` : "");
   const fallbackCanonical = `${group.siteUrl}/${group.pathPrefix}/${encodeURIComponent(caseData.slug)}${urlSuffix}/`;
   const canonical = canonicalForLanding(landing, group, fallbackCanonical);
-  const ogRevision = landing.ogRevision || caseData.ogRevision || caseData.updatedAt || "";
+  const ogRevision = latestSeoDate(landing.ogRevision, caseData.ogRevision, caseData.updatedAt, OG_TEMPLATE_REFRESHED_AT);
   const ogImage = appendOgRevision(caseOgPngImageUrl(caseData.slug || "landing", group.siteUrl), ogRevision);
   const displayOgImage = appendOgRevision(caseOgWebpImageUrl(caseData.slug || "landing", group.siteUrl), ogRevision);
   const publishedDate = caseData.createdAt || new Date().toISOString().slice(0, 10);
   const modifiedDate = lk === "c"
-    ? "2026-08-13"
-    : latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), SEO_STABILIZED_AT);
+    ? latestSeoDate("2026-08-13", OG_TEMPLATE_REFRESHED_AT)
+    : latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), SEO_STABILIZED_AT, OG_TEMPLATE_REFRESHED_AT);
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
   const keyword = searchKeyword(rawCaseName);
