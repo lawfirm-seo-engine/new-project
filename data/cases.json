@@ -172207,5 +172207,89 @@
       "c"
     ],
     "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "케이뱅크-계좌지급정지-이의신청",
+    "caseName": "케이뱅크 계좌지급정지 이의신청",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-09-16",
+    "updatedAt": "2026-09-16",
+    "thumbnailUrl": "",
+    "landingViews": 2448,
+    "reports": 0,
+    "summary": "케이뱅크 계좌지급정지 이의신청은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, 계좌지급정지 이의신청 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "카카오뱅크-계좌지급정지-이의신청",
+    "caseName": "카카오뱅크 계좌지급정지 이의신청",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-09-16",
+    "updatedAt": "2026-09-16",
+    "thumbnailUrl": "",
+    "landingViews": 7531,
+    "reports": 0,
+    "summary": "카카오뱅크 계좌지급정지 이의신청은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, 계좌지급정지 이의신청 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "토스뱅크-계좌지급정지-이의신청",
+    "caseName": "토스뱅크 계좌지급정지 이의신청",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-09-16",
+    "updatedAt": "2026-09-16",
+    "thumbnailUrl": "",
+    "landingViews": 6596,
+    "reports": 0,
+    "summary": "토스뱅크 계좌지급정지 이의신청은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, 계좌지급정지 이의신청 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "새마을금고-계좌지급정지-이의신청",
+    "caseName": "새마을금고 계좌지급정지 이의신청",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-09-16",
+    "updatedAt": "2026-09-16",
+    "thumbnailUrl": "",
+    "landingViews": 288,
+    "reports": 0,
+    "summary": "새마을금고 계좌지급정지 이의신청은 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, 계좌지급정지 이의신청 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
   }
 ]
