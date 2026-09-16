@@ -27606,7 +27606,7 @@
   },
   {
     "slug": "peida",
-    "caseName": "페이다 사기",
+    "caseName": "페이 사기",
     "category": "형사대응",
     "createdAt": "2026-06-25",
     "updatedAt": "2026-09-16",
@@ -27641,7 +27641,7 @@
     "caseName": "PAYDA 사기",
     "category": "형사대응",
     "createdAt": "2026-06-25",
-    "updatedAt": "2026-06-25",
+    "updatedAt": "2026-09-16",
     "thumbnailUrl": "",
     "landingViews": 5757,
     "reports": 16,
@@ -27655,8 +27655,18 @@
     ],
     "memo": "",
     "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
     "targetGroups": [],
-    "createdBy": ""
+    "createdBy": "",
+    "fraudType": "",
+    "memos": [
+      {
+        "id": 1786781925781,
+        "text": "PAYDA 사기 사칭 사기 사건 현재 접수중 입니다.",
+        "createdAt": "2026-08-15 17:18"
+      }
+    ]
   },
   {
     "slug": "qpffktlfn-shop",
