@@ -115678,8 +115678,7 @@
       {
         "id": 1786780507418,
         "text": "milestone 사칭 사기 사건 현재 접수중 입니다.",
-        "createdAt": "2026-08-15 16:55",
-        "editedAt": "2026-08-21 23:52"
+        "createdAt": "2026-08-15 16:55"
       }
     ]
   },
@@ -135812,7 +135811,8 @@
     "caseName": "kyoboria 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-08-21",
-    "updatedAt": "2026-09-17",
+    "createdAtKst": "2026-08-21T00:00:00+09:00",
+    "updatedAt": "2026-08-21",
     "thumbnailUrl": "",
     "landingViews": 4149,
     "reports": 25,
@@ -135827,18 +135827,9 @@
     ],
     "memo": "",
     "noindex": false,
-    "hideFromListing": false,
-    "searchHidden": false,
     "targetGroups": [],
     "createdBy": "",
-    "fraudType": "stock-project",
-    "memos": [
-      {
-        "id": 1789624961795,
-        "text": "KYOBORIA 교보리아는 교보증권과 박봉권을 사칭한 어플로 교보 경제연구회 리딩방 사기를 주의하시기 바랍니다.",
-        "createdAt": "2026-09-17 15:02"
-      }
-    ]
+    "fraudType": "stock-project"
   },
   {
     "slug": "gyoboria",
@@ -170933,6 +170924,79 @@
       "Premium",
       "Investment",
       "사칭",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "rppeurimieom-inbeseuteumeonteu",
+    "caseName": "RP프리미엄 인베스트먼트 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-17",
+    "updatedAt": "2026-09-17",
+    "thumbnailUrl": "",
+    "landingViews": 7364,
+    "reports": 25,
+    "summary": "RP프리미엄 인베스트먼트 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "RP프리미엄",
+      "인베스트먼트",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "mbksamopeondeu",
+    "caseName": "MBK사모펀드 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-17",
+    "updatedAt": "2026-09-17",
+    "thumbnailUrl": "",
+    "landingViews": 433,
+    "reports": 20,
+    "summary": "MBK사모펀드 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "MBK사모펀드",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "embikeipateuneoseu",
+    "caseName": "엠비케이파트너스 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-17",
+    "updatedAt": "2026-09-17",
+    "thumbnailUrl": "",
+    "landingViews": 1047,
+    "reports": 13,
+    "summary": "엠비케이파트너스 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "엠비케이파트너스",
+      "사칭",
+      "사기",
       "사기피해",
       "피해금회수",
       "증거보존"
