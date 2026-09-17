@@ -6,8 +6,8 @@ import {
 } from "../_seo.js";
 import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
-import { recoveryRepresentativeSlug } from "../_recoverySeo.js";
-import { correctKoreanParticles } from "../_koreanParticles.js";
+import { RECOVERY_BANKS, RECOVERY_OBJECTION_FORM_URL, recoveryRepresentativeSlug } from "../_recoverySeo.js";
+import { koreanParticle } from "../_koreanParticles.js";
 
 const GITHUB_FILE_PATH = "data/cases.json";
 const RECOVERY_HOST = "gnlaw-recovery.co.kr";
@@ -21,9 +21,12 @@ const CREATED_BY = "jipjeong-manual";
 // BANK / ACTION 플레이스홀더를 치환하여 원고 생성
 const TPLB = "BANK";    // 은행명
 const TPLA = "ACTION";  // 행위 키워드 (지급정지 해결 / 지급정지 이의신청 / 계좌 지급정지 해제 등)
+const TPLF = "FORM_URL";
+const TPLG = "SUBMISSION_GUIDE";
 
 const TEMPLATE_BODY = [
-  `## ${TPLB} ${TPLA}이란?`,
+  `## ${TPLB} ${TPLA} 방법과 이의제기 절차`,
+  `${TPLB} 계좌지급정지해제는 먼저 지급정지 사유와 피해신고 금액을 확인한 뒤, 거래 경위를 입증할 자료와 이의제기 신청서를 제출하는 순서로 진행합니다. 이의제기만으로 해결되지 않을 때에는 「통신사기피해환급법」의 법령에 근거하여 채무부존재확인소송을 진행하고 지급정지 신청자를 정확히 특정하여 소송계속증명원을 금융사에 제출하여야 합니다.`,
   `${TPLB} ${TPLA}은 금융사기 피해 신고 등으로 인해 지급정지된 계좌의 사실관계를 확인하고, 거래의 정당성을 객관적으로 설명하기 위한 절차를 의미합니다.`,
   `최근에는 보이스피싱, 투자사기, 가상자산 거래, 팀미션 사기, 중고거래 사기 등 다양한 유형의 금융사기로 인해 정상적인 거래를 한 계좌도 지급정지 대상이 되는 사례가 증가하고 있습니다. 따라서 지급정지 통보를 받았다면 지급정지 사유와 거래 경위를 먼저 확인하는 것이 중요합니다.`,
   `### 법률 검토에서 확인하는 핵심`,
@@ -51,6 +54,10 @@ const TEMPLATE_BODY = [
   `- 객관적인 소명자료 준비`,
   `- ${TPLA} 절차 진행`,
   `사안에 따라 금융기관의 검토와 수사기관의 절차가 함께 진행될 수 있으므로 초기 단계에서 충분한 자료를 확보하는 것이 중요합니다.`,
+  `## ${TPLB} 이의제기 신청서와 공식 접수 안내`,
+  `[${TPLB} 제출용 이의제기신청서 내려받기](${TPLF})`,
+  `${TPLG}`,
+  `신청서에는 지급정지 계좌, 이의제기 사유와 거래 경위를 구체적으로 기재하고, 신분증 사본 및 사기이용계좌가 아니라는 사실을 증명하는 자료를 함께 준비해야 합니다. 은행별 내부 접수 방식과 추가 자료는 실제 통지 내용에 따라 달라질 수 있으므로 제출 전에 담당부서에 확인해야 합니다.`,
   `## ${TPLA}을 위해 준비해야 하는 자료`,
   `### 기본 거래자료`,
   `${TPLB} ${TPLA}에서는 거래를 객관적으로 설명할 수 있는 자료를 충분히 준비하는 것이 중요합니다.`,
@@ -76,6 +83,8 @@ const TEMPLATE_BODY = [
   `${TPLB} ${TPLA}은 단순히 금융기관에 서류를 제출하는 것으로 마무리되는 경우도 있지만, 거래 구조와 사실관계에 따라 민사상 분쟁이나 형사절차와 연결될 가능성도 있습니다.`,
   `특히 보이스피싱, 투자사기, 가상자산 거래, 팀미션 사기, 오픈채팅 투자방 등에서는 여러 계좌를 거쳐 자금이 이동하는 경우가 많아 거래 경위와 자금 흐름을 객관적으로 설명할 수 있는 자료가 중요합니다.`,
   `${TPLB} ${TPLA}은 지급정지 사유와 거래 구조를 함께 분석하여 필요한 증빙자료를 정리하고, 사건의 특성에 맞는 대응 방향을 검토해야 합니다.`,
+  `## 소송을 제기하면 바로 지급정지 해제가 가능한가`,
+  `통신사기피해환급법의 법령에 근거하여 채무부존재확인소송을 진행하고 지급정지 신청자를 정확히 특정하여 소송계속증명원을 금융사에 제출하여야 합니다. 소장 접수만으로 지급정지가 자동 해제되는 것은 아니며, 금융사가 소송 계속 사실과 법정 종료 요건을 확인할 수 있어야 합니다.`,
   `## ${TPLA}을 위해 확인해야 할 체크리스트`,
   `### 우선 점검할 사항`,
   `지급정지 통보를 받았다면 다음 사항을 우선 점검하는 것이 좋습니다.`,
@@ -175,7 +184,7 @@ export async function onRequestPost(context) {
     // ── 저장 단계 ──────────────────────────────────────────────────────────
     const confirmedBody = appendStockReadingroomCta(Array.isArray(body.body) && body.body.length
       ? body.body
-      : generatedBody).map((line) => correctKoreanParticles(removeJongnoLawyerPhrase(line)));
+      : generatedBody).map((line) => removeJongnoLawyerPhrase(line));
 
     const generatedMeta = generateJipjeongMeta(newBank, newAction);
     const imageAlt        = removeJongnoLawyerPhrase(normalizeSpace(body.imageAlt)).slice(0, 160) || generatedMeta.imageAlt;
@@ -268,19 +277,26 @@ export async function onRequestPost(context) {
 // ─── 원고 생성 ──────────────────────────────────────────────────────────────
 
 export function buildJipjeongTemplate(bank, action) {
-  return TEMPLATE_BODY.map((para) => applySubstitutions(para, bank, action));
+  const bankInfo = RECOVERY_BANKS.find((item) => item.aliases.includes(bank) || item.name === bank);
+  return TEMPLATE_BODY.map((para) => applySubstitutions(para, bank, action, bankInfo));
 }
 
-function applySubstitutions(str, bank, action) {
+function applySubstitutions(str, bank, action, bankInfo = null) {
   let s = str;
   s = replaceAll(s, TPLB, bank);
   s = replaceAll(s, TPLA, action);
-  return correctKoreanParticles(s);
+  s = replaceAll(s, TPLF, bankInfo?.objectionUrl || RECOVERY_OBJECTION_FORM_URL);
+  s = replaceAll(s, TPLG, bankInfo?.submissionGuide || `${bank} 고객센터 또는 계좌 관리 영업점에서 지급정지 담당부서와 제출방법을 먼저 확인해야 합니다.`);
+  const subject = `${bank} ${action}`;
+  s = replaceAll(s, `${subject}은`, `${subject}${koreanParticle(subject, "은", "는")}`);
+  s = replaceAll(s, `${action}은`, `${action}${koreanParticle(action, "은", "는")}`);
+  s = replaceAll(s, `${action}을`, `${action}${koreanParticle(action, "을", "를")}`);
+  return s;
 }
 
 export function generateJipjeongMeta(bank, action) {
   const subject = `${bank} ${action}`.trim();
-  const summary = `${subject}${topicParticle(subject)} 지급정지 사유를 정확하게 확인하고 거래 경위를 객관적인 자료로 소명하는 과정이 중요합니다. 지급정지 원인, ${action} 절차, 준비해야 할 자료와 주요 유의사항을 안내합니다.`.slice(0, 180);
+  const summary = `${bank} 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.`.slice(0, 180);
   const imageAlt = `${bank} ${action} 절차 안내`;
   const imageCaption = `${bank} ${action} 절차와 준비자료 안내`;
   const imageDescription = `${bank} ${action}에 관한 법적 절차와 준비서류를 정리한 안내 이미지입니다. 지급정지 사유 확인부터 소명자료 준비까지 체계적으로 안내합니다.`;

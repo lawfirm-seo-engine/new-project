@@ -1,4 +1,5 @@
 export const RECOVERY_DEBT_REPRESENTATIVE_SLUG = "계좌지급정지-채무부존재확인소송";
+export const RECOVERY_OBJECTION_FORM_URL = "https://law.go.kr/LSW/flDownload.do?flSeq=167499499";
 
 export const RECOVERY_INTENTS = [
   { key: "objection_rejected", label: "계좌지급정지 이의신청 불수용", suffix: "계좌지급정지이의신청-불수용", test: (text) => /이의신청.*불수용|불수용.*이의신청/.test(text) },
@@ -12,7 +13,7 @@ export const RECOVERY_BANKS = [
   { name: "KB국민은행", slugBase: "kb국민은행", officialUrl: "https://www.kbstar.com/", aliases: ["KB국민은행", "국민은행"] },
   { name: "신한은행", slugBase: "신한은행", officialUrl: "https://bank.shinhan.com/", aliases: ["신한은행"] },
   { name: "우리은행", slugBase: "우리은행", officialUrl: "https://spot.wooribank.com/", aliases: ["우리은행"] },
-  { name: "하나은행", slugBase: "하나은행", officialUrl: "https://www.kebhana.com/", aliases: ["하나은행"] },
+  { name: "하나은행", slugBase: "하나은행", officialUrl: "https://www.kebhana.com/", objectionUrl: "https://image.kebhana.com/cont/customer/customer07/customer0701/customer070106/__icsFiles/afieldfile/2024/08/21/5-08-0246.pdf", aliases: ["하나은행"] },
   { name: "NH농협은행", slugBase: "nh농협은행", officialUrl: "https://banking.nonghyup.com/", aliases: ["NH농협은행", "NH농협", "농협은행", "농협"] },
   { name: "IBK기업은행", slugBase: "ibk기업은행", officialUrl: "https://www.ibk.co.kr/", aliases: ["IBK기업은행", "기업은행"] },
   { name: "SC제일은행", slugBase: "sc제일은행", officialUrl: "https://www.standardchartered.co.kr/", aliases: ["SC제일은행", "제일은행"] },
@@ -20,7 +21,7 @@ export const RECOVERY_BANKS = [
   { name: "카카오뱅크", slugBase: "카카오뱅크", officialUrl: "https://www.kakaobank.com/", aliases: ["카카오뱅크"] },
   { name: "토스뱅크", slugBase: "토스뱅크", officialUrl: "https://www.tossbank.com/", aliases: ["토스뱅크"] },
   { name: "케이뱅크", slugBase: "케이뱅크", officialUrl: "https://www.kbanknow.com/", aliases: ["케이뱅크", "K뱅크"] },
-  { name: "한국씨티은행", slugBase: "한국씨티은행", officialUrl: "https://www.citibank.co.kr/", aliases: ["한국씨티은행", "씨티은행", "시티은행"] },
+  { name: "한국씨티은행", slugBase: "한국씨티은행", officialUrl: "https://www.citibank.co.kr/CusFconCnts0400.act", objectionUrl: "https://www.citibank.co.kr/download/etc/objection_ex.pdf", aliases: ["한국씨티은행", "씨티은행", "시티은행"] },
   { name: "SH수협은행", slugBase: "sh수협은행", officialUrl: "https://www.suhyup-bank.com/", aliases: ["SH수협은행", "SH수협", "수협은행", "수협"] },
   { name: "BNK부산은행", slugBase: "bnk부산은행", officialUrl: "https://www.busanbank.co.kr/", aliases: ["BNK부산은행", "부산은행"] },
   { name: "IM뱅크", slugBase: "im뱅크", officialUrl: "https://www.imbank.co.kr/", aliases: ["IM뱅크", "아이엠뱅크", "대구은행", "DGB대구은행"] },
@@ -29,7 +30,15 @@ export const RECOVERY_BANKS = [
   { name: "BNK경남은행", slugBase: "bnk경남은행", officialUrl: "https://www.knbank.co.kr/", aliases: ["BNK경남은행", "경남은행"] },
   { name: "제주은행", slugBase: "제주은행", officialUrl: "https://www.jejubank.co.kr/", aliases: ["제주은행"] },
   { name: "새마을금고", slugBase: "새마을금고", officialUrl: "https://www.kfcc.co.kr/", hubSlug: "새마을금고-계좌지급정지해제-지급정지-사실-통지서", aliases: ["새마을금고"] },
-].map((bank) => ({ ...bank, slug: bank.hubSlug || `${bank.slugBase}-계좌지급정지해제` }));
+].map((bank) => ({
+  ...bank,
+  slug: bank.hubSlug || `${bank.slugBase}-계좌지급정지해제`,
+  objectionUrl: bank.objectionUrl || RECOVERY_OBJECTION_FORM_URL,
+  objectionLabel: `${bank.name} 제출용 이의제기신청서`,
+  submissionGuide: ["카카오뱅크", "토스뱅크", "케이뱅크"].includes(bank.name)
+    ? `${bank.name} 앱 또는 고객센터에서 지급정지 담당 접수 경로와 추가 제출방법을 먼저 확인해야 합니다.`
+    : `${bank.name} 고객센터 또는 계좌 관리 영업점에서 지급정지 담당부서, 제출방법과 추가 요구자료를 먼저 확인해야 합니다.`,
+}));
 
 function compact(value = "") {
   return String(value).replace(/[\s_-]+/g, "").toLowerCase();
@@ -40,6 +49,8 @@ function recoveryText(item = {}) {
 }
 
 export function isRecoveryDebtCase(item = {}) {
+  const bank = recoveryBankForCase(item);
+  if (bank && item.slug === bank.slug) return false;
   return /채무부존재(?:확인)?소송|채무부존재소송/.test(recoveryText(item));
 }
 
@@ -49,6 +60,8 @@ export function recoveryBankForCase(item = {}) {
 }
 
 export function recoveryIntentForCase(item = {}) {
+  const bank = recoveryBankForCase(item);
+  if (bank && item.slug === bank.slug) return { key: "release", label: "계좌지급정지 해제" };
   if (isRecoveryDebtCase(item)) return { key: "debt_nonexistence", label: "채무부존재확인소송" };
   const text = recoveryText(item);
   return RECOVERY_INTENTS.find((intent) => intent.test(text)) || { key: "release", label: "계좌지급정지 해제" };
@@ -69,8 +82,11 @@ export function recoveryRepresentativeTitle(item = {}) {
   if (intent.key === "debt_nonexistence") return "계좌지급정지 채무부존재확인소송 대응 방법·준비자료";
   const bank = recoveryBankForCase(item);
   if (!bank) return "";
+  if (item.slug === bank.slug) {
+    return `${bank.name} 계좌지급정지해제 방법｜이의제기·소명자료·채무부존재확인소송`;
+  }
   const suffix = {
-    release: "계좌지급정지 해제 방법·준비자료",
+    release: "계좌지급정지해제 방법｜이의제기·소명자료·채무부존재확인소송",
     objection: "계좌지급정지 이의신청 방법·준비자료",
     objection_rejected: "계좌지급정지 이의신청 불수용 대응 방법",
     notice: "지급정지 사실 통지서 확인·대응 방법",

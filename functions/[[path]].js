@@ -43,6 +43,7 @@ import {
 } from "./_stockReadingroomCta.js";
 import { ldPageH1, ldPageTitle } from "./_readingroomTemplate.js";
 import { correctKoreanParticles } from "./_koreanParticles.js";
+import { buildJipjeongTemplate } from "./api/create-jipjeong-landing.js";
 import {
   isRecoveryRepresentative,
   recoveryBankForCase,
@@ -1404,11 +1405,14 @@ function selectRecoveryCarouselCases(caseData = {}, group = {}, relatedCases = [
   if ((group.landingKey || group.key) !== "c") return [];
   const currentSlug = caseData.slug || "";
   const bankName = recoveryBankName(caseData);
+  const representativePage = isRecoveryRepresentative(caseData);
   const eligible = (Array.isArray(relatedCases) ? relatedCases : [])
     .filter((item) => item?.slug && item.slug !== currentSlug)
     .filter((item) => isCaseAllowedForGroup(item, group))
     .filter(isRecoveryTopicCase)
-    .filter((item) => !shouldConsolidateRecoveryCase(item) || isRecoveryRepresentative(item));
+    .filter((item) => representativePage
+      ? isRecoveryRepresentative(item)
+      : (!shouldConsolidateRecoveryCase(item) || isRecoveryRepresentative(item)));
   const sameBank = bankName ? eligible.filter((item) => recoveryBankName(item) === bankName) : [];
   const sameBankSlugs = new Set(sameBank.map((item) => item.slug));
   const otherBanks = eligible.filter((item) => !sameBankSlugs.has(item.slug));
@@ -1501,17 +1505,27 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     : latestSeoDate(useStandardTemplate ? standardLastModified(caseData) : (caseData.updatedAt || publishedDate), SEO_STABILIZED_AT, OG_TEMPLATE_REFRESHED_AT);
   const isoPublished = `${publishedDate}T00:00:00+09:00`;
   const isoModified = `${modifiedDate}T00:00:00+09:00`;
-  const keyword = searchKeyword(rawCaseName);
+  const keyword = representativeTitle
+    ? [
+        `${recoveryBank?.name || "은행"} 계좌지급정지해제`,
+        `${recoveryBank?.name || "은행"} 지급정지 이의제기`,
+        "계좌지급정지 소명자료",
+        "채무부존재확인소송",
+        "소송계속증명원",
+      ].join(", ")
+    : searchKeyword(rawCaseName);
   const renderedFaq = renderFaqForLanding(landing, { ...group, key: lk }, caseData);
   const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
   const seoDescription = representativeTitle
-    ? `${representativeTitle}. ${recoveryBank ? `${recoveryBank.name} 관련 ` : ""}${recoveryIntent?.label || "계좌지급정지"}의 확인사항, 준비자료와 대응 순서를 법무법인 선린이 정리합니다.`.slice(0, 155)
+    ? `${recoveryBank?.name || "은행"} 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.`.slice(0, 155)
     : lk === "c"
     ? `${primaryCaseKeyword(rawCaseName) || normalizeCaseName(rawCaseName)} 관련 계좌 지급정지 원인, 이의제기·해제 절차, 준비자료와 채무부존재확인소송 대응 방법을 정리합니다.`.slice(0, 150)
     : useStandardTemplate
       ? standardMetaDescription(rawCaseName)
       : createSeoDescription(landing.description || caseData.summary || "", rawCaseName, lk);
-  const articleTags = createArticleTags(rawCaseName, lk);
+  const articleTags = representativeTitle
+    ? [`${recoveryBank?.name || "은행"} 계좌지급정지해제`, `${recoveryBank?.name || "은행"} 지급정지 이의제기`, "계좌지급정지 소명자료", "채무부존재확인소송", "소송계속증명원"]
+    : createArticleTags(rawCaseName, lk);
   const imageMeta = normalizeLandingImageMeta(landing, pageH1, seoDescription, caseData);
   const imageAlt = imageMeta.alt;
   const imageCaption = imageMeta.caption;
@@ -1575,7 +1589,9 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     keyword ? `<meta name="keywords" content="${esc(keyword)}">` : "",
   ].filter(Boolean).join("\n  ");
 
-  const caseKeywordForSchema = primaryCaseKeyword(rawCaseName) || rawCaseName;
+  const caseKeywordForSchema = representativeTitle
+    ? `${recoveryBank?.name || "은행"} 계좌지급정지해제`
+    : (primaryCaseKeyword(rawCaseName) || rawCaseName);
   const breadcrumbCategory = breadcrumbLabel(group);
   const breadcrumbPageName = pageTitle;
   const recoveryCarouselSchema = createRecoveryCarouselSchema(caseData, group, relatedCases, canonical);
@@ -1635,7 +1651,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
         publisher: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
         isPartOf: { "@id": `${canonical}#webpage` },
         image: { "@id": `${canonical}#primaryimage` },
-        about: [searchKeyword(rawCaseName), group.intent].filter(Boolean),
+        about: [representativeTitle ? caseKeywordForSchema : searchKeyword(rawCaseName), group.intent].filter(Boolean),
         keywords: keyword,
         ...(recoveryOfficialSourceUrls.length ? { citation: recoveryOfficialSourceUrls } : {}),
         speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", ".aeo-summary", ".article-block > p", "#faq-list"] },
@@ -1766,7 +1782,9 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
     headerCall: createCenterHeaderNav(group),
     bodyScripts: logScanScriptForSite(group.siteUrl),
   });
-  const particleCheckedHtml = lk === "c" ? correctKoreanParticles(renderedHtml) : renderedHtml;
+  const particleCheckedHtml = lk === "c" && !isRecoveryRepresentative(caseData)
+    ? correctKoreanParticles(renderedHtml)
+    : renderedHtml;
   return useManualTitle ? particleCheckedHtml : cleanStandardLandingText(particleCheckedHtml);
 }
 
@@ -2120,9 +2138,10 @@ function createRecoveryRepresentativeGuide(caseData = {}) {
   const intent = recoveryIntentForCase(caseData);
   const bankName = esc(bank?.name || "은행");
   const title = esc(recoveryRepresentativeTitle(caseData));
+  const guideHeading = bank ? `${bank.name} 계좌지급정지해제 핵심 답변` : recoveryRepresentativeTitle(caseData);
   const guides = {
     release: {
-      answer: "지급정지 해제를 검토하려면 통지된 조치의 근거와 문제 된 거래를 먼저 특정해야 합니다. 정당한 거래였다는 자료를 시간순으로 정리한 뒤 이의신청 또는 필요한 법원 절차를 선택합니다.",
+      answer: `${bank?.name || "은행"} 계좌지급정지해제는 먼저 지급정지 사유와 피해신고 금액을 확인한 뒤, 거래 경위를 입증할 자료와 이의제기 신청서를 제출하는 순서로 진행합니다. 이의제기만으로 해결되지 않을 때에는 「통신사기피해환급법」의 법령에 근거하여 채무부존재확인소송을 진행하고 지급정지 신청자를 정확히 특정하여 소송계속증명원을 금융사에 제출하여야 합니다.`,
       steps: ["조치명·요청기관·대상 금액 확인", "입금 전후 거래내역과 거래 원인 정리", "이의신청서와 객관적 소명자료 제출", "채권소멸절차 및 추가 법적 절차 확인"],
     },
     objection: {
@@ -2151,15 +2170,18 @@ function createRecoveryRepresentativeGuide(caseData = {}) {
     },
   };
   const guide = guides[intent.key] || guides.release;
+  const directAnswer = bank
+    ? `${bank.name} 계좌지급정지해제는 먼저 지급정지 사유와 피해신고 금액을 확인한 뒤, 거래 경위를 입증할 자료와 이의제기 신청서를 제출하는 순서로 진행합니다. 이의제기만으로 해결되지 않을 때에는 「통신사기피해환급법」의 법령에 근거하여 채무부존재확인소송을 진행하고 지급정지 신청자를 정확히 특정하여 소송계속증명원을 금융사에 제출하여야 합니다.`
+    : guide.answer;
   const steps = guide.steps.map((step) => `<li>${esc(step)}</li>`).join("");
   return `<section class="aeo-summary recovery-representative-guide" id="aeo-summary" aria-label="${title} 핵심 답변">
     <p>핵심 답변</p>
-    <h2>${title}</h2>
-    <blockquote>${esc(guide.answer)}</blockquote>
+    <h2>${esc(guideHeading)}</h2>
+    <blockquote>${esc(directAnswer)}</blockquote>
     <h3>${esc(intent.label)} 확인 순서</h3>
     <ol>${steps}</ol>
     ${bank ? `<p>${bankName}에 제출할 세부 양식과 추가 확인자료는 실제 통지 내용 및 제한 사유에 따라 달라질 수 있습니다.</p>` : ""}
-    <p class="content-review-note"><strong>작성·검토:</strong> 법무법인 선린 금융사기 대응팀 · 담당 변호사 김상수<br><strong>최종 검토일:</strong> ${esc(caseData.updatedAt || caseData.createdAt || "")}</p>
+    <p class="content-review-note"><strong>작성:</strong> 법무법인 선린 금융사기 대응팀<br><strong>법률 검토:</strong> <a href="https://gnlaw.co.kr/bbs/board.php?bo_table=lawyer&amp;wr_id=1" target="_blank" rel="noopener noreferrer">김상수 대표변호사</a><br><strong>최종 검토일:</strong> ${esc(caseData.updatedAt || caseData.createdAt || "")}</p>
   </section>`;
 }
 
@@ -2177,7 +2199,8 @@ function createRecoveryOfficialSourceItems(caseData = {}) {
       label: "금융감독원 — 보이스피싱·금융사기 피해 예방 및 신고 안내",
       url: RECOVERY_FSS_URL,
     },
-    ...(bank?.officialUrl ? [{ label: `${bank.name} 공식 홈페이지·고객센터 안내`, url: bank.officialUrl }] : []),
+    ...(bank?.objectionUrl ? [{ label: `${bank.name} 제출용 이의제기신청서`, url: bank.objectionUrl }] : []),
+    ...(bank?.officialUrl ? [{ label: `${bank.name} 공식 지급정지·고객센터 안내`, url: bank.officialUrl }] : []),
   ];
 }
 
@@ -2186,24 +2209,31 @@ function createRecoveryOfficialSourcesSection(caseData = {}) {
   const links = createRecoveryOfficialSourceItems(caseData)
     .map((item) => `<li><a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">${esc(item.label)}</a></li>`)
     .join("");
+  const bank = recoveryBankForCase(caseData);
   return `<section class="article-block recovery-official-sources" aria-labelledby="recovery-official-sources-title">
     <p class="section-kicker">OFFICIAL SOURCES</p>
     <h2 id="recovery-official-sources-title">금융감독원·법령·은행 공식 안내 출처</h2>
-    <p>지급정지와 전자금융거래 제한의 적용 범위 및 제출자료는 통지 내용과 처리 시점에 따라 달라질 수 있습니다. 아래 공식 출처에서 최신 법령과 해당 금융기관 안내를 함께 확인하시기 바랍니다.</p>
+    <p>${esc(bank?.submissionGuide || "지급정지 담당부서와 제출방법을 먼저 확인해야 합니다.")} 지급정지와 전자금융거래 제한의 적용 범위 및 제출자료는 통지 내용과 처리 시점에 따라 달라질 수 있습니다.</p>
     <ul>${links}</ul>
   </section>`;
 }
 
 function createRecoveryManualContent(landing, group, caseData, relatedCases = []) {
-  const cn = esc(normalizeCaseName(caseData.caseName));
+  const cn = esc(isRecoveryRepresentative(caseData)
+    ? (recoveryRepresentativeTitle(caseData) || caseData.caseName || "계좌지급정지해제")
+    : normalizeCaseName(caseData.caseName));
   const siteName = esc(group.siteName);
   const slug = esc(caseData.slug);
   const trackScript = `<script>(function(){fetch('/api/track-view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}'})}).catch(function(){});})();</script>`;
   const manualTitle = landing.h1 || landing.title || caseData.caseName || "";
   const isRecoveryLanding = (group.landingKey || group.key) === "c";
-  const rawManualBody = Array.isArray(landing.body)
-    ? stripLeadingDuplicateManualTitle(landing.body, manualTitle)
+  const representativeBank = isRecoveryRepresentative(caseData) ? recoveryBankForCase(caseData) : null;
+  const sourceManualBody = representativeBank
+    ? buildJipjeongTemplate(representativeBank.name, "계좌지급정지해제")
     : landing.body;
+  const rawManualBody = Array.isArray(sourceManualBody)
+    ? stripLeadingDuplicateManualTitle(sourceManualBody, manualTitle)
+    : sourceManualBody;
   const bodyHtml = Array.isArray(rawManualBody)
     ? renderManualBodyArray(rawManualBody, { preferExplicitLists: isRecoveryLanding })
     : renderManualArticle(String(rawManualBody || ""));
@@ -3413,7 +3443,8 @@ const PERSON_ATTORNEY = {
   jobTitle: "대표변호사",
   worksFor: { "@id": "https://gnlaw-criminal.co.kr/#organization" },
   knowsAbout: ["금융사기", "사기죄 형사고소", "피해금 회수", "가압류", "손해배상"],
-  sameAs: [],
+  url: "https://gnlaw.co.kr/bbs/board.php?bo_table=lawyer&wr_id=1",
+  sameAs: ["https://gnlaw.co.kr/bbs/board.php?bo_table=lawyer&wr_id=1"],
 };
 
 function esc(v = "") {
@@ -3925,7 +3956,17 @@ function withSentenceBreaks(value = "") {
 }
 
 function formatInlineText(value = "") {
-  return linkifyEscapedUrls(esc(value));
+  const links = [];
+  const withTokens = String(value || "").replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => {
+    const token = `MANUALLINKTOKEN${links.length}ENDTOKEN`;
+    links.push(`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`);
+    return token;
+  });
+  let output = linkifyEscapedUrls(esc(withTokens));
+  links.forEach((link, index) => {
+    output = output.replace(`MANUALLINKTOKEN${index}ENDTOKEN`, link);
+  });
+  return output;
 }
 
 function linkifyEscapedUrls(value = "") {

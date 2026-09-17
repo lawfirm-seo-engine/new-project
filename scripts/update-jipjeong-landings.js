@@ -6,6 +6,10 @@ import {
   generateJipjeongMeta,
   removeJongnoLawyerPhrase,
 } from "../functions/api/create-jipjeong-landing.js";
+import {
+  RECOVERY_BANKS,
+  recoveryRepresentativeTitle,
+} from "../functions/_recoverySeo.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const casesPath = path.join(root, "data", "cases.json");
@@ -17,29 +21,34 @@ let detailed = 0;
 
 for (const item of cases) {
   if (item?.createdBy !== "jipjeong-manual") continue;
+  const bank = RECOVERY_BANKS.find((entry) => item.slug === entry.slug);
+  if (!bank) continue;
 
-  const title = removeJongnoLawyerPhrase(item.caseName || "");
-  const bank = extractBank(title);
-  const action = extractAction(title, bank);
-  const meta = generateJipjeongMeta(bank, action);
+  const action = "계좌지급정지해제";
+  const title = recoveryRepresentativeTitle(item);
+  const meta = generateJipjeongMeta(bank.name, action);
 
   item.caseName = title;
   item.summary = meta.summary;
-  item.tags = (Array.isArray(item.tags) ? item.tags : [])
-    .filter((tag) => !String(tag || "").includes("종로변호사"));
+  item.tags = ["계좌지급정지해제", "지급정지 이의제기", "소명자료", "채무부존재확인소송", "소송계속증명원"];
   item.updatedAt = updatedAt;
 
-  if (item.landings?.c) {
+  item.landings = item.landings || {};
+  item.landings.c = item.landings.c || {};
+  {
     const landing = item.landings.c;
-    landing.title = removeJongnoLawyerPhrase(landing.title || title);
-    landing.h1 = removeJongnoLawyerPhrase(landing.h1 || title);
-    landing.ogTitle = removeJongnoLawyerPhrase(landing.ogTitle || title);
+    landing.title = title;
+    landing.h1 = title;
+    landing.ogTitle = title;
     landing.description = meta.summary;
     landing.ogDescription = meta.summary;
     landing.imageAlt = meta.imageAlt;
     landing.imageCaption = meta.imageCaption;
     landing.imageDescription = meta.imageDescription;
-    landing.body = buildJipjeongTemplate(bank, action);
+    landing.body = buildJipjeongTemplate(bank.name, action);
+    landing.victimCases = [];
+    landing.suspiciousCompanies = [];
+    landing.faq = [];
     detailed += 1;
   }
 
