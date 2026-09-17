@@ -171006,5 +171006,101 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
+  },
+  {
+    "slug": "raonai",
+    "caseName": "라온AI 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-17",
+    "updatedAt": "2026-09-17",
+    "thumbnailUrl": "",
+    "landingViews": 2765,
+    "reports": 24,
+    "summary": "라온AI 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "라온AI",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "peuraimtujayeonguso",
+    "caseName": "프라임투자연구소 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-17",
+    "updatedAt": "2026-09-17",
+    "thumbnailUrl": "",
+    "landingViews": 7778,
+    "reports": 5,
+    "summary": "프라임투자연구소 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "프라임투자연구소",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "tedeoriseu",
+    "caseName": "테더리스 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-17",
+    "updatedAt": "2026-09-17",
+    "thumbnailUrl": "",
+    "landingViews": 4543,
+    "reports": 32,
+    "summary": "테더리스 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "테더리스",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "llbase",
+    "caseName": "llBASE 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-17",
+    "updatedAt": "2026-09-17",
+    "thumbnailUrl": "",
+    "landingViews": 2578,
+    "reports": 14,
+    "summary": "llBASE 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "llBASE",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
   }
 ]
