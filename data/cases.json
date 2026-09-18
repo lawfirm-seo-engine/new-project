@@ -175788,5 +175788,67 @@
         "canonical": "https://리딩방피해회수센터.kr/insights/ls%EC%A6%9D%EA%B6%8C-%EA%B0%95%EB%8F%84%ED%98%84-%ED%94%84%EB%A1%9C-%EC%A0%9C7%EA%B8%B0-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%82%AC%EC%B9%AD-%EC%82%AC%EA%B8%B0-%EC%A3%BC%EC%8B%9D-%ED%88%AC%EC%9E%90-%EB%A6%AC%EB%94%A9%EB%B0%A9-%ED%94%BC%ED%95%B4%ED%9A%8C%EB%B3%B5-%EC%95%88%EB%82%B4-report/"
       }
     }
+  },
+  {
+    "slug": "gangdohyeon-peuro",
+    "caseName": "강도현 프로 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-18",
+    "updatedAt": "2026-09-18",
+    "thumbnailUrl": "",
+    "landingViews": 3701,
+    "reports": 15,
+    "summary": "강도현 프로 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "강도현",
+      "프로",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "apcm-얼라인파트너스-윤가은-비서-사칭-사기-주식-투자-리딩방-피해회복-안내",
+    "caseName": "APCM 얼라인파트너스 윤가은 비서 사칭 사기 주식·투자 리딩방 피해회복 안내",
+    "category": "주식리딩방사기 랜딩",
+    "createdAt": "2026-09-18",
+    "updatedAt": "2026-09-18",
+    "thumbnailUrl": "",
+    "landingViews": 3529,
+    "reports": 0,
+    "summary": "APCM 얼라인파트너스 윤가은 비서 사기 피해가 의심되나요? 주식 리딩방 출금거부, 추가입금 요구, 가짜 HTS·거래소 정황과 피해금 회수 가능성, 형사고소 및 민사 대응 절차를 02-6348-0406 24시간 안내합니다.",
+    "tags": [
+      "주식리딩방사기",
+      "코인리딩방사기",
+      "출금거부",
+      "피해금회수",
+      "법무법인선린"
+    ],
+    "memo": "",
+    "noindex": false,
+    "hideFromListing": false,
+    "searchHidden": false,
+    "targetGroups": [
+      "ld"
+    ],
+    "createdBy": "readingroom-manual",
+    "ldCategory": "stock-reading",
+    "hasReadingroomLanding": true,
+    "landings": {
+      "ld": {
+        "createdBy": "readingroom-manual",
+        "title": "APCM 얼라인파트너스 윤가은 비서 사칭 사기 주식·투자 리딩방 피해회복 안내",
+        "h1": "APCM 얼라인파트너스 윤가은 비서 사칭 사기 주식·투자 리딩방 피해회복 안내",
+        "description": "APCM 얼라인파트너스 윤가은 비서 사기 피해가 의심되나요? 주식 리딩방 출금거부, 추가입금 요구, 가짜 HTS·거래소 정황과 피해금 회수 가능성, 형사고소 및 민사 대응 절차를 02-6348-0406 24시간 안내합니다.",
+        "canonical": "https://리딩방피해회수센터.kr/insights/apcm-%EC%96%BC%EB%9D%BC%EC%9D%B8%ED%8C%8C%ED%8A%B8%EB%84%88%EC%8A%A4-%EC%9C%A4%EA%B0%80%EC%9D%80-%EB%B9%84%EC%84%9C-%EC%82%AC%EC%B9%AD-%EC%82%AC%EA%B8%B0-%EC%A3%BC%EC%8B%9D-%ED%88%AC%EC%9E%90-%EB%A6%AC%EB%94%A9%EB%B0%A9-%ED%94%BC%ED%95%B4%ED%9A%8C%EB%B3%B5-%EC%95%88%EB%82%B4-report/"
+      }
+    }
   }
 ]
