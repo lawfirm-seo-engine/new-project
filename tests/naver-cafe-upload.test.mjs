@@ -94,6 +94,7 @@ test("Naver Cafe upload attaches all configured images without unsupported image
     assert.match(multipart, /filename="naver-cafe-phone\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-kakao\.jpg"/);
     assert.doesNotMatch(multipart, /%3Cimg|src%3D%22%23/i);
+    assert.doesNotMatch(multipart, /%3Ca(?:%20|\+)/i);
     assert.doesNotMatch(multipart, /%F0%9F%93%8C/i);
     assert.match(multipart, /Content-Transfer-Encoding: binary/);
     assert.match(multipart, /Content-Type: text\/plain; charset=UTF-8/);

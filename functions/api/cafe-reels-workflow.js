@@ -421,10 +421,11 @@ function buildCafeArticleHtml(job) {
   const bodyHtml = bodyToCafeHtml(job.draft?.body || "");
   // Naver's multipart API appends each image field to the article automatically.
   // Embedding <img src="#n"> placeholders in content causes a generic 403/999,
-  // so contact actions remain as ordinary links instead of linked image HTML.
+  // Naver also rejects <a href> markup in this endpoint with the same 999
+  // response. Plain URLs are auto-linked by Cafe after publishing.
   const contactLinks = [
-    `<p><a href="${escapeAttr(NAVER_CAFE_PHONE_HREF)}">전화 상담 02-6348-0406</a></p>`,
-    `<p><a href="https://pf.kakao.com/_WkdxfX/chat">카카오톡 상담 바로가기</a></p>`,
+    `<p>전화 상담 02-6348-0406 ${escapeHtml(NAVER_CAFE_PHONE_HREF)}</p>`,
+    `<p>카카오톡 상담 바로가기 https://pf.kakao.com/_WkdxfX/chat</p>`,
   ].join("\n");
   return [bodyHtml, contactLinks].filter(Boolean).join("\n");
 }
@@ -578,21 +579,11 @@ function bodyToCafeHtml(body) {
 }
 
 function inlineCafeText(text) {
-  const source = String(text || "");
-  const linkRe = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
-  let html = "";
-  let last = 0;
-  for (const match of source.matchAll(linkRe)) {
-    html += linkBareUrls(escapeHtml(source.slice(last, match.index)));
-    html += `<a href="${escapeAttr(match[2])}">${escapeHtml(match[1])}</a>`;
-    last = match.index + match[0].length;
-  }
-  html += linkBareUrls(escapeHtml(source.slice(last)));
-  return html;
-}
-
-function linkBareUrls(html) {
-  return html.replace(/(https?:\/\/[^\s<]+)/g, (url) => `<a href="${escapeAttr(url)}">${url}</a>`);
+  const source = String(text || "").replace(
+    /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+    "$1 ($2)",
+  );
+  return escapeHtml(source);
 }
 
 function normalizeArticleSubject(value) {
