@@ -199,19 +199,33 @@ async function publishNaverCafe(env, job) {
   }
 
   const subject = normalizeArticleSubject(job.draft?.title || job.title || `${job.caseName || "사기 피해"} 대응 안내`);
-  const content = buildCafeArticleHtml(job);
-  const params = new URLSearchParams();
-  params.set("subject", subject);
-  params.set("content", content);
+  let attachments;
+  try {
+    attachments = await loadCafeImageAttachments(job.images || []);
+  } catch (error) {
+    return {
+      ok: false,
+      status: "upload-failed",
+      message: `네이버 카페 이미지 준비 실패: ${error?.message || "이미지를 불러오지 못했습니다."}`,
+    };
+  }
+
+  const content = buildCafeArticleHtml(job, attachments);
+  const form = new FormData();
+  // Naver Cafe expects URL-encoded strings even when the request itself is multipart.
+  form.append("subject", encodeURIComponent(subject));
+  form.append("content", encodeURIComponent(content));
+  for (const attachment of attachments) {
+    form.append("image", attachment.blob, attachment.fileName);
+  }
 
   const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token.accessToken}`,
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
     },
-    body: params,
+    body: form,
   });
   const text = await res.text();
   let data = {};
@@ -233,9 +247,10 @@ async function publishNaverCafe(env, job) {
     status: "posted",
     articleId,
     cafeUrl,
+    imageCount: attachments.length,
     message: cafeUrl
-      ? `네이버 카페에 자동 업로드했습니다.\n${cafeUrl}`
-      : "네이버 카페에 자동 업로드했습니다. 네이버 응답에 게시글 URL이 없어 글 목록에서 확인해주세요.",
+      ? `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다.\n${cafeUrl}`
+      : `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다. 네이버 응답에 게시글 URL이 없어 글 목록에서 확인해주세요.`,
   };
 }
 
@@ -326,16 +341,81 @@ async function refreshNaverAccessToken(env, token) {
   return { ok: true, accessToken: next.accessToken };
 }
 
-function buildCafeArticleHtml(job) {
+function buildCafeArticleHtml(job, attachments = []) {
   const bodyHtml = bodyToCafeHtml(job.draft?.body || "");
-  const imagesHtml = (job.images || []).map((image) => {
-    const imageUrl = absoluteImageUrl(image.url);
-    if (!imageUrl) return "";
-    const href = normalizeHref(image.href || "") || imageUrl;
+  const imagesHtml = attachments.map((attachment, index) => {
+    const image = attachment.image || {};
+    const href = normalizeHref(image.href || "");
     const label = normalizeText(image.label || image.slot || "이미지");
-    return `<p><a href="${escapeAttr(href)}" target="_blank" rel="noopener"><img src="${escapeAttr(imageUrl)}" alt="${escapeAttr(label)}"></a></p>`;
-  }).filter(Boolean).join("\n");
+    const imageHtml = `<img src="#${index}" alt="${escapeAttr(label)}">`;
+    return href
+      ? `<div align="center"><a href="${escapeAttr(href)}">${imageHtml}</a></div>`
+      : `<div align="center">${imageHtml}</div>`;
+  }).join("\n");
   return [bodyHtml, imagesHtml].filter(Boolean).join("\n");
+}
+
+async function loadCafeImageAttachments(images) {
+  const attachments = [];
+  let totalBytes = 0;
+
+  for (const image of images) {
+    const imageUrl = absoluteImageUrl(image.url);
+    if (!imageUrl) continue;
+
+    const res = await fetch(imageUrl, { redirect: "follow" });
+    if (!res.ok) {
+      throw new Error(`${image.label || image.slot || "이미지"} 다운로드 실패 (${res.status})`);
+    }
+
+    const contentType = normalizeImageContentType(res.headers.get("content-type"), imageUrl);
+    if (!contentType) {
+      throw new Error(`${image.label || image.slot || "이미지"} 파일 형식을 확인할 수 없습니다.`);
+    }
+
+    const bytes = await res.arrayBuffer();
+    if (!bytes.byteLength) {
+      throw new Error(`${image.label || image.slot || "이미지"} 파일이 비어 있습니다.`);
+    }
+    if (bytes.byteLength > 15 * 1024 * 1024) {
+      throw new Error(`${image.label || image.slot || "이미지"} 파일이 15MB를 초과합니다.`);
+    }
+    totalBytes += bytes.byteLength;
+    if (totalBytes > 80 * 1024 * 1024) {
+      throw new Error("첨부 이미지 전체 용량이 80MB를 초과합니다.");
+    }
+
+    attachments.push({
+      image,
+      blob: new Blob([bytes], { type: contentType }),
+      fileName: cafeImageFileName(image, contentType, attachments.length),
+    });
+  }
+
+  return attachments;
+}
+
+function normalizeImageContentType(value, imageUrl) {
+  const declared = String(value || "").split(";", 1)[0].trim().toLowerCase();
+  const supported = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
+  if (supported.has(declared)) return declared;
+  const pathname = new URL(imageUrl).pathname.toLowerCase();
+  if (/\.jpe?g$/.test(pathname)) return "image/jpeg";
+  if (/\.png$/.test(pathname)) return "image/png";
+  if (/\.gif$/.test(pathname)) return "image/gif";
+  if (/\.webp$/.test(pathname)) return "image/webp";
+  return "";
+}
+
+function cafeImageFileName(image, contentType, index) {
+  const extension = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/gif": "gif",
+    "image/webp": "webp",
+  }[contentType] || "jpg";
+  const slot = safeId(image?.slot || String(index + 1)) || String(index + 1);
+  return `naver-cafe-${slot}.${extension}`;
 }
 
 function bodyToCafeHtml(body) {
