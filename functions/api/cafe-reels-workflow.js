@@ -376,12 +376,15 @@ function delay(ms) {
 }
 
 async function resolveCafeImages(env, job) {
-  const savedOnJob = sanitizeImages(job.images);
-  if (savedOnJob.length) return savedOnJob.map(withFixedContactHref);
-
   const sets = await env.CASES.get(ASSET_CONFIG_KEY, "json").catch(() => null);
   const setKey = isPaymentSuspensionJob(job) ? "payment-suspension-release" : "fraud";
-  return sanitizeImages(sets?.[setKey]?.slots || []).map(withFixedContactHref);
+  const configured = sanitizeImages(sets?.[setKey]?.slots || []);
+  if (configured.length) return configured.map(withFixedContactHref);
+
+  // A saved job contains a snapshot of the image set. Prefer the current set so
+  // retries also receive corrected or optimized assets, while keeping the job
+  // snapshot as a fallback when no set has been configured yet.
+  return sanitizeImages(job.images).map(withFixedContactHref);
 }
 
 function withFixedContactHref(image) {
