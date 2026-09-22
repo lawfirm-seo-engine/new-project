@@ -87,7 +87,9 @@ test("Naver Cafe upload uses a legacy-compatible multipart body with at most ten
     assert.ok(uploadRequest.init.body instanceof Uint8Array);
 
     const multipart = new TextDecoder().decode(uploadRequest.init.body);
-    assert.equal((multipart.match(/name="image"/g) || []).length, 10);
+    assert.equal((multipart.match(/name="image\[\d+\]"/g) || []).length, 10);
+    assert.match(multipart, /name="image\[0\]"/);
+    assert.match(multipart, /name="image\[9\]"/);
     assert.match(multipart, /filename="naver-cafe-08\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-phone\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-kakao\.jpg"/);
