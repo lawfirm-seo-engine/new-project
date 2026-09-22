@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카페 원고·릴스 자동 업로드</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#f4f6fb;color:#172033;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}
+    .wrap{max-width:1240px;margin:0 auto;padding:32px 20px 70px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
+    h1{margin:0;font-size:25px}
+    h2{margin:0 0 12px;font-size:18px}
+    h3{margin:0;font-size:14px}
+    .back,.btn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 14px;border:0;border-radius:7px;background:#263244;color:#fff;font-size:13px;font-weight:800;text-decoration:none;cursor:pointer}
+    .btn.primary{background:#1f4fd8}
+    .btn.green{background:#03a856}
+    .btn.warn{background:#8c1d18}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .panel{background:#fff;border:1px solid #dce3ee;border-radius:12px;padding:20px;box-shadow:0 3px 14px rgba(22,42,75,.06)}
+    .full{grid-column:1/-1}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:flex;flex-direction:column;gap:7px;color:#445269;font-size:13px;font-weight:800}
+    input,select,textarea,button{font:inherit}
+    input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e3;border-radius:8px;background:#fff;color:#172033}
+    textarea{min-height:240px;line-height:1.65;resize:vertical}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .message{min-height:22px;margin-top:12px;color:#3f5f91;font-size:13px;white-space:pre-wrap}
+    .message.err{color:#b42318}
+    .note{margin:10px 0 0;padding:12px 14px;border-radius:8px;background:#f7f9fd;color:#5f6f86;font-size:13px;line-height:1.55}
+    .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+    .slot{border:1px solid #e1e7f0;border-radius:10px;padding:10px;background:#fbfcff}
+    .slot-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+    .slot small{display:block;color:#7a8798;font-weight:700}
+    .thumb{width:100%;aspect-ratio:1/1;border:1px solid #e1e7f0;border-radius:8px;background:#edf2f7;object-fit:cover}
+    .mini{font-size:12px;padding:8px 10px;min-height:32px;border-radius:6px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .copy-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .copy-row .btn{white-space:nowrap}
+    .job-list{display:grid;gap:8px;max-height:360px;overflow:auto}
+    .job-item{padding:11px 12px;border:1px solid #e1e7f0;border-radius:8px;background:#fff;cursor:pointer}
+    .job-item:hover{border-color:#1f4fd8;background:#f8faff}
+    .job-item strong{display:block;font-size:13px}
+    .job-item span{display:block;margin-top:4px;color:#7a8798;font-size:12px}
+    .status{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;background:#edf2ff;color:#1f4fd8;font-size:11px;font-weight:900}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:960px){.grid,.split,.form-grid,.row{grid-template-columns:1fr}.slots{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:560px){.wrap{padding:22px 14px 50px}.top{align-items:flex-start;flex-direction:column}.slots{grid-template-columns:1fr}.actions .btn{width:100%}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <div>
+      <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
+      <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
+    </div>
+    <a class="btn warn" href="/admin/whiteboard.html" target="_blank">릴스 영상 생성 열기</a>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>1. 카페 원고 생성</h2>
+      <div class="form-grid">
+        <label>사건명
+          <input id="caseName" placeholder="예: ZERO TO ONE" autocomplete="off">
+        </label>
+        <label>사건 유형
+          <select id="fraudType">
+            <option value="">사건 유형 선택</option>
+            <option value="stock-project">주식 리딩방 사기·투자 프로젝트 사칭형</option>
+            <option value="institution-exchange">증권사·은행·거래소 사기 사칭형</option>
+            <option value="team-mission">팀미션 사기·부업·영상 시청형</option>
+            <option value="live-dating">라이브 방송·만남 플랫폼 사칭형</option>
+            <option value="refund-reward">환불·보상금 지급 사칭형</option>
+            <option value="payment-suspension-release">지급정지해제</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button id="generateBtn" class="btn primary" type="button">네이버카페 원고 생성</button>
+        <button class="btn" type="button" onclick="resetDraft()">초기화</button>
+      </div>
+      <div id="draftMsg" class="message"></div>
+      <div class="note">원고 생성 후 이미지 세트를 확인하고 작업을 저장하면, 카페 게시 URL과 릴스 영상 URL을 이어서 관리할 수 있습니다.</div>
+    </section>
+
+    <section class="panel">
+      <h2>최근 작업</h2>
+      <div id="jobList" class="job-list"><div class="note">불러오는 중...</div></div>
+    </section>
+
+    <section class="panel full" id="draftPanel" hidden>
+      <h2>2. 생성 원고 검수</h2>
+      <div class="split">
+        <label>게시글 제목
+          <input id="titleOutput">
+        </label>
+        <label>이미지 세트
+          <select id="imageSetKey">
+            <option value="fraud">사기피해 원고</option>
+            <option value="payment-suspension-release">계좌지급정지해제 원고</option>
+          </select>
+        </label>
+      </div>
+      <label style="margin-top:12px">게시글 본문
+        <textarea id="bodyOutput"></textarea>
+      </label>
+      <div class="actions">
+        <button class="btn" type="button" onclick="copyValue(titleOutput.value, this)">제목 복사</button>
+        <button class="btn green" type="button" onclick="copyValue(bodyOutput.value, this)">본문 복사</button>
+        <button class="btn primary" type="button" onclick="saveWorkflow()">작업 저장</button>
+        <button class="btn" type="button" onclick="prepareCafe()">카페 게시 준비 완료</button>
+      </div>
+      <div id="workflowMsg" class="message"></div>
+    </section>
+
+    <section class="panel full" id="assetPanel">
+      <h2>3. 고정 이미지 세트</h2>
+      <div class="split">
+        <div>
+          <strong id="assetTitle">이미지 세트</strong>
+          <p id="assetDesc" class="note"></p>
+        </div>
+        <div class="actions" style="justify-content:flex-end;margin-top:0">
+          <button class="btn" type="button" onclick="loadAssets()">이미지 세트 새로고침</button>
+          <button class="btn primary" type="button" onclick="saveAssets()">이미지 세트 저장</button>
+        </div>
+      </div>
+      <div id="slotList" class="slots"></div>
+      <div id="assetMsg" class="message"></div>
+    </section>
+
+    <section class="panel full" id="reelsPanel">
+      <h2>4. 카페 URL·릴스 준비</h2>
+      <div class="row">
+        <label>카페 게시글 URL
+          <input id="cafeUrl" placeholder="https://cafe.naver.com/...">
+        </label>
+        <label>릴스 영상 공개 URL
+          <input id="videoUrl" placeholder="R2 공개 URL 또는 외부 공개 MP4 URL">
+        </label>
+      </div>
+      <div class="copy-row">
+        <input id="videoFile" type="file" accept="video/mp4,video/quicktime">
+        <button class="btn" type="button" onclick="uploadVideo()">영상 업로드</button>
+      </div>
+      <label style="margin-top:12px">릴스 캡션
+        <textarea id="captionOutput" style="min-height:170px"></textarea>
+      </label>
+      <div class="actions">
+        <button class="btn" type="button" onclick="saveCafeUrl()">카페 URL 저장</button>
+        <button class="btn" type="button" onclick="saveVideoUrl()">영상 URL 저장</button>
+        <button class="btn green" type="button" onclick="markInstagramReady()">릴스 업로드 준비 완료</button>
+        <button class="btn" type="button" onclick="copyValue(captionOutput.value, this)">캡션 복사</button>
+      </div>
+      <div id="reelsMsg" class="message"></div>
+      <p class="note">외부 계정에 직접 게시하는 단계는 계정 토큰과 별도 승인이 필요합니다. 현재 화면은 카페 원고, 고정 이미지, 영상 URL, 릴스 캡션을 한 작업으로 저장해 이어서 관리합니다.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const caseNameEl = $("caseName");
+  const fraudTypeEl = $("fraudType");
+  const titleOutput = $("titleOutput");
+  const bodyOutput = $("bodyOutput");
+  const imageSetKeyEl = $("imageSetKey");
+  const cafeUrlEl = $("cafeUrl");
+  const videoUrlEl = $("videoUrl");
+  const captionOutput = $("captionOutput");
+  let draft = null;
+  let currentJob = null;
+  let assetSets = {};
+
+  document.addEventListener("DOMContentLoaded", () => {
+    $("generateBtn").addEventListener("click", generateDraft);
+    fraudTypeEl.addEventListener("change", () => {
+      imageSetKeyEl.value = fraudTypeEl.value === "payment-suspension-release" ? "payment-suspension-release" : "fraud";
+      renderAssetSet();
+    });
+    imageSetKeyEl.addEventListener("change", renderAssetSet);
+    loadAssets();
+    loadJobs();
+  });
+
+  async function generateDraft() {
+    const caseName = caseNameEl.value.trim().replace(/\s+/g, " ");
+    const fraudType = fraudTypeEl.value;
+    if (!caseName) return show("draftMsg", "사건명을 입력해주세요.", true);
+    if (!fraudType) return show("draftMsg", "사건 유형을 선택해주세요.", true);
+    $("generateBtn").disabled = true;
+    show("draftMsg", "원고 생성 중...");
+    try {
+      const response = await fetch("/api/generate-cafe-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caseName, fraudType }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "원고 생성 실패");
+      draft = data.draft;
+      currentJob = null;
+      titleOutput.value = draft.title || "";
+      bodyOutput.value = draft.body || "";
+      imageSetKeyEl.value = fraudType === "payment-suspension-release" ? "payment-suspension-release" : "fraud";
+      $("draftPanel").hidden = false;
+      captionOutput.value = buildLocalCaption();
+      renderAssetSet();
+      show("draftMsg", "원고 생성 완료. 아래에서 검수 후 작업을 저장하세요.");
+      $("draftPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      show("draftMsg", `원고 생성 오류: ${error.message}`, true);
+    } finally {
+      $("generateBtn").disabled = false;
+    }
+  }
+
+  async function loadAssets() {
+    try {
+      const response = await fetch("/api/cafe-reels-assets");
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "이미지 세트 로드 실패");
+      assetSets = data.sets || {};
+      renderAssetSet();
+    } catch (error) {
+      show("assetMsg", error.message, true);
+    }
+  }
+
+  function renderAssetSet() {
+    const key = imageSetKeyEl.value || "fraud";
+    const set = assetSets[key];
+    if (!set) {
+      $("slotList").innerHTML = "<div class='note'>이미지 세트를 불러오지 못했습니다.</div>";
+      return;
+    }
+    $("assetTitle").textContent = set.label || "이미지 세트";
+    $("assetDesc").textContent = set.description || "";
+    $("slotList").innerHTML = (set.slots || []).map((slot, index) => `
+      <div class="slot" data-slot="${escAttr(slot.slot)}">
+        <div class="slot-head">
+          <h3>${esc(slot.label || slot.slot)}</h3>
+          <small>${esc(slot.slot)}</small>
+        </div>
+        <img class="thumb" src="${escAttr(slot.url || "")}" alt="" onerror="this.removeAttribute('src')">
+        <label style="margin-top:8px">이미지 URL
+          <input data-field="url" value="${escAttr(slot.url || "")}" placeholder="/api/criminal-board-image?id=...">
+        </label>
+        <label style="margin-top:8px">클릭 링크
+          <input data-field="href" value="${escAttr(slot.href || "")}" placeholder="https://... 또는 tel:0263480406">
+        </label>
+        <div class="actions">
+          <button class="btn mini" type="button" onclick="pickSlotFile(${index})">이미지 업로드</button>
+          <input data-file hidden type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="uploadSlotImage(${index}, this.files[0])">
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function pickSlotFile(index) {
+    const card = $("slotList").children[index];
+    card?.querySelector("[data-file]")?.click();
+  }
+
+  async function uploadSlotImage(index, file) {
+    if (!file) return;
+    show("assetMsg", "이미지 업로드 중...");
+    const card = $("slotList").children[index];
+    try {
+      const form = new FormData();
+      form.append("image", file);
+      const response = await fetch("/api/criminal-board-image", { method: "POST", body: form });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "이미지 업로드 실패");
+      card.querySelector('[data-field="url"]').value = data.url;
+      card.querySelector(".thumb").src = data.url;
+      show("assetMsg", "이미지 업로드 완료. 이미지 세트 저장을 눌러 반영하세요.");
+    } catch (error) {
+      show("assetMsg", error.message, true);
+    } finally {
+      card.querySelector("[data-file]").value = "";
+    }
+  }
+
+  async function saveAssets() {
+    const key = imageSetKeyEl.value || "fraud";
+    const slots = [...$("slotList").children].map((card) => ({
+      slot: card.dataset.slot,
+      url: card.querySelector('[data-field="url"]').value.trim(),
+      href: card.querySelector('[data-field="href"]').value.trim(),
+    }));
+    show("assetMsg", "이미지 세트 저장 중...");
+    try {
+      const response = await fetch("/api/cafe-reels-assets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ setKey: key, slots }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "이미지 세트 저장 실패");
+      assetSets = data.sets || assetSets;
+      renderAssetSet();
+      show("assetMsg", "이미지 세트가 저장되었습니다.");
+    } catch (error) {
+      show("assetMsg", error.message, true);
+    }
+  }
+
+  async function saveWorkflow() {
+    if (!draft) return show("workflowMsg", "먼저 원고를 생성해주세요.", true);
+    const payload = {
+      action: "save-job",
+      jobId: currentJob?.id || "",
+      caseName: caseNameEl.value.trim(),
+      fraudType: fraudTypeEl.value,
+      title: titleOutput.value.trim(),
+      body: bodyOutput.value.trim(),
+      draft: { ...draft, title: titleOutput.value.trim(), body: bodyOutput.value.trim() },
+      imageSetKey: imageSetKeyEl.value,
+      images: currentAssetImages(),
+      cafeUrl: cafeUrlEl.value.trim(),
+      videoUrl: videoUrlEl.value.trim(),
+    };
+    show("workflowMsg", "작업 저장 중...");
+    try {
+      const data = await postWorkflow(payload);
+      applyJob(data.job);
+      show("workflowMsg", data.message || "작업 저장 완료");
+      loadJobs();
+    } catch (error) {
+      show("workflowMsg", error.message, true);
+    }
+  }
+
+  async function prepareCafe() {
+    if (!currentJob) await saveWorkflow();
+    if (!currentJob) return;
+    try {
+      const data = await postWorkflow({ action: "prepare-cafe", jobId: currentJob.id });
+      applyJob(data.job);
+      show("workflowMsg", data.message || "카페 게시 준비 완료");
+      loadJobs();
+    } catch (error) {
+      show("workflowMsg", error.message, true);
+    }
+  }
+
+  async function saveCafeUrl() {
+    if (!currentJob) await saveWorkflow();
+    if (!currentJob) return;
+    try {
+      const data = await postWorkflow({ action: "set-cafe-url", jobId: currentJob.id, cafeUrl: cafeUrlEl.value.trim() });
+      applyJob(data.job);
+      show("reelsMsg", data.message || "카페 URL 저장 완료");
+      loadJobs();
+    } catch (error) {
+      show("reelsMsg", error.message, true);
+    }
+  }
+
+  async function uploadVideo() {
+    if (!currentJob) await saveWorkflow();
+    if (!currentJob) return;
+    const file = $("videoFile").files[0];
+    if (!file) return show("reelsMsg", "업로드할 MP4 영상을 선택해주세요.", true);
+    show("reelsMsg", "영상 업로드 중...");
+    try {
+      const form = new FormData();
+      form.append("jobId", currentJob.id);
+      form.append("video", file);
+      const response = await fetch("/api/cafe-reels-video", { method: "POST", body: form });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "영상 업로드 실패");
+      videoUrlEl.value = data.videoUrl || "";
+      await saveVideoUrl(data.key);
+      show("reelsMsg", data.message || "영상 업로드 완료");
+    } catch (error) {
+      show("reelsMsg", error.message, true);
+    } finally {
+      $("videoFile").value = "";
+    }
+  }
+
+  async function saveVideoUrl(videoKey = "") {
+    if (!currentJob) await saveWorkflow();
+    if (!currentJob) return;
+    try {
+      const data = await postWorkflow({ action: "set-video", jobId: currentJob.id, videoUrl: videoUrlEl.value.trim(), videoKey });
+      applyJob(data.job);
+      show("reelsMsg", data.message || "영상 URL 저장 완료");
+      loadJobs();
+    } catch (error) {
+      show("reelsMsg", error.message, true);
+    }
+  }
+
+  async function markInstagramReady() {
+    if (!currentJob) await saveWorkflow();
+    if (!currentJob) return;
+    try {
+      const data = await postWorkflow({ action: "mark-instagram-ready", jobId: currentJob.id, caption: captionOutput.value });
+      applyJob(data.job);
+      show("reelsMsg", data.message || "릴스 업로드 준비 완료");
+      loadJobs();
+    } catch (error) {
+      show("reelsMsg", error.message, true);
+    }
+  }
+
+  async function postWorkflow(payload) {
+    const response = await fetch("/api/cafe-reels-workflow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.message || "작업 처리 실패");
+    return data;
+  }
+
+  async function loadJobs() {
+    try {
+      const response = await fetch("/api/cafe-reels-workflow");
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "작업 목록 로드 실패");
+      const jobs = data.jobs || [];
+      $("jobList").innerHTML = jobs.length ? jobs.map((job) => `
+        <div class="job-item" onclick="loadJob('${escAttr(job.id)}')">
+          <strong>${esc(job.caseName || job.title || job.id)}</strong>
+          <span>${esc(job.title || "")}</span>
+          <span><b class="status">${esc(job.cafeStatus || "-")}</b> <b class="status">${esc(job.instagramStatus || "-")}</b> ${esc(formatDate(job.updatedAt))}</span>
+        </div>
+      `).join("") : "<div class='note'>저장된 작업이 없습니다.</div>";
+    } catch (error) {
+      $("jobList").innerHTML = `<div class="note">${esc(error.message)}</div>`;
+    }
+  }
+
+  async function loadJob(jobId) {
+    try {
+      const response = await fetch(`/api/cafe-reels-workflow?jobId=${encodeURIComponent(jobId)}`);
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "작업 로드 실패");
+      applyJob(data.job);
+      $("draftPanel").hidden = false;
+      $("draftPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      show("workflowMsg", error.message, true);
+    }
+  }
+
+  function applyJob(job) {
+    currentJob = job;
+    draft = job.draft || draft;
+    caseNameEl.value = job.caseName || "";
+    fraudTypeEl.value = job.fraudType || "";
+    titleOutput.value = job.draft?.title || "";
+    bodyOutput.value = job.draft?.body || "";
+    imageSetKeyEl.value = job.imageSetKey || "fraud";
+    cafeUrlEl.value = job.cafeUrl || "";
+    videoUrlEl.value = job.videoUrl || "";
+    captionOutput.value = job.caption || buildLocalCaption();
+    renderAssetSet();
+  }
+
+  function currentAssetImages() {
+    return [...$("slotList").children].map((card) => ({
+      slot: card.dataset.slot,
+      label: card.querySelector("h3")?.textContent || card.dataset.slot,
+      url: card.querySelector('[data-field="url"]')?.value.trim() || "",
+      href: card.querySelector('[data-field="href"]')?.value.trim() || "",
+    })).filter((slot) => slot.slot && slot.url);
+  }
+
+  function buildLocalCaption() {
+    const cafeUrl = cafeUrlEl.value.trim();
+    return [
+      titleOutput.value.trim() || `${caseNameEl.value.trim() || "사기 피해"} 대응 안내`,
+      "",
+      "피해 정황과 입금 자료를 보존한 뒤 법률 대응 가능성을 확인하세요.",
+      cafeUrl ? `자세한 내용: ${cafeUrl}` : "",
+      "",
+      "#법무법인선린 #사기피해 #금융사기 #피해회복",
+    ].filter(Boolean).join("\n");
+  }
+
+  function resetDraft() {
+    draft = null;
+    currentJob = null;
+    caseNameEl.value = "";
+    fraudTypeEl.value = "";
+    titleOutput.value = "";
+    bodyOutput.value = "";
+    cafeUrlEl.value = "";
+    videoUrlEl.value = "";
+    captionOutput.value = "";
+    $("draftPanel").hidden = true;
+    show("draftMsg", "");
+    show("workflowMsg", "");
+    show("reelsMsg", "");
+    caseNameEl.focus();
+  }
+
+  async function copyValue(value, button) {
+    try {
+      await navigator.clipboard.writeText(value || "");
+      const before = button.textContent;
+      button.textContent = "복사됨";
+      setTimeout(() => { button.textContent = before; }, 1400);
+    } catch {
+      alert("자동 복사가 차단되었습니다. 내용을 직접 선택해 복사해주세요.");
+    }
+  }
+
+  function show(id, text, isError = false) {
+    const el = $(id);
+    el.textContent = text || "";
+    el.className = `message${isError ? " err" : ""}`;
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    try { return new Date(value).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }); }
+    catch { return value; }
+  }
+
+  function esc(value) {
+    return String(value || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function escAttr(value) {
+    return esc(value).replace(/`/g, "&#96;");
+  }
+</script>
+</body>
+</html>
