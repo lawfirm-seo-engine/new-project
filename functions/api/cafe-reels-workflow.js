@@ -4,7 +4,7 @@ const SETTINGS_PATH = "data/settings.json";
 const NAVER_TOKEN_KEY = "naver-cafe:oauth:v1";
 const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
-const NAVER_CAFE_MAX_IMAGES = 10;
+const NAVER_CAFE_MAX_IMAGES = 100;
 const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
 
 export async function onRequestGet({ request, env }) {
@@ -224,7 +224,7 @@ async function publishNaverCafe(env, job) {
     };
   }
 
-  const content = buildCafeArticleHtml(job, attachments);
+  const content = buildCafeArticleHtml(job);
   const multipart = buildNaverCafeMultipart(subject, content, attachments);
   const requestDiagnostics = {
     imageCount: attachments.length,
@@ -234,8 +234,9 @@ async function publishNaverCafe(env, job) {
     contentCharacters: content.length,
     multipartBytes: multipart.body.byteLength,
     legacyMultipart: true,
+    embeddedImageHtml: false,
     imageFieldMode: "indexed",
-    phoneLinkMode: "https-bridge",
+    phoneLinkMode: "text-links",
   };
 
   const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
@@ -404,8 +405,7 @@ function selectNaverUploadImages(images = []) {
   const normalized = sanitizeImages(images);
   const contacts = normalized.filter((image) => image.slot === "phone" || image.slot === "kakao");
   const regular = normalized.filter((image) => image.slot !== "phone" && image.slot !== "kakao");
-  const regularLimit = Math.max(0, NAVER_CAFE_MAX_IMAGES - contacts.length);
-  return [...regular.slice(0, regularLimit), ...contacts].slice(0, NAVER_CAFE_MAX_IMAGES);
+  return [...regular, ...contacts].slice(0, NAVER_CAFE_MAX_IMAGES);
 }
 
 function withFixedContactHref(image) {
@@ -417,18 +417,16 @@ function withFixedContactHref(image) {
   return { ...image, href: "" };
 }
 
-function buildCafeArticleHtml(job, attachments = []) {
+function buildCafeArticleHtml(job) {
   const bodyHtml = bodyToCafeHtml(job.draft?.body || "");
-  const imagesHtml = attachments.map((attachment, index) => {
-    const image = attachment.image || {};
-    const href = normalizeHref(image.href || "");
-    const label = normalizeText(image.label || image.slot || "이미지");
-    const imageHtml = `<img src="#${index}" width="${attachment.width}" height="${attachment.height}" alt="${escapeAttr(label)}" />`;
-    return href
-      ? `<div align="center"><a href="${escapeAttr(href)}">${imageHtml}</a></div>`
-      : `<div align="center">${imageHtml}</div>`;
-  }).join("\n");
-  return [bodyHtml, imagesHtml].filter(Boolean).join("\n");
+  // Naver's multipart API appends each image field to the article automatically.
+  // Embedding <img src="#n"> placeholders in content causes a generic 403/999,
+  // so contact actions remain as ordinary links instead of linked image HTML.
+  const contactLinks = [
+    `<p><a href="${escapeAttr(NAVER_CAFE_PHONE_HREF)}">전화 상담 02-6348-0406</a></p>`,
+    `<p><a href="https://pf.kakao.com/_WkdxfX/chat">카카오톡 상담 바로가기</a></p>`,
+  ].join("\n");
+  return [bodyHtml, contactLinks].filter(Boolean).join("\n");
 }
 
 async function loadCafeImageAttachments(images) {

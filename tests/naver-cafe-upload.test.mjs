@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { onRequestPost } from "../functions/api/cafe-reels-workflow.js";
 
-test("Naver Cafe upload uses a legacy-compatible multipart body with at most ten images", async () => {
+test("Naver Cafe upload attaches all configured images without unsupported image placeholders", async () => {
   const jobId = "test-job";
   const slots = [
     ...Array.from({ length: 12 }, (_, index) => ({
@@ -82,18 +82,18 @@ test("Naver Cafe upload uses a legacy-compatible multipart body with at most ten
     });
     const result = await response.json();
     assert.equal(result.job.cafeStatus, "posted");
-    assert.equal(result.job.images.length, 10);
+    assert.equal(result.job.images.length, 14);
     assert.match(uploadRequest.init.headers["Content-Type"], /^multipart\/form-data; boundary=/);
     assert.ok(uploadRequest.init.body instanceof Uint8Array);
 
     const multipart = new TextDecoder().decode(uploadRequest.init.body);
-    assert.equal((multipart.match(/name="image\[\d+\]"/g) || []).length, 10);
+    assert.equal((multipart.match(/name="image\[\d+\]"/g) || []).length, 14);
     assert.match(multipart, /name="image\[0\]"/);
-    assert.match(multipart, /name="image\[9\]"/);
-    assert.match(multipart, /filename="naver-cafe-08\.jpg"/);
+    assert.match(multipart, /name="image\[13\]"/);
+    assert.match(multipart, /filename="naver-cafe-12\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-phone\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-kakao\.jpg"/);
-    assert.doesNotMatch(multipart, /filename="naver-cafe-09\.jpg"/);
+    assert.doesNotMatch(multipart, /%3Cimg|src%3D%22%23/i);
     assert.doesNotMatch(multipart, /%F0%9F%93%8C/i);
     assert.match(multipart, /Content-Transfer-Encoding: binary/);
     assert.match(multipart, /Content-Type: text\/plain; charset=UTF-8/);
