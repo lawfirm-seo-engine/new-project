@@ -1,4 +1,13 @@
 import {
+  GROUPS,
+  buildLandingUrl,
+  landingUrlForItem,
+} from "../_seo.js";
+import { compareCaseIdentity, hangulToRoman } from "../_searchNormalize.js";
+import { onRequestPost as createCaseLanding } from "./create-case.js";
+import { onRequestPost as createRecoveryLanding } from "./create-recovery-landing.js";
+import { onRequestPost as generateLandingDraft } from "./generate-draft.js";
+import {
   FRAUD_TYPE_OPTIONS,
   fraudTypeLabel,
   normalizeFraudTypeKey,
@@ -11,6 +20,9 @@ import {
 
 const RELATED_READINGROOM_CTA = "다른 리딩방 사기 사건 보기는 이곳 📌 https://gnlaw-criminal.co.kr/prosecute/jusigridingbang-litigation/";
 const PAYMENT_SUSPENSION_RELEASE_TYPE = "payment-suspension-release";
+const MAX_CASE_NAME_MENTIONS = 9;
+const PRIMARY_GROUP = GROUPS.find((group) => group.host === "gnlaw-criminal.co.kr");
+const RECOVERY_GROUP = GROUPS.find((group) => group.host === "gnlaw-recovery.co.kr");
 
 export async function onRequestPost(context) {
   try {
@@ -29,7 +41,12 @@ export async function onRequestPost(context) {
     const draft = isPaymentSuspensionRelease
       ? createPaymentSuspensionReleaseDraft(rawCaseName)
       : createCafeDraft(normalizeCaseName(rawCaseName), fraudType);
-    return json({ ok: true, draft });
+    const landing = await ensureLandingPage(context, { rawCaseName, fraudType, draft });
+    const finalDraft = finalizeDraftBody(draft, {
+      rawCaseName,
+      landing,
+    });
+    return json({ ok: true, draft: finalDraft, landing });
   } catch (error) {
     return json({ ok: false, message: error.message || "원고 생성에 실패했습니다." }, 500);
   }
@@ -38,10 +55,10 @@ export async function onRequestPost(context) {
 function createPaymentSuspensionReleaseDraft(caseName) {
   const keyword = normalizeSpace(caseName);
   const typeLabel = "지급정지해제";
-  const title = `${keyword} 지급정지해제, 채무부존재확인소송으로 대응하는 방법`;
+  const title = `${keyword}, 채무부존재확인소송으로 대응하는 방법`;
   const sections = [
     {
-      heading: `${keyword} 지급정지, 왜 해제 절차가 필요한가`,
+      heading: `${keyword}, 왜 해제를 위한 법률 절차가 필요한가`,
       paragraphs: [
         "계좌가 지급정지되면 단순히 금융회사에 해제를 요청하는 것만으로 해결되지 않는 경우가 있습니다. 특히 본인이 사기 거래에 관여하지 않았거나, 지급정지를 신청한 상대방에게 반환할 채무가 존재하지 않는다고 다투어야 하는 사안이라면 지급정지의 원인이 된 법률관계를 명확히 정리할 필요가 있습니다.",
         "이때 검토할 수 있는 주요 민사 절차가 채무부존재확인소송입니다. 핵심은 ‘지급정지를 신청한 상대방에 대하여 반환해야 할 채무가 존재하지 않는다’는 점을 법원의 절차를 통해 확인받는 것입니다.",
@@ -229,6 +246,216 @@ function createCafeDraft(caseName, fraudType) {
     hashtags,
     body: renderPlainText(sections, hashtags),
   };
+}
+
+async function ensureLandingPage(context, { rawCaseName, fraudType, draft }) {
+  if (fraudType === PAYMENT_SUSPENSION_RELEASE_TYPE) {
+    return ensureRecoveryLandingPage(context, { rawCaseName, draft });
+  }
+  return ensureStandardLandingPage(context, { rawCaseName, fraudType });
+}
+
+async function ensureStandardLandingPage(context, { rawCaseName, fraudType }) {
+  if (!PRIMARY_GROUP) throw new Error("형사 랜딩 그룹 설정을 찾지 못했습니다.");
+  const generated = await callFunctionJson(context, generateLandingDraft, { caseName: rawCaseName, fraudType });
+  if (!generated.ok || !generated.data?.case) {
+    throw new Error(generated.data?.message || "랜딩페이지 원고 생성에 실패했습니다.");
+  }
+
+  const candidate = generated.data.case;
+  const existing = await findExistingLanding(context.env, candidate, PRIMARY_GROUP);
+  if (existing) {
+    return {
+      status: "existing",
+      slug: existing.slug,
+      url: landingUrlForItem(PRIMARY_GROUP, existing),
+      group: "a",
+    };
+  }
+
+  const created = await callFunctionJson(context, createCaseLanding, candidate);
+  if (!created.ok) {
+    const retryExisting = await findExistingLanding(context.env, candidate, PRIMARY_GROUP);
+    if (retryExisting) {
+      return {
+        status: "existing",
+        slug: retryExisting.slug,
+        url: landingUrlForItem(PRIMARY_GROUP, retryExisting),
+        group: "a",
+      };
+    }
+    throw new Error(created.data?.message || "랜딩페이지 생성에 실패했습니다.");
+  }
+
+  const createdCase = created.data?.case || candidate;
+  return {
+    status: "created",
+    slug: createdCase.slug,
+    url: buildLandingUrl(PRIMARY_GROUP, createdCase.slug),
+    group: "a",
+  };
+}
+
+async function ensureRecoveryLandingPage(context, { rawCaseName, draft }) {
+  if (!RECOVERY_GROUP) throw new Error("계좌 지급정지 대응 랜딩 그룹 설정을 찾지 못했습니다.");
+  const slug = createSlug(rawCaseName);
+  const incoming = { slug, caseName: rawCaseName, title: rawCaseName, targetGroups: ["c"] };
+  const existing = await findExistingLanding(context.env, incoming, RECOVERY_GROUP);
+  if (existing) {
+    return {
+      status: "existing",
+      slug: existing.slug,
+      url: landingUrlForItem(RECOVERY_GROUP, existing),
+      group: "c",
+    };
+  }
+
+  const payload = {
+    title: rawCaseName,
+    h1: rawCaseName,
+    slug,
+    summary: `${rawCaseName} 계좌 지급정지 해제와 채무부존재확인소송 대응 절차를 정리합니다.`,
+    body: draft.body,
+    tags: ["지급정지해제", "채무부존재확인소송", "계좌지급정지", rawCaseName],
+  };
+  let created = await callFunctionJson(context, createRecoveryLanding, payload);
+
+  if (!created.ok && created.status === 409) {
+    created = await callFunctionJson(context, createRecoveryLanding, {
+      ...payload,
+      slug: `${slug}-recovery`.slice(0, 75),
+    });
+  }
+
+  if (!created.ok) throw new Error(created.data?.message || "계좌 지급정지 대응 랜딩페이지 생성에 실패했습니다.");
+  return {
+    status: created.data?.message?.includes("갱신") ? "existing" : "created",
+    slug: created.data?.landing?.slug || payload.slug,
+    url: created.data?.url || buildLandingUrl(RECOVERY_GROUP, payload.slug),
+    group: "c",
+  };
+}
+
+async function findExistingLanding(env, incoming, group) {
+  const cases = await loadCaseIndex(env);
+  const landingKey = group.landingKey || group.key;
+  const exact = cases.find((item) => item.slug === incoming.slug && hasLandingForGroup(item, landingKey));
+  if (exact) return exact;
+  return cases.find((item) => {
+    if (!hasLandingForGroup(item, landingKey)) return false;
+    const result = compareCaseIdentity(incoming, item);
+    return result.score >= 0.99;
+  }) || null;
+}
+
+function hasLandingForGroup(item = {}, landingKey = "") {
+  if (item.landings?.[landingKey]) return true;
+  const targets = Array.isArray(item.targetGroups) ? item.targetGroups : [];
+  if (targets.length) return targets.includes(landingKey);
+  return landingKey === "a";
+}
+
+async function loadCaseIndex(env) {
+  if (env?.CASES) {
+    const raw = await env.CASES.get("cases:index");
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  const owner = env?.GITHUB_REPO_OWNER;
+  const repo = env?.GITHUB_REPO_NAME;
+  const branch = env?.GITHUB_BRANCH || "main";
+  const token = env?.GITHUB_TOKEN;
+  if (!owner || !repo || !token) return [];
+  const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/cases.json?ref=${branch}`, {
+    headers: githubHeaders(token),
+  });
+  if (!response.ok) return [];
+  const file = await response.json();
+  const raw = await readFileContent(file, token);
+  return raw ? JSON.parse(raw) : [];
+}
+
+async function callFunctionJson(context, handler, body) {
+  const response = await handler({
+    ...context,
+    request: new Request(context.request.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  return { ok: response.ok && data.ok !== false, status: response.status, data };
+}
+
+function finalizeDraftBody(draft, { rawCaseName, landing }) {
+  const next = { ...draft, landingUrl: landing?.url || "", landingStatus: landing?.status || "" };
+  if (landing?.url) next.body = insertLandingBlock(next.body, landing.url);
+  next.body = limitCaseNameMentions(next.body, [
+    rawCaseName,
+    next.caseName,
+    standardCaseKeyword(rawCaseName),
+  ], MAX_CASE_NAME_MENTIONS);
+  return next;
+}
+
+function insertLandingBlock(body = "", landingUrl = "") {
+  const block = `관련 랜딩페이지\n아래 페이지에서 사건별 대응 내용을 함께 확인할 수 있습니다.\n${landingUrl}`;
+  const parts = String(body || "").split("\n\n");
+  const insertAt = parts.findIndex((part) => String(part || "").trim().startsWith("#"));
+  if (insertAt >= 0) parts.splice(insertAt, 0, block);
+  else parts.push(block);
+  return parts.join("\n\n");
+}
+
+function limitCaseNameMentions(text = "", names = [], max = 9) {
+  const patterns = [...new Set(names.map(normalizeSpace).filter((name) => name.length >= 2))]
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp);
+  if (!patterns.length) return text;
+  let count = 0;
+  const replacements = ["해당 사건", "이 사안", "같은 유형"];
+  return String(text || "").replace(new RegExp(patterns.join("|"), "g"), (match) => {
+    count += 1;
+    if (count <= max) return match;
+    return replacements[(count - max - 1) % replacements.length];
+  });
+}
+
+function createSlug(value = "") {
+  return hangulToRoman(normalizeSpace(value))
+    .toLowerCase()
+    .replace(/https?:\/\//g, "")
+    .replace(/www\./g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-")
+    .slice(0, 60) || "landing";
+}
+
+function githubHeaders(token) {
+  return {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "User-Agent": "lawfirm-seo-engine",
+  };
+}
+
+async function readFileContent(file, token) {
+  if (file?.content) return decodeBase64(file.content);
+  if (!file?.download_url) return "";
+  const response = await fetch(file.download_url, { headers: githubHeaders(token) });
+  return response.ok ? response.text() : "";
+}
+
+function decodeBase64(value = "") {
+  const normalized = String(value || "").replace(/\s/g, "");
+  if (typeof atob === "function") return decodeURIComponent(escape(atob(normalized)));
+  return Buffer.from(normalized, "base64").toString("utf8");
+}
+
+function escapeRegExp(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function warningSigns(fraudType) {
