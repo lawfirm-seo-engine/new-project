@@ -235,7 +235,7 @@ async function publishNaverCafe(env, job) {
     multipartBytes: multipart.body.byteLength,
     legacyMultipart: true,
     embeddedImageHtml: false,
-    imageFieldMode: "indexed",
+    imageFieldMode: "repeated",
     phoneLinkMode: "text-links",
   };
 
@@ -492,9 +492,9 @@ function buildNaverCafeMultipart(subject, content, attachments = []) {
   appendField("subject", subject);
   appendField("content", content);
 
-  for (const [index, attachment] of attachments.entries()) {
+  for (const attachment of attachments) {
     appendText(`--${boundary}\r\n`);
-    appendText(`Content-Disposition: form-data; name="image[${index}]"; filename="${attachment.fileName}"\r\n`);
+    appendText(`Content-Disposition: form-data; name="image"; filename="${attachment.fileName}"\r\n`);
     appendText(`Content-Type: ${attachment.contentType}\r\n`);
     appendText("Content-Transfer-Encoding: binary\r\n\r\n");
     chunks.push(attachment.bytes);

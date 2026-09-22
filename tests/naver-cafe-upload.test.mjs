@@ -87,9 +87,8 @@ test("Naver Cafe upload attaches all configured images without unsupported image
     assert.ok(uploadRequest.init.body instanceof Uint8Array);
 
     const multipart = new TextDecoder().decode(uploadRequest.init.body);
-    assert.equal((multipart.match(/name="image\[\d+\]"/g) || []).length, 14);
-    assert.match(multipart, /name="image\[0\]"/);
-    assert.match(multipart, /name="image\[13\]"/);
+    assert.equal((multipart.match(/name="image"/g) || []).length, 14);
+    assert.doesNotMatch(multipart, /name="image\[\d+\]"/);
     assert.match(multipart, /filename="naver-cafe-12\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-phone\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-kakao\.jpg"/);
