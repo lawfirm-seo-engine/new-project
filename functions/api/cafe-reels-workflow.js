@@ -43,6 +43,7 @@ export async function onRequestPost({ request, env }) {
         cafeUrl: publish.cafeUrl || job.cafeUrl || "",
         naverArticleId: publish.articleId || job.naverArticleId || "",
         naverUploadError: publish.ok ? "" : publish.message,
+        naverUploadDiagnostics: publish.ok ? null : (publish.diagnostics || null),
         cafePreparedAt: new Date().toISOString(),
         caption: buildCaption({ ...job, cafeUrl: publish.cafeUrl || job.cafeUrl || "" }),
       });
@@ -224,6 +225,13 @@ async function publishNaverCafe(env, job) {
 
   const content = buildCafeArticleHtml(job, attachments);
   const multipart = buildNaverCafeMultipart(subject, content, attachments);
+  const requestDiagnostics = {
+    imageCount: attachments.length,
+    imageBytes: attachments.reduce((sum, attachment) => sum + attachment.bytes.byteLength, 0),
+    contentCharacters: content.length,
+    multipartBytes: multipart.body.byteLength,
+    legacyMultipart: true,
+  };
 
   const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
   const res = await fetch(endpoint, {
@@ -239,10 +247,14 @@ async function publishNaverCafe(env, job) {
   try { data = JSON.parse(text); } catch { /* ignore */ }
 
   if (!res.ok || data.error) {
+    const naverError = extractNaverError(data, text);
+    const diagnostics = { ...requestDiagnostics, responseStatus: res.status, naverError };
+    console.error("[naver-cafe] upload failed", JSON.stringify(diagnostics));
     return {
       ok: false,
       status: res.status === 401 ? "connection-required" : "upload-failed",
-      message: `네이버 카페 업로드 실패 (${res.status}): ${extractNaverError(data, text)}`,
+      message: `네이버 카페 업로드 실패 (${res.status}): ${naverError}`,
+      diagnostics,
     };
   }
 
