@@ -387,7 +387,7 @@ async function resolveCafeImages(env, job) {
 function withFixedContactHref(image) {
   if (image.slot === "phone") return { ...image, href: "tel:02-6348-0406" };
   if (image.slot === "kakao") return { ...image, href: "https://pf.kakao.com/_WkdxfX/chat" };
-  return image;
+  return { ...image, href: "" };
 }
 
 function buildCafeArticleHtml(job, attachments = []) {
@@ -396,7 +396,7 @@ function buildCafeArticleHtml(job, attachments = []) {
     const image = attachment.image || {};
     const href = normalizeHref(image.href || "");
     const label = normalizeText(image.label || image.slot || "이미지");
-    const imageHtml = `<img src="#${index}" alt="${escapeAttr(label)}">`;
+    const imageHtml = `<img src="#${index}" width="${attachment.width}" height="${attachment.height}" alt="${escapeAttr(label)}" />`;
     return href
       ? `<div align="center"><a href="${escapeAttr(href)}">${imageHtml}</a></div>`
       : `<div align="center">${imageHtml}</div>`;
@@ -433,15 +433,45 @@ async function loadCafeImageAttachments(images) {
     if (totalBytes > 80 * 1024 * 1024) {
       throw new Error("첨부 이미지 전체 용량이 80MB를 초과합니다.");
     }
+    const dimensions = readImageDimensions(bytes, contentType);
+    if (!dimensions) {
+      throw new Error(`${image.label || image.slot || "이미지"} 크기를 확인할 수 없습니다.`);
+    }
 
     attachments.push({
       image,
       blob: new Blob([bytes], { type: contentType }),
       fileName: cafeImageFileName(image, contentType, attachments.length),
+      width: dimensions.width,
+      height: dimensions.height,
     });
   }
 
   return attachments;
+}
+
+function readImageDimensions(bytes, contentType) {
+  const view = new DataView(bytes);
+  if (contentType === "image/png" && bytes.byteLength >= 24) {
+    return { width: view.getUint32(16), height: view.getUint32(20) };
+  }
+  if (contentType === "image/gif" && bytes.byteLength >= 10) {
+    return { width: view.getUint16(6, true), height: view.getUint16(8, true) };
+  }
+  if (contentType === "image/jpeg" && bytes.byteLength >= 4) {
+    let offset = 2;
+    while (offset + 8 < bytes.byteLength) {
+      if (view.getUint8(offset) !== 0xff) return null;
+      const marker = view.getUint8(offset + 1);
+      if (marker >= 0xc0 && marker <= 0xc3) {
+        return { width: view.getUint16(offset + 7), height: view.getUint16(offset + 5) };
+      }
+      const length = view.getUint16(offset + 2);
+      if (length < 2) return null;
+      offset += 2 + length;
+    }
+  }
+  return null;
 }
 
 function normalizeImageContentType(value, imageUrl) {
@@ -524,7 +554,21 @@ function expiresAt(seconds) {
 }
 
 function extractNaverError(data, fallback) {
-  return data.error_description || data.errorMessage || data.message?.error || data.error || plainErrorText(fallback) || "알 수 없는 오류";
+  const candidates = [data?.message?.error, data?.error, data?.error_description, data?.errorMessage];
+  for (const candidate of candidates) {
+    const message = formatNaverError(candidate);
+    if (message) return message;
+  }
+  return plainErrorText(fallback) || "알 수 없는 오류";
+}
+
+function formatNaverError(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (typeof value !== "object") return String(value);
+  const code = normalizeText(value.code || value.errorCode || value.status || "");
+  const message = normalizeText(value.msg || value.message || value.error_description || value.description || "");
+  return [code, message].filter(Boolean).join(": ");
 }
 
 function plainErrorText(value) {

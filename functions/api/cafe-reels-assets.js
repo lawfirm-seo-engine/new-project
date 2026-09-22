@@ -9,7 +9,7 @@ const DEFAULT_SETS = {
       ...Array.from({ length: 12 }, (_, index) => ({
         slot: String(index + 1).padStart(2, "0"),
         label: `${String(index + 1).padStart(2, "0")} 이미지`,
-        href: "https://gnlaw-criminal.co.kr/",
+        href: "",
       })),
       { slot: "phone", label: "전화 이미지", href: "tel:02-6348-0406" },
       { slot: "kakao", label: "카카오톡 이미지", href: "https://pf.kakao.com/_WkdxfX/chat" },
@@ -22,7 +22,7 @@ const DEFAULT_SETS = {
       ...Array.from({ length: 10 }, (_, index) => ({
         slot: String(index + 1).padStart(2, "0"),
         label: `${String(index + 1).padStart(2, "0")} 이미지`,
-        href: "https://gnlaw-criminal.co.kr/",
+        href: "",
       })),
       { slot: "phone", label: "전화 이미지", href: "tel:02-6348-0406" },
       { slot: "kakao", label: "카카오톡 이미지", href: "https://pf.kakao.com/_WkdxfX/chat" },
@@ -52,7 +52,7 @@ export async function onRequestPost({ request, env }) {
     const nextSlots = DEFAULT_SETS[setKey].slots.map((defaultSlot) => {
       const item = incoming.find((slot) => String(slot?.slot || "") === defaultSlot.slot) || {};
       const url = normalizeUrl(item.url);
-      const href = fixedContactHref(defaultSlot) || normalizeHref(item.href || defaultSlot.href);
+      const href = fixedContactHref(defaultSlot);
       const label = normalizeLabel(item.label || defaultSlot.label);
       if (url && !IMAGE_RE.test(url)) throw new Error(`${defaultSlot.label}의 이미지 주소가 올바르지 않습니다.`);
       return {
@@ -90,7 +90,7 @@ async function loadSets(env) {
         ...(savedBySlot.get(defaultSlot.slot) || {}),
         slot: defaultSlot.slot,
         label: normalizeLabel(savedBySlot.get(defaultSlot.slot)?.label || defaultSlot.label),
-        href: fixedContactHref(defaultSlot) || normalizeHref(savedBySlot.get(defaultSlot.slot)?.href || defaultSlot.href),
+        href: fixedContactHref(defaultSlot),
         url: normalizeUrl(savedBySlot.get(defaultSlot.slot)?.url || ""),
       })),
     };
