@@ -133,7 +133,7 @@
         <button class="btn" type="button" onclick="copyValue(titleOutput.value, this)">제목 복사</button>
         <button class="btn green" type="button" onclick="copyValue(bodyOutput.value, this)">본문 복사</button>
         <button class="btn primary" type="button" onclick="saveWorkflow()">작업 저장</button>
-        <button class="btn" type="button" onclick="prepareCafe()">카페 게시 준비 상태 저장</button>
+        <button class="btn" type="button" onclick="prepareCafe()">네이버 카페 자동 업로드</button>
       </div>
       <div id="workflowMsg" class="message"></div>
     </section>
@@ -204,7 +204,7 @@
         <button class="btn" type="button" onclick="copyValue(captionOutput.value, this)">캡션 복사</button>
       </div>
       <div id="reelsMsg" class="message"></div>
-      <p class="note">사용 순서: 카페 게시글을 실제로 올린 뒤 URL을 붙여 저장하고, 위에서 만든 뒤 자동 다운로드된 MP4를 선택해 업로드하거나 공개 MP4 URL을 입력해 저장합니다. 그러면 릴스 캡션에 카페 URL이 포함되고, 업로드 준비 상태로 작업을 남길 수 있습니다.</p>
+      <p class="note">네이버 권한 연결이 완료되어 있으면 위의 자동 업로드 버튼으로 카페 게시글 URL이 저장됩니다. 직접 게시한 글이 있으면 이곳에 URL을 붙여 저장하고, 생성된 MP4를 업로드하거나 공개 MP4 URL을 입력하면 릴스 캡션에 카페 URL이 반영됩니다.</p>
     </section>
   </div>
 </main>
@@ -330,7 +330,8 @@
     try {
       const data = await postWorkflow({ action: "prepare-cafe", jobId: currentJob.id });
       applyJob(data.job);
-      show("workflowMsg", data.message || "카페 게시 준비 완료");
+      if (data.job?.cafeUrl) cafeUrlEl.value = data.job.cafeUrl;
+      show("workflowMsg", data.message || "네이버 카페 자동 업로드 처리 완료");
       loadJobs();
     } catch (error) {
       show("workflowMsg", error.message, true);

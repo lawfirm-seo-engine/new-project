@@ -25,10 +25,20 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { telegramChatId, openaiApiKey } = body;
+    const { telegramChatId, openaiApiKey, naverCafeClubId, naverCafeMenuId, naverCafeSlug } = body;
 
     // SHA 충돌 방지: 항상 최신 파일 정보를 가져와 저장
-    const result = await saveSettings({ repoOwner, repoName, branch, token, telegramChatId, openaiApiKey });
+    const result = await saveSettings({
+      repoOwner,
+      repoName,
+      branch,
+      token,
+      telegramChatId,
+      openaiApiKey,
+      naverCafeClubId,
+      naverCafeMenuId,
+      naverCafeSlug,
+    });
     if (!result.ok) {
       return json({ ok: false, message: result.message }, 500);
     }
@@ -48,7 +58,17 @@ async function fetchCurrentFile(apiUrl, branch, token) {
   return { sha: file.sha, existingSettings };
 }
 
-async function saveSettings({ repoOwner, repoName, branch, token, telegramChatId, openaiApiKey }) {
+async function saveSettings({
+  repoOwner,
+  repoName,
+  branch,
+  token,
+  telegramChatId,
+  openaiApiKey,
+  naverCafeClubId,
+  naverCafeMenuId,
+  naverCafeSlug,
+}) {
   const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${FILE_PATH}`;
 
   // 첫 시도
@@ -58,6 +78,9 @@ async function saveSettings({ repoOwner, repoName, branch, token, telegramChatId
     const s = { ...base };
     if (telegramChatId !== undefined) s.telegramChatId = String(telegramChatId || "").trim();
     if (openaiApiKey !== undefined) s.openaiApiKey = obfuscateKey(String(openaiApiKey || "").trim());
+    if (naverCafeClubId !== undefined) s.naverCafeClubId = String(naverCafeClubId || "").trim();
+    if (naverCafeMenuId !== undefined) s.naverCafeMenuId = String(naverCafeMenuId || "").trim();
+    if (naverCafeSlug !== undefined) s.naverCafeSlug = String(naverCafeSlug || "").trim();
     return encodeBase64(JSON.stringify(s, null, 2) + "\n");
   };
 
