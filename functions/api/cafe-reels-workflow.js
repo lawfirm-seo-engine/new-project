@@ -173,12 +173,13 @@ async function loadIndex(env) {
 
 async function publishNaverCafe(env, job) {
   const settings = await loadNaverCafeSettings(env);
+  const menuId = resolveNaverCafeMenuId(settings, job);
   const missing = [];
   if (!env?.CASES) missing.push("KV 바인딩");
   if (!env?.NAVER_CLIENT_ID) missing.push("NAVER_CLIENT_ID");
   if (!env?.NAVER_CLIENT_SECRET) missing.push("NAVER_CLIENT_SECRET");
   if (!settings.naverCafeClubId) missing.push("카페 고유 ID(clubid)");
-  if (!settings.naverCafeMenuId) missing.push("게시판 ID(menuid)");
+  if (!menuId) missing.push(`${cafeBoardLabel(job)} 게시판 ID(menuid)`);
 
   if (missing.length) {
     return {
@@ -203,7 +204,7 @@ async function publishNaverCafe(env, job) {
   params.set("subject", subject);
   params.set("content", content);
 
-  const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(settings.naverCafeMenuId)}/articles`;
+  const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
@@ -251,11 +252,28 @@ async function loadNaverCafeSettings(env) {
     return {
       naverCafeClubId: normalizeText(raw.naverCafeClubId || ""),
       naverCafeMenuId: normalizeText(raw.naverCafeMenuId || ""),
+      naverCafeFraudMenuId: normalizeText(raw.naverCafeFraudMenuId || raw.naverCafeMenuId || ""),
+      naverCafePaymentSuspensionMenuId: normalizeText(raw.naverCafePaymentSuspensionMenuId || raw.naverCafeMenuId || ""),
       naverCafeSlug: normalizeText(raw.naverCafeSlug || "gnlawfintech") || "gnlawfintech",
     };
   } catch {
     return {};
   }
+}
+
+function resolveNaverCafeMenuId(settings = {}, job = {}) {
+  if (isPaymentSuspensionJob(job)) {
+    return settings.naverCafePaymentSuspensionMenuId || settings.naverCafeMenuId || "";
+  }
+  return settings.naverCafeFraudMenuId || settings.naverCafeMenuId || "";
+}
+
+function cafeBoardLabel(job = {}) {
+  return isPaymentSuspensionJob(job) ? "계좌지급정지해제" : "사기피해진행사건정리";
+}
+
+function isPaymentSuspensionJob(job = {}) {
+  return job.imageSetKey === "payment-suspension-release" || job.fraudType === "payment-suspension-release";
 }
 
 async function getNaverAccessToken(env) {

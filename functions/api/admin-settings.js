@@ -25,7 +25,15 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { telegramChatId, openaiApiKey, naverCafeClubId, naverCafeMenuId, naverCafeSlug } = body;
+    const {
+      telegramChatId,
+      openaiApiKey,
+      naverCafeClubId,
+      naverCafeMenuId,
+      naverCafeFraudMenuId,
+      naverCafePaymentSuspensionMenuId,
+      naverCafeSlug,
+    } = body;
 
     // SHA 충돌 방지: 항상 최신 파일 정보를 가져와 저장
     const result = await saveSettings({
@@ -37,6 +45,8 @@ export async function onRequestPost(context) {
       openaiApiKey,
       naverCafeClubId,
       naverCafeMenuId,
+      naverCafeFraudMenuId,
+      naverCafePaymentSuspensionMenuId,
       naverCafeSlug,
     });
     if (!result.ok) {
@@ -67,6 +77,8 @@ async function saveSettings({
   openaiApiKey,
   naverCafeClubId,
   naverCafeMenuId,
+  naverCafeFraudMenuId,
+  naverCafePaymentSuspensionMenuId,
   naverCafeSlug,
 }) {
   const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${FILE_PATH}`;
@@ -80,6 +92,8 @@ async function saveSettings({
     if (openaiApiKey !== undefined) s.openaiApiKey = obfuscateKey(String(openaiApiKey || "").trim());
     if (naverCafeClubId !== undefined) s.naverCafeClubId = String(naverCafeClubId || "").trim();
     if (naverCafeMenuId !== undefined) s.naverCafeMenuId = String(naverCafeMenuId || "").trim();
+    if (naverCafeFraudMenuId !== undefined) s.naverCafeFraudMenuId = String(naverCafeFraudMenuId || "").trim();
+    if (naverCafePaymentSuspensionMenuId !== undefined) s.naverCafePaymentSuspensionMenuId = String(naverCafePaymentSuspensionMenuId || "").trim();
     if (naverCafeSlug !== undefined) s.naverCafeSlug = String(naverCafeSlug || "").trim();
     return encodeBase64(JSON.stringify(s, null, 2) + "\n");
   };

@@ -71,9 +71,14 @@
       <p class="hint">카페 주소의 gnlawfintech가 아니라 네이버 카페 내부 숫자 ID입니다.</p>
     </div>
     <div class="field">
-      <label>게시판 ID(menuid)</label>
-      <input type="text" id="naverCafeMenuId" placeholder="예: 1">
-      <p class="hint">자동 업로드할 게시판의 숫자 ID입니다.</p>
+      <label>사기피해진행사건정리 게시판 ID(menuid)</label>
+      <input type="text" id="naverCafeFraudMenuId" placeholder="예: 1">
+      <p class="hint">사기피해 원고를 자동 업로드할 게시판의 숫자 ID입니다.</p>
+    </div>
+    <div class="field">
+      <label>계좌지급정지해제 게시판 ID(menuid)</label>
+      <input type="text" id="naverCafePaymentSuspensionMenuId" placeholder="예: 2">
+      <p class="hint">계좌지급정지해제 원고를 자동 업로드할 게시판의 숫자 ID입니다.</p>
     </div>
     <div class="field">
       <label>카페 URL ID</label>
@@ -105,7 +110,8 @@
       document.getElementById('chatId').value = data.settings?.telegramChatId || '';
       document.getElementById('openaiKey').value = data.settings?.openaiApiKey || '';
       document.getElementById('naverCafeClubId').value = data.settings?.naverCafeClubId || '';
-      document.getElementById('naverCafeMenuId').value = data.settings?.naverCafeMenuId || '';
+      document.getElementById('naverCafeFraudMenuId').value = data.settings?.naverCafeFraudMenuId || data.settings?.naverCafeMenuId || '';
+      document.getElementById('naverCafePaymentSuspensionMenuId').value = data.settings?.naverCafePaymentSuspensionMenuId || data.settings?.naverCafeMenuId || '';
       document.getElementById('naverCafeSlug').value = data.settings?.naverCafeSlug || 'gnlawfintech';
       document.getElementById('naverCallbackUrl').textContent = location.origin + '/api/naver-cafe-oauth/callback';
       loaded = true;
@@ -123,14 +129,15 @@
     const chatId = (document.getElementById('chatId')?.value || '').trim();
     const openaiKey = (document.getElementById('openaiKey')?.value || '').trim();
     const naverCafeClubId = (document.getElementById('naverCafeClubId')?.value || '').trim();
-    const naverCafeMenuId = (document.getElementById('naverCafeMenuId')?.value || '').trim();
+    const naverCafeFraudMenuId = (document.getElementById('naverCafeFraudMenuId')?.value || '').trim();
+    const naverCafePaymentSuspensionMenuId = (document.getElementById('naverCafePaymentSuspensionMenuId')?.value || '').trim();
     const naverCafeSlug = (document.getElementById('naverCafeSlug')?.value || '').trim() || 'gnlawfintech';
     msg.textContent = '저장 중...'; msg.className = 'msg';
     try {
       const res = await fetch('/api/admin-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramChatId: chatId, openaiApiKey: openaiKey, naverCafeClubId, naverCafeMenuId, naverCafeSlug }),
+        body: JSON.stringify({ telegramChatId: chatId, openaiApiKey: openaiKey, naverCafeClubId, naverCafeFraudMenuId, naverCafePaymentSuspensionMenuId, naverCafeSlug }),
       });
       const data = await res.json();
       if (data.ok) {
