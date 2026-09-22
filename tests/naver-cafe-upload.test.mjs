@@ -94,6 +94,11 @@ test("Naver Cafe upload uses a legacy-compatible multipart body with at most ten
     assert.doesNotMatch(multipart, /filename="naver-cafe-09\.jpg"/);
     assert.doesNotMatch(multipart, /%F0%9F%93%8C/i);
     assert.match(multipart, /Content-Transfer-Encoding: binary/);
+    assert.match(multipart, /Content-Type: text\/plain; charset=UTF-8/);
+    assert.match(multipart, /https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F/);
+    assert.match(multipart, /https%3A%2F%2Fpf\.kakao\.com%2F_WkdxfX%2Fchat/);
+    assert.doesNotMatch(multipart, /tel%3A02-6348-0406/);
+    assert.doesNotMatch(multipart, /target%3D%22_blank%22|rel%3D%22noopener%22/);
   } finally {
     globalThis.fetch = originalFetch;
   }

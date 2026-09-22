@@ -5,6 +5,7 @@ const NAVER_TOKEN_KEY = "naver-cafe:oauth:v1";
 const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
 const NAVER_CAFE_MAX_IMAGES = 10;
+const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -228,9 +229,12 @@ async function publishNaverCafe(env, job) {
   const requestDiagnostics = {
     imageCount: attachments.length,
     imageBytes: attachments.reduce((sum, attachment) => sum + attachment.bytes.byteLength, 0),
+    maxImageWidth: Math.max(...attachments.map((attachment) => attachment.width)),
+    maxImageHeight: Math.max(...attachments.map((attachment) => attachment.height)),
     contentCharacters: content.length,
     multipartBytes: multipart.body.byteLength,
     legacyMultipart: true,
+    phoneLinkMode: "https-bridge",
   };
 
   const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
@@ -404,7 +408,10 @@ function selectNaverUploadImages(images = []) {
 }
 
 function withFixedContactHref(image) {
-  if (image.slot === "phone") return { ...image, href: "tel:02-6348-0406" };
+  // SmartEditor accepts links around images, but its legacy API rejects
+  // non-HTTP schemes in multipart HTML with a generic 999 response. Keep the
+  // phone image tappable through a same-origin HTTPS bridge.
+  if (image.slot === "phone") return { ...image, href: NAVER_CAFE_PHONE_HREF };
   if (image.slot === "kakao") return { ...image, href: "https://pf.kakao.com/_WkdxfX/chat" };
   return { ...image, href: "" };
 }
@@ -477,7 +484,8 @@ function buildNaverCafeMultipart(subject, content, attachments = []) {
   const appendText = (value) => chunks.push(encoder.encode(value));
   const appendField = (name, value) => {
     appendText(`--${boundary}\r\n`);
-    appendText(`Content-Disposition: form-data; name="${name}"\r\n\r\n`);
+    appendText(`Content-Disposition: form-data; name="${name}"\r\n`);
+    appendText("Content-Type: text/plain; charset=UTF-8\r\n\r\n");
     appendText(`${encodeURIComponent(stripUnsupportedNaverCharacters(value))}\r\n`);
   };
 
@@ -563,7 +571,7 @@ function bodyToCafeHtml(body) {
   return String(body || "").split(/\r?\n/).map((line) => {
     const text = line.trim();
     if (!text) return "<br>";
-    if (/^#{1,3}\s+/.test(text)) return `<p><strong>${inlineCafeText(text.replace(/^#{1,3}\s+/, ""))}</strong></p>`;
+    if (/^#{1,3}\s+/.test(text)) return `<p><b>${inlineCafeText(text.replace(/^#{1,3}\s+/, ""))}</b></p>`;
     if (/^[-*]\s+/.test(text)) return `<p>• ${inlineCafeText(text.replace(/^[-*]\s+/, ""))}</p>`;
     if (/^\d+\.\s+/.test(text)) return `<p>${inlineCafeText(text)}</p>`;
     return `<p>${inlineCafeText(text)}</p>`;
@@ -577,7 +585,7 @@ function inlineCafeText(text) {
   let last = 0;
   for (const match of source.matchAll(linkRe)) {
     html += linkBareUrls(escapeHtml(source.slice(last, match.index)));
-    html += `<a href="${escapeAttr(match[2])}" target="_blank" rel="noopener">${escapeHtml(match[1])}</a>`;
+    html += `<a href="${escapeAttr(match[2])}">${escapeHtml(match[1])}</a>`;
     last = match.index + match[0].length;
   }
   html += linkBareUrls(escapeHtml(source.slice(last)));
@@ -585,7 +593,7 @@ function inlineCafeText(text) {
 }
 
 function linkBareUrls(html) {
-  return html.replace(/(https?:\/\/[^\s<]+)/g, (url) => `<a href="${escapeAttr(url)}" target="_blank" rel="noopener">${url}</a>`);
+  return html.replace(/(https?:\/\/[^\s<]+)/g, (url) => `<a href="${escapeAttr(url)}">${url}</a>`);
 }
 
 function normalizeArticleSubject(value) {

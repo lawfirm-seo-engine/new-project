@@ -304,6 +304,35 @@ gtag('config', '${gaId}');
   });
 }
 
+// Naver SmartEditor only accepts HTTP(S) links around uploaded images. This
+// bridge keeps the cafe phone image tappable while handing off to the device's
+// dialer after the allowed HTTPS navigation.
+function handlePhoneRedirectRoute(url) {
+  if (url.pathname !== "/call_redirect" && url.pathname !== "/call_redirect/") return null;
+
+  const phoneHref = "tel:02-6348-0406";
+  const body = `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0;url=${phoneHref}">
+  <title>전화 연결</title>
+</head>
+<body>
+  <p>전화 앱이 열리지 않으면 <a href="${phoneHref}">02-6348-0406</a>를 눌러주세요.</p>
+  <script>window.location.href = ${JSON.stringify(phoneHref)};</script>
+</body>
+</html>`;
+  return new Response(body, {
+    headers: {
+      "Content-Type": "text/html; charset=UTF-8",
+      "Cache-Control": "public, max-age=86400",
+      "X-Robots-Tag": "noindex, nofollow",
+    },
+  });
+}
+
 async function handleSeoXmlRoute({ pathname, url, env }) {
   if (!SEO_XML_ROUTES.has(pathname)) return null;
 
@@ -358,6 +387,9 @@ export async function onRequest(context) {
 
   const kakaoRedirectResponse = handleKakaoRedirectRoute(url);
   if (kakaoRedirectResponse) return kakaoRedirectResponse;
+
+  const phoneRedirectResponse = handlePhoneRedirectRoute(url);
+  if (phoneRedirectResponse) return phoneRedirectResponse;
 
   // 정적 파일·다른 Worker로 패스스루
   if (
