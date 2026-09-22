@@ -393,12 +393,18 @@ async function resolveCafeImages(env, job) {
   const sets = await env.CASES.get(ASSET_CONFIG_KEY, "json").catch(() => null);
   const setKey = isPaymentSuspensionJob(job) ? "payment-suspension-release" : "fraud";
   const configured = sanitizeImages(sets?.[setKey]?.slots || []);
-  if (configured.length) return configured.map(withFixedContactHref);
+  if (configured.length) return configured.map((image) => withCanonicalArticleImage(image, setKey)).map(withFixedContactHref);
 
   // A saved job contains a snapshot of the image set. Prefer the current set so
   // retries also receive corrected or optimized assets, while keeping the job
   // snapshot as a fallback when no set has been configured yet.
   return sanitizeImages(job.images).map(withFixedContactHref);
+}
+
+function withCanonicalArticleImage(image, setKey) {
+  if (!/^\d{2}$/.test(image.slot) || !/^\/api\/criminal-board-image\?id=/i.test(image.url)) return image;
+  const directory = setKey === "payment-suspension-release" ? "payment-suspension-release" : "fraud";
+  return { ...image, url: `/assets/cafe-reels/${directory}/${image.slot}.jpg` };
 }
 
 function selectNaverUploadImages(images = []) {
@@ -710,7 +716,7 @@ function normalizeHttpUrl(value = "") {
 
 function normalizeHttpOrRelativeImage(value = "") {
   const text = String(value || "").trim().slice(0, 1000);
-  return /^(https?:\/\/|\/api\/criminal-board-image\?id=)/i.test(text) ? text : "";
+  return /^(https?:\/\/|\/api\/criminal-board-image\?id=|\/assets\/cafe-reels\/)/i.test(text) ? text : "";
 }
 
 function normalizeHref(value = "") {

@@ -32,6 +32,7 @@ import { recoveryListingDescription } from "../functions/_recoverySeo.js";
 const root = process.cwd();
 const dataPath = path.join(root, "data", "cases.json");
 const publicDir = path.join(root, "public");
+const criminalCafeAssetsDir = path.join(root, "criminal-cafe-assets");
 const centerFintechAssetsDir = path.join(root, "center-fintech-assets");
 const readingroomCarouselAssetsDir = path.join(root, "readingroom-carousel-assets");
 const templatesDir = path.join(root, "templates");
@@ -4099,6 +4100,9 @@ for (const group of groups) {
   }
 
   if (group.key === "a") {
+    if (await fs.pathExists(criminalCafeAssetsDir)) {
+      await fs.copy(criminalCafeAssetsDir, path.join(group.outDir, "assets", "cafe-reels"));
+    }
     await fs.copy(path.join(root, "admin"), path.join(root, "dist-a", "admin"));
   }
 

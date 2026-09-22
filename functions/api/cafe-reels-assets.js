@@ -1,5 +1,5 @@
 const CONFIG_KEY = "cafe-reels:asset-sets:v1";
-const IMAGE_RE = /^(https?:\/\/|\/api\/criminal-board-image\?id=)/i;
+const IMAGE_RE = /^(https?:\/\/|\/api\/criminal-board-image\?id=|\/assets\/cafe-reels\/)/i;
 
 const DEFAULT_SETS = {
   fraud: {

@@ -9,7 +9,7 @@ test("Naver Cafe upload attaches all configured images without unsupported image
     ...Array.from({ length: 12 }, (_, index) => ({
       slot: String(index + 1).padStart(2, "0"),
       label: `${index + 1}`,
-      url: `https://images.example/${index + 1}.jpg`,
+      url: `/api/criminal-board-image?id=fraud-${index + 1}.jpg`,
     })),
     { slot: "phone", label: "phone", url: "https://images.example/phone.jpg" },
     { slot: "kakao", label: "kakao", url: "https://images.example/kakao.jpg" },
@@ -49,6 +49,7 @@ test("Naver Cafe upload attaches all configured images without unsupported image
     0xff, 0xd8, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x02, 0x00, 0x03, 0x03,
   ]);
   let uploadRequest;
+  const requestedImageUrls = [];
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (input, init = {}) => {
     const url = String(input);
@@ -60,6 +61,10 @@ test("Naver Cafe upload attaches all configured images without unsupported image
         naverCafeSlug: "gnlawfintech",
       };
       return Response.json({ content: Buffer.from(JSON.stringify(settings)).toString("base64") });
+    }
+    if (url.startsWith("https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/")) {
+      requestedImageUrls.push(url);
+      return new Response(jpeg, { headers: { "Content-Type": "image/jpeg" } });
     }
     if (url.startsWith("https://images.example/")) {
       return new Response(jpeg, { headers: { "Content-Type": "image/jpeg" } });
@@ -92,6 +97,10 @@ test("Naver Cafe upload attaches all configured images without unsupported image
     assert.match(multipart, /filename="naver-cafe-12\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-phone\.jpg"/);
     assert.match(multipart, /filename="naver-cafe-kakao\.jpg"/);
+    assert.deepEqual(
+      requestedImageUrls,
+      Array.from({ length: 12 }, (_, index) => `https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.jpg`),
+    );
     assert.doesNotMatch(multipart, /%3Cimg|src%3D%22%23/i);
     assert.doesNotMatch(multipart, /%3Ca(?:%20|\+)/i);
     assert.doesNotMatch(multipart, /%F0%9F%93%8C/i);
