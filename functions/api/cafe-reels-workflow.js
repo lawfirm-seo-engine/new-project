@@ -3,6 +3,7 @@ const INDEX_KEY = "cafe-reels:jobs:index:v1";
 const SETTINGS_PATH = "data/settings.json";
 const NAVER_TOKEN_KEY = "naver-cafe:oauth:v1";
 const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
+const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -37,6 +38,7 @@ export async function onRequestPost({ request, env }) {
       const next = await saveJob(env, {
         ...job,
         cafeStatus: publish.ok ? "posted" : publish.status,
+        images: publish.images?.length ? publish.images : job.images,
         cafeUrl: publish.cafeUrl || job.cafeUrl || "",
         naverArticleId: publish.articleId || job.naverArticleId || "",
         naverUploadError: publish.ok ? "" : publish.message,
@@ -189,6 +191,15 @@ async function publishNaverCafe(env, job) {
     };
   }
 
+  const uploadImages = await resolveCafeImages(env, job);
+  if (!uploadImages.length) {
+    return {
+      ok: false,
+      status: "images-required",
+      message: `${cafeBoardLabel(job)} 파트에 등록된 카페 이미지가 없습니다. 이미지 세트를 등록한 뒤 다시 시도해주세요.`,
+    };
+  }
+
   const token = await getNaverAccessToken(env);
   if (!token.ok) {
     return {
@@ -201,7 +212,7 @@ async function publishNaverCafe(env, job) {
   const subject = normalizeArticleSubject(job.draft?.title || job.title || `${job.caseName || "사기 피해"} 대응 안내`);
   let attachments;
   try {
-    attachments = await loadCafeImageAttachments(job.images || []);
+    attachments = await loadCafeImageAttachments(uploadImages);
   } catch (error) {
     return {
       ok: false,
@@ -247,6 +258,7 @@ async function publishNaverCafe(env, job) {
     status: "posted",
     articleId,
     cafeUrl,
+    images: uploadImages,
     imageCount: attachments.length,
     message: cafeUrl
       ? `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다.\n${cafeUrl}`
@@ -318,7 +330,7 @@ async function refreshNaverAccessToken(env, token) {
   params.set("client_secret", env.NAVER_CLIENT_SECRET || "");
   params.set("refresh_token", token.refreshToken || "");
 
-  const res = await fetch(`${NAVER_TOKEN_URL}?${params.toString()}`);
+  const res = await fetchNaverTokenWithRetry(params);
   const text = await res.text();
   let data = {};
   try { data = JSON.parse(text); } catch { /* ignore */ }
@@ -339,6 +351,43 @@ async function refreshNaverAccessToken(env, token) {
   };
   await env.CASES.put(NAVER_TOKEN_KEY, JSON.stringify(next));
   return { ok: true, accessToken: next.accessToken };
+}
+
+async function fetchNaverTokenWithRetry(params) {
+  let lastResponse;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (attempt) await delay(attempt * 350);
+    lastResponse = await fetch(NAVER_TOKEN_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+      body: params.toString(),
+    });
+    if (!isRetryableStatus(lastResponse.status)) return lastResponse;
+  }
+  return lastResponse;
+}
+
+function isRetryableStatus(status) {
+  return status === 429 || (status >= 500 && status <= 524);
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function resolveCafeImages(env, job) {
+  const savedOnJob = sanitizeImages(job.images);
+  if (savedOnJob.length) return savedOnJob.map(withFixedContactHref);
+
+  const sets = await env.CASES.get(ASSET_CONFIG_KEY, "json").catch(() => null);
+  const setKey = isPaymentSuspensionJob(job) ? "payment-suspension-release" : "fraud";
+  return sanitizeImages(sets?.[setKey]?.slots || []).map(withFixedContactHref);
+}
+
+function withFixedContactHref(image) {
+  if (image.slot === "phone") return { ...image, href: "tel:02-6348-0406" };
+  if (image.slot === "kakao") return { ...image, href: "https://pf.kakao.com/_WkdxfX/chat" };
+  return image;
 }
 
 function buildCafeArticleHtml(job, attachments = []) {
@@ -475,7 +524,18 @@ function expiresAt(seconds) {
 }
 
 function extractNaverError(data, fallback) {
-  return data.error_description || data.errorMessage || data.message?.error || data.error || String(fallback || "").slice(0, 300) || "알 수 없는 오류";
+  return data.error_description || data.errorMessage || data.message?.error || data.error || plainErrorText(fallback) || "알 수 없는 오류";
+}
+
+function plainErrorText(value) {
+  return String(value || "")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 300);
 }
 
 function githubEnv(env) {

@@ -406,7 +406,14 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      const detail = text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
+      throw new Error(`업로드 서버 오류 (HTTP ${response.status}). ${detail || "잠시 후 다시 시도해주세요."}`);
+    }
     if (!response.ok || !data.ok) throw new Error(data.message || "작업 처리 실패");
     return data;
   }
