@@ -4,6 +4,7 @@ const SETTINGS_PATH = "data/settings.json";
 const NAVER_TOKEN_KEY = "naver-cafe:oauth:v1";
 const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
+const NAVER_CAFE_MAX_IMAGES = 10;
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -191,7 +192,7 @@ async function publishNaverCafe(env, job) {
     };
   }
 
-  const uploadImages = await resolveCafeImages(env, job);
+  const uploadImages = selectNaverUploadImages(await resolveCafeImages(env, job));
   if (!uploadImages.length) {
     return {
       ok: false,
@@ -222,21 +223,16 @@ async function publishNaverCafe(env, job) {
   }
 
   const content = buildCafeArticleHtml(job, attachments);
-  const form = new FormData();
-  // Naver Cafe expects URL-encoded strings even when the request itself is multipart.
-  form.append("subject", encodeURIComponent(subject));
-  form.append("content", encodeURIComponent(content));
-  for (const attachment of attachments) {
-    form.append("image", attachment.blob, attachment.fileName);
-  }
+  const multipart = buildNaverCafeMultipart(subject, content, attachments);
 
   const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token.accessToken}`,
+      "Content-Type": multipart.contentType,
     },
-    body: form,
+    body: multipart.body,
   });
   const text = await res.text();
   let data = {};
@@ -387,6 +383,14 @@ async function resolveCafeImages(env, job) {
   return sanitizeImages(job.images).map(withFixedContactHref);
 }
 
+function selectNaverUploadImages(images = []) {
+  const normalized = sanitizeImages(images);
+  const contacts = normalized.filter((image) => image.slot === "phone" || image.slot === "kakao");
+  const regular = normalized.filter((image) => image.slot !== "phone" && image.slot !== "kakao");
+  const regularLimit = Math.max(0, NAVER_CAFE_MAX_IMAGES - contacts.length);
+  return [...regular.slice(0, regularLimit), ...contacts].slice(0, NAVER_CAFE_MAX_IMAGES);
+}
+
 function withFixedContactHref(image) {
   if (image.slot === "phone") return { ...image, href: "tel:02-6348-0406" };
   if (image.slot === "kakao") return { ...image, href: "https://pf.kakao.com/_WkdxfX/chat" };
@@ -443,7 +447,8 @@ async function loadCafeImageAttachments(images) {
 
     attachments.push({
       image,
-      blob: new Blob([bytes], { type: contentType }),
+      bytes: new Uint8Array(bytes),
+      contentType,
       fileName: cafeImageFileName(image, contentType, attachments.length),
       width: dimensions.width,
       height: dimensions.height,
@@ -451,6 +456,48 @@ async function loadCafeImageAttachments(images) {
   }
 
   return attachments;
+}
+
+function buildNaverCafeMultipart(subject, content, attachments = []) {
+  const boundary = `----NaverCafeBoundary${crypto.randomUUID().replaceAll("-", "")}`;
+  const encoder = new TextEncoder();
+  const chunks = [];
+  const appendText = (value) => chunks.push(encoder.encode(value));
+  const appendField = (name, value) => {
+    appendText(`--${boundary}\r\n`);
+    appendText(`Content-Disposition: form-data; name="${name}"\r\n\r\n`);
+    appendText(`${encodeURIComponent(stripUnsupportedNaverCharacters(value))}\r\n`);
+  };
+
+  appendField("subject", subject);
+  appendField("content", content);
+
+  for (const attachment of attachments) {
+    appendText(`--${boundary}\r\n`);
+    appendText(`Content-Disposition: form-data; name="image"; filename="${attachment.fileName}"\r\n`);
+    appendText(`Content-Type: ${attachment.contentType}\r\n`);
+    appendText("Content-Transfer-Encoding: binary\r\n\r\n");
+    chunks.push(attachment.bytes);
+    appendText("\r\n");
+  }
+
+  appendText(`--${boundary}--\r\n`);
+  const size = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
+  const body = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return {
+    body,
+    contentType: `multipart/form-data; boundary=${boundary}`,
+  };
+}
+
+function stripUnsupportedNaverCharacters(value = "") {
+  return String(value).replace(/[\u{10000}-\u{10ffff}]/gu, "");
 }
 
 function readImageDimensions(bytes, contentType) {
