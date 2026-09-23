@@ -6,6 +6,7 @@ const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
 const NAVER_CAFE_MAX_IMAGES = 100;
 const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
+const NAVER_CAFE_KAKAO_HREF = "https://gnlaw-criminal.co.kr/kakao_redirect/";
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -43,6 +44,7 @@ export async function onRequestPost({ request, env }) {
         images: publish.images?.length ? publish.images : job.images,
         cafeUrl: publish.cafeUrl || job.cafeUrl || "",
         naverArticleId: publish.articleId || job.naverArticleId || "",
+        naverContactLinkMode: publish.contactLinkMode || job.naverContactLinkMode || "",
         naverUploadError: publish.ok ? "" : publish.message,
         naverUploadDiagnostics: publish.ok ? null : (publish.diagnostics || null),
         cafePreparedAt: new Date().toISOString(),
@@ -224,49 +226,70 @@ async function publishNaverCafe(env, job) {
     };
   }
 
-  const content = buildCafeArticleHtml(job);
-  const multipart = buildNaverCafeMultipart(subject, content, attachments);
-  const requestDiagnostics = {
-    imageCount: attachments.length,
-    imageBytes: attachments.reduce((sum, attachment) => sum + attachment.bytes.byteLength, 0),
-    maxImageWidth: Math.max(...attachments.map((attachment) => attachment.width)),
-    maxImageHeight: Math.max(...attachments.map((attachment) => attachment.height)),
-    contentCharacters: content.length,
-    multipartBytes: multipart.body.byteLength,
-    legacyMultipart: true,
-    embeddedImageHtml: false,
-    imageFieldMode: "repeated",
-    phoneLinkMode: "text-links",
-  };
-
   const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token.accessToken}`,
-      "Content-Type": multipart.contentType,
-    },
-    body: multipart.body,
-  });
-  const text = await res.text();
-  let data = {};
-  try { data = JSON.parse(text); } catch { /* ignore */ }
+  const attempts = [];
+  let posted = null;
+  for (const contactLinkMode of ["linked-contact-text", "plain-contact-urls"]) {
+    const content = buildCafeArticleHtml(job, { contactLinkMode });
+    const multipart = buildNaverCafeMultipart(subject, content, attachments);
+    const requestDiagnostics = {
+      contactLinkMode,
+      imageCount: attachments.length,
+      imageBytes: attachments.reduce((sum, attachment) => sum + attachment.bytes.byteLength, 0),
+      maxImageWidth: Math.max(...attachments.map((attachment) => attachment.width)),
+      maxImageHeight: Math.max(...attachments.map((attachment) => attachment.height)),
+      contentCharacters: content.length,
+      multipartBytes: multipart.body.byteLength,
+      legacyMultipart: true,
+      embeddedImageHtml: false,
+      imageFieldMode: "repeated",
+    };
 
-  if (!res.ok || data.error) {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.accessToken}`,
+        "Content-Type": multipart.contentType,
+      },
+      body: multipart.body,
+    });
+    const text = await res.text();
+    let data = {};
+    try { data = JSON.parse(text); } catch { /* ignore */ }
+
+    if (res.ok && !data.error) {
+      posted = { data, contactLinkMode };
+      break;
+    }
+
     const naverError = extractNaverError(data, text);
     const diagnostics = { ...requestDiagnostics, responseStatus: res.status, naverError };
+    attempts.push(diagnostics);
     console.error("[naver-cafe] upload failed", JSON.stringify(diagnostics));
+    if (!shouldRetryPlainContactUrls(contactLinkMode, res.status, naverError)) {
+      return {
+        ok: false,
+        status: res.status === 401 ? "connection-required" : "upload-failed",
+        message: `네이버 카페 업로드 실패 (${res.status}): ${naverError}`,
+        diagnostics,
+      };
+    }
+  }
+
+  if (!posted) {
+    const last = attempts.at(-1) || {};
     return {
       ok: false,
-      status: res.status === 401 ? "connection-required" : "upload-failed",
-      message: `네이버 카페 업로드 실패 (${res.status}): ${naverError}`,
-      diagnostics,
+      status: last.responseStatus === 401 ? "connection-required" : "upload-failed",
+      message: `네이버 카페 업로드 실패 (${last.responseStatus || "?"}): ${last.naverError || "알 수 없는 오류"}`,
+      diagnostics: { attempts },
     };
   }
 
-  const result = data.message?.result || data.result || {};
+  const result = posted.data.message?.result || posted.data.result || {};
   const articleId = normalizeText(result.articleid || result.articleId || result.articleNo || result.id || "");
   const cafeUrl = normalizeHttpUrl(result.articleUrl || result.articleurl || result.url || buildCafeArticleUrl(settings, articleId));
+  const usedFallback = posted.contactLinkMode === "plain-contact-urls";
   return {
     ok: true,
     status: "posted",
@@ -274,9 +297,10 @@ async function publishNaverCafe(env, job) {
     cafeUrl,
     images: uploadImages,
     imageCount: attachments.length,
+    contactLinkMode: posted.contactLinkMode,
     message: cafeUrl
-      ? `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다.\n${cafeUrl}`
-      : `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다. 네이버 응답에 게시글 URL이 없어 글 목록에서 확인해주세요.`,
+      ? `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다.${usedFallback ? "\n네이버가 링크 마크업을 거부해 연락처는 일반 URL로 넣었습니다." : ""}\n${cafeUrl}`
+      : `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다.${usedFallback ? " 네이버가 링크 마크업을 거부해 연락처는 일반 URL로 넣었습니다." : ""} 네이버 응답에 게시글 URL이 없어 글 목록에서 확인해주세요.`,
   };
 }
 
@@ -419,21 +443,33 @@ function withFixedContactHref(image) {
   // non-HTTP schemes in multipart HTML with a generic 999 response. Keep the
   // phone image tappable through a same-origin HTTPS bridge.
   if (image.slot === "phone") return { ...image, href: NAVER_CAFE_PHONE_HREF };
-  if (image.slot === "kakao") return { ...image, href: "https://pf.kakao.com/_WkdxfX/chat" };
+  if (image.slot === "kakao") return { ...image, href: NAVER_CAFE_KAKAO_HREF };
   return { ...image, href: "" };
 }
 
-function buildCafeArticleHtml(job) {
+function buildCafeArticleHtml(job, options = {}) {
+  const contactLinkMode = options.contactLinkMode || "linked-contact-text";
   const bodyHtml = bodyToCafeHtml(job.draft?.body || "");
   // Naver's multipart API appends each image field to the article automatically.
   // Embedding <img src="#n"> placeholders in content causes a generic 403/999,
-  // Naver also rejects <a href> markup in this endpoint with the same 999
-  // response. Plain URLs are auto-linked by Cafe after publishing.
-  const contactLinks = [
-    `<p>전화 상담 02-6348-0406 ${escapeHtml(NAVER_CAFE_PHONE_HREF)}</p>`,
-    `<p>카카오톡 상담 바로가기 https://pf.kakao.com/_WkdxfX/chat</p>`,
-  ].join("\n");
+  // so images are uploaded as multipart files. Contact links are text-only; if
+  // Naver rejects <a> markup, the caller retries with plain URLs.
+  const contactLinks = contactLinkMode === "plain-contact-urls"
+    ? [
+        `<p>전화 상담 02-6348-0406 ${escapeHtml(NAVER_CAFE_PHONE_HREF)}</p>`,
+        `<p>카카오톡 상담 바로가기 ${escapeHtml(NAVER_CAFE_KAKAO_HREF)}</p>`,
+      ].join("\n")
+    : [
+        `<p><a href="${escapeAttr(NAVER_CAFE_PHONE_HREF)}">전화 상담 02-6348-0406</a></p>`,
+        `<p><a href="${escapeAttr(NAVER_CAFE_KAKAO_HREF)}">카카오톡 상담 바로가기</a></p>`,
+      ].join("\n");
   return [bodyHtml, contactLinks].filter(Boolean).join("\n");
+}
+
+function shouldRetryPlainContactUrls(contactLinkMode, status, naverError = "") {
+  if (contactLinkMode !== "linked-contact-text") return false;
+  if (status === 401 || status === 429) return false;
+  return status === 403 || /999|html|tag|markup|link|href|forbidden|invalid/i.test(String(naverError || ""));
 }
 
 async function loadCafeImageAttachments(images) {
