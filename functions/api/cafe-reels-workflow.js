@@ -229,8 +229,8 @@ async function publishNaverCafe(env, job) {
   const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
   const attempts = [];
   let posted = null;
-  for (const contactLinkMode of ["linked-contact-text", "plain-contact-urls"]) {
-    const content = buildCafeArticleHtml(job, { contactLinkMode });
+  for (const contactLinkMode of ["linked-contact-images"]) {
+    const content = buildCafeArticleHtml(job, attachments, { contactLinkMode });
     const multipart = buildNaverCafeMultipart(subject, content, attachments);
     const requestDiagnostics = {
       contactLinkMode,
@@ -241,7 +241,7 @@ async function publishNaverCafe(env, job) {
       contentCharacters: content.length,
       multipartBytes: multipart.body.byteLength,
       legacyMultipart: true,
-      embeddedImageHtml: false,
+      embeddedImageHtml: contactLinkMode === "linked-contact-images",
       imageFieldMode: "repeated",
     };
 
@@ -266,14 +266,12 @@ async function publishNaverCafe(env, job) {
     const diagnostics = { ...requestDiagnostics, responseStatus: res.status, naverError };
     attempts.push(diagnostics);
     console.error("[naver-cafe] upload failed", JSON.stringify(diagnostics));
-    if (!shouldRetryPlainContactUrls(contactLinkMode, res.status, naverError)) {
-      return {
-        ok: false,
-        status: res.status === 401 ? "connection-required" : "upload-failed",
-        message: `네이버 카페 업로드 실패 (${res.status}): ${naverError}`,
-        diagnostics,
-      };
-    }
+    return {
+      ok: false,
+      status: res.status === 401 ? "connection-required" : "upload-failed",
+      message: `네이버 카페 이미지 링크 업로드 실패 (${res.status}): ${naverError}`,
+      diagnostics,
+    };
   }
 
   if (!posted) {
@@ -289,7 +287,6 @@ async function publishNaverCafe(env, job) {
   const result = posted.data.message?.result || posted.data.result || {};
   const articleId = normalizeText(result.articleid || result.articleId || result.articleNo || result.id || "");
   const cafeUrl = normalizeHttpUrl(result.articleUrl || result.articleurl || result.url || buildCafeArticleUrl(settings, articleId));
-  const usedFallback = posted.contactLinkMode === "plain-contact-urls";
   return {
     ok: true,
     status: "posted",
@@ -299,8 +296,8 @@ async function publishNaverCafe(env, job) {
     imageCount: attachments.length,
     contactLinkMode: posted.contactLinkMode,
     message: cafeUrl
-      ? `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다.${usedFallback ? "\n네이버가 링크 마크업을 거부해 연락처는 일반 URL로 넣었습니다." : ""}\n${cafeUrl}`
-      : `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다.${usedFallback ? " 네이버가 링크 마크업을 거부해 연락처는 일반 URL로 넣었습니다." : ""} 네이버 응답에 게시글 URL이 없어 글 목록에서 확인해주세요.`,
+      ? `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다. 전화·카카오 이미지 링크를 적용했습니다.\n${cafeUrl}`
+      : `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다. 전화·카카오 이미지 링크를 적용했습니다. 네이버 응답에 게시글 URL이 없어 글 목록에서 확인해주세요.`,
   };
 }
 
@@ -447,29 +444,23 @@ function withFixedContactHref(image) {
   return { ...image, href: "" };
 }
 
-function buildCafeArticleHtml(job, options = {}) {
-  const contactLinkMode = options.contactLinkMode || "linked-contact-text";
+function buildCafeArticleHtml(job, attachments = [], options = {}) {
+  const contactLinkMode = options.contactLinkMode || "linked-contact-images";
   const bodyHtml = bodyToCafeHtml(job.draft?.body || "");
-  // Naver's multipart API appends each image field to the article automatically.
-  // Embedding <img src="#n"> placeholders in content causes a generic 403/999,
-  // so images are uploaded as multipart files. Contact links are text-only; if
-  // Naver rejects <a> markup, the caller retries with plain URLs.
-  const contactLinks = contactLinkMode === "plain-contact-urls"
-    ? [
-        `<p>전화 상담 02-6348-0406 ${escapeHtml(NAVER_CAFE_PHONE_HREF)}</p>`,
-        `<p>카카오톡 상담 바로가기 ${escapeHtml(NAVER_CAFE_KAKAO_HREF)}</p>`,
-      ].join("\n")
-    : [
-        `<p><a href="${escapeAttr(NAVER_CAFE_PHONE_HREF)}">전화 상담 02-6348-0406</a></p>`,
-        `<p><a href="${escapeAttr(NAVER_CAFE_KAKAO_HREF)}">카카오톡 상담 바로가기</a></p>`,
-      ].join("\n");
-  return [bodyHtml, contactLinks].filter(Boolean).join("\n");
-}
-
-function shouldRetryPlainContactUrls(contactLinkMode, status, naverError = "") {
-  if (contactLinkMode !== "linked-contact-text") return false;
-  if (status === 401 || status === 429) return false;
-  return status === 403 || /999|html|tag|markup|link|href|forbidden|invalid/i.test(String(naverError || ""));
+  // Naver's official SmartEditor guide supports linking multipart images with
+  // <a><img src="#index"></a>. Keep the markup minimal: no wrapper div,
+  // dimensions, target, rel, or text links that can trigger the legacy 999
+  // validator. Images without placeholders are appended by the Cafe API.
+  const contactImages = contactLinkMode === "linked-contact-images"
+    ? attachments.map((attachment, index) => {
+        const image = attachment.image || {};
+        const href = normalizeHref(image.href || "");
+        if (!href) return "";
+        const label = normalizeText(image.label || image.slot || "상담");
+        return `<p><a href="${escapeAttr(href)}"><img src="#${index}" alt="${escapeAttr(label)}" /></a></p>`;
+      }).filter(Boolean).join("\n")
+    : "";
+  return [bodyHtml, contactImages].filter(Boolean).join("\n");
 }
 
 async function loadCafeImageAttachments(images) {

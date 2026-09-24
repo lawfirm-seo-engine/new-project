@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { onRequestPost } from "../functions/api/cafe-reels-workflow.js";
 
-test("Naver Cafe upload attaches all configured images without unsupported image placeholders", async () => {
+test("Naver Cafe upload links the phone and Kakao images with SmartEditor placeholders", async () => {
   const jobId = "test-job";
   const slots = [
     ...Array.from({ length: 12 }, (_, index) => ({
@@ -87,7 +87,7 @@ test("Naver Cafe upload attaches all configured images without unsupported image
     });
     const result = await response.json();
     assert.equal(result.job.cafeStatus, "posted");
-    assert.equal(result.job.naverContactLinkMode, "linked-contact-text");
+    assert.equal(result.job.naverContactLinkMode, "linked-contact-images");
     assert.equal(result.job.images.length, 14);
     assert.match(uploadRequest.init.headers["Content-Type"], /^multipart\/form-data; boundary=/);
     assert.ok(uploadRequest.init.body instanceof Uint8Array);
@@ -102,9 +102,9 @@ test("Naver Cafe upload attaches all configured images without unsupported image
       requestedImageUrls,
       Array.from({ length: 12 }, (_, index) => `https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.jpg`),
     );
-    assert.doesNotMatch(multipart, /%3Cimg|src%3D%22%23/i);
-    assert.match(multipart, /%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F%22/i);
-    assert.match(multipart, /%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fkakao_redirect%2F%22/i);
+    assert.match(multipart, /%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F%22%3E%3Cimg%20src%3D%22%2312%22/i);
+    assert.match(multipart, /%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fkakao_redirect%2F%22%3E%3Cimg%20src%3D%22%2313%22/i);
+    assert.equal((multipart.match(/src%3D%22%23\d+%22/gi) || []).length, 2);
     assert.doesNotMatch(multipart, /%F0%9F%93%8C/i);
     assert.match(multipart, /Content-Transfer-Encoding: binary/);
     assert.match(multipart, /Content-Type: text\/plain; charset=UTF-8/);
@@ -116,7 +116,7 @@ test("Naver Cafe upload attaches all configured images without unsupported image
   }
 });
 
-test("Naver Cafe upload falls back to plain contact URLs when link markup is rejected", async () => {
+test("Naver Cafe upload reports a failure instead of silently publishing unlinked contact images", async () => {
   const jobId = "fallback-job";
   const slots = [
     { slot: "01", label: "1", url: "/api/criminal-board-image?id=fraud-1.jpg" },
@@ -194,16 +194,10 @@ test("Naver Cafe upload falls back to plain contact URLs when link markup is rej
       env,
     });
     const result = await response.json();
-    assert.equal(result.job.cafeStatus, "posted");
-    assert.equal(result.job.naverContactLinkMode, "plain-contact-urls");
-    assert.equal(uploadRequests.length, 2);
-
-    const fallbackMultipart = new TextDecoder().decode(uploadRequests[1].init.body);
-    assert.doesNotMatch(fallbackMultipart, /%3Ca(?:%20|\+)/i);
-    assert.match(fallbackMultipart, /https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F/);
-    assert.match(fallbackMultipart, /https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fkakao_redirect%2F/);
-    assert.doesNotMatch(fallbackMultipart, /pf\.kakao\.com/);
-    assert.match(result.message, /일반 URL/);
+    assert.equal(result.job.cafeStatus, "upload-failed");
+    assert.equal(result.job.naverContactLinkMode, "");
+    assert.equal(uploadRequests.length, 1);
+    assert.match(result.message, /이미지 링크 업로드 실패/);
   } finally {
     globalThis.fetch = originalFetch;
   }
