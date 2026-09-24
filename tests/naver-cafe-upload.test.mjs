@@ -102,8 +102,8 @@ test("Naver Cafe upload links the phone and Kakao images with SmartEditor placeh
       requestedImageUrls,
       Array.from({ length: 12 }, (_, index) => `https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.jpg`),
     );
-    assert.match(multipart, /%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F%22%3E%3Cimg%20src%3D%22%2312%22/i);
-    assert.match(multipart, /%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fkakao_redirect%2F%22%3E%3Cimg%20src%3D%22%2313%22/i);
+    assert.match(multipart, /%3Cdiv%20align%3D%22center%22%3E%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F%22%3E%3Cimg%20src%3D%22%2312%22%20width%3D%223%22%20height%3D%222%22/i);
+    assert.match(multipart, /%3Cdiv%20align%3D%22center%22%3E%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fkakao_redirect%2F%22%3E%3Cimg%20src%3D%22%2313%22%20width%3D%223%22%20height%3D%222%22/i);
     assert.equal((multipart.match(/src%3D%22%23\d+%22/gi) || []).length, 2);
     assert.doesNotMatch(multipart, /%F0%9F%93%8C/i);
     assert.match(multipart, /Content-Transfer-Encoding: binary/);

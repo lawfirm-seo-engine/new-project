@@ -448,16 +448,16 @@ function buildCafeArticleHtml(job, attachments = [], options = {}) {
   const contactLinkMode = options.contactLinkMode || "linked-contact-images";
   const bodyHtml = bodyToCafeHtml(job.draft?.body || "");
   // Naver's official SmartEditor guide supports linking multipart images with
-  // <a><img src="#index"></a>. Keep the markup minimal: no wrapper div,
-  // dimensions, target, rel, or text links that can trigger the legacy 999
-  // validator. Images without placeholders are appended by the Cafe API.
+  // <a><img src="#index"></a>, and requires every image to be wrapped in a
+  // div with exact dimensions. Limit placeholders to the two contact images;
+  // images without placeholders are appended by the Cafe API.
   const contactImages = contactLinkMode === "linked-contact-images"
     ? attachments.map((attachment, index) => {
         const image = attachment.image || {};
         const href = normalizeHref(image.href || "");
         if (!href) return "";
         const label = normalizeText(image.label || image.slot || "상담");
-        return `<p><a href="${escapeAttr(href)}"><img src="#${index}" alt="${escapeAttr(label)}" /></a></p>`;
+        return `<div align="center"><a href="${escapeAttr(href)}"><img src="#${index}" width="${attachment.width}" height="${attachment.height}" alt="${escapeAttr(label)}" /></a></div>`;
       }).filter(Boolean).join("\n")
     : "";
   return [bodyHtml, contactImages].filter(Boolean).join("\n");
