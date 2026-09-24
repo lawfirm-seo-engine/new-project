@@ -229,7 +229,7 @@ async function publishNaverCafe(env, job) {
   const endpoint = `https://openapi.naver.com/v1/cafe/${encodeURIComponent(settings.naverCafeClubId)}/menu/${encodeURIComponent(menuId)}/articles`;
   const attempts = [];
   let posted = null;
-  for (const contactLinkMode of ["linked-contact-images"]) {
+  for (const contactLinkMode of ["plain-contact-urls"]) {
     const content = buildCafeArticleHtml(job, attachments, { contactLinkMode });
     const multipart = buildNaverCafeMultipart(subject, content, attachments);
     const requestDiagnostics = {
@@ -241,7 +241,7 @@ async function publishNaverCafe(env, job) {
       contentCharacters: content.length,
       multipartBytes: multipart.body.byteLength,
       legacyMultipart: true,
-      embeddedImageHtml: contactLinkMode === "linked-contact-images",
+      embeddedImageHtml: false,
       imageFieldMode: "repeated",
     };
 
@@ -269,7 +269,7 @@ async function publishNaverCafe(env, job) {
     return {
       ok: false,
       status: res.status === 401 ? "connection-required" : "upload-failed",
-      message: `네이버 카페 이미지 링크 업로드 실패 (${res.status}): ${naverError}`,
+      message: `네이버 카페 업로드 실패 (${res.status}): ${naverError}`,
       diagnostics,
     };
   }
@@ -296,8 +296,8 @@ async function publishNaverCafe(env, job) {
     imageCount: attachments.length,
     contactLinkMode: posted.contactLinkMode,
     message: cafeUrl
-      ? `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다. 전화·카카오 이미지 링크를 적용했습니다.\n${cafeUrl}`
-      : `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다. 전화·카카오 이미지 링크를 적용했습니다. 네이버 응답에 게시글 URL이 없어 글 목록에서 확인해주세요.`,
+      ? `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다. 전화·카카오 브리지 URL을 추가했습니다.\n${cafeUrl}`
+      : `네이버 카페에 이미지 ${attachments.length}개와 원고를 자동 업로드했습니다. 전화·카카오 브리지 URL을 추가했습니다. 네이버 응답에 게시글 URL이 없어 글 목록에서 확인해주세요.`,
   };
 }
 
@@ -432,10 +432,7 @@ function selectNaverUploadImages(images = []) {
   const normalized = sanitizeImages(images);
   const contacts = normalized.filter((image) => image.slot === "phone" || image.slot === "kakao");
   const regular = normalized.filter((image) => image.slot !== "phone" && image.slot !== "kakao");
-  // SmartEditor multipart placeholders are most reliable with single-digit
-  // indexes. Put the only two referenced files first; their visual placement
-  // still follows the #0/#1 placeholders appended after the article body.
-  return [...contacts, ...regular].slice(0, NAVER_CAFE_MAX_IMAGES);
+  return [...regular, ...contacts].slice(0, NAVER_CAFE_MAX_IMAGES);
 }
 
 function withFixedContactHref(image) {
@@ -448,22 +445,18 @@ function withFixedContactHref(image) {
 }
 
 function buildCafeArticleHtml(job, attachments = [], options = {}) {
-  const contactLinkMode = options.contactLinkMode || "linked-contact-images";
+  const contactLinkMode = options.contactLinkMode || "plain-contact-urls";
   const bodyHtml = bodyToCafeHtml(job.draft?.body || "");
-  // Naver's official SmartEditor guide supports linking multipart images with
-  // <a><img src="#index"></a>, and requires every image to be wrapped in a
-  // div with exact dimensions. Limit placeholders to the two contact images;
-  // images without placeholders are appended by the Cafe API.
-  const contactImages = contactLinkMode === "linked-contact-images"
-    ? attachments.map((attachment, index) => {
-        const image = attachment.image || {};
-        const href = normalizeHref(image.href || "");
-        if (!href) return "";
-        const label = normalizeText(image.label || image.slot || "상담");
-        return `<div align="center"><a href="${escapeAttr(href)}"><img src="#${index}" width="${attachment.width}" height="${attachment.height}" alt="${escapeAttr(label)}" /></a></div>`;
-      }).filter(Boolean).join("\n")
+  // This Cafe endpoint currently rejects every <a href> payload with 403/999,
+  // including Naver's documented linked-image form. Bare HTTPS URLs are
+  // converted to clickable anchors by Cafe after publishing.
+  const contactLinks = contactLinkMode === "plain-contact-urls"
+    ? [
+        `<p>전화 상담 02-6348-0406 ${escapeHtml(NAVER_CAFE_PHONE_HREF)}</p>`,
+        `<p>카카오톡 상담 바로가기 ${escapeHtml(NAVER_CAFE_KAKAO_HREF)}</p>`,
+      ].join("\n")
     : "";
-  return [bodyHtml, contactImages].filter(Boolean).join("\n");
+  return [bodyHtml, contactLinks].filter(Boolean).join("\n");
 }
 
 async function loadCafeImageAttachments(images) {

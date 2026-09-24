@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { onRequestPost } from "../functions/api/cafe-reels-workflow.js";
 
-test("Naver Cafe upload links the phone and Kakao images with SmartEditor placeholders", async () => {
+test("Naver Cafe upload appends clickable phone and Kakao bridge URLs", async () => {
   const jobId = "test-job";
   const slots = [
     ...Array.from({ length: 12 }, (_, index) => ({
@@ -87,7 +87,7 @@ test("Naver Cafe upload links the phone and Kakao images with SmartEditor placeh
     });
     const result = await response.json();
     assert.equal(result.job.cafeStatus, "posted");
-    assert.equal(result.job.naverContactLinkMode, "linked-contact-images");
+    assert.equal(result.job.naverContactLinkMode, "plain-contact-urls");
     assert.equal(result.job.images.length, 14);
     assert.match(uploadRequest.init.headers["Content-Type"], /^multipart\/form-data; boundary=/);
     assert.ok(uploadRequest.init.body instanceof Uint8Array);
@@ -102,9 +102,9 @@ test("Naver Cafe upload links the phone and Kakao images with SmartEditor placeh
       requestedImageUrls,
       Array.from({ length: 12 }, (_, index) => `https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.jpg`),
     );
-    assert.match(multipart, /%3Cdiv%20align%3D%22center%22%3E%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F%22%3E%3Cimg%20src%3D%22%230%22%20width%3D%223%22%20height%3D%222%22/i);
-    assert.match(multipart, /%3Cdiv%20align%3D%22center%22%3E%3Ca%20href%3D%22https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fkakao_redirect%2F%22%3E%3Cimg%20src%3D%22%231%22%20width%3D%223%22%20height%3D%222%22/i);
-    assert.equal((multipart.match(/src%3D%22%23\d+%22/gi) || []).length, 2);
+    assert.doesNotMatch(multipart, /%3Ca(?:%20|%3E)|src%3D%22%23/i);
+    assert.match(multipart, /https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F/i);
+    assert.match(multipart, /https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fkakao_redirect%2F/i);
     assert.doesNotMatch(multipart, /%F0%9F%93%8C/i);
     assert.match(multipart, /Content-Transfer-Encoding: binary/);
     assert.match(multipart, /Content-Type: text\/plain; charset=UTF-8/);
@@ -116,7 +116,7 @@ test("Naver Cafe upload links the phone and Kakao images with SmartEditor placeh
   }
 });
 
-test("Naver Cafe upload reports a failure instead of silently publishing unlinked contact images", async () => {
+test("Naver Cafe upload reports API failures without creating a fallback post", async () => {
   const jobId = "fallback-job";
   const slots = [
     { slot: "01", label: "1", url: "/api/criminal-board-image?id=fraud-1.jpg" },
@@ -175,11 +175,7 @@ test("Naver Cafe upload reports a failure instead of silently publishing unlinke
     }
     if (url.startsWith("https://openapi.naver.com/")) {
       uploadRequests.push({ url, init });
-      const multipart = new TextDecoder().decode(init.body);
-      if (/%3Ca%20href/i.test(multipart)) {
-        return Response.json({ message: { error: { code: "999", msg: "unsupported html" } } }, { status: 403 });
-      }
-      return Response.json({ message: { result: { articleid: "456" } } });
+      return Response.json({ message: { error: { code: "999", msg: "rejected" } } }, { status: 403 });
     }
     throw new Error(`Unexpected fetch: ${url}`);
   };
@@ -197,7 +193,7 @@ test("Naver Cafe upload reports a failure instead of silently publishing unlinke
     assert.equal(result.job.cafeStatus, "upload-failed");
     assert.equal(result.job.naverContactLinkMode, "");
     assert.equal(uploadRequests.length, 1);
-    assert.match(result.message, /이미지 링크 업로드 실패/);
+    assert.match(result.message, /업로드 실패/);
   } finally {
     globalThis.fetch = originalFetch;
   }
