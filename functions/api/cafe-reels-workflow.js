@@ -432,7 +432,10 @@ function selectNaverUploadImages(images = []) {
   const normalized = sanitizeImages(images);
   const contacts = normalized.filter((image) => image.slot === "phone" || image.slot === "kakao");
   const regular = normalized.filter((image) => image.slot !== "phone" && image.slot !== "kakao");
-  return [...regular, ...contacts].slice(0, NAVER_CAFE_MAX_IMAGES);
+  // SmartEditor multipart placeholders are most reliable with single-digit
+  // indexes. Put the only two referenced files first; their visual placement
+  // still follows the #0/#1 placeholders appended after the article body.
+  return [...contacts, ...regular].slice(0, NAVER_CAFE_MAX_IMAGES);
 }
 
 function withFixedContactHref(image) {
