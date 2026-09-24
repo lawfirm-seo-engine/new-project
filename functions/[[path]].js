@@ -242,7 +242,7 @@ const LOGSCAN_SCRIPT = `<!-- LogScan -->
 const READ_REPAIR_SLUGS = new Set(["jusigridingbang"]);
 
 // 카카오톡 상담 채널 실제 이동 대상
-const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_WkdxfX";
+const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_WkdxfX/chat";
 
 // /kakao_redirect/ : 카카오톡 상담 링크가 곧바로 채널로 가지 않고 이 페이지를 거치게 해서
 // GA로 카카오톡채널 상담 전환을 집계한 뒤 채널로 자동 이동시키는 브리지 페이지.
