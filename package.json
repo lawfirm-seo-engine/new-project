@@ -9,6 +9,9 @@
     "warmup": "node scripts/warmup.js",
     "indexnow": "node scripts/indexnow-bulk.js",
     "preview": "npx http-server dist -p 4173 -c-1",
+    "naver:cafe": "node tools/naver-cafe-smarteditor/cli.mjs",
+    "naver:cafe:login": "node tools/naver-cafe-smarteditor/cli.mjs login",
+    "naver:cafe:watch": "node tools/naver-cafe-smarteditor/cli.mjs watch",
     "deploy:a": "node scripts/verify-bulk-create.js && npx wrangler pages deploy dist-a --project-name new-project",
     "deploy:b": "npx wrangler pages deploy dist-b --project-name new-project-b",
     "deploy:c": "npx wrangler pages deploy dist-c --project-name new-project-c",
@@ -31,6 +34,7 @@
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "playwright-core": "^1.63.0",
     "wrangler": "^4.93.0"
   }
 }

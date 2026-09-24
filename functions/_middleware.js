@@ -26,6 +26,7 @@ export async function onRequest(context) {
     url.pathname.startsWith("/api/whiteboard") ||
     url.pathname.startsWith("/api/cafe-reels") ||
     url.pathname.startsWith("/api/naver-cafe-oauth") ||
+    url.pathname.startsWith("/api/instagram-oauth") ||
     url.pathname.startsWith("/api/create-case") || url.pathname.startsWith("/api/create-powerlink") ||
     url.pathname.startsWith("/api/create-recovery-landing") || url.pathname.startsWith("/api/create-readingroom-landing") ||
     url.pathname.startsWith("/api/get-powerlinks") || url.pathname.startsWith("/api/update-powerlink") || url.pathname.startsWith("/api/delete-powerlink") ||

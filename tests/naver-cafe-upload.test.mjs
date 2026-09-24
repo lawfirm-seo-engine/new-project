@@ -3,6 +3,58 @@ import test from "node:test";
 
 import { onRequestPost } from "../functions/api/cafe-reels-workflow.js";
 
+test("SmartEditor queue and runner status are persisted", async () => {
+  const jobId = "smarteditor-job";
+  const job = {
+    id: jobId,
+    caseName: "릴스 포함 테스트 사건",
+    fraudType: "institution-exchange",
+    imageSetKey: "fraud",
+    draft: { title: "테스트 제목", body: "테스트 본문" },
+    images: [{ slot: "01", url: "https://images.example/1.jpg" }],
+    videoUrl: "https://videos.example/reels.mp4",
+    cafeStatus: "draft-ready",
+  };
+  const stored = new Map([
+    [`cafe-reels:job:${jobId}`, job],
+    ["cafe-reels:jobs:index:v1", []],
+  ]);
+  const env = {
+    CASES: {
+      async get(key) { return stored.get(key) ?? null; },
+      async put(key, value) { stored.set(key, JSON.parse(value)); },
+    },
+  };
+  const post = async (payload) => {
+    const response = await onRequestPost({
+      request: new Request("https://example.test/api/cafe-reels-workflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }),
+      env,
+    });
+    return { response, result: await response.json() };
+  };
+
+  const queued = await post({ action: "queue-smarteditor", jobId });
+  assert.equal(queued.response.status, 200);
+  assert.equal(queued.result.job.cafeStatus, "smarteditor-queued");
+  assert.equal(queued.result.job.videoUrl, "https://videos.example/reels.mp4");
+
+  const preparing = await post({ action: "report-smarteditor", jobId, status: "preparing" });
+  assert.equal(preparing.result.job.cafeStatus, "smarteditor-preparing");
+
+  const posted = await post({
+    action: "report-smarteditor",
+    jobId,
+    status: "posted",
+    cafeUrl: "https://cafe.naver.com/gnlawfintech/999",
+  });
+  assert.equal(posted.result.job.cafeStatus, "smarteditor-posted");
+  assert.equal(posted.result.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/999");
+});
+
 test("Naver Cafe upload appends clickable phone and Kakao bridge URLs", async () => {
   const jobId = "test-job";
   const slots = [
