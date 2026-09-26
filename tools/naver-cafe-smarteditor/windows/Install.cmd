@@ -8,6 +8,8 @@ set "NODE_FOLDER=node-v24.15.0-win-x64"
 set "TEMP_NODE=%TEMP%\gnlaw-node-runtime"
 
 echo [GNLAW] Installing SmartEditor automation...
+if not exist "%~dp0app\GNLAWSmartEditor.exe" goto package_error
+taskkill.exe /F /T /IM GNLAWSmartEditor.exe >nul 2>&1
 if not exist "%TARGET%" mkdir "%TARGET%"
 xcopy "%~dp0app\*" "%TARGET%\" /E /I /Y >nul
 if errorlevel 1 goto install_error
@@ -35,6 +37,11 @@ exit /b 0
 
 :download_error
 echo [ERROR] Runtime download failed. Check the Internet connection and run Install.cmd again.
+pause
+exit /b 1
+
+:package_error
+echo [ERROR] Installation files are incomplete. Extract the entire ZIP file, then run Install.cmd again.
 pause
 exit /b 1
 

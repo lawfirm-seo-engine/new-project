@@ -57,6 +57,12 @@ test("desktop automation uses the Windows Chrome sandbox and opens the work scre
   assert.match(source, /monitorPage\.goto\(`\$\{config\.siteOrigin\}\/admin\/cafe-reels`/);
 });
 
+test("Windows installer validates the packaged app and stops an old instance", () => {
+  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
+  assert.match(source, /app\\GNLAWSmartEditor\.exe/);
+  assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
+});
+
 test("full automation selects the first ten regular images for Reels", () => {
   const images = [
     ...Array.from({ length: 12 }, (_, index) => ({ slot: String(index + 1).padStart(2, "0"), url: `/assets/${index + 1}.jpg` })),
