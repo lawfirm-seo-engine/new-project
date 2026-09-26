@@ -9,7 +9,7 @@ import {
   saveInstagramConfig,
   saveInstagramToken,
 } from "../functions/_instagram.js";
-import { onRequestPost as onWorkflowPost } from "../functions/api/cafe-reels-workflow.js";
+import { buildCaption, onRequestPost as onWorkflowPost } from "../functions/api/cafe-reels-workflow.js";
 
 function testEnv(initial = []) {
   const stored = new Map(initial);
@@ -59,6 +59,60 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
 
   assert.match(generatorSource, /whiteboard:video-ready/);
   assert.match(pageSource, /async function handleGeneratedVideo[\s\S]*await publishInstagramReel\(\)/);
+});
+
+test("caption templates use the case, landing, and reserved Cafe URL", () => {
+  const fraud = buildCaption({
+    caseName: "스크류바 프로젝트",
+    fraudType: "stock-project",
+    imageSetKey: "fraud",
+    draft: { landingUrl: "https://gnlaw-criminal.co.kr/prosecute/screwbar-litigation/" },
+    cafeUrl: "https://cafe.naver.com/gnlawfintech/134",
+  });
+  assert.match(fraud, /🚨\[사기피해주의\] 스크류바 프로젝트 사칭 사기/);
+  assert.match(fraud, /screwbar-litigation/);
+  assert.match(fraud, /gnlawfintech\/134/);
+  assert.match(fraud, /#스크류바프로젝트사칭사기/);
+  assert.match(fraud, /litigation\/\n\n스크류바 프로젝트 사칭 사기/);
+
+  const payment = buildCaption({
+    caseName: "하나",
+    fraudType: "payment-suspension-release",
+    imageSetKey: "payment-suspension-release",
+    draft: { landingUrl: "https://gnlaw-recovery.co.kr/success/hana-result/" },
+    cafeUrl: "https://cafe.naver.com/gnlawfintech/135",
+  });
+  assert.match(payment, /하나은행 계좌지급정지해제/);
+  assert.match(payment, /gnlawfintech\/135/);
+});
+
+test("new automation jobs reserve Naver Cafe numbers from 134 in order", async () => {
+  const { env } = testEnv([["cafe-reels:jobs:index:v1", []]]);
+  const save = async (caseName) => {
+    const response = await onWorkflowPost({
+      request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save-job",
+          caseName,
+          fraudType: "stock-project",
+          imageSetKey: "fraud",
+          draft: { title: `${caseName} 원고`, body: "본문", landingUrl: `https://gnlaw-criminal.co.kr/prosecute/${caseName}-litigation/` },
+          images: [{ slot: "01", url: "https://images.example/1.jpg" }],
+          autoFlow: true,
+        }),
+      }),
+      env,
+    });
+    return response.json();
+  };
+  const first = await save("first");
+  const second = await save("second");
+  assert.equal(first.job.reservedNaverArticleId, "134");
+  assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/134");
+  assert.equal(first.job.videoStatus, "render-queued");
+  assert.equal(second.job.reservedNaverArticleId, "135");
 });
 
 test("Instagram Reel automation creates, checks, and publishes a Reel", async () => {
@@ -137,6 +191,8 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
     assert.equal(checked.result.job.instagramStatus, "posted");
     assert.equal(checked.result.job.instagramMediaId, "media-456");
     assert.equal(checked.result.job.instagramPermalink, "https://www.instagram.com/reel/example/");
+    assert.equal(checked.result.job.cafeStatus, "smarteditor-queued");
+    assert.match(checked.result.job.draft.body, /https:\/\/www\.instagram\.com\/reel\/example\//);
     assert.equal(calls.length, 4);
   } finally {
     globalThis.fetch = originalFetch;

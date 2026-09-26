@@ -67,6 +67,12 @@ export function orderedJobImages(job = [], siteOrigin = DEFAULT_SITE_ORIGIN) {
   return [...regular, ...contacts];
 }
 
+export function reelJobImages(job = {}, siteOrigin = DEFAULT_SITE_ORIGIN) {
+  return orderedJobImages(job, siteOrigin)
+    .filter((image) => image.slot !== "phone" && image.slot !== "kakao")
+    .slice(0, 10);
+}
+
 export function parseLinkedImageData(raw = "") {
   try {
     const parsed = JSON.parse(raw);
@@ -142,12 +148,22 @@ async function login(context, config) {
 }
 
 async function watchQueue(context, config, options) {
-  console.log(`SmartEditor 대기열 감시 시작 (${config.siteOrigin}, ${config.pollSeconds}초 간격)`);
+  console.log(`랜딩·릴스·SmartEditor 전체 대기열 감시 시작 (${config.siteOrigin}, ${config.pollSeconds}초 간격)`);
   for (;;) {
     const jobs = await loadQueue(context, config);
-    const queued = jobs.find((job) => job.cafeStatus === "smarteditor-queued");
-    if (queued) {
-      const job = await loadJob(context, config, queued.id);
+    const byReservedNumber = (a, b) => Number(a.reservedNaverArticleId || Number.MAX_SAFE_INTEGER) - Number(b.reservedNaverArticleId || Number.MAX_SAFE_INTEGER);
+    const renderQueued = jobs.filter((job) => job.videoStatus === "render-queued").sort(byReservedNumber)[0];
+    const cafeQueued = jobs.filter((job) => job.cafeStatus === "smarteditor-queued").sort(byReservedNumber)[0];
+    if (renderQueued) {
+      let job = await loadJob(context, config, renderQueued.id);
+      await processReelJob(context, config, job);
+      job = await loadJob(context, config, renderQueued.id);
+      if (job.cafeStatus === "smarteditor-queued") {
+        const result = await processJob(context, config, job, options);
+        if (!result?.posted && !options.yes) return;
+      }
+    } else if (cafeQueued) {
+      const job = await loadJob(context, config, cafeQueued.id);
       const result = await processJob(context, config, job, options);
       if (!result?.posted && !options.yes) return;
     } else if (options.once) {
@@ -156,6 +172,54 @@ async function watchQueue(context, config, options) {
     }
     if (options.once) return;
     await delay(config.pollSeconds * 1000);
+  }
+}
+
+async function processReelJob(context, config, job) {
+  validateJob(job);
+  const images = reelJobImages(job, config.siteOrigin);
+  if (images.length !== 10) throw new Error(`릴스 영상 생성에는 일반 이미지 10장이 필요합니다 (현재 ${images.length}장).`);
+
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "gnlaw-reels-render-"));
+  const page = await context.newPage();
+  try {
+    await reportRenderStatus(context, config, job.id, "rendering");
+    const files = await downloadImages(context, images, tempDir);
+    await page.goto(`${config.siteOrigin}/admin/cafe-reels`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    if (/\/admin\/login/i.test(page.url())) throw new Error("gnlaw-criminal 관리자 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 실행하세요.");
+
+    await page.evaluate(async (jobId) => {
+      if (typeof window.loadJob !== "function") throw new Error("카페 원고·릴스 화면을 불러오지 못했습니다.");
+      await window.loadJob(jobId);
+      window.syncVideoTitle?.();
+    }, job.id);
+    await page.locator("#title").fill(String(job.caseName || job.draft?.title || "릴스 영상"));
+    await page.locator("#duration").selectOption("15");
+    await page.locator("#aspect").selectOption({ label: "9:16" });
+    await page.locator("#localAssets").setInputFiles(files.map((file) => file.path));
+    await page.locator("#generate").click();
+    console.log(`릴스 영상 생성 시작: ${job.caseName}`);
+
+    const deadline = Date.now() + 12 * 60 * 1000;
+    while (Date.now() < deadline) {
+      await delay(5_000);
+      const latest = await loadJob(context, config, job.id);
+      if (latest.instagramStatus === "failed") throw new Error(latest.instagramError || "Instagram 릴스 업로드 실패");
+      if (latest.videoStatus === "failed") throw new Error(latest.videoError || "릴스 영상 생성 실패");
+      if (latest.instagramStatus === "posted" && latest.instagramPermalink && latest.cafeStatus === "smarteditor-queued") {
+        console.log(`Instagram 릴스 게시 완료: ${latest.instagramPermalink}`);
+        return latest;
+      }
+      const browserError = await page.locator("#status").textContent().catch(() => "");
+      if (/^오류:/.test(String(browserError || "").trim())) throw new Error(String(browserError).trim());
+    }
+    throw new Error("릴스 영상 생성·Instagram 게시가 12분 안에 완료되지 않았습니다.");
+  } catch (error) {
+    await reportRenderStatus(context, config, job.id, "failed", { message: error?.message || String(error) }).catch(() => {});
+    throw error;
+  } finally {
+    await page.close().catch(() => {});
+    await rm(tempDir, { recursive: true, force: true });
   }
 }
 
@@ -424,6 +488,12 @@ async function reportStatus(context, config, jobId, status, extra = {}) {
   });
 }
 
+async function reportRenderStatus(context, config, jobId, status, extra = {}) {
+  return apiJson(context, "POST", `${config.siteOrigin}/api/cafe-reels-workflow`, {
+    data: { action: "report-render", jobId, status, ...extra },
+  });
+}
+
 async function apiJson(context, method, url, options = {}) {
   const response = method === "POST"
     ? await context.request.post(url, options)
@@ -438,11 +508,11 @@ async function apiJson(context, method, url, options = {}) {
 
 async function assertNaverLogin(page) {
   if (/nid\.naver\.com\/nidlogin/i.test(page.url())) {
-    throw new Error("네이버 로그인이 필요합니다. npm run naver:cafe:login을 먼저 실행하세요.");
+    throw new Error("네이버 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 먼저 실행하세요.");
   }
   const loginLink = page.getByText("로그인", { exact: true });
   if (await loginLink.isVisible().catch(() => false)) {
-    throw new Error("네이버 로그인이 필요합니다. npm run naver:cafe:login을 먼저 실행하세요.");
+    throw new Error("네이버 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 먼저 실행하세요.");
   }
 }
 
@@ -498,11 +568,9 @@ function printHelp() {
   console.log(`
 네이버 카페 SmartEditor PC 업로드 러너
 
-  npm run naver:cafe:login
-  npm run naver:cafe -- prepare --job-id <ID>
-  npm run naver:cafe -- publish --job-id <ID>
-  npm run naver:cafe:watch -- --publish
-  npm run naver:cafe:watch -- --publish --yes
+  Windows 프로그램: 최초 로그인 → 자동화 시작
+  CLI 로그인: node cli.mjs login
+  CLI 전체 자동화: node cli.mjs watch --publish --yes
 
 주요 옵션
   --yes                 최종 게시 확인 문구 생략

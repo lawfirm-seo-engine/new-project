@@ -45,6 +45,7 @@
     .job-item strong{display:block;font-size:13px}
     .job-item span{display:block;margin-top:4px;color:#7a8798;font-size:12px}
     .status{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;background:#edf2ff;color:#1f4fd8;font-size:11px;font-weight:900}
+    .bulk-cases{min-height:150px}
     .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .sceneHead,.footer{display:flex;justify-content:space-between;align-items:center;gap:14px}
     #whiteboardPanel .sceneHead,#whiteboardPanel #scenes{display:none!important}
@@ -72,9 +73,22 @@
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
     </div>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip" download>Windows 자동화 프로그램 다운로드</a>
   </div>
 
   <div class="grid">
+    <section class="panel full">
+      <h2>대량 전체 자동화</h2>
+      <label>사건명(상호명) 목록 · 한 줄에 하나씩 입력
+        <textarea id="bulkCaseNames" class="bulk-cases" placeholder="예:&#10;스크류바 프로젝트&#10;네이버주식연구소&#10;캐피털 인사이트"></textarea>
+      </label>
+      <div class="actions">
+        <button id="bulkCreateBtn" class="btn primary" type="button">랜딩·릴스·카페 전체 작업 등록</button>
+      </div>
+      <div id="bulkMsg" class="message"></div>
+      <p class="note">아래 원고 파트와 사건 유형을 적용합니다. 중복 검수와 랜딩페이지 생성을 마치면 카페 글 번호를 134부터 순서대로 예약합니다. 설치한 Windows 프로그램이 릴스 영상 생성·Instagram 게시·네이버 카페 원고/이미지/영상 게시를 순차 처리합니다.</p>
+    </section>
+
     <section class="panel">
       <h2>1. 카페 원고 생성</h2>
       <div class="form-grid">
@@ -234,6 +248,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     $("generateBtn").addEventListener("click", generateDraft);
+    $("bulkCreateBtn").addEventListener("click", createBulkJobs);
     partTypeEl.addEventListener("change", syncPartSelection);
     caseNameEl.addEventListener("input", syncVideoTitle);
     window.addEventListener("whiteboard:video-ready", handleGeneratedVideo);
@@ -267,7 +282,10 @@
       captionOutput.value = buildLocalCaption();
       renderAssetSet();
       syncVideoTitle();
-      show("draftMsg", "원고 생성 완료. 아래에서 검수 후 작업을 저장하세요.");
+      const saved = await saveWorkflow(false);
+      show("draftMsg", saved
+        ? `중복 검수·랜딩페이지·카페 글 ${saved.reservedNaverArticleId || ""}번 예약 완료.`
+        : "원고와 랜딩페이지는 생성됐지만 작업 저장에 실패했습니다.", !saved);
       $("draftPanel").scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       show("draftMsg", `원고 생성 오류: ${error.message}`, true);
@@ -301,7 +319,7 @@
     $("imageSetSummary").textContent = `${set.label || "이미지 세트"}가 자동 적용됩니다. 현재 등록 이미지 ${registered}개가 카페 작업에 함께 저장됩니다.`;
   }
 
-  async function saveWorkflow() {
+  async function saveWorkflow(autoFlow = false) {
     if (!draft) return show("workflowMsg", "먼저 원고를 생성해주세요.", true);
     const payload = {
       action: "save-job",
@@ -315,6 +333,7 @@
       images: currentAssetImages(),
       cafeUrl: cafeUrlEl.value.trim(),
       videoUrl: videoUrlEl.value.trim(),
+      autoFlow,
     };
     show("workflowMsg", "작업 저장 중...");
     try {
@@ -322,8 +341,62 @@
       applyJob(data.job);
       show("workflowMsg", data.message || "작업 저장 완료");
       loadJobs();
+      return data.job;
     } catch (error) {
       show("workflowMsg", error.message, true);
+      return null;
+    }
+  }
+
+  async function createBulkJobs() {
+    const names = [...new Set($("bulkCaseNames").value.split(/\r?\n/).map((value) => value.trim().replace(/\s+/g, " ")).filter(Boolean))];
+    const fraudType = effectiveFraudType();
+    if (!names.length) return show("bulkMsg", "사건명을 한 줄에 하나씩 입력해주세요.", true);
+    if (partTypeEl.value === "fraud" && !fraudType) return show("bulkMsg", "사기피해 사건 유형을 선택해주세요.", true);
+    const imageSetKey = partTypeEl.value === "payment-suspension-release" ? "payment-suspension-release" : "fraud";
+    const selectedImages = assetImagesForKey(imageSetKey);
+    if (selectedImages.filter((image) => image.slot !== "phone" && image.slot !== "kakao").length < 10) {
+      return show("bulkMsg", "선택한 파트의 영상용 이미지가 10장 이상 등록되어 있어야 합니다.", true);
+    }
+    const button = $("bulkCreateBtn");
+    button.disabled = true;
+    let completed = 0;
+    const failures = [];
+    try {
+      for (const caseName of names) {
+        show("bulkMsg", `${completed + 1}/${names.length} · ${caseName} 중복 검수 및 랜딩페이지 생성 중...`);
+        try {
+          const draftResponse = await fetch("/api/generate-cafe-draft", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ caseName, fraudType }),
+          });
+          const draftData = await draftResponse.json();
+          if (!draftResponse.ok || !draftData.ok) throw new Error(draftData.message || "원고 생성 실패");
+          const generatedDraft = draftData.draft;
+          const saved = await postWorkflow({
+            action: "save-job",
+            caseName,
+            fraudType,
+            title: generatedDraft.title || "",
+            body: generatedDraft.body || "",
+            draft: generatedDraft,
+            imageSetKey,
+            images: selectedImages,
+            autoFlow: true,
+          });
+          completed += 1;
+          show("bulkMsg", `${completed}/${names.length} · ${caseName} · 카페 글 ${saved.job.reservedNaverArticleId}번 작업 등록 완료`);
+        } catch (error) {
+          failures.push(`${caseName}: ${error.message}`);
+        }
+      }
+      await loadJobs();
+      show("bulkMsg", failures.length
+        ? `${completed}건 등록, ${failures.length}건 실패\n${failures.join("\n")}`
+        : `${completed}건 전체 작업 등록 완료. Windows 자동화 프로그램이 순차 처리합니다.`, failures.length > 0);
+    } finally {
+      button.disabled = false;
     }
   }
 
@@ -517,7 +590,7 @@
         <div class="job-item" onclick="loadJob('${escAttr(job.id)}')">
           <strong>${esc(job.caseName || job.title || job.id)}</strong>
           <span>${esc(job.title || "")}</span>
-          <span><b class="status">${esc(job.cafeStatus || "-")}</b> <b class="status">${esc(job.instagramStatus || "-")}</b> ${esc(formatDate(job.updatedAt))}</span>
+          <span><b class="status">카페 ${esc(job.reservedNaverArticleId || "-")}번</b> <b class="status">${esc(job.videoStatus || "-")}</b> <b class="status">${esc(job.cafeStatus || "-")}</b> <b class="status">${esc(job.instagramStatus || "-")}</b> ${esc(formatDate(job.updatedAt))}</span>
         </div>
       `).join("") : "<div class='note'>저장된 작업이 없습니다.</div>";
     } catch (error) {
@@ -556,7 +629,11 @@
   }
 
   function currentAssetImages() {
-    const set = assetSets[imageSetKeyEl.value] || {};
+    return assetImagesForKey(imageSetKeyEl.value);
+  }
+
+  function assetImagesForKey(key) {
+    const set = assetSets[key] || {};
     return (set.slots || []).filter((slot) => slot.url).map((slot) => ({
       slot: slot.slot,
       label: slot.label,
@@ -609,15 +686,17 @@
   }
 
   function buildLocalCaption() {
+    const caseName = caseNameEl.value.trim();
+    const landingUrl = landingUrlOutput.value.trim();
     const cafeUrl = cafeUrlEl.value.trim();
-    return [
-      titleOutput.value.trim() || `${caseNameEl.value.trim() || "사기 피해"} 대응 안내`,
-      "",
-      "피해 정황과 입금 자료를 보존한 뒤 법률 대응 가능성을 확인하세요.",
-      cafeUrl ? `자세한 내용: ${cafeUrl}` : "",
-      "",
-      "#법무법인선린 #사기피해 #금융사기 #피해회복",
-    ].filter(Boolean).join("\n");
+    if (partTypeEl.value === "payment-suspension-release") {
+      const bankName = /은행(?:\s|$)/.test(caseName) ? caseName : `${caseName}은행`;
+      const subject = /계좌\s*지급정지\s*해제/.test(bankName) ? bankName : `${bankName} 계좌지급정지해제`;
+      return [`🚨[계좌지급정지해제] ${subject}⏳02-6348-0406 지금 바로 긴급 상담⏰망설이면 늦습니다.📌${landingUrl}`, "", `${subject} 망설이지 않고 상담 받으면 늦지 않습니다.`, "", "🚨채무부존재확인소송 법무법인 선린 금융사기피해센터 카카오톡 상담", "📌 https://pf.kakao.com/_WkdxfX/chat", "", "법무법인 선린 계좌 지급정지 대응센터", "📢 https://gnlaw-recovery.co.kr", cafeUrl ? `📢 ${cafeUrl}` : null].filter((line) => line !== null).join("\n");
+    }
+    const subject = /사칭\s*사기/.test(caseName) ? caseName : `${caseName} 사칭 사기`;
+    const tag = subject.replace(/[^0-9A-Za-z가-힣]/g, "");
+    return [`🚨[사기피해주의] ${subject}⏳02-6348-0406 지금 바로 긴급 상담⏰망설이면 늦습니다.📌${landingUrl}`, "", `${subject} 투자 리딩방 사기 피해 회복 망설이지 않고 상담 받으면 늦지 않습니다.`, "", "📌법무법인 선린 금융사기피해센터 카카오톡 상담 https://pf.kakao.com/_WkdxfX/chat", "", "다른 리딩방 사기 사건 보기는 이곳", "📢 https://gnlaw-criminal.co.kr/prosecute/jusigridingbang-litigation/", cafeUrl ? `📢 ${cafeUrl}` : null, "", `#${tag} #투자사기 #리딩방사기 #팀미션사기 #법무법인선린 #금융사기피해센터 #금융사기 #피해회복`].filter((line) => line !== null).join("\n");
   }
 
   function resetDraft() {

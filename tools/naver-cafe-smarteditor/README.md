@@ -2,33 +2,21 @@
 
 네이버 Open API 대신 회사 PC의 로그인된 Chrome을 이용해 SmartEditor ONE에 글·이미지·이미지 링크·릴스 영상을 입력합니다.
 
-## 1. 최초 로그인
+## 1. Windows 프로그램 설치와 최초 로그인
 
-```powershell
-npm install
-npm run naver:cafe:login
-```
+1. 관리자 `카페 원고·릴스 작업`에서 **Windows 자동화 프로그램 다운로드**를 누릅니다.
+2. 압축을 풀고 `설치.cmd`를 더블클릭합니다.
+3. 설치된 **GNLAW SmartEditor**에서 `1. 최초 로그인`을 누릅니다.
+4. 열린 Chrome에서 네이버와 `gnlaw-criminal.co.kr` 관리자 로그인을 완료한 뒤 프로그램의 `로그인 확인 완료`를 누릅니다.
 
-열린 Chrome에서 네이버와 `gnlaw-criminal.co.kr` 관리자 로그인을 완료한 후 PowerShell에서 Enter를 누릅니다. 아이디·비밀번호는 프로그램이 저장하지 않고 Chrome 전용 프로필의 로그인 쿠키만 유지합니다.
+아이디·비밀번호는 프로그램이 저장하지 않고 Chrome 전용 프로필의 로그인 쿠키만 유지합니다. 집 PC와 회사 PC에 각각 설치할 수 있지만 두 PC에서 자동화를 동시에 실행하지 않습니다.
 
 ## 2. 작업 대기열 사용
 
-1. 관리자 대시보드에서 카페 원고를 생성하고 `SmartEditor PC 업로드 대기`를 누릅니다.
-2. 회사 PC에서 다음 명령을 실행합니다.
+1. 관리자 대시보드에서 사건명을 한 건 또는 여러 건 등록합니다.
+2. PC의 **GNLAW SmartEditor**에서 `2. 자동화 시작`을 누르고 창을 켜둡니다.
 
-```powershell
-npm run naver:cafe:watch -- --publish
-```
-
-러너가 SmartEditor에 모든 내용을 준비한 뒤 실제 게시 여부를 묻습니다. 작업에 `videoUrl`이 저장되어 있으면 MP4/MOV 파일을 내려받아 이미지 다음에 함께 첨부합니다. 공개 글의 이미지 링크와 영상 존재까지 검증한 후 게시글 URL을 관리자 작업에 저장합니다.
-
-### 완전 자동 게시
-
-```powershell
-npm run naver:cafe:watch -- --publish --yes
-```
-
-`--yes`는 공개 글 등록 직전의 사람 확인을 생략합니다. 초기 운영 기간에는 `--yes`를 빼고 사용하는 것을 권장합니다.
+프로그램이 대기열을 확인해 릴스 영상 생성, Instagram 게시 및 주소 확인, 원고에 릴스 주소 삽입, SmartEditor 이미지·영상 첨부와 실제 게시까지 수행합니다. 공개 글의 전화·카카오 이미지 링크와 영상 존재를 검증한 뒤 게시글 URL을 관리자 작업에 저장합니다.
 
 ## 3. 개별 작업 실행
 

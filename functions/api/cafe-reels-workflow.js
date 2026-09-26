@@ -10,6 +10,9 @@ const SETTINGS_PATH = "data/settings.json";
 const NAVER_TOKEN_KEY = "naver-cafe:oauth:v1";
 const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
+const NAVER_ARTICLE_SEQUENCE_KEY = "cafe-reels:naver-article-sequence:v1";
+const NAVER_ARTICLE_START = 134;
+const NAVER_CAFE_SLUG = "gnlawfintech";
 const NAVER_CAFE_MAX_IMAGES = 100;
 const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
 const NAVER_CAFE_KAKAO_HREF = "https://gnlaw-criminal.co.kr/kakao_redirect/";
@@ -37,7 +40,32 @@ export async function onRequestPost({ request, env }) {
     const action = String(body?.action || "save-job");
 
     if (action === "save-job") {
-      const job = await saveJob(env, buildJob(body));
+      const built = buildJob(body);
+      const previous = body?.jobId ? await loadJob(env, built.id) : null;
+      const reservedNaverArticleId = normalizeText(
+        previous?.reservedNaverArticleId || await reserveNaverArticleId(env),
+      );
+      const expectedCafeUrl = `https://cafe.naver.com/${NAVER_CAFE_SLUG}/${reservedNaverArticleId}`;
+      const autoFlow = Boolean(body?.autoFlow);
+      const prepared = {
+        ...built,
+        createdAt: previous?.createdAt || built.createdAt,
+        reservedNaverArticleId,
+        expectedCafeUrl,
+        cafeUrl: built.cafeUrl || previous?.cafeUrl || expectedCafeUrl,
+        cafeStatus: autoFlow ? "awaiting-reel" : (previous?.cafeStatus || built.cafeStatus),
+        videoStatus: autoFlow ? "render-queued" : (previous?.videoStatus || built.videoStatus),
+        automationMode: autoFlow ? "full" : (previous?.automationMode || "manual"),
+        instagramStatus: previous?.instagramStatus || built.instagramStatus,
+        instagramContainerId: previous?.instagramContainerId || "",
+        instagramMediaId: previous?.instagramMediaId || "",
+        instagramPermalink: previous?.instagramPermalink || "",
+        instagramPublishedAt: previous?.instagramPublishedAt || "",
+        naverArticleId: previous?.naverArticleId || "",
+        caption: "",
+      };
+      prepared.caption = buildCaption(prepared);
+      const job = await saveJob(env, prepared);
       return json({ ok: true, job, message: "카페 원고·이미지·릴스 작업이 저장되었습니다." });
     }
 
@@ -95,9 +123,24 @@ export async function onRequestPost({ request, env }) {
         smartEditorError: status === "failed" ? String(body?.message || "SmartEditor 업로드 실패").slice(0, 1200) : "",
         smartEditorUpdatedAt: new Date().toISOString(),
         cafeUrl,
+        naverArticleId: articleIdFromCafeUrl(cafeUrl) || job.naverArticleId || "",
         caption: buildCaption({ ...job, cafeUrl }),
       });
       return json({ ok: true, job: next, message: "SmartEditor 작업 상태를 저장했습니다." });
+    }
+
+    if (action === "report-render") {
+      const job = await requireJob(env, body?.jobId);
+      const status = normalizeText(body?.status || "");
+      const allowed = new Set(["rendering", "failed"]);
+      if (!allowed.has(status)) return json({ ok: false, message: "영상 생성 상태값이 올바르지 않습니다." }, 400);
+      const next = await saveJob(env, {
+        ...job,
+        videoStatus: status,
+        videoError: status === "failed" ? String(body?.message || "영상 생성 실패").slice(0, 1200) : "",
+        videoUpdatedAt: new Date().toISOString(),
+      });
+      return json({ ok: true, job: next, message: "영상 생성 상태를 저장했습니다." });
     }
 
     if (action === "set-cafe-url") {
@@ -241,16 +284,40 @@ async function updateIndex(env, job) {
     title: job.draft?.title || "",
     cafeStatus: job.cafeStatus || "",
     instagramStatus: job.instagramStatus || "",
+    videoStatus: job.videoStatus || "",
+    reservedNaverArticleId: job.reservedNaverArticleId || "",
+    expectedCafeUrl: job.expectedCafeUrl || "",
     updatedAt: job.updatedAt,
   };
   const next = [item, ...index.filter((entry) => entry.id !== job.id)]
     .sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")))
-    .slice(0, 80);
+    .slice(0, 500);
   await env.CASES.put(INDEX_KEY, JSON.stringify(next));
 }
 
 async function loadIndex(env) {
   return (await env.CASES.get(INDEX_KEY, "json").catch(() => null)) || [];
+}
+
+async function reserveNaverArticleId(env) {
+  const stored = await env.CASES.get(NAVER_ARTICLE_SEQUENCE_KEY, "json").catch(() => null);
+  let next = Number(stored?.next || stored || 0);
+  if (!Number.isFinite(next) || next < NAVER_ARTICLE_START) {
+    const index = await loadIndex(env);
+    let highest = NAVER_ARTICLE_START - 1;
+    for (const entry of index) {
+      const job = await loadJob(env, safeId(entry?.id || ""));
+      const candidates = [
+        Number(job?.reservedNaverArticleId || 0),
+        Number(job?.naverArticleId || 0),
+        Number(articleIdFromCafeUrl(job?.cafeUrl || "") || 0),
+      ].filter(Number.isFinite);
+      highest = Math.max(highest, ...candidates);
+    }
+    next = Math.max(NAVER_ARTICLE_START, highest + 1);
+  }
+  await env.CASES.put(NAVER_ARTICLE_SEQUENCE_KEY, JSON.stringify({ next: next + 1, updatedAt: new Date().toISOString() }));
+  return String(next);
 }
 
 async function startInstagramReel(env, job, requestedCaption = "") {
@@ -340,11 +407,20 @@ async function checkInstagramReel(env, job) {
     instagramError: "",
     instagramPublishedAt: new Date().toISOString(),
     instagramUpdatedAt: new Date().toISOString(),
+    cafeStatus: permalink ? "smarteditor-queued" : "awaiting-instagram-permalink",
+    smartEditorStatus: permalink ? "queued" : (job.smartEditorStatus || ""),
+    smartEditorQueuedAt: permalink ? new Date().toISOString() : (job.smartEditorQueuedAt || ""),
+    draft: {
+      ...job.draft,
+      body: permalink ? appendInstagramReelLink(job.draft?.body || "", permalink) : (job.draft?.body || ""),
+    },
   });
   return {
     job: next,
     done: true,
-    message: permalink ? `Instagram 릴스 게시 완료: ${permalink}` : "Instagram 릴스 게시가 완료되었습니다.",
+    message: permalink
+      ? `Instagram 릴스 게시 완료 및 SmartEditor 자동 게시 대기 등록: ${permalink}`
+      : "Instagram 릴스 게시물 주소를 확인하지 못해 카페 자동 게시 대기 등록을 보류했습니다.",
   };
 }
 
@@ -881,17 +957,56 @@ function sanitizeImages(images) {
   })).filter((item) => item.slot && item.url);
 }
 
-function buildCaption(job = {}) {
-  const title = normalizeText(job.draft?.title || job.title || `${job.caseName || "사기 피해"} 대응 안내`);
-  const cafeUrl = normalizeHttpUrl(job.cafeUrl || "");
+export function buildCaption(job = {}) {
+  const caseName = normalizeText(job.caseName || job.draft?.caseName || "");
+  const landingUrl = normalizeHttpUrl(job.draft?.landingUrl || job.landingUrl || "");
+  const cafeUrl = normalizeHttpUrl(job.cafeUrl || job.expectedCafeUrl || "");
+  const payment = job.imageSetKey === "payment-suspension-release" || job.fraudType === "payment-suspension-release";
+
+  if (payment) {
+    const bankName = /은행(?:\s|$)/.test(caseName) ? caseName : `${caseName}은행`;
+    const subject = /계좌\s*지급정지\s*해제/.test(bankName) ? bankName : `${bankName} 계좌지급정지해제`;
+    return normalizeCaption([
+      `🚨[계좌지급정지해제] ${subject}⏳02-6348-0406 지금 바로 긴급 상담⏰망설이면 늦습니다.📌${landingUrl}`,
+      "",
+      `${subject} 망설이지 않고 상담 받으면 늦지 않습니다.`,
+      "",
+      "🚨채무부존재확인소송 법무법인 선린 금융사기피해센터 카카오톡 상담",
+      "📌 https://pf.kakao.com/_WkdxfX/chat",
+      "",
+      "법무법인 선린 계좌 지급정지 대응센터",
+      "📢 https://gnlaw-recovery.co.kr",
+      cafeUrl ? `📢 ${cafeUrl}` : null,
+    ].filter((line) => line !== null).join("\n"));
+  }
+
+  const subject = /사칭\s*사기/.test(caseName) ? caseName : `${caseName} 사칭 사기`;
+  const compactTag = subject.replace(/[^0-9A-Za-z가-힣]/g, "");
   return normalizeCaption([
-    title,
+    `🚨[사기피해주의] ${subject}⏳02-6348-0406 지금 바로 긴급 상담⏰망설이면 늦습니다.📌${landingUrl}`,
     "",
-    "피해 정황과 입금 자료를 보존한 뒤 법률 대응 가능성을 확인하세요.",
-    cafeUrl ? `자세한 내용: ${cafeUrl}` : "",
+    `${subject} 투자 리딩방 사기 피해 회복 망설이지 않고 상담 받으면 늦지 않습니다.`,
     "",
-    "#법무법인선린 #사기피해 #금융사기 #피해회복",
-  ].filter(Boolean).join("\n"));
+    "📌법무법인 선린 금융사기피해센터 카카오톡 상담 https://pf.kakao.com/_WkdxfX/chat",
+    "",
+    "다른 리딩방 사기 사건 보기는 이곳",
+    "📢 https://gnlaw-criminal.co.kr/prosecute/jusigridingbang-litigation/",
+    cafeUrl ? `📢 ${cafeUrl}` : null,
+    "",
+    `#${compactTag} #투자사기 #리딩방사기 #팀미션사기 #법무법인선린 #금융사기피해센터 #금융사기 #피해회복`,
+  ].filter((line) => line !== null).join("\n"));
+}
+
+function appendInstagramReelLink(body = "", permalink = "") {
+  const cleanBody = String(body || "").trim();
+  const url = normalizeHttpUrl(permalink);
+  if (!url || cleanBody.includes(url)) return cleanBody;
+  return `${cleanBody}\n\nInstagram 릴스 영상\n${url}`.trim();
+}
+
+function articleIdFromCafeUrl(value = "") {
+  const match = String(value || "").match(/\/(?:articles\/)?(\d+)(?:[/?#]|$)/i);
+  return match?.[1] || "";
 }
 
 function normalizeCaption(value = "") {
