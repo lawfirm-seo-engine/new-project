@@ -154,7 +154,7 @@ function createCafeDraft(caseName, fraudType) {
   const victimCase = standardVictimCases(fraudType)[0]
     .replace(/^사례\s*1\s*/i, "")
     .trim();
-  const title = `${keyword} 피해 대응, 출금거부·추가입금 요구 확인할 점`;
+  const title = buildFraudCafeTitle(caseName);
 
   const sections = [
     {
@@ -342,6 +342,10 @@ async function findExistingLanding(env, incoming, group) {
   return cases.find((item) => (
     hasLandingForGroup(item, landingKey) && isExactLandingIdentity(incoming, item)
   )) || null;
+}
+
+export function buildFraudCafeTitle(caseName) {
+  return `${standardCaseKeyword(caseName)}, 출금거부·추가입금 요구 피해 회복 대응`;
 }
 
 export function isExactLandingIdentity(incoming = {}, existing = {}) {

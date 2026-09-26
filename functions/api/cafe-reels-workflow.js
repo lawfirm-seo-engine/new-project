@@ -688,9 +688,12 @@ async function resolveCafeImages(env, job) {
 }
 
 function withCanonicalArticleImage(image, setKey) {
-  if (!/^\d{2}$/.test(image.slot) || !/^\/api\/criminal-board-image\?id=/i.test(image.url)) return image;
   const directory = setKey === "payment-suspension-release" ? "payment-suspension-release" : "fraud";
-  return { ...image, url: `/assets/cafe-reels/${directory}/${image.slot}.jpg` };
+  const numericLimit = directory === "payment-suspension-release" ? 10 : 12;
+  const numericSlot = /^\d{2}$/.test(image.slot) && Number(image.slot) >= 1 && Number(image.slot) <= numericLimit;
+  const contactSlot = image.slot === "phone" || image.slot === "kakao";
+  if (!numericSlot && !contactSlot) return image;
+  return { ...image, url: `/assets/cafe-reels/${directory}/${image.slot}.png` };
 }
 
 function selectNaverUploadImages(images = []) {

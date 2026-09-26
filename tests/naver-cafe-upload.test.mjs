@@ -1,7 +1,24 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { onRequestGet as onAssetsGet } from "../functions/api/cafe-reels-assets.js";
 import { onRequestPost } from "../functions/api/cafe-reels-workflow.js";
+
+test("bundled Cafe image sets use the replacement PNG assets", async () => {
+  const response = await onAssetsGet({
+    env: { CASES: { async get() { return null; } } },
+  });
+  const result = await response.json();
+  assert.equal(result.ok, true);
+  assert.equal(result.sets.fraud.slots.length, 14);
+  assert.equal(result.sets.fraud.slots[0].url, "/assets/cafe-reels/fraud/01.png");
+  assert.equal(result.sets.fraud.slots.at(-2).url, "/assets/cafe-reels/fraud/phone.png");
+  assert.equal(result.sets.fraud.slots.at(-1).url, "/assets/cafe-reels/fraud/kakao.png");
+  assert.equal(result.sets["payment-suspension-release"].slots.length, 12);
+  assert.equal(result.sets["payment-suspension-release"].slots[9].url, "/assets/cafe-reels/payment-suspension-release/10.png");
+  assert.equal(result.sets["payment-suspension-release"].slots.at(-2).url, "/assets/cafe-reels/payment-suspension-release/phone.png");
+  assert.equal(result.sets["payment-suspension-release"].slots.at(-1).url, "/assets/cafe-reels/payment-suspension-release/kakao.png");
+});
 
 test("SmartEditor queue and runner status are persisted", async () => {
   const jobId = "smarteditor-job";
@@ -98,8 +115,10 @@ test("Naver Cafe upload appends clickable phone and Kakao bridge URLs", async ()
     GITHUB_BRANCH: "main",
     GITHUB_TOKEN: "github-token",
   };
-  const jpeg = new Uint8Array([
-    0xff, 0xd8, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x02, 0x00, 0x03, 0x03,
+  const png = new Uint8Array([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+    0x00, 0x00, 0x04, 0x38, 0x00, 0x00, 0x07, 0x80,
   ]);
   let uploadRequest;
   const requestedImageUrls = [];
@@ -117,10 +136,10 @@ test("Naver Cafe upload appends clickable phone and Kakao bridge URLs", async ()
     }
     if (url.startsWith("https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/")) {
       requestedImageUrls.push(url);
-      return new Response(jpeg, { headers: { "Content-Type": "image/jpeg" } });
+      return new Response(png, { headers: { "Content-Type": "image/png" } });
     }
     if (url.startsWith("https://images.example/")) {
-      return new Response(jpeg, { headers: { "Content-Type": "image/jpeg" } });
+      return new Response(png, { headers: { "Content-Type": "image/png" } });
     }
     if (url.startsWith("https://openapi.naver.com/")) {
       uploadRequest = { url, init };
@@ -148,12 +167,16 @@ test("Naver Cafe upload appends clickable phone and Kakao bridge URLs", async ()
     const multipart = new TextDecoder().decode(uploadRequest.init.body);
     assert.equal((multipart.match(/name="image"/g) || []).length, 14);
     assert.doesNotMatch(multipart, /name="image\[\d+\]"/);
-    assert.match(multipart, /filename="naver-cafe-12\.jpg"/);
-    assert.match(multipart, /filename="naver-cafe-phone\.jpg"/);
-    assert.match(multipart, /filename="naver-cafe-kakao\.jpg"/);
+    assert.match(multipart, /filename="naver-cafe-12\.png"/);
+    assert.match(multipart, /filename="naver-cafe-phone\.png"/);
+    assert.match(multipart, /filename="naver-cafe-kakao\.png"/);
     assert.deepEqual(
       requestedImageUrls,
-      Array.from({ length: 12 }, (_, index) => `https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.jpg`),
+      [
+        ...Array.from({ length: 12 }, (_, index) => `https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.png`),
+        "https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/phone.png",
+        "https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/kakao.png",
+      ],
     );
     assert.doesNotMatch(multipart, /%3Ca(?:%20|%3E)|src%3D%22%23/i);
     assert.match(multipart, /https%3A%2F%2Fgnlaw-criminal\.co\.kr%2Fcall_redirect%2F/i);

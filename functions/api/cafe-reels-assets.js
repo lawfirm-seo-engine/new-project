@@ -1,6 +1,10 @@
 const CONFIG_KEY = "cafe-reels:asset-sets:v1";
 const IMAGE_RE = /^(https?:\/\/|\/api\/criminal-board-image\?id=|\/assets\/cafe-reels\/)/i;
 
+function bundledImageUrl(setKey, slot) {
+  return `/assets/cafe-reels/${setKey}/${slot}.png`;
+}
+
 const DEFAULT_SETS = {
   fraud: {
     label: "사기피해 원고",
@@ -10,9 +14,10 @@ const DEFAULT_SETS = {
         slot: String(index + 1).padStart(2, "0"),
         label: `${String(index + 1).padStart(2, "0")} 이미지`,
         href: "",
+        url: bundledImageUrl("fraud", String(index + 1).padStart(2, "0")),
       })),
-      { slot: "phone", label: "전화 이미지", href: "tel:02-6348-0406" },
-      { slot: "kakao", label: "카카오톡 이미지", href: "https://pf.kakao.com/_WkdxfX/chat" },
+      { slot: "phone", label: "전화 이미지", href: "tel:02-6348-0406", url: bundledImageUrl("fraud", "phone") },
+      { slot: "kakao", label: "카카오톡 이미지", href: "https://pf.kakao.com/_WkdxfX/chat", url: bundledImageUrl("fraud", "kakao") },
     ],
   },
   "payment-suspension-release": {
@@ -23,9 +28,10 @@ const DEFAULT_SETS = {
         slot: String(index + 1).padStart(2, "0"),
         label: `${String(index + 1).padStart(2, "0")} 이미지`,
         href: "",
+        url: bundledImageUrl("payment-suspension-release", String(index + 1).padStart(2, "0")),
       })),
-      { slot: "phone", label: "전화 이미지", href: "tel:02-6348-0406" },
-      { slot: "kakao", label: "카카오톡 이미지", href: "https://pf.kakao.com/_WkdxfX/chat" },
+      { slot: "phone", label: "전화 이미지", href: "tel:02-6348-0406", url: bundledImageUrl("payment-suspension-release", "phone") },
+      { slot: "kakao", label: "카카오톡 이미지", href: "https://pf.kakao.com/_WkdxfX/chat", url: bundledImageUrl("payment-suspension-release", "kakao") },
     ],
   },
 };
@@ -51,7 +57,7 @@ export async function onRequestPost({ request, env }) {
     const incoming = Array.isArray(body?.slots) ? body.slots : [];
     const nextSlots = DEFAULT_SETS[setKey].slots.map((defaultSlot) => {
       const item = incoming.find((slot) => String(slot?.slot || "") === defaultSlot.slot) || {};
-      const url = normalizeUrl(item.url);
+      const url = defaultSlot.url || normalizeUrl(item.url);
       const href = fixedContactHref(defaultSlot);
       const label = normalizeLabel(item.label || defaultSlot.label);
       if (url && !IMAGE_RE.test(url)) throw new Error(`${defaultSlot.label}의 이미지 주소가 올바르지 않습니다.`);
@@ -91,7 +97,7 @@ async function loadSets(env) {
         slot: defaultSlot.slot,
         label: normalizeLabel(savedBySlot.get(defaultSlot.slot)?.label || defaultSlot.label),
         href: fixedContactHref(defaultSlot),
-        url: normalizeUrl(savedBySlot.get(defaultSlot.slot)?.url || ""),
+        url: defaultSlot.url || normalizeUrl(savedBySlot.get(defaultSlot.slot)?.url || ""),
       })),
     };
   }

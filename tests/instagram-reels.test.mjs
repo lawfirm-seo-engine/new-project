@@ -10,7 +10,7 @@ import {
   saveInstagramToken,
 } from "../functions/_instagram.js";
 import { buildCaption, onRequestPost as onWorkflowPost } from "../functions/api/cafe-reels-workflow.js";
-import { isExactLandingIdentity } from "../functions/api/generate-cafe-draft.js";
+import { buildFraudCafeTitle, isExactLandingIdentity } from "../functions/api/generate-cafe-draft.js";
 
 function testEnv(initial = []) {
   const stored = new Map(initial);
@@ -85,6 +85,13 @@ test("Cafe landing reuse requires the exact case instead of generic fraud tags",
   };
   assert.equal(isExactLandingIdentity(incoming, wrongExisting), false);
   assert.equal(isExactLandingIdentity(incoming, { ...incoming, title: "다른 부제" }), true);
+});
+
+test("Cafe fraud titles use the requested recovery-focused wording", () => {
+  assert.equal(
+    buildFraudCafeTitle("테스트 프로젝트"),
+    "테스트 프로젝트 사칭 사기, 출금거부·추가입금 요구 피해 회복 대응",
+  );
 });
 
 test("caption templates use the case, landing, and reserved Cafe URL", () => {

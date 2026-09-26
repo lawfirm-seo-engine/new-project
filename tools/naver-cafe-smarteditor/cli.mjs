@@ -268,18 +268,16 @@ async function processJob(context, config, job, options, existingPage = null) {
     await assertNaverLogin(page);
     await selectBoard(page, board);
 
-    await page.locator('textarea[placeholder="제목을 입력해 주세요."]').fill(String(job.draft.title || job.title || ""));
-    const editorBody = page.frameLocator('iframe[id^="input_buffer"]').locator("body");
-    await editorBody.waitFor({ state: "visible", timeout: 30_000 });
-    await editorBody.click();
-    await page.keyboard.insertText(String(job.draft.body || ""));
-    await editorBody.click();
-    await page.keyboard.press("Control+Home");
+    const articleTitle = String(job.draft.title || job.title || "");
+    await page.locator("p.se-text-paragraph").first().waitFor({ state: "visible", timeout: 30_000 });
+    await fillArticleTitle(page, articleTitle);
+    await insertArticleBody(page, String(job.draft.body || ""));
 
     const chooserPromise = page.waitForEvent("filechooser", { timeout: 30_000 });
     await page.getByRole("button", { name: "사진 추가", exact: true }).click();
     const chooser = await chooserPromise;
     await chooser.setFiles(files.map((file) => file.path));
+    await chooseIndividualPhotoMode(page);
     await waitForImageCount(page, images.length);
 
     if (videoFile) {
@@ -288,6 +286,7 @@ async function processJob(context, config, job, options, existingPage = null) {
 
     await setImageLink(page, phoneIndex, config.phoneLink);
     await setImageLink(page, kakaoIndex, config.kakaoLink);
+    await fillArticleTitle(page, articleTitle);
 
     const screenshotPath = path.join(config.artifactDir, `${safeFileName(job.id)}-${Date.now()}-prepared.png`);
     await page.screenshot({ path: screenshotPath, fullPage: false });
@@ -318,6 +317,10 @@ async function processJob(context, config, job, options, existingPage = null) {
     console.log(`공개 글 링크 검증: ${publishedLinks.join(", ")}`);
     return { posted: true, cafeUrl, screenshotPath, videoUploaded: Boolean(videoFile) };
   } catch (error) {
+    const failureScreenshotPath = path.join(config.artifactDir, `${safeFileName(job.id)}-${Date.now()}-failed.png`);
+    if (await page.screenshot({ path: failureScreenshotPath, fullPage: false }).then(() => true).catch(() => false)) {
+      console.error(`SmartEditor 실패 화면: ${failureScreenshotPath}`);
+    }
     if (options.publish) {
       await reportStatus(context, config, job.id, "failed", { message: error?.message || String(error) }).catch(() => {});
     }
@@ -329,8 +332,56 @@ async function processJob(context, config, job, options, existingPage = null) {
   }
 }
 
+async function fillArticleTitle(page, title) {
+  const input = page.locator('textarea[placeholder="제목을 입력해 주세요."]');
+  await input.fill(title);
+  if (await input.inputValue() !== title) throw new Error("카페 원고 제목 입력 검증 실패");
+}
+
+async function chooseIndividualPhotoMode(page) {
+  const heading = page.getByText("사진 첨부 방식", { exact: true }).last();
+  const appeared = await heading.waitFor({ state: "visible", timeout: 10_000 }).then(() => true).catch(() => false);
+  if (!appeared) return;
+  await page.getByText("개별사진", { exact: true }).last().click();
+  await heading.waitFor({ state: "hidden", timeout: 30_000 });
+}
+
+async function insertArticleBody(page, body) {
+  const content = String(body || "");
+  const paragraph = page.locator("p.se-text-paragraph").first();
+  await paragraph.waitFor({ state: "visible", timeout: 30_000 });
+  await paragraph.click();
+
+  const lines = content.replace(/\r\n?/g, "\n").split("\n");
+  for (let index = 0; index < lines.length; index += 1) {
+    if (lines[index]) await page.keyboard.insertText(lines[index]);
+    if (index < lines.length - 1) await page.keyboard.press("Enter");
+  }
+
+  const editorText = (await page.locator(".se-component-content").allInnerTexts()).join("\n");
+  const compactText = (value) => String(value || "").normalize("NFKC").replace(/[^0-9A-Za-z가-힣]/g, "");
+  const normalizedEditorText = compactText(editorText);
+  const verifiableLines = lines
+    .map((line) => line.trim())
+    .filter((line) => line && !/https?:\/\//i.test(line))
+    .map((line) => compactText(line.replace(/^(?:[-*•·]+|\d+[.)])\s*/, "")))
+    .filter(Boolean);
+  const expectedLength = verifiableLines.join("").length;
+  if (normalizedEditorText.length < Math.max(80, expectedLength * 0.45)) {
+    throw new Error(`카페 원고 본문 입력 분량 검증 실패: 예상 ${expectedLength}자 / 확인 ${normalizedEditorText.length}자`);
+  }
+  const firstLine = verifiableLines[0] || "";
+  if (firstLine && !normalizedEditorText.includes(firstLine.slice(0, Math.min(12, firstLine.length)))) {
+    throw new Error(`카페 원고 본문 입력 검증 실패: ${firstLine.slice(0, 80)}`);
+  }
+
+  await page.locator("p.se-text-paragraph").first().click();
+  await page.keyboard.press("Control+Home");
+}
+
 async function selectBoard(page, board) {
   await page.locator('textarea[placeholder="제목을 입력해 주세요."]').waitFor({ state: "visible", timeout: 30_000 });
+  if (new URL(page.url()).pathname.includes(`/menus/${board.menuId}/articles/write`)) return;
   const empty = page.getByText("게시판을 선택해 주세요.", { exact: true });
   if (!await empty.isVisible().catch(() => false)) return;
 
@@ -454,29 +505,66 @@ async function downloadVideo(context, videoUrl, tempDir) {
 async function uploadVideo(page, videoFile, title) {
   const components = page.locator("div.se-component.se-video");
   const beforeCount = await components.count();
+  const uploader = page.locator("#video-uploader-wrap");
+  const toolbarButton = page.locator('button[data-name="video"]');
+  let uploaderOpened = false;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.keyboard.press("Escape").catch(() => {});
+    await page.locator("p.se-text-paragraph").first().click();
+    await page.keyboard.press("Control+Home");
+    await toolbarButton.click();
+    uploaderOpened = await uploader.waitFor({ state: "visible", timeout: 5_000 }).then(() => true).catch(() => false);
+    if (uploaderOpened) break;
+    await delay(1_000);
+  }
+  if (!uploaderOpened) throw new Error("네이버 동영상 업로더를 열지 못했습니다.");
   const chooserPromise = page.waitForEvent("filechooser", { timeout: 30_000 });
-  await page.getByRole("button", { name: "동영상 추가", exact: true }).click();
+  await uploader.locator("button.nvu_btn_append.nvu_local").click();
   const chooser = await chooserPromise;
   await chooser.setFiles(videoFile.path);
+  console.log("[영상] 릴스 파일을 네이버 업로더에 전달했습니다.");
 
   const deadline = Date.now() + 300_000;
   let dialogHandled = false;
   while (Date.now() < deadline) {
     if (await components.count() > beforeCount) {
+      console.log("[영상] SmartEditor 영상 컴포넌트가 생성되었습니다.");
       const component = components.nth(beforeCount);
       await waitForVideoProcessing(component, deadline - Date.now());
+      console.log("[영상] SmartEditor 영상 처리가 완료되었습니다.");
       return;
     }
 
-    const dialog = page.getByRole("dialog").filter({ hasText: /동영상|비디오/ }).last();
-    if (!dialogHandled && await dialog.isVisible().catch(() => false)) {
-      const titleInput = dialog.locator('input[placeholder*="제목"], textarea[placeholder*="제목"]').first();
+    if (!dialogHandled && await uploader.isVisible().catch(() => false)) {
+      const titleInput = uploader.locator('input[placeholder*="제목"], textarea[placeholder*="제목"]').first();
       if (await titleInput.isVisible().catch(() => false)) await titleInput.fill(title.slice(0, 100));
 
-      const apply = dialog.getByRole("button", { name: /^(등록|첨부|올리기|완료|확인|저장)$/ }).last();
-      if (await apply.isVisible().catch(() => false) && await apply.isEnabled().catch(() => false)) {
-        await apply.click();
-        dialogHandled = true;
+      const uploaderText = await uploader.innerText().catch(() => "");
+      const uploadReady = /업로드 완료/.test(uploaderText) && !/업로드 진행중|로딩중/.test(uploaderText);
+      if (!uploadReady) {
+        await delay(750);
+        continue;
+      }
+
+      const completeLabels = page.getByText("완료", { exact: true });
+      for (let index = await completeLabels.count() - 1; index >= 0; index -= 1) {
+        const complete = completeLabels.nth(index);
+        if (await complete.isVisible().catch(() => false) && await complete.isEnabled().catch(() => true)) {
+          await complete.click();
+          console.log("[영상] 업로더의 완료 컨트롤을 클릭했습니다.");
+          dialogHandled = true;
+          break;
+        }
+      }
+      if (!dialogHandled) {
+        const apply = uploader.locator("button:visible").filter({
+          hasText: /^\s*(등록|첨부|올리기|확인|저장)\s*$/,
+        }).last();
+        if (await apply.isVisible().catch(() => false) && await apply.isEnabled().catch(() => false)) {
+          await apply.click();
+          console.log("[영상] 업로더의 적용 컨트롤을 클릭했습니다.");
+          dialogHandled = true;
+        }
       }
     }
     await delay(750);

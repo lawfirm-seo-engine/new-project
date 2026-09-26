@@ -89,11 +89,32 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /processJob\(context, config, job, options, monitorPage\)/);
   assert.doesNotMatch(source, /locator\("#localAssets"\)\.setInputFiles/);
   assert.doesNotMatch(source, /videoStatus === "render-queued"/);
+  assert.doesNotMatch(source, /frameLocator\('iframe\[id\^="input_buffer"\]'\)/);
+  assert.match(source, /locator\("p\.se-text-paragraph"\)\.first\(\)/);
+  assert.match(source, /page\.keyboard\.press\("Enter"\)/);
+  assert.match(source, /카페 원고 본문 입력 검증 실패/);
+  assert.match(source, /chooseIndividualPhotoMode\(page\)/);
+  assert.match(source, /getByText\("개별사진", \{ exact: true \}\)\.last\(\)\.click\(\)/);
+  assert.match(source, /await fillArticleTitle\(page, articleTitle\)/);
+  assert.match(source, /await uploadVideo\(page, videoFile/);
+  assert.match(source, /locator\("#video-uploader-wrap"\)/);
+  assert.match(source, /button\[data-name="video"\]/);
+  assert.match(source, /네이버 동영상 업로더를 열지 못했습니다/);
+  assert.match(source, /button\.nvu_btn_append\.nvu_local/);
+  assert.match(source, /getByText\("완료", \{ exact: true \}\)/);
+  assert.match(source, /\/업로드 완료\/\.test\(uploaderText\)/);
+  assert.match(source, /!\/업로드 진행중\|로딩중\/\.test\(uploaderText\)/);
+  assert.match(source, /locator\("button:visible"\)\.filter/);
+  assert.match(source, /await setImageLink\(page, phoneIndex, config\.phoneLink\)/);
+  assert.match(source, /await setImageLink\(page, kakaoIndex, config\.kakaoLink\)/);
+  assert.match(source, /verifyPublishedLinks\(page, \[config\.phoneLink, config\.kakaoLink\]\)/);
+  assert.match(source, /if \(videoFile\) await verifyPublishedVideo\(page\)/);
 });
 
 test("SmartEditor accepts a board already selected by the menu URL", () => {
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   assert.match(source, /selectBoard\(page, board\)/);
+  assert.match(source, /pathname\.includes\(`\/menus\/\$\{board\.menuId\}\/articles\/write`\)/);
   assert.match(source, /if \(!await empty\.isVisible\(\)\.catch\(\(\) => false\)\) return/);
   assert.doesNotMatch(source, /getByText\(boardLabel, \{ exact: true \}\)/);
 });
