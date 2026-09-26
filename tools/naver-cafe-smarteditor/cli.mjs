@@ -66,8 +66,16 @@ export function orderedJobImages(job = [], siteOrigin = DEFAULT_SITE_ORIGIN) {
       slot: String(image.slot || index + 1),
       url: new URL(String(image.url), `${cleanOrigin(siteOrigin)}/`).href,
     }));
-  const contacts = images.filter((image) => image.slot === "phone" || image.slot === "kakao");
-  const regular = images.filter((image) => image.slot !== "phone" && image.slot !== "kakao");
+  const contactOrder = new Map([["phone", 0], ["kakao", 1]]);
+  const contacts = images
+    .filter((image) => contactOrder.has(image.slot))
+    .sort((left, right) => contactOrder.get(left.slot) - contactOrder.get(right.slot));
+  const regular = images
+    .filter((image) => !contactOrder.has(image.slot))
+    .sort((left, right) => left.slot.localeCompare(right.slot, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    }));
   return [...regular, ...contacts];
 }
 
@@ -88,6 +96,20 @@ export function jobVideoUrl(job = {}, siteOrigin = DEFAULT_SITE_ORIGIN) {
     throw new Error("릴스 영상 URL은 HTTP 또는 HTTPS 주소여야 합니다.");
   }
   return url.href;
+}
+
+export function articleBodyForJob(job = {}) {
+  const body = String(job?.draft?.body || "").replace(/\r\n?/g, "\n");
+  const permalink = String(job?.instagramPermalink || "").trim();
+  if (!permalink) return body;
+
+  const lines = body.split("\n");
+  const filtered = lines.filter((line, index) => {
+    if (line.trim() === permalink) return false;
+    if (line.trim() !== "Instagram 릴스 영상") return true;
+    return !lines.slice(index + 1).some((nextLine) => nextLine.trim() === permalink);
+  });
+  return filtered.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 export function hasNaverSessionCookies(cookies = []) {
@@ -273,7 +295,7 @@ async function processJob(context, config, job, options, existingPage = null) {
     await page.locator("p.se-text-paragraph:visible").first().waitFor({ state: "visible", timeout: 30_000 });
     await resetEditorForJob(page);
     await fillArticleTitle(page, articleTitle);
-    await insertArticleBody(page, String(job.draft.body || ""));
+    await insertArticleBody(page, articleBodyForJob(job));
 
     await chooseImageFiles(page, files.map((file) => file.path));
     await chooseIndividualPhotoMode(page);
@@ -281,6 +303,9 @@ async function processJob(context, config, job, options, existingPage = null) {
 
     if (videoFile) {
       await uploadVideo(page, videoFile, String(job.caseName || job.draft.title || "릴스 영상"));
+    }
+    if (job.instagramPermalink) {
+      await insertInstagramReelPreview(page, job.instagramPermalink);
     }
 
     await setImageLink(page, phoneIndex, config.phoneLink);
@@ -308,7 +333,7 @@ async function processJob(context, config, job, options, existingPage = null) {
     }
 
     await submitArticle(page);
-    const cafeUrl = page.url();
+    const cafeUrl = await canonicalCafeArticleUrl(page, config, job.reservedNaverArticleId);
     const publishedLinks = await verifyPublishedLinks(page, [config.phoneLink, config.kakaoLink]);
     if (videoFile) await verifyPublishedVideo(page);
     await reportStatus(context, config, job.id, "posted", { cafeUrl });
@@ -458,15 +483,20 @@ async function insertArticleBody(page, body) {
   await focusEditorParagraph(page, true);
 
   const lines = content.replace(/\r\n?/g, "\n").split("\n");
-  for (let index = 0; index < lines.length; index += 1) {
-    if (lines[index]) {
-      await page.keyboard.insertText(lines[index]);
-      await delay(50);
-    }
-    if (index < lines.length - 1) {
+  const paragraphs = content.replace(/\r\n?/g, "\n")
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+  for (let index = 0; index < paragraphs.length; index += 1) {
+    await page.keyboard.insertText(paragraphs[index]);
+    await delay(40);
+    if (index < paragraphs.length - 1) {
       await page.keyboard.press("Enter");
-      await delay(100);
+      await delay(75);
       await page.keyboard.press("Escape").catch(() => {});
+      await focusEditorParagraph(page);
+      await page.keyboard.press("Enter");
+      await delay(40);
       await focusEditorParagraph(page);
     }
   }
@@ -491,6 +521,56 @@ async function insertArticleBody(page, body) {
 
   await focusEditorParagraph(page, true);
   await page.keyboard.press("Control+Home");
+}
+
+async function insertInstagramReelPreview(page, rawPermalink) {
+  const permalink = String(rawPermalink || "").trim();
+  let url;
+  try {
+    url = new URL(permalink);
+  } catch {
+    throw new Error("Instagram 릴스 주소가 올바르지 않습니다.");
+  }
+  if (!/(^|\.)instagram\.com$/i.test(url.hostname)) {
+    throw new Error("Instagram 릴스 미리보기에는 instagram.com 주소가 필요합니다.");
+  }
+
+  const previews = page.locator([
+    "div.se-component.se-oglink",
+    "div.se-component[data-a11y-title*='링크']",
+    ".se-module-oglink",
+    "[data-module='oglink']",
+  ].join(", "));
+  const beforeCount = await previews.count();
+
+  await focusEditorParagraph(page);
+  await page.keyboard.press("Control+End");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  await page.keyboard.insertText(url.href);
+
+  const activeParagraph = page.locator("p.se-text-paragraph:visible").last();
+  const typedUrl = await activeParagraph.innerText().catch(() => "");
+  if (!typedUrl.includes(url.href)) {
+    throw new Error("Instagram 릴스 주소를 SmartEditor에 입력하지 못했습니다.");
+  }
+  await page.keyboard.press("Enter");
+
+  const deadline = Date.now() + 45_000;
+  while (Date.now() < deadline) {
+    const afterCount = await previews.count();
+    if (afterCount > beforeCount) {
+      const preview = previews.nth(afterCount - 1);
+      const previewText = await preview.innerText().catch(() => "");
+      const previewHtml = await preview.innerHTML().catch(() => "");
+      if (/instagram/i.test(`${previewText} ${previewHtml}`)) {
+        console.log("[Instagram] 클릭 링크와 미리보기 카드 생성을 확인했습니다.");
+        return;
+      }
+    }
+    await delay(500);
+  }
+  throw new Error("Instagram 릴스 링크의 미리보기 카드가 생성되지 않았습니다. 네이버 또는 Instagram 응답을 확인한 뒤 다시 실행해주세요.");
 }
 
 async function selectBoard(page, board) {
@@ -544,14 +624,52 @@ async function setImageLink(page, imageIndex, href) {
 async function submitArticle(page) {
   const register = page.getByRole("button", { name: "등록", exact: true });
   await register.first().click();
-  try {
-    await page.waitForURL(/\/articles\/\d+/, { timeout: 10_000, waitUntil: "domcontentloaded" });
-    return;
-  } catch {
-    const count = await register.count();
-    if (count > 1 && await register.last().isVisible()) await register.last().click();
+  if (await waitForPublishedArticleView(page, 10_000)) return;
+  const count = await register.count();
+  if (count > 1 && await register.last().isVisible()) {
+    await register.last().click();
   }
-  await page.waitForURL(/\/articles\/\d+/, { timeout: 60_000, waitUntil: "domcontentloaded" });
+  if (!await waitForPublishedArticleView(page, 60_000)) {
+    throw new Error(`카페 등록 후 게시글 화면을 확인하지 못했습니다: ${page.url()}`);
+  }
+}
+
+async function waitForPublishedArticleView(page, timeout) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (articleIdFromNaverUrl(page.url())) return true;
+    const edit = page.getByText("수정", { exact: true });
+    const remove = page.getByText("삭제", { exact: true });
+    if (await edit.isVisible().catch(() => false) && await remove.isVisible().catch(() => false)) return true;
+    await delay(500);
+  }
+  return false;
+}
+
+function articleIdFromNaverUrl(rawUrl) {
+  let decoded = String(rawUrl || "");
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+  const match = decoded.match(/\/articles\/(\d+)|[?&]articleid=(\d+)|\/gnlawfintech\/(\d+)(?:[/?#]|$)/i);
+  return match?.[1] || match?.[2] || match?.[3] || "";
+}
+
+async function canonicalCafeArticleUrl(page, config, fallbackArticleId = "") {
+  let articleId = articleIdFromNaverUrl(page.url());
+  if (!articleId) {
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute("href").catch(() => "");
+    articleId = articleIdFromNaverUrl(canonical);
+  }
+  articleId ||= String(fallbackArticleId || "").replace(/\D/g, "");
+  if (!articleId) throw new Error(`게시된 카페 글 번호를 확인하지 못했습니다: ${page.url()}`);
+  return `${config.cafeUrl}/${articleId}`;
 }
 
 async function verifyPublishedLinks(page, expectedLinks) {

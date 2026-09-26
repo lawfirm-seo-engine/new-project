@@ -11,13 +11,23 @@ test("bundled Cafe image sets use the replacement PNG assets", async () => {
   const result = await response.json();
   assert.equal(result.ok, true);
   assert.equal(result.sets.fraud.slots.length, 14);
-  assert.equal(result.sets.fraud.slots[0].url, "/assets/cafe-reels/fraud/01.png");
-  assert.equal(result.sets.fraud.slots.at(-2).url, "/assets/cafe-reels/fraud/phone.png");
-  assert.equal(result.sets.fraud.slots.at(-1).url, "/assets/cafe-reels/fraud/kakao.png");
+  assert.deepEqual(
+    result.sets.fraud.slots.map((item) => item.url),
+    [
+      ...Array.from({ length: 12 }, (_, index) => `/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.png`),
+      "/assets/cafe-reels/fraud/phone.png",
+      "/assets/cafe-reels/fraud/kakao.png",
+    ],
+  );
   assert.equal(result.sets["payment-suspension-release"].slots.length, 12);
-  assert.equal(result.sets["payment-suspension-release"].slots[9].url, "/assets/cafe-reels/payment-suspension-release/10.png");
-  assert.equal(result.sets["payment-suspension-release"].slots.at(-2).url, "/assets/cafe-reels/payment-suspension-release/phone.png");
-  assert.equal(result.sets["payment-suspension-release"].slots.at(-1).url, "/assets/cafe-reels/payment-suspension-release/kakao.png");
+  assert.deepEqual(
+    result.sets["payment-suspension-release"].slots.map((item) => item.url),
+    [
+      ...Array.from({ length: 10 }, (_, index) => `/assets/cafe-reels/payment-suspension-release/${String(index + 1).padStart(2, "0")}.png`),
+      "/assets/cafe-reels/payment-suspension-release/phone.png",
+      "/assets/cafe-reels/payment-suspension-release/kakao.png",
+    ],
+  );
 });
 
 test("SmartEditor queue and runner status are persisted", async () => {

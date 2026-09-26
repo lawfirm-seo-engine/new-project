@@ -431,7 +431,7 @@ async function checkInstagramReel(env, job) {
     smartEditorQueuedAt: permalink ? new Date().toISOString() : (job.smartEditorQueuedAt || ""),
     draft: {
       ...job.draft,
-      body: permalink ? appendInstagramReelLink(job.draft?.body || "", permalink) : (job.draft?.body || ""),
+      body: job.draft?.body || "",
     },
   });
   return {
@@ -1017,13 +1017,6 @@ export function buildCaption(job = {}) {
     "",
     `#${compactTag} #투자사기 #리딩방사기 #팀미션사기 #법무법인선린 #금융사기피해센터 #금융사기 #피해회복`,
   ].filter((line) => line !== null).join("\n"));
-}
-
-function appendInstagramReelLink(body = "", permalink = "") {
-  const cleanBody = String(body || "").trim();
-  const url = normalizeHttpUrl(permalink);
-  if (!url || cleanBody.includes(url)) return cleanBody;
-  return `${cleanBody}\n\nInstagram 릴스 영상\n${url}`.trim();
 }
 
 function articleIdFromCafeUrl(value = "") {

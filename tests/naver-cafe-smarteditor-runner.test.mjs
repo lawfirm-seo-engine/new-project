@@ -3,6 +3,7 @@ import fs from "node:fs";
 import test from "node:test";
 
 import {
+  articleBodyForJob,
   boardForJob,
   hasNaverSessionCookies,
   hasUnfinishedBatchJobs,
@@ -33,17 +34,43 @@ test("SmartEditor runner maps jobs to the two Naver Cafe boards", () => {
   });
 });
 
-test("SmartEditor runner keeps contact images last and resolves local URLs", () => {
+test("SmartEditor runner sorts numbered images and keeps phone then Kakao last", () => {
   const images = orderedJobImages([
     { slot: "phone", url: "/phone.jpg" },
+    { slot: "10", url: "/ten.jpg" },
     { slot: "02", url: "/two.jpg" },
     { slot: "kakao", url: "https://cdn.example/kakao.png" },
     { slot: "01", url: "/one.jpg" },
   ], "https://gnlaw-criminal.co.kr/");
 
-  assert.deepEqual(images.map((image) => image.slot), ["02", "01", "phone", "kakao"]);
-  assert.equal(images[0].url, "https://gnlaw-criminal.co.kr/two.jpg");
-  assert.equal(images[3].url, "https://cdn.example/kakao.png");
+  assert.deepEqual(images.map((image) => image.slot), ["01", "02", "10", "phone", "kakao"]);
+  assert.equal(images[0].url, "https://gnlaw-criminal.co.kr/one.jpg");
+  assert.equal(images[4].url, "https://cdn.example/kakao.png");
+});
+
+test("both Cafe image sets stay in filename order even when saved job data is shuffled", () => {
+  const shuffledFraud = ["12", "03", "phone", "01", "11", "kakao", "02"]
+    .map((slot) => ({ slot, url: `/assets/cafe-reels/fraud/${slot}.png` }));
+  const shuffledPayment = ["10", "02", "kakao", "01", "09", "phone", "03"]
+    .map((slot) => ({ slot, url: `/assets/cafe-reels/payment-suspension-release/${slot}.png` }));
+
+  assert.deepEqual(
+    orderedJobImages(shuffledFraud).map((image) => image.slot),
+    ["01", "02", "03", "11", "12", "phone", "kakao"],
+  );
+  assert.deepEqual(
+    orderedJobImages(shuffledPayment).map((image) => image.slot),
+    ["01", "02", "03", "09", "10", "phone", "kakao"],
+  );
+});
+
+test("legacy Instagram URL text is removed before SmartEditor creates a proper preview card", () => {
+  const instagramPermalink = "https://www.instagram.com/reel/example/";
+  assert.equal(articleBodyForJob({
+    instagramPermalink,
+    draft: { body: `첫 문단\n\nInstagram 릴스 영상\n${instagramPermalink}` },
+  }), "첫 문단");
+  assert.equal(articleBodyForJob({ draft: { body: "기존 본문" } }), "기존 본문");
 });
 
 test("desktop automation uses the Windows Chrome sandbox and opens the work screen", () => {
@@ -92,6 +119,8 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.doesNotMatch(source, /frameLocator\('iframe\[id\^="input_buffer"\]'\)/);
   assert.match(source, /locator\("p\.se-text-paragraph:visible"\)\.first\(\)/);
   assert.match(source, /page\.keyboard\.press\("Enter"\)/);
+  assert.match(source, /split\(\/\\n\{2,\}\/\)/);
+  assert.match(source, /paragraphs\[index\]/);
   assert.match(source, /카페 원고 본문 입력 검증 실패/);
   assert.match(source, /clearNaverDraftState\(page\)/);
   assert.match(source, /localStorage\.clear\(\)/);
@@ -105,6 +134,12 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /getByText\("개별사진", \{ exact: true \}\)\.last\(\)\.click\(\)/);
   assert.match(source, /await fillArticleTitle\(page, articleTitle\)/);
   assert.match(source, /await uploadVideo\(page, videoFile/);
+  assert.match(source, /await insertInstagramReelPreview\(page, job\.instagramPermalink\)/);
+  assert.doesNotMatch(source, /page\.keyboard\.insertText\("📌"\)/);
+  assert.match(source, /page\.keyboard\.insertText\(url\.href\)/);
+  assert.match(source, /typedUrl\.includes\(url\.href\)/);
+  assert.match(source, /se-component\.se-oglink/);
+  assert.match(source, /클릭 링크와 미리보기 카드 생성을 확인했습니다/);
   assert.match(source, /locator\("#video-uploader-wrap"\)/);
   assert.match(source, /button\[data-name="video"\]/);
   assert.match(source, /네이버 동영상 업로더를 열지 못했습니다/);
@@ -122,6 +157,10 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /await setImageLink\(page, kakaoIndex, config\.kakaoLink\)/);
   assert.match(source, /verifyPublishedLinks\(page, \[config\.phoneLink, config\.kakaoLink\]\)/);
   assert.match(source, /if \(videoFile\) await verifyPublishedVideo\(page\)/);
+  assert.match(source, /async function waitForPublishedArticleView/);
+  assert.match(source, /articleIdFromNaverUrl/);
+  assert.match(source, /\/gnlawfintech\\\/\(\\d\+\)/);
+  assert.match(source, /async function canonicalCafeArticleUrl/);
 });
 
 test("SmartEditor accepts a board already selected by the menu URL", () => {

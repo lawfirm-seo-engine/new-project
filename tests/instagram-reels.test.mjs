@@ -244,7 +244,7 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
     assert.equal(checked.result.job.instagramMediaId, "media-456");
     assert.equal(checked.result.job.instagramPermalink, "https://www.instagram.com/reel/example/");
     assert.equal(checked.result.job.cafeStatus, "smarteditor-queued");
-    assert.match(checked.result.job.draft.body, /https:\/\/www\.instagram\.com\/reel\/example\//);
+    assert.equal(checked.result.job.draft.body, "본문");
     assert.equal(calls.length, 4);
   } finally {
     globalThis.fetch = originalFetch;
