@@ -119,7 +119,7 @@ test("caption templates use the case, landing, and reserved Cafe URL", () => {
   assert.match(payment, /gnlawfintech\/135/);
 });
 
-test("Naver Cafe number stays at 134 until a SmartEditor post succeeds", async () => {
+test("Naver Cafe number stays at 135 until a SmartEditor post succeeds", async () => {
   const { env } = testEnv([["cafe-reels:jobs:index:v1", []]]);
   const save = async (caseName) => {
     const response = await onWorkflowPost({
@@ -143,11 +143,11 @@ test("Naver Cafe number stays at 134 until a SmartEditor post succeeds", async (
   };
   const first = await save("first");
   const second = await save("second");
-  assert.equal(first.job.reservedNaverArticleId, "134");
-  assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/134");
+  assert.equal(first.job.reservedNaverArticleId, "135");
+  assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/135");
   assert.equal(first.job.videoStatus, "awaiting-images");
   assert.equal(first.job.batchId, "bulk-test");
-  assert.equal(second.job.reservedNaverArticleId, "134");
+  assert.equal(second.job.reservedNaverArticleId, "135");
 
   const postedResponse = await onWorkflowPost({
     request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
@@ -157,14 +157,14 @@ test("Naver Cafe number stays at 134 until a SmartEditor post succeeds", async (
         action: "report-smarteditor",
         jobId: first.job.id,
         status: "posted",
-        cafeUrl: "https://cafe.naver.com/gnlawfintech/134",
+        cafeUrl: "https://cafe.naver.com/gnlawfintech/135",
       }),
     }),
     env,
   });
   assert.equal(postedResponse.status, 200);
   const third = await save("third");
-  assert.equal(third.job.reservedNaverArticleId, "135");
+  assert.equal(third.job.reservedNaverArticleId, "136");
 });
 
 test("Instagram Reel automation creates, checks, and publishes a Reel", async () => {

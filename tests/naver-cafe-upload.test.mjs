@@ -70,7 +70,7 @@ test("SmartEditor queue and runner status are persisted", async () => {
   });
   assert.equal(posted.result.job.cafeStatus, "smarteditor-posted");
   assert.equal(posted.result.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/999");
-  assert.equal(stored.get("cafe-reels:naver-article-sequence:v2").next, 135);
+  assert.equal(stored.get("cafe-reels:naver-article-sequence:v2").next, 136);
 });
 
 test("Naver Cafe upload appends clickable phone and Kakao bridge URLs", async () => {
