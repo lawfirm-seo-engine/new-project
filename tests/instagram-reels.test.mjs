@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import test from "node:test";
 
 import {
@@ -50,6 +51,14 @@ test("Instagram authorization URL requests the publishing scopes", () => {
   assert.equal(url.searchParams.get("state"), "state-value");
   assert.match(url.searchParams.get("scope"), /instagram_business_basic/);
   assert.match(url.searchParams.get("scope"), /instagram_business_content_publish/);
+});
+
+test("generated whiteboard video starts Instagram publishing automatically", () => {
+  const generatorSource = fs.readFileSync(new URL("../admin/whiteboard-local-v2.js", import.meta.url), "utf8");
+  const pageSource = fs.readFileSync(new URL("../admin/cafe-reels.html", import.meta.url), "utf8");
+
+  assert.match(generatorSource, /whiteboard:video-ready/);
+  assert.match(pageSource, /async function handleGeneratedVideo[\s\S]*await publishInstagramReel\(\)/);
 });
 
 test("Instagram Reel automation creates, checks, and publishes a Reel", async () => {

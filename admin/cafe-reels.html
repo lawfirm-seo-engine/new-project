@@ -212,7 +212,7 @@
 </main>
 
 <template id="sceneTpl"><section class="scene"><div class="sceneTop"><strong class="num"></strong><div class="actions"><button class="btn up" type="button">↑</button><button class="btn down" type="button">↓</button><button class="btn warn del" type="button">삭제</button></div></div><div class="sceneBody"><div class="scenePreview"><img class="preview" alt="장면 이미지"></div><div><div class="whiteboard-row"><label>역할<input class="role"></label><label>시간 가중치<input class="weight" type="number" min="0.1" step="0.1" value="1"></label></div><label>내레이션<textarea class="narration" rows="2"></textarea></label><label>그림 상황 설명<textarea class="visual" rows="2"></textarea></label></div></div></section></template>
-<script src="/admin/whiteboard-local-v2.js?v=20260922-1"></script>
+<script src="/admin/whiteboard-local-v2.js?v=20260926-1"></script>
 <script>
   const $ = (id) => document.getElementById(id);
   const caseNameEl = $("caseName");
@@ -230,6 +230,7 @@
   let currentJob = null;
   let assetSets = {};
   let generatedVideoFile = null;
+  let instagramAutoUploadInProgress = false;
 
   document.addEventListener("DOMContentLoaded", () => {
     $("generateBtn").addEventListener("click", generateDraft);
@@ -592,11 +593,19 @@
     if (next) titleEl.value = next;
   }
 
-  function handleGeneratedVideo(event) {
+  async function handleGeneratedVideo(event) {
     const { blob, fileName } = event.detail || {};
     if (!blob) return;
     generatedVideoFile = new File([blob], fileName || "reels.mp4", { type: "video/mp4" });
-    show("reelsMsg", "영상이 이 화면에서 생성되었습니다. 아래 '영상 업로드'를 누르면 방금 만든 MP4를 업로드합니다.");
+    videoUrlEl.value = "";
+    if (instagramAutoUploadInProgress) return;
+    instagramAutoUploadInProgress = true;
+    show("reelsMsg", "영상 생성 완료. Instagram 자동 업로드를 시작합니다...");
+    try {
+      await publishInstagramReel();
+    } finally {
+      instagramAutoUploadInProgress = false;
+    }
   }
 
   function buildLocalCaption() {
