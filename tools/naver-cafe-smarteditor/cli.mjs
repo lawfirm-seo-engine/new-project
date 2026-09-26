@@ -518,10 +518,7 @@ async function uploadVideo(page, videoFile, title) {
     await delay(1_000);
   }
   if (!uploaderOpened) throw new Error("네이버 동영상 업로더를 열지 못했습니다.");
-  const chooserPromise = page.waitForEvent("filechooser", { timeout: 30_000 });
-  await uploader.locator("button.nvu_btn_append.nvu_local").click();
-  const chooser = await chooserPromise;
-  await chooser.setFiles(videoFile.path);
+  await chooseVideoFile(page, uploader, videoFile.path);
   console.log("[영상] 릴스 파일을 네이버 업로더에 전달했습니다.");
 
   const deadline = Date.now() + 300_000;
@@ -570,6 +567,40 @@ async function uploadVideo(page, videoFile, title) {
     await delay(750);
   }
   throw new Error("릴스 영상 업로드 시간 초과 (5분)");
+}
+
+async function chooseVideoFile(page, uploader, videoPath) {
+  const addButton = uploader.locator("button.nvu_btn_append.nvu_local");
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await addButton.waitFor({ state: "visible", timeout: 10_000 });
+      const chooserPromise = page.waitForEvent("filechooser", { timeout: 10_000 });
+      await addButton.click();
+      const chooser = await chooserPromise;
+      await chooser.setFiles(videoPath);
+      if (attempt > 1) console.log(`[영상] PC 파일 선택창 ${attempt}회차 재시도에 성공했습니다.`);
+      return;
+    } catch (error) {
+      lastError = error;
+      const fileInputs = uploader.locator('input[type="file"]');
+      for (let index = await fileInputs.count() - 1; index >= 0; index -= 1) {
+        const input = fileInputs.nth(index);
+        const accept = await input.getAttribute("accept").catch(() => "");
+        if (accept && !/video|mp4|quicktime/i.test(accept)) continue;
+        if (await input.isEnabled().catch(() => true)) {
+          await input.setInputFiles(videoPath);
+          console.log("[영상] 업로더 파일 입력 요소에 릴스 파일을 직접 지정했습니다.");
+          return;
+        }
+      }
+      if (attempt < 3) {
+        console.log(`[영상] PC 파일 선택창이 열리지 않아 재시도합니다 (${attempt}/3).`);
+        await delay(1_000);
+      }
+    }
+  }
+  throw new Error(`릴스 영상 파일 선택 실패 (3회 재시도): ${lastError?.message || "파일 선택창이 열리지 않았습니다."}`);
 }
 
 async function waitForVideoProcessing(component, remainingMs) {

@@ -101,6 +101,10 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /button\[data-name="video"\]/);
   assert.match(source, /네이버 동영상 업로더를 열지 못했습니다/);
   assert.match(source, /button\.nvu_btn_append\.nvu_local/);
+  assert.match(source, /async function chooseVideoFile/);
+  assert.match(source, /attempt <= 3/);
+  assert.match(source, /input\[type="file"\]/);
+  assert.match(source, /릴스 영상 파일 선택 실패 \(3회 재시도\)/);
   assert.match(source, /getByText\("완료", \{ exact: true \}\)/);
   assert.match(source, /\/업로드 완료\/\.test\(uploaderText\)/);
   assert.match(source, /!\/업로드 진행중\|로딩중\/\.test\(uploaderText\)/);
