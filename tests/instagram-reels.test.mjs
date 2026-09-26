@@ -59,6 +59,9 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
 
   assert.match(generatorSource, /whiteboard:video-ready/);
   assert.match(pageSource, /async function handleGeneratedVideo[\s\S]*await publishInstagramReel\(\)/);
+  assert.match(pageSource, /class="bulk-part"/);
+  assert.match(pageSource, /class="bulk-type"/);
+  assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
 });
 
 test("caption templates use the case, landing, and reserved Cafe URL", () => {

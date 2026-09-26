@@ -46,6 +46,9 @@
     .job-item span{display:block;margin-top:4px;color:#7a8798;font-size:12px}
     .status{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;background:#edf2ff;color:#1f4fd8;font-size:11px;font-weight:900}
     .bulk-cases{min-height:150px}
+    .bulk-list{display:grid;gap:8px;margin-top:12px}
+    .bulk-row{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(160px,.8fr) minmax(240px,1.2fr) auto;gap:8px;align-items:center;padding:10px;border:1px solid #e1e7f0;border-radius:9px;background:#f8faff}
+    .bulk-row .btn{min-height:42px}
     .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .sceneHead,.footer{display:flex;justify-content:space-between;align-items:center;gap:14px}
     #whiteboardPanel .sceneHead,#whiteboardPanel #scenes{display:none!important}
@@ -62,7 +65,7 @@
     .media video{display:block;width:100%;max-height:580px;background:#000;border-radius:8px}
     .big{font-size:17px;padding:14px 28px}
     .footer{position:sticky;bottom:12px;background:#ffffffee;border:1px solid #dde4ee;border-radius:12px;padding:14px;margin-top:18px;justify-content:flex-start}
-    @media(max-width:960px){.grid,.split,.form-grid,.row,.whiteboard-row,.sceneBody{grid-template-columns:1fr}.slots{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:960px){.grid,.split,.form-grid,.row,.whiteboard-row,.sceneBody,.bulk-row{grid-template-columns:1fr}.slots{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:560px){.wrap{padding:22px 14px 50px}.top{align-items:flex-start;flex-direction:column}.slots{grid-template-columns:1fr}.actions .btn{width:100%}}
   </style>
 </head>
@@ -83,10 +86,12 @@
         <textarea id="bulkCaseNames" class="bulk-cases" placeholder="예:&#10;스크류바 프로젝트&#10;네이버주식연구소&#10;캐피털 인사이트"></textarea>
       </label>
       <div class="actions">
+        <button id="bulkAddBtn" class="btn" type="button">입력한 사건명을 유형 선택 목록에 추가</button>
         <button id="bulkCreateBtn" class="btn primary" type="button">랜딩·릴스·카페 전체 작업 등록</button>
       </div>
+      <div id="bulkRows" class="bulk-list"></div>
       <div id="bulkMsg" class="message"></div>
-      <p class="note">아래 원고 파트와 사건 유형을 적용합니다. 중복 검수와 랜딩페이지 생성을 마치면 카페 글 번호를 134부터 순서대로 예약합니다. 설치한 Windows 프로그램이 릴스 영상 생성·Instagram 게시·네이버 카페 원고/이미지/영상 게시를 순차 처리합니다.</p>
+      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트와 사건 유형을 선택합니다. 중복 검수와 랜딩페이지 생성을 마치면 카페 글 번호를 134부터 순서대로 예약합니다. 설치한 Windows 프로그램이 릴스 영상 생성·Instagram 게시·네이버 카페 원고/이미지/영상 게시를 순차 처리합니다.</p>
     </section>
 
     <section class="panel">
@@ -161,8 +166,8 @@
         </label>
         <label>영상 길이
           <select id="duration">
-            <option value="10">10초</option>
-            <option value="15" selected>15초</option>
+            <option value="10" selected>10초</option>
+            <option value="15">15초</option>
             <option value="30">30초</option>
             <option value="45">45초</option>
             <option value="60">60초</option>
@@ -248,6 +253,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     $("generateBtn").addEventListener("click", generateDraft);
+    $("bulkAddBtn").addEventListener("click", addBulkRowsFromInput);
     $("bulkCreateBtn").addEventListener("click", createBulkJobs);
     partTypeEl.addEventListener("change", syncPartSelection);
     caseNameEl.addEventListener("input", syncVideoTitle);
@@ -349,23 +355,31 @@
   }
 
   async function createBulkJobs() {
-    const names = [...new Set($("bulkCaseNames").value.split(/\r?\n/).map((value) => value.trim().replace(/\s+/g, " ")).filter(Boolean))];
-    const fraudType = effectiveFraudType();
-    if (!names.length) return show("bulkMsg", "사건명을 한 줄에 하나씩 입력해주세요.", true);
-    if (partTypeEl.value === "fraud" && !fraudType) return show("bulkMsg", "사기피해 사건 유형을 선택해주세요.", true);
-    const imageSetKey = partTypeEl.value === "payment-suspension-release" ? "payment-suspension-release" : "fraud";
-    const selectedImages = assetImagesForKey(imageSetKey);
-    if (selectedImages.filter((image) => image.slot !== "phone" && image.slot !== "kakao").length < 10) {
-      return show("bulkMsg", "선택한 파트의 영상용 이미지가 10장 이상 등록되어 있어야 합니다.", true);
-    }
+    if (!$("bulkRows").children.length) addBulkRowsFromInput();
+    const rows = [...$("bulkRows").querySelectorAll('.bulk-row:not([data-registered="true"])')].map((row) => ({
+      row,
+      caseName: row.querySelector(".bulk-name").value.trim().replace(/\s+/g, " "),
+      partType: row.querySelector(".bulk-part").value,
+      fraudType: row.querySelector(".bulk-type").value,
+    })).filter((item) => item.caseName);
+    if (!rows.length) return show("bulkMsg", "사건명을 한 줄에 하나씩 입력하고 목록에 추가해주세요.", true);
+    const missingType = rows.find((item) => item.partType === "fraud" && !item.fraudType);
+    if (missingType) return show("bulkMsg", `${missingType.caseName}: 사건 유형을 선택해주세요.`, true);
     const button = $("bulkCreateBtn");
     button.disabled = true;
     let completed = 0;
     const failures = [];
     try {
-      for (const caseName of names) {
-        show("bulkMsg", `${completed + 1}/${names.length} · ${caseName} 중복 검수 및 랜딩페이지 생성 중...`);
+      for (const item of rows) {
+        const { caseName, partType } = item;
+        const fraudType = partType === "payment-suspension-release" ? "payment-suspension-release" : item.fraudType;
+        const imageSetKey = partType === "payment-suspension-release" ? "payment-suspension-release" : "fraud";
+        const selectedImages = assetImagesForKey(imageSetKey);
+        show("bulkMsg", `${completed + 1}/${rows.length} · ${caseName} 중복 검수 및 랜딩페이지 생성 중...`);
         try {
+          if (selectedImages.filter((image) => image.slot !== "phone" && image.slot !== "kakao").length < 10) {
+            throw new Error("선택한 파트의 영상용 이미지가 10장 이상 등록되어 있어야 합니다.");
+          }
           const draftResponse = await fetch("/api/generate-cafe-draft", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -386,7 +400,9 @@
             autoFlow: true,
           });
           completed += 1;
-          show("bulkMsg", `${completed}/${names.length} · ${caseName} · 카페 글 ${saved.job.reservedNaverArticleId}번 작업 등록 완료`);
+          item.row.dataset.registered = "true";
+          item.row.style.opacity = ".55";
+          show("bulkMsg", `${completed}/${rows.length} · ${caseName} · 카페 글 ${saved.job.reservedNaverArticleId}번 작업 등록 완료`);
         } catch (error) {
           failures.push(`${caseName}: ${error.message}`);
         }
@@ -398,6 +414,53 @@
     } finally {
       button.disabled = false;
     }
+  }
+
+  function addBulkRowsFromInput() {
+    const names = $("bulkCaseNames").value.split(/\r?\n/).map((value) => value.trim().replace(/\s+/g, " ")).filter(Boolean);
+    if (!names.length) {
+      addBulkRow("");
+      return show("bulkMsg", "빈 행을 추가했습니다. 사건명과 유형을 입력해주세요.");
+    }
+    const existing = new Set([...$("bulkRows").querySelectorAll(".bulk-name")].map((input) => input.value.trim()).filter(Boolean));
+    names.forEach((name) => {
+      if (!existing.has(name)) {
+        addBulkRow(name);
+        existing.add(name);
+      }
+    });
+    $("bulkCaseNames").value = "";
+    show("bulkMsg", `${names.length}개 사건명을 유형 선택 목록에 추가했습니다.`);
+  }
+
+  function addBulkRow(caseName) {
+    const row = document.createElement("div");
+    row.className = "bulk-row";
+    row.innerHTML = `
+      <input class="bulk-name" aria-label="사건명" placeholder="사건명(상호명)">
+      <select class="bulk-part" aria-label="원고 파트">
+        <option value="fraud">사기피해</option>
+        <option value="payment-suspension-release">계좌지급정지해제</option>
+      </select>
+      <select class="bulk-type" aria-label="사건 유형">
+        <option value="">사건 유형 선택</option>
+        <option value="stock-project">주식 리딩방 사기·투자 프로젝트 사칭형</option>
+        <option value="institution-exchange">증권사·은행·거래소 사기 사칭형</option>
+        <option value="team-mission">팀미션 사기·부업·영상 시청형</option>
+        <option value="live-dating">라이브 방송·만남 플랫폼 사칭형</option>
+        <option value="refund-reward">환불·보상금 지급 사칭형</option>
+      </select>
+      <button class="btn warn bulk-remove" type="button">삭제</button>`;
+    row.querySelector(".bulk-name").value = caseName;
+    const part = row.querySelector(".bulk-part");
+    const type = row.querySelector(".bulk-type");
+    part.addEventListener("change", () => {
+      const payment = part.value === "payment-suspension-release";
+      type.disabled = payment;
+      if (payment) type.value = "";
+    });
+    row.querySelector(".bulk-remove").addEventListener("click", () => row.remove());
+    $("bulkRows").appendChild(row);
   }
 
   async function prepareCafe() {

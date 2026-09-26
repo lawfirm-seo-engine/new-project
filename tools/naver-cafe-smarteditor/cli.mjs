@@ -194,7 +194,7 @@ async function processReelJob(context, config, job) {
       window.syncVideoTitle?.();
     }, job.id);
     await page.locator("#title").fill(String(job.caseName || job.draft?.title || "릴스 영상"));
-    await page.locator("#duration").selectOption("15");
+    await page.locator("#duration").selectOption("10");
     await page.locator("#aspect").selectOption({ label: "9:16" });
     await page.locator("#localAssets").setInputFiles(files.map((file) => file.path));
     await page.locator("#generate").click();

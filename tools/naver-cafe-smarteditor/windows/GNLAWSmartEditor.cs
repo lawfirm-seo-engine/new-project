@@ -95,7 +95,7 @@ namespace GNLAW.SmartEditor
             var nodePath = Path.Combine(baseDir, "runtime", "node.exe");
             var cliPath = Path.Combine(baseDir, "cli.mjs");
             if (!File.Exists(nodePath) || !File.Exists(cliPath)) {
-                MessageBox.Show("프로그램 파일이 완전하지 않습니다. 설치.cmd를 다시 실행해주세요.", "설치 확인", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("프로그램 파일이 완전하지 않습니다. Install.cmd를 다시 실행해주세요.", "설치 확인", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 

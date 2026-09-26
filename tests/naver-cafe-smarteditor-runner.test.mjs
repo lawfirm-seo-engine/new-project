@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import test from "node:test";
 
 import {
@@ -42,6 +43,11 @@ test("SmartEditor runner keeps contact images last and resolves local URLs", () 
   assert.deepEqual(images.map((image) => image.slot), ["02", "01", "phone", "kakao"]);
   assert.equal(images[0].url, "https://gnlaw-criminal.co.kr/two.jpg");
   assert.equal(images[3].url, "https://cdn.example/kakao.png");
+});
+
+test("desktop full automation renders ten-second Reels by default", () => {
+  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
+  assert.match(source, /locator\("#duration"\)\.selectOption\("10"\)/);
 });
 
 test("full automation selects the first ten regular images for Reels", () => {
