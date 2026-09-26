@@ -10,6 +10,7 @@ import { chromium } from "playwright-core";
 
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
+const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
 const DEFAULT_PHONE_LINK = "https://gnlaw-criminal.co.kr/call_redirect/";
 const DEFAULT_KAKAO_LINK = "https://gnlaw-criminal.co.kr/kakao_redirect/";
 const DEFAULT_PROFILE_DIR = path.join(process.env.LOCALAPPDATA || os.homedir(), "gnlaw-smarteditor-runner", "chrome-profile");
@@ -37,6 +38,7 @@ export function runnerConfig(options = {}) {
   return {
     siteOrigin: cleanOrigin(options.siteOrigin || process.env.GNLAW_SITE_ORIGIN || DEFAULT_SITE_ORIGIN),
     clubId: String(options.clubId || process.env.GNLAW_CAFE_CLUB_ID || DEFAULT_CLUB_ID),
+    cafeUrl: cleanOrigin(options.cafeUrl || process.env.GNLAW_CAFE_URL || DEFAULT_CAFE_URL),
     profileDir: path.resolve(options.profileDir || process.env.GNLAW_CAFE_PROFILE_DIR || DEFAULT_PROFILE_DIR),
     artifactDir: path.resolve(options.artifactDir || process.env.GNLAW_CAFE_ARTIFACT_DIR || DEFAULT_ARTIFACT_DIR),
     chromePath: options.chromePath || process.env.GNLAW_CHROME_PATH || "",
@@ -147,7 +149,7 @@ async function main() {
 
 async function login(context, config) {
   const naver = context.pages()[0] || await context.newPage();
-  await naver.goto(`https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}`, { waitUntil: "domcontentloaded" });
+  await naver.goto(config.cafeUrl, { waitUntil: "domcontentloaded", timeout: 30_000 });
   const admin = await context.newPage();
   await admin.goto(`${config.siteOrigin}/admin/cafe-reels`, { waitUntil: "domcontentloaded" });
   console.log("\nChrome에서 네이버와 gnlaw-criminal 관리자 로그인을 완료하세요.");
@@ -197,7 +199,7 @@ async function verifyLoginSessions(context, page, config) {
 
   console.log("[사전 확인] 네이버 카페 로그인 확인 중...");
   await assertSavedNaverSession(context);
-  await page.goto(`https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}`, {
+  await page.goto(config.cafeUrl, {
     waitUntil: "domcontentloaded",
     timeout: 30_000,
   });

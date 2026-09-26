@@ -53,6 +53,10 @@ test("desktop automation uses the Windows Chrome sandbox and opens the work scre
   assert.match(source, /page\.goto\(`\$\{config\.siteOrigin\}\/admin\/cafe-reels`/);
   assert.match(source, /verifyLoginSessions\(context, monitorPage, config\)/);
   assert.match(source, /\[사전 확인\] 네이버 카페 로그인 확인 완료/);
+  assert.match(source, /DEFAULT_CAFE_URL = "https:\/\/cafe\.naver\.com\/gnlawfintech"/);
+  assert.match(source, /await naver\.goto\(config\.cafeUrl/);
+  assert.match(source, /await page\.goto\(config\.cafeUrl/);
+  assert.equal((source.match(/ca-fe\/cafes\/\$\{encodeURIComponent\(config\.clubId\)\}/g) || []).length, 1);
 });
 
 test("desktop automation pre-checks the persisted Naver login cookies", () => {
