@@ -102,8 +102,8 @@ namespace GNLAW.SmartEditor
             logBox.Clear();
             AppendLog(loginMode
                 ? "Chrome이 열리면 네이버와 관리자 로그인을 완료한 뒤 '로그인 확인 완료'를 누르세요."
-                : "전체 자동화 대기열 감시를 시작합니다. 이 창은 켜두세요.");
-            statusLabel.Text = loginMode ? "로그인 대기 중" : "자동화 실행 중";
+                : "관리자·네이버 카페 로그인을 먼저 확인한 뒤 전체 자동화 대기열 감시를 시작합니다.");
+            statusLabel.Text = loginMode ? "로그인 대기 중" : "로그인 사전 확인 중";
             loginDoneButton.Enabled = loginMode;
 
             var info = new ProcessStartInfo {
@@ -160,6 +160,7 @@ namespace GNLAW.SmartEditor
         private void AppendLog(string text)
         {
             if (InvokeRequired) { BeginInvoke((Action<string>)AppendLog, text); return; }
+            if (text.Contains("두 로그인 확인 완료")) statusLabel.Text = "자동화 실행 중";
             logBox.AppendText("[" + DateTime.Now.ToString("HH:mm:ss") + "] " + text + Environment.NewLine);
         }
 

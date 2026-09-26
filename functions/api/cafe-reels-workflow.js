@@ -53,6 +53,7 @@ export async function onRequestPost({ request, env }) {
       const prepared = {
         ...built,
         createdAt: previous?.createdAt || built.createdAt,
+        batchId: built.batchId || previous?.batchId || "",
         reservedNaverArticleId,
         expectedCafeUrl,
         cafeUrl: built.cafeUrl || previous?.cafeUrl || expectedCafeUrl,
@@ -238,6 +239,7 @@ function buildJob(body = {}) {
 
   const job = {
     id,
+    batchId: safeId(body.batchId || ""),
     caseName,
     fraudType,
     imageSetKey: normalizeText(body.imageSetKey || "fraud"),
@@ -283,6 +285,7 @@ async function updateIndex(env, job) {
   const index = await loadIndex(env);
   const item = {
     id: job.id,
+    batchId: job.batchId || "",
     caseName: job.caseName,
     fraudType: job.fraudType,
     title: job.draft?.title || "",

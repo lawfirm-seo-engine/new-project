@@ -62,6 +62,11 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /async function handleGeneratedVideo[\s\S]*await publishInstagramReel\(\)/);
   assert.match(pageSource, /class="bulk-part"/);
   assert.match(pageSource, /class="bulk-type"/);
+  assert.match(pageSource, /class="bulk-images"/);
+  assert.match(pageSource, /bulkLocalFiles\.set\(saved\.job\.id, item\.files\.slice\(\)\)/);
+  assert.match(pageSource, /batchId/);
+  assert.match(generatorSource, /window\.setWhiteboardLocalFiles=setLocalFiles/);
+  assert.match(generatorSource, /selectedLocalFiles/);
   assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
   assert.match(pageSource, /id="generate" type="button">자동화 실행<\/button>/);
   assert.match(pageSource, /function applyJob[\s\S]*syncVideoTitle\(\)/);
@@ -122,6 +127,7 @@ test("Naver Cafe number stays at 134 until a SmartEditor post succeeds", async (
           draft: { title: `${caseName} 원고`, body: "본문", landingUrl: `https://gnlaw-criminal.co.kr/prosecute/${caseName}-litigation/` },
           images: [{ slot: "01", url: "https://images.example/1.jpg" }],
           autoFlow: true,
+          batchId: "bulk-test",
         }),
       }),
       env,
@@ -133,6 +139,7 @@ test("Naver Cafe number stays at 134 until a SmartEditor post succeeds", async (
   assert.equal(first.job.reservedNaverArticleId, "134");
   assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/134");
   assert.equal(first.job.videoStatus, "awaiting-images");
+  assert.equal(first.job.batchId, "bulk-test");
   assert.equal(second.job.reservedNaverArticleId, "134");
 
   const postedResponse = await onWorkflowPost({

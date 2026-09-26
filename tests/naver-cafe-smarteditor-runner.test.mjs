@@ -4,6 +4,8 @@ import test from "node:test";
 
 import {
   boardForJob,
+  hasNaverSessionCookies,
+  hasUnfinishedBatchJobs,
   jobVideoUrl,
   orderedJobImages,
   parseArgs,
@@ -48,7 +50,29 @@ test("desktop automation uses the Windows Chrome sandbox and opens the work scre
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   assert.match(source, /chromiumSandbox:\s*true/);
   assert.doesNotMatch(source, /["']--no-sandbox["']/);
-  assert.match(source, /monitorPage\.goto\(`\$\{config\.siteOrigin\}\/admin\/cafe-reels`/);
+  assert.match(source, /page\.goto\(`\$\{config\.siteOrigin\}\/admin\/cafe-reels`/);
+  assert.match(source, /verifyLoginSessions\(context, monitorPage, config\)/);
+  assert.match(source, /\[사전 확인\] 네이버 카페 로그인 확인 완료/);
+});
+
+test("desktop automation pre-checks the persisted Naver login cookies", () => {
+  assert.equal(hasNaverSessionCookies([{ name: "NID_AUT" }, { name: "NID_SES" }]), true);
+  assert.equal(hasNaverSessionCookies([{ name: "NID_SES" }]), true);
+  assert.equal(hasNaverSessionCookies([{ name: "NID_AUT" }]), false);
+  assert.equal(hasNaverSessionCookies([]), false);
+});
+
+test("a bulk batch waits for every case Reel before Cafe posting starts", () => {
+  const queued = { id: "one", batchId: "batch-1", cafeStatus: "smarteditor-queued" };
+  assert.equal(hasUnfinishedBatchJobs([
+    queued,
+    { id: "two", batchId: "batch-1", cafeStatus: "awaiting-reel" },
+  ], queued), true);
+  assert.equal(hasUnfinishedBatchJobs([
+    queued,
+    { id: "two", batchId: "batch-1", cafeStatus: "smarteditor-queued" },
+  ], queued), false);
+  assert.equal(hasUnfinishedBatchJobs([queued, { id: "other", batchId: "batch-2", cafeStatus: "awaiting-reel" }], queued), false);
 });
 
 test("desktop automation posts from the original work tab and never auto-selects Reel images", () => {

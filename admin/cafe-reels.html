@@ -47,8 +47,11 @@
     .status{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;background:#edf2ff;color:#1f4fd8;font-size:11px;font-weight:900}
     .bulk-cases{min-height:150px}
     .bulk-list{display:grid;gap:8px;margin-top:12px}
-    .bulk-row{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(160px,.8fr) minmax(240px,1.2fr) auto;gap:8px;align-items:center;padding:10px;border:1px solid #e1e7f0;border-radius:9px;background:#f8faff}
+    .bulk-row{display:grid;grid-template-columns:minmax(210px,1.3fr) minmax(150px,.75fr) minmax(220px,1.1fr) minmax(220px,1fr) auto;gap:8px;align-items:center;padding:10px;border:1px solid #e1e7f0;border-radius:9px;background:#f8faff}
     .bulk-row .btn{min-height:42px}
+    .bulk-image-picker{display:grid;gap:4px;padding:7px 9px;border:1px solid #ccd7e7;border-radius:8px;background:#fff;cursor:pointer;font-weight:700;color:#24324a}
+    .bulk-image-picker input{font-size:12px;padding:0;border:0;background:transparent}
+    .bulk-image-status{font-size:12px;font-weight:500;color:#667085}
     .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .sceneHead,.footer{display:flex;justify-content:space-between;align-items:center;gap:14px}
     #whiteboardPanel .sceneHead,#whiteboardPanel #scenes{display:none!important}
@@ -91,7 +94,7 @@
       </div>
       <div id="bulkRows" class="bulk-list"></div>
       <div id="bulkMsg" class="message"></div>
-      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트와 사건 유형을 선택합니다. 작업 등록 후 처리할 사건을 선택하면 입력한 사건명이 영상 제목에 자동 반영됩니다. 로컬 이미지 10장을 직접 선택하고 자동화 실행을 누르면 영상 생성·Instagram 게시·네이버 카페 게시가 순서대로 진행됩니다.</p>
+      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트·사건 유형·릴스 이미지 10장을 각각 지정합니다. 작업 등록 후 해당 사건을 선택하면 그 사건의 이미지 10장과 영상 제목이 자동 적용됩니다. 로컬 파일은 서버에 업로드되지 않으므로 브라우저를 닫거나 새로고침하면 다시 선택해야 합니다.</p>
     </section>
 
     <section class="panel">
@@ -231,7 +234,7 @@
 </main>
 
 <template id="sceneTpl"><section class="scene"><div class="sceneTop"><strong class="num"></strong><div class="actions"><button class="btn up" type="button">↑</button><button class="btn down" type="button">↓</button><button class="btn warn del" type="button">삭제</button></div></div><div class="sceneBody"><div class="scenePreview"><img class="preview" alt="장면 이미지"></div><div><div class="whiteboard-row"><label>역할<input class="role"></label><label>시간 가중치<input class="weight" type="number" min="0.1" step="0.1" value="1"></label></div><label>내레이션<textarea class="narration" rows="2"></textarea></label><label>그림 상황 설명<textarea class="visual" rows="2"></textarea></label></div></div></section></template>
-<script src="/admin/whiteboard-local-v2.js?v=20260926-2"></script>
+<script src="/admin/whiteboard-local-v2.js?v=20260926-3"></script>
 <script>
   const $ = (id) => document.getElementById(id);
   const caseNameEl = $("caseName");
@@ -250,6 +253,7 @@
   let assetSets = {};
   let generatedVideoFile = null;
   let instagramAutoUploadInProgress = false;
+  const bulkLocalFiles = new Map();
 
   document.addEventListener("DOMContentLoaded", () => {
     $("generateBtn").addEventListener("click", generateDraft);
@@ -363,12 +367,16 @@
       caseName: row.querySelector(".bulk-name").value.trim().replace(/\s+/g, " "),
       partType: row.querySelector(".bulk-part").value,
       fraudType: row.querySelector(".bulk-type").value,
+      files: [...row.querySelector(".bulk-images").files],
     })).filter((item) => item.caseName);
     if (!rows.length) return show("bulkMsg", "사건명을 한 줄에 하나씩 입력하고 목록에 추가해주세요.", true);
     const missingType = rows.find((item) => item.partType === "fraud" && !item.fraudType);
     if (missingType) return show("bulkMsg", `${missingType.caseName}: 사건 유형을 선택해주세요.`, true);
+    const missingImages = rows.find((item) => item.files.length !== 10);
+    if (missingImages) return show("bulkMsg", `${missingImages.caseName}: 릴스 제작 이미지 10장을 정확히 선택해주세요. (현재 ${missingImages.files.length}장)`, true);
     const button = $("bulkCreateBtn");
     button.disabled = true;
+    const batchId = `bulk-${crypto.randomUUID()}`;
     let completed = 0;
     let firstSavedJob = null;
     const failures = [];
@@ -398,9 +406,11 @@
             imageSetKey,
             images: selectedImages,
             autoFlow: true,
+            batchId,
           });
           completed += 1;
           firstSavedJob ||= saved.job;
+          bulkLocalFiles.set(saved.job.id, item.files.slice());
           item.row.dataset.registered = "true";
           item.row.style.opacity = ".55";
           show("bulkMsg", `${completed}/${rows.length} · ${caseName} · 카페 글 ${saved.job.reservedNaverArticleId}번 작업 등록 완료`);
@@ -416,7 +426,7 @@
       }
       show("bulkMsg", failures.length
         ? `${completed}건 등록, ${failures.length}건 실패\n${failures.join("\n")}`
-        : `${completed}건 전체 작업 등록 완료. 첫 작업의 이미지 10장을 선택한 뒤 자동화 실행을 눌러주세요.`, failures.length > 0);
+        : `${completed}건 전체 작업 등록 완료. 첫 작업부터 자동화 실행을 누르면 사건별로 지정한 이미지 10장이 적용됩니다.`, failures.length > 0);
     } finally {
       button.disabled = false;
     }
@@ -456,6 +466,10 @@
         <option value="live-dating">라이브 방송·만남 플랫폼 사칭형</option>
         <option value="refund-reward">환불·보상금 지급 사칭형</option>
       </select>
+      <label class="bulk-image-picker">릴스 이미지 10장
+        <input class="bulk-images" type="file" accept="image/png,image/jpeg,image/webp,image/*" multiple>
+        <span class="bulk-image-status">선택된 이미지 없음</span>
+      </label>
       <button class="btn warn bulk-remove" type="button">삭제</button>`;
     row.querySelector(".bulk-name").value = caseName;
     const part = row.querySelector(".bulk-part");
@@ -464,6 +478,13 @@
       const payment = part.value === "payment-suspension-release";
       type.disabled = payment;
       if (payment) type.value = "";
+    });
+    const images = row.querySelector(".bulk-images");
+    const imageStatus = row.querySelector(".bulk-image-status");
+    images.addEventListener("change", () => {
+      const count = images.files.length;
+      imageStatus.textContent = count === 10 ? "10장 준비 완료" : `${count}장 선택 · 10장이 필요합니다`;
+      imageStatus.style.color = count === 10 ? "#067647" : "#b42318";
     });
     row.querySelector(".bulk-remove").addEventListener("click", () => row.remove());
     $("bulkRows").appendChild(row);
@@ -697,7 +718,9 @@
     captionOutput.value = job.caption || buildLocalCaption();
     renderAssetSet();
     syncVideoTitle();
-    if (previousJobId && previousJobId !== job.id) window.resetWhiteboardLocalAssets?.();
+    const localFiles = bulkLocalFiles.get(job.id);
+    if (localFiles?.length) window.setWhiteboardLocalFiles?.(localFiles);
+    else if (previousJobId && previousJobId !== job.id) window.resetWhiteboardLocalAssets?.();
   }
 
   function currentAssetImages() {

@@ -86,6 +86,22 @@ export function jobVideoUrl(job = {}, siteOrigin = DEFAULT_SITE_ORIGIN) {
   return url.href;
 }
 
+export function hasNaverSessionCookies(cookies = []) {
+  const names = new Set((Array.isArray(cookies) ? cookies : []).map((cookie) => String(cookie?.name || "")));
+  return names.has("NID_SES");
+}
+
+export function hasUnfinishedBatchJobs(jobs = [], queuedJob = {}) {
+  const batchId = String(queuedJob?.batchId || "");
+  if (!batchId) return false;
+  const readyStatuses = new Set(["smarteditor-queued", "smarteditor-preparing", "smarteditor-posted"]);
+  return (Array.isArray(jobs) ? jobs : []).some((job) => (
+    job?.id !== queuedJob.id
+    && String(job?.batchId || "") === batchId
+    && !readyStatuses.has(String(job?.cafeStatus || ""))
+  ));
+}
+
 async function main() {
   const { command, options } = parseArgs(process.argv.slice(2));
   if (command === "help" || options.help) return printHelp();
@@ -137,6 +153,7 @@ async function login(context, config) {
   console.log("\nChrome에서 네이버와 gnlaw-criminal 관리자 로그인을 완료하세요.");
   console.log(`로그인 정보는 ${config.profileDir}의 Chrome 프로필에만 저장됩니다.`);
   await prompt("\n두 로그인을 모두 완료했으면 Enter를 누르세요. ");
+  await assertSavedNaverSession(context);
   await assertNaverLogin(naver);
   await loadQueue(context, config);
   console.log("로그인 상태를 확인했습니다.");
@@ -144,18 +161,15 @@ async function login(context, config) {
 
 async function watchQueue(context, config, options) {
   const monitorPage = context.pages()[0] || await context.newPage();
-  await monitorPage.goto(`${config.siteOrigin}/admin/cafe-reels`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  if (/\/admin\/login/i.test(monitorPage.url())) {
-    throw new Error("gnlaw-criminal 관리자 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 실행하세요.");
-  }
+  await verifyLoginSessions(context, monitorPage, config);
   console.log(`랜딩·릴스·SmartEditor 전체 대기열 감시 시작 (${config.siteOrigin}, ${config.pollSeconds}초 간격)`);
   for (;;) {
     const jobs = await loadQueue(context, config);
     const byReservedNumber = (a, b) => Number(a.reservedNaverArticleId || Number.MAX_SAFE_INTEGER) - Number(b.reservedNaverArticleId || Number.MAX_SAFE_INTEGER);
-    const cafeQueued = jobs.filter((job) => job.cafeStatus === "smarteditor-queued").sort(byReservedNumber)[0];
+    const cafeQueued = jobs
+      .filter((job) => job.cafeStatus === "smarteditor-queued")
+      .sort(byReservedNumber)
+      .find((job) => !hasUnfinishedBatchJobs(jobs, job));
     if (cafeQueued) {
       const job = await loadJob(context, config, cafeQueued.id);
       const result = await processJob(context, config, job, options, monitorPage);
@@ -166,6 +180,42 @@ async function watchQueue(context, config, options) {
     }
     if (options.once) return;
     await delay(config.pollSeconds * 1000);
+  }
+}
+
+async function verifyLoginSessions(context, page, config) {
+  console.log("[사전 확인] gnlaw-criminal 관리자 로그인 확인 중...");
+  await page.goto(`${config.siteOrigin}/admin/cafe-reels`, {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  if (/\/admin\/login/i.test(page.url())) {
+    throw new Error("gnlaw-criminal 관리자 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 실행하세요.");
+  }
+  await loadQueue(context, config);
+  console.log("[사전 확인] 관리자 로그인 확인 완료");
+
+  console.log("[사전 확인] 네이버 카페 로그인 확인 중...");
+  await assertSavedNaverSession(context);
+  await page.goto(`https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}`, {
+    waitUntil: "domcontentloaded",
+    timeout: 30_000,
+  });
+  await assertNaverLogin(page);
+  console.log("[사전 확인] 네이버 카페 로그인 확인 완료");
+
+  await page.goto(`${config.siteOrigin}/admin/cafe-reels`, {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  await loadQueue(context, config);
+  console.log("[사전 확인] 두 로그인 확인 완료 · 자동화를 시작합니다.");
+}
+
+async function assertSavedNaverSession(context) {
+  const naverCookies = await context.cookies(["https://naver.com", "https://cafe.naver.com"]);
+  if (!hasNaverSessionCookies(naverCookies)) {
+    throw new Error("네이버 카페 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 실행한 뒤 다시 자동화 시작을 눌러주세요.");
   }
 }
 
