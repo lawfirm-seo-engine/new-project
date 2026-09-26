@@ -15,6 +15,7 @@ const DEFAULT_PHONE_LINK = "https://gnlaw-criminal.co.kr/call_redirect/";
 const DEFAULT_KAKAO_LINK = "https://gnlaw-criminal.co.kr/kakao_redirect/";
 const DEFAULT_PROFILE_DIR = path.join(process.env.LOCALAPPDATA || os.homedir(), "gnlaw-smarteditor-runner", "chrome-profile");
 const DEFAULT_ARTIFACT_DIR = path.join(process.env.LOCALAPPDATA || os.homedir(), "gnlaw-smarteditor-runner", "artifacts");
+const DEFAULT_SESSION_STATE_PATH = path.join(process.env.LOCALAPPDATA || os.homedir(), "gnlaw-smarteditor-runner", "session-state.json");
 
 export function parseArgs(argv = []) {
   const args = [...argv];
@@ -41,6 +42,7 @@ export function runnerConfig(options = {}) {
     cafeUrl: cleanOrigin(options.cafeUrl || process.env.GNLAW_CAFE_URL || DEFAULT_CAFE_URL),
     profileDir: path.resolve(options.profileDir || process.env.GNLAW_CAFE_PROFILE_DIR || DEFAULT_PROFILE_DIR),
     artifactDir: path.resolve(options.artifactDir || process.env.GNLAW_CAFE_ARTIFACT_DIR || DEFAULT_ARTIFACT_DIR),
+    sessionStatePath: path.resolve(options.sessionStatePath || process.env.GNLAW_SESSION_STATE_PATH || DEFAULT_SESSION_STATE_PATH),
     chromePath: options.chromePath || process.env.GNLAW_CHROME_PATH || "",
     phoneLink: options.phoneLink || process.env.GNLAW_PHONE_LINK || DEFAULT_PHONE_LINK,
     kakaoLink: options.kakaoLink || process.env.GNLAW_KAKAO_LINK || DEFAULT_KAKAO_LINK,
@@ -90,7 +92,7 @@ export function jobVideoUrl(job = {}, siteOrigin = DEFAULT_SITE_ORIGIN) {
 
 export function hasNaverSessionCookies(cookies = []) {
   const names = new Set((Array.isArray(cookies) ? cookies : []).map((cookie) => String(cookie?.name || "")));
-  return names.has("NID_SES");
+  return names.has("NID_SES") || names.has("NID_AUT");
 }
 
 export function hasUnfinishedBatchJobs(jobs = [], queuedJob = {}) {
@@ -122,6 +124,7 @@ async function main() {
   });
 
   try {
+    await restoreSessionState(context, config);
     if (command === "login") return await login(context, config);
     if (command === "watch") {
       return await watchQueue(context, config, {
@@ -155,10 +158,11 @@ async function login(context, config) {
   console.log("\nChrome에서 네이버와 gnlaw-criminal 관리자 로그인을 완료하세요.");
   console.log(`로그인 정보는 ${config.profileDir}의 Chrome 프로필에만 저장됩니다.`);
   await prompt("\n두 로그인을 모두 완료했으면 Enter를 누르세요. ");
-  await assertSavedNaverSession(context);
   await assertNaverLogin(naver);
+  await assertSavedNaverSession(context);
   await loadQueue(context, config);
-  console.log("로그인 상태를 확인했습니다.");
+  await saveSessionState(context, config);
+  console.log("로그인 상태를 확인하고 다음 실행용 세션을 저장했습니다.");
 }
 
 async function watchQueue(context, config, options) {
@@ -198,12 +202,13 @@ async function verifyLoginSessions(context, page, config) {
   console.log("[사전 확인] 관리자 로그인 확인 완료");
 
   console.log("[사전 확인] 네이버 카페 로그인 확인 중...");
-  await assertSavedNaverSession(context);
   await page.goto(config.cafeUrl, {
     waitUntil: "domcontentloaded",
     timeout: 30_000,
   });
   await assertNaverLogin(page);
+  await assertSavedNaverSession(context);
+  await saveSessionState(context, config);
   console.log("[사전 확인] 네이버 카페 로그인 확인 완료");
 
   await page.goto(`${config.siteOrigin}/admin/cafe-reels`, {
@@ -219,6 +224,27 @@ async function assertSavedNaverSession(context) {
   if (!hasNaverSessionCookies(naverCookies)) {
     throw new Error("네이버 카페 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 실행한 뒤 다시 자동화 시작을 눌러주세요.");
   }
+}
+
+async function restoreSessionState(context, config) {
+  try {
+    const state = JSON.parse(await readFile(config.sessionStatePath, "utf8"));
+    const now = Date.now() / 1000;
+    const cookies = (Array.isArray(state?.cookies) ? state.cookies : [])
+      .filter((cookie) => Number(cookie?.expires || -1) < 0 || Number(cookie.expires) > now);
+    if (cookies.length) {
+      await context.addCookies(cookies);
+      console.log(`[세션] 저장된 로그인 쿠키 ${cookies.length}개를 복원했습니다.`);
+    }
+  } catch (error) {
+    if (error?.code !== "ENOENT") console.log(`[세션] 저장 상태를 복원하지 못했습니다: ${error.message}`);
+  }
+}
+
+async function saveSessionState(context, config) {
+  await mkdir(path.dirname(config.sessionStatePath), { recursive: true });
+  await context.storageState({ path: config.sessionStatePath });
+  console.log(`[세션] 로그인 상태를 ${config.sessionStatePath}에 저장했습니다.`);
 }
 
 async function processJob(context, config, job, options, existingPage = null) {

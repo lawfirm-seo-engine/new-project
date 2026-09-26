@@ -8,6 +8,7 @@ GNLAW SmartEditor for Windows
 6. From then on, click the automation start button and keep the program open.
 
 Before watching the queue, the automation start button verifies both the admin login and the saved Naver Cafe login. If either session has expired, run the first login step again.
+The login confirmation step stores the browser session in the current Windows user's LocalAppData folder so it can be restored when automation starts.
 
 For bulk work, select exactly 10 Reels images in each case row before registering the jobs. Local image selections are kept only while that browser page remains open.
 

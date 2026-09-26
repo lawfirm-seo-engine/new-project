@@ -62,8 +62,13 @@ test("desktop automation uses the Windows Chrome sandbox and opens the work scre
 test("desktop automation pre-checks the persisted Naver login cookies", () => {
   assert.equal(hasNaverSessionCookies([{ name: "NID_AUT" }, { name: "NID_SES" }]), true);
   assert.equal(hasNaverSessionCookies([{ name: "NID_SES" }]), true);
-  assert.equal(hasNaverSessionCookies([{ name: "NID_AUT" }]), false);
+  assert.equal(hasNaverSessionCookies([{ name: "NID_AUT" }]), true);
   assert.equal(hasNaverSessionCookies([]), false);
+  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
+  assert.match(source, /await restoreSessionState\(context, config\)/);
+  assert.match(source, /context\.storageState\(\{ path: config\.sessionStatePath \}\)/);
+  assert.match(source, /context\.addCookies\(cookies\)/);
+  assert.match(source, /await page\.goto\(config\.cafeUrl[\s\S]*await assertSavedNaverSession\(context\)/);
 });
 
 test("a bulk batch waits for every case Reel before Cafe posting starts", () => {
