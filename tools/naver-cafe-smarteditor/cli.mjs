@@ -264,19 +264,18 @@ async function processJob(context, config, job, options, existingPage = null) {
     const files = await downloadImages(context, images, tempDir);
     const videoFile = videoUrl ? await downloadVideo(context, videoUrl, tempDir) : null;
     const writeUrl = `https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}/menus/${board.menuId}/articles/write`;
-    await page.goto(writeUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await clearNaverDraftState(page);
+    await page.goto(`${writeUrl}?gnlawRun=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
     await assertNaverLogin(page);
     await selectBoard(page, board);
 
     const articleTitle = String(job.draft.title || job.title || "");
-    await page.locator("p.se-text-paragraph").first().waitFor({ state: "visible", timeout: 30_000 });
+    await page.locator("p.se-text-paragraph:visible").first().waitFor({ state: "visible", timeout: 30_000 });
+    await resetEditorForJob(page);
     await fillArticleTitle(page, articleTitle);
     await insertArticleBody(page, String(job.draft.body || ""));
 
-    const chooserPromise = page.waitForEvent("filechooser", { timeout: 30_000 });
-    await page.getByRole("button", { name: "사진 추가", exact: true }).click();
-    const chooser = await chooserPromise;
-    await chooser.setFiles(files.map((file) => file.path));
+    await chooseImageFiles(page, files.map((file) => file.path));
     await chooseIndividualPhotoMode(page);
     await waitForImageCount(page, images.length);
 
@@ -338,6 +337,114 @@ async function fillArticleTitle(page, title) {
   if (await input.inputValue() !== title) throw new Error("카페 원고 제목 입력 검증 실패");
 }
 
+async function clearNaverDraftState(page) {
+  console.log("[편집기] 이전 임시 편집 상태를 초기화합니다.");
+  await page.goto("https://cafe.naver.com/", { waitUntil: "domcontentloaded", timeout: 30_000 });
+  await page.evaluate(async () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    if (globalThis.caches?.keys) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((key) => caches.delete(key)));
+    }
+    if (globalThis.indexedDB?.databases) {
+      const databases = await indexedDB.databases();
+      await Promise.all(databases.filter((database) => database.name).map((database) => new Promise((resolve) => {
+        const request = indexedDB.deleteDatabase(database.name);
+        request.onsuccess = request.onerror = request.onblocked = () => resolve();
+      })));
+    }
+  }).catch((error) => {
+    console.log(`[편집기] 로컬 임시 상태 정리 일부를 건너뜁니다: ${error.message}`);
+  });
+}
+
+async function resetEditorForJob(page) {
+  await page.keyboard.press("Escape").catch(() => {});
+  await focusEditorParagraph(page);
+  await page.keyboard.press("Control+A");
+  await page.keyboard.press("Backspace");
+  await delay(750);
+
+  const staleMedia = page.locator("div.se-component.se-image, div.se-component.se-video");
+  if (await staleMedia.count() > 0) {
+    await focusEditorParagraph(page);
+    await page.keyboard.press("Control+A");
+    await page.keyboard.press("Backspace");
+    await delay(750);
+  }
+  if (await staleMedia.count() > 0) {
+    throw new Error("네이버가 복원한 이전 임시 원고를 초기화하지 못했습니다. 편집기 창을 닫고 다시 실행해 주세요.");
+  }
+  console.log("[편집기] 새 원고 입력 상태를 확인했습니다.");
+}
+
+async function focusEditorParagraph(page, atStart = false) {
+  const paragraphs = page.locator("p.se-text-paragraph:visible");
+  const paragraph = atStart ? paragraphs.first() : paragraphs.last();
+  await paragraph.waitFor({ state: "visible", timeout: 30_000 });
+  await paragraph.scrollIntoViewIfNeeded();
+  const clicked = await paragraph.click({ position: { x: 24, y: 12 }, timeout: 5_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!clicked) {
+    const box = await paragraph.boundingBox();
+    if (!box) throw new Error("SmartEditor 본문 입력 위치를 찾지 못했습니다.");
+    await page.mouse.click(box.x + Math.min(24, Math.max(4, box.width / 2)), box.y + Math.min(12, Math.max(4, box.height / 2)));
+  }
+  await page.keyboard.press(atStart ? "Home" : "End");
+  await delay(100);
+  return paragraph;
+}
+
+async function chooseImageFiles(page, filePaths) {
+  const addButton = page.getByRole("button", { name: "사진 추가", exact: true });
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await page.keyboard.press("Escape").catch(() => {});
+      await addButton.waitFor({ state: "visible", timeout: 10_000 });
+      const [chooser] = await Promise.all([
+        page.waitForEvent("filechooser", { timeout: 10_000 }),
+        addButton.click({ force: attempt > 1 }),
+      ]);
+      await chooser.setFiles(filePaths);
+      if (attempt > 1) console.log(`[사진] 파일 선택창 ${attempt}회차 재시도에 성공했습니다.`);
+      else console.log("[사진] 기본 이미지를 네이버 업로더에 전달했습니다.");
+      return;
+    } catch (error) {
+      lastError = error;
+      if (await setFilesOnMatchingInput(page, filePaths, /image/i)) {
+        console.log("[사진] 파일 입력 요소에 기본 이미지를 직접 지정했습니다.");
+        return;
+      }
+      if (attempt < 3) {
+        console.log(`[사진] 파일 선택창이 열리지 않아 재시도합니다 (${attempt}/3).`);
+        await delay(1_000);
+      }
+    }
+  }
+  throw new Error(`기본 이미지 파일 선택 실패 (3회 재시도): ${lastError?.message || "파일 선택창이 열리지 않았습니다."}`);
+}
+
+async function setFilesOnMatchingInput(page, filePaths, acceptPattern) {
+  for (const frame of page.frames()) {
+    const inputs = frame.locator('input[type="file"]');
+    for (let index = await inputs.count() - 1; index >= 0; index -= 1) {
+      const input = inputs.nth(index);
+      const accept = await input.getAttribute("accept").catch(() => "");
+      if (!acceptPattern.test(String(accept || ""))) continue;
+      try {
+        await input.setInputFiles(filePaths);
+        return true;
+      } catch {
+        // Try the next matching input or frame.
+      }
+    }
+  }
+  return false;
+}
+
 async function chooseIndividualPhotoMode(page) {
   const heading = page.getByText("사진 첨부 방식", { exact: true }).last();
   const appeared = await heading.waitFor({ state: "visible", timeout: 10_000 }).then(() => true).catch(() => false);
@@ -348,15 +455,22 @@ async function chooseIndividualPhotoMode(page) {
 
 async function insertArticleBody(page, body) {
   const content = String(body || "");
-  const paragraph = page.locator("p.se-text-paragraph").first();
-  await paragraph.waitFor({ state: "visible", timeout: 30_000 });
-  await paragraph.click();
+  await focusEditorParagraph(page, true);
 
   const lines = content.replace(/\r\n?/g, "\n").split("\n");
   for (let index = 0; index < lines.length; index += 1) {
-    if (lines[index]) await page.keyboard.insertText(lines[index]);
-    if (index < lines.length - 1) await page.keyboard.press("Enter");
+    if (lines[index]) {
+      await page.keyboard.insertText(lines[index]);
+      await delay(50);
+    }
+    if (index < lines.length - 1) {
+      await page.keyboard.press("Enter");
+      await delay(100);
+      await page.keyboard.press("Escape").catch(() => {});
+      await focusEditorParagraph(page);
+    }
   }
+  await page.keyboard.press("Escape").catch(() => {});
 
   const editorText = (await page.locator(".se-component-content").allInnerTexts()).join("\n");
   const compactText = (value) => String(value || "").normalize("NFKC").replace(/[^0-9A-Za-z가-힣]/g, "");
@@ -375,7 +489,7 @@ async function insertArticleBody(page, body) {
     throw new Error(`카페 원고 본문 입력 검증 실패: ${firstLine.slice(0, 80)}`);
   }
 
-  await page.locator("p.se-text-paragraph").first().click();
+  await focusEditorParagraph(page, true);
   await page.keyboard.press("Control+Home");
 }
 
@@ -510,7 +624,7 @@ async function uploadVideo(page, videoFile, title) {
   let uploaderOpened = false;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     await page.keyboard.press("Escape").catch(() => {});
-    await page.locator("p.se-text-paragraph").first().click();
+    await focusEditorParagraph(page, true);
     await page.keyboard.press("Control+Home");
     await toolbarButton.click();
     uploaderOpened = await uploader.waitFor({ state: "visible", timeout: 5_000 }).then(() => true).catch(() => false);
@@ -575,24 +689,18 @@ async function chooseVideoFile(page, uploader, videoPath) {
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
       await addButton.waitFor({ state: "visible", timeout: 10_000 });
-      const chooserPromise = page.waitForEvent("filechooser", { timeout: 10_000 });
-      await addButton.click();
-      const chooser = await chooserPromise;
+      const [chooser] = await Promise.all([
+        page.waitForEvent("filechooser", { timeout: 10_000 }),
+        addButton.click({ force: attempt > 1 }),
+      ]);
       await chooser.setFiles(videoPath);
       if (attempt > 1) console.log(`[영상] PC 파일 선택창 ${attempt}회차 재시도에 성공했습니다.`);
       return;
     } catch (error) {
       lastError = error;
-      const fileInputs = uploader.locator('input[type="file"]');
-      for (let index = await fileInputs.count() - 1; index >= 0; index -= 1) {
-        const input = fileInputs.nth(index);
-        const accept = await input.getAttribute("accept").catch(() => "");
-        if (accept && !/video|mp4|quicktime/i.test(accept)) continue;
-        if (await input.isEnabled().catch(() => true)) {
-          await input.setInputFiles(videoPath);
-          console.log("[영상] 업로더 파일 입력 요소에 릴스 파일을 직접 지정했습니다.");
-          return;
-        }
+      if (await setFilesOnMatchingInput(page, videoPath, /video|mp4|quicktime/i)) {
+        console.log("[영상] 업로더 파일 입력 요소에 릴스 파일을 직접 지정했습니다.");
+        return;
       }
       if (attempt < 3) {
         console.log(`[영상] PC 파일 선택창이 열리지 않아 재시도합니다 (${attempt}/3).`);

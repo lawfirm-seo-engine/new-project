@@ -90,9 +90,17 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.doesNotMatch(source, /locator\("#localAssets"\)\.setInputFiles/);
   assert.doesNotMatch(source, /videoStatus === "render-queued"/);
   assert.doesNotMatch(source, /frameLocator\('iframe\[id\^="input_buffer"\]'\)/);
-  assert.match(source, /locator\("p\.se-text-paragraph"\)\.first\(\)/);
+  assert.match(source, /locator\("p\.se-text-paragraph:visible"\)\.first\(\)/);
   assert.match(source, /page\.keyboard\.press\("Enter"\)/);
   assert.match(source, /카페 원고 본문 입력 검증 실패/);
+  assert.match(source, /clearNaverDraftState\(page\)/);
+  assert.match(source, /localStorage\.clear\(\)/);
+  assert.match(source, /async function resetEditorForJob/);
+  assert.match(source, /async function focusEditorParagraph/);
+  assert.match(source, /page\.mouse\.click/);
+  assert.match(source, /네이버가 복원한 이전 임시 원고를 초기화하지 못했습니다/);
+  assert.match(source, /async function chooseImageFiles/);
+  assert.match(source, /기본 이미지 파일 선택 실패 \(3회 재시도\)/);
   assert.match(source, /chooseIndividualPhotoMode\(page\)/);
   assert.match(source, /getByText\("개별사진", \{ exact: true \}\)\.last\(\)\.click\(\)/);
   assert.match(source, /await fillArticleTitle\(page, articleTitle\)/);
@@ -103,6 +111,7 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /button\.nvu_btn_append\.nvu_local/);
   assert.match(source, /async function chooseVideoFile/);
   assert.match(source, /attempt <= 3/);
+  assert.match(source, /async function setFilesOnMatchingInput/);
   assert.match(source, /input\[type="file"\]/);
   assert.match(source, /릴스 영상 파일 선택 실패 \(3회 재시도\)/);
   assert.match(source, /getByText\("완료", \{ exact: true \}\)/);
