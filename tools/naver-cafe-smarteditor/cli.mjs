@@ -188,7 +188,7 @@ async function processJob(context, config, job, options, existingPage = null) {
     const writeUrl = `https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}/menus/${board.menuId}/articles/write`;
     await page.goto(writeUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
     await assertNaverLogin(page);
-    await selectBoard(page, board.label);
+    await selectBoard(page, board);
 
     await page.locator('textarea[placeholder="제목을 입력해 주세요."]').fill(String(job.draft.title || job.title || ""));
     const editorBody = page.frameLocator('iframe[id^="input_buffer"]').locator("body");
@@ -251,12 +251,35 @@ async function processJob(context, config, job, options, existingPage = null) {
   }
 }
 
-async function selectBoard(page, boardLabel) {
+async function selectBoard(page, board) {
+  await page.locator('textarea[placeholder="제목을 입력해 주세요."]').waitFor({ state: "visible", timeout: 30_000 });
   const empty = page.getByText("게시판을 선택해 주세요.", { exact: true });
-  if (await empty.isVisible().catch(() => false)) await empty.click();
-  const option = page.getByRole("button", { name: new RegExp(`^${escapeRegExp(boardLabel)}`) });
-  if (await option.count()) await option.last().click();
-  await page.getByText(boardLabel, { exact: true }).first().waitFor({ state: "visible", timeout: 15_000 });
+  if (!await empty.isVisible().catch(() => false)) return;
+
+  await empty.click();
+  let selected = false;
+  const byLabel = page.getByText(board.label, { exact: false });
+  for (let index = (await byLabel.count()) - 1; index >= 0; index -= 1) {
+    const candidate = byLabel.nth(index);
+    if (await candidate.isVisible().catch(() => false)) {
+      await candidate.click();
+      selected = true;
+      break;
+    }
+  }
+  if (!selected) {
+    const byMenuId = page.locator(`[href*="/menus/${board.menuId}/"], [data-menu-id="${board.menuId}"], [data-menuid="${board.menuId}"]`);
+    for (let index = (await byMenuId.count()) - 1; index >= 0; index -= 1) {
+      const candidate = byMenuId.nth(index);
+      if (await candidate.isVisible().catch(() => false)) {
+        await candidate.click();
+        selected = true;
+        break;
+      }
+    }
+  }
+  if (!selected) throw new Error(`${board.label} 게시판 선택 항목을 찾지 못했습니다.`);
+  await empty.waitFor({ state: "hidden", timeout: 15_000 });
 }
 
 async function setImageLink(page, imageIndex, href) {

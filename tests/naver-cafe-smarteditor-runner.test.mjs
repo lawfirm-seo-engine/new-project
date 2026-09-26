@@ -58,6 +58,13 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.doesNotMatch(source, /videoStatus === "render-queued"/);
 });
 
+test("SmartEditor accepts a board already selected by the menu URL", () => {
+  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
+  assert.match(source, /selectBoard\(page, board\)/);
+  assert.match(source, /if \(!await empty\.isVisible\(\)\.catch\(\(\) => false\)\) return/);
+  assert.doesNotMatch(source, /getByText\(boardLabel, \{ exact: true \}\)/);
+});
+
 test("Windows installer validates the packaged app and stops an old instance", () => {
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);

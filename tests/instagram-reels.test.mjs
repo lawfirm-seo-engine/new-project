@@ -107,7 +107,7 @@ test("caption templates use the case, landing, and reserved Cafe URL", () => {
   assert.match(payment, /gnlawfintech\/135/);
 });
 
-test("new automation jobs reserve Naver Cafe numbers from 134 in order", async () => {
+test("Naver Cafe number stays at 134 until a SmartEditor post succeeds", async () => {
   const { env } = testEnv([["cafe-reels:jobs:index:v1", []]]);
   const save = async (caseName) => {
     const response = await onWorkflowPost({
@@ -133,7 +133,24 @@ test("new automation jobs reserve Naver Cafe numbers from 134 in order", async (
   assert.equal(first.job.reservedNaverArticleId, "134");
   assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/134");
   assert.equal(first.job.videoStatus, "awaiting-images");
-  assert.equal(second.job.reservedNaverArticleId, "135");
+  assert.equal(second.job.reservedNaverArticleId, "134");
+
+  const postedResponse = await onWorkflowPost({
+    request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "report-smarteditor",
+        jobId: first.job.id,
+        status: "posted",
+        cafeUrl: "https://cafe.naver.com/gnlawfintech/134",
+      }),
+    }),
+    env,
+  });
+  assert.equal(postedResponse.status, 200);
+  const third = await save("third");
+  assert.equal(third.job.reservedNaverArticleId, "135");
 });
 
 test("Instagram Reel automation creates, checks, and publishes a Reel", async () => {

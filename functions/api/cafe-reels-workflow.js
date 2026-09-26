@@ -10,7 +10,7 @@ const SETTINGS_PATH = "data/settings.json";
 const NAVER_TOKEN_KEY = "naver-cafe:oauth:v1";
 const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
-const NAVER_ARTICLE_SEQUENCE_KEY = "cafe-reels:naver-article-sequence:v1";
+const NAVER_ARTICLE_SEQUENCE_KEY = "cafe-reels:naver-article-sequence:v2";
 const NAVER_ARTICLE_START = 134;
 const NAVER_CAFE_SLUG = "gnlawfintech";
 const NAVER_CAFE_MAX_IMAGES = 100;
@@ -23,8 +23,9 @@ export async function onRequestGet({ request, env }) {
     const url = new URL(request.url);
     const jobId = safeId(url.searchParams.get("jobId") || "");
     if (jobId) {
-      const job = await loadJob(env, jobId);
+      let job = await loadJob(env, jobId);
       if (!job) return json({ ok: false, message: "작업을 찾을 수 없습니다." }, 404);
+      job = await refreshPendingArticleNumber(env, job);
       return json({ ok: true, job });
     }
     return json({ ok: true, jobs: await loadIndex(env) });
@@ -43,7 +44,9 @@ export async function onRequestPost({ request, env }) {
       const built = buildJob(body);
       const previous = body?.jobId ? await loadJob(env, built.id) : null;
       const reservedNaverArticleId = normalizeText(
-        previous?.reservedNaverArticleId || await reserveNaverArticleId(env),
+        previous?.smartEditorStatus === "posted"
+          ? previous.reservedNaverArticleId
+          : await currentNaverArticleId(env),
       );
       const expectedCafeUrl = `https://cafe.naver.com/${NAVER_CAFE_SLUG}/${reservedNaverArticleId}`;
       const autoFlow = Boolean(body?.autoFlow);
@@ -126,6 +129,7 @@ export async function onRequestPost({ request, env }) {
         naverArticleId: articleIdFromCafeUrl(cafeUrl) || job.naverArticleId || "",
         caption: buildCaption({ ...job, cafeUrl }),
       });
+      if (status === "posted") await advanceNaverArticleId(env, next.reservedNaverArticleId);
       return json({ ok: true, job: next, message: "SmartEditor 작업 상태를 저장했습니다." });
     }
 
@@ -299,25 +303,37 @@ async function loadIndex(env) {
   return (await env.CASES.get(INDEX_KEY, "json").catch(() => null)) || [];
 }
 
-async function reserveNaverArticleId(env) {
+async function currentNaverArticleId(env) {
   const stored = await env.CASES.get(NAVER_ARTICLE_SEQUENCE_KEY, "json").catch(() => null);
   let next = Number(stored?.next || stored || 0);
-  if (!Number.isFinite(next) || next < NAVER_ARTICLE_START) {
-    const index = await loadIndex(env);
-    let highest = NAVER_ARTICLE_START - 1;
-    for (const entry of index) {
-      const job = await loadJob(env, safeId(entry?.id || ""));
-      const candidates = [
-        Number(job?.reservedNaverArticleId || 0),
-        Number(job?.naverArticleId || 0),
-        Number(articleIdFromCafeUrl(job?.cafeUrl || "") || 0),
-      ].filter(Number.isFinite);
-      highest = Math.max(highest, ...candidates);
-    }
-    next = Math.max(NAVER_ARTICLE_START, highest + 1);
-  }
-  await env.CASES.put(NAVER_ARTICLE_SEQUENCE_KEY, JSON.stringify({ next: next + 1, updatedAt: new Date().toISOString() }));
+  if (!Number.isFinite(next) || next < NAVER_ARTICLE_START) next = NAVER_ARTICLE_START;
   return String(next);
+}
+
+async function advanceNaverArticleId(env, completedArticleId = "") {
+  const current = Number(await currentNaverArticleId(env));
+  const completed = Number(completedArticleId || current);
+  if (!Number.isFinite(completed) || completed < current) return String(current);
+  const next = completed + 1;
+  await env.CASES.put(NAVER_ARTICLE_SEQUENCE_KEY, JSON.stringify({
+    next,
+    updatedAt: new Date().toISOString(),
+  }));
+  return String(next);
+}
+
+async function refreshPendingArticleNumber(env, job) {
+  if (!job || job.smartEditorStatus === "posted" || job.cafeStatus === "smarteditor-posted") return job;
+  const reservedNaverArticleId = await currentNaverArticleId(env);
+  if (String(job.reservedNaverArticleId || "") === reservedNaverArticleId) return job;
+  const expectedCafeUrl = `https://cafe.naver.com/${NAVER_CAFE_SLUG}/${reservedNaverArticleId}`;
+  return saveJob(env, {
+    ...job,
+    reservedNaverArticleId,
+    expectedCafeUrl,
+    cafeUrl: expectedCafeUrl,
+    caption: buildCaption({ ...job, reservedNaverArticleId, expectedCafeUrl, cafeUrl: expectedCafeUrl }),
+  });
 }
 
 async function startInstagramReel(env, job, requestedCaption = "") {
