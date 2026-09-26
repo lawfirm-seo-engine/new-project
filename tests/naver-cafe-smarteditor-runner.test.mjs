@@ -50,6 +50,13 @@ test("desktop full automation renders ten-second Reels by default", () => {
   assert.match(source, /locator\("#duration"\)\.selectOption\("10"\)/);
 });
 
+test("desktop automation uses the Windows Chrome sandbox and opens the work screen", () => {
+  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
+  assert.match(source, /chromiumSandbox:\s*true/);
+  assert.doesNotMatch(source, /["']--no-sandbox["']/);
+  assert.match(source, /monitorPage\.goto\(`\$\{config\.siteOrigin\}\/admin\/cafe-reels`/);
+});
+
 test("full automation selects the first ten regular images for Reels", () => {
   const images = [
     ...Array.from({ length: 12 }, (_, index) => ({ slot: String(index + 1).padStart(2, "0"), url: `/assets/${index + 1}.jpg` })),

@@ -105,6 +105,7 @@ async function main() {
     headless: false,
     viewport: null,
     acceptDownloads: true,
+    chromiumSandbox: true,
     args: ["--start-maximized"],
   });
 
@@ -148,6 +149,14 @@ async function login(context, config) {
 }
 
 async function watchQueue(context, config, options) {
+  const monitorPage = context.pages()[0] || await context.newPage();
+  await monitorPage.goto(`${config.siteOrigin}/admin/cafe-reels`, {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  if (/\/admin\/login/i.test(monitorPage.url())) {
+    throw new Error("gnlaw-criminal 관리자 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 실행하세요.");
+  }
   console.log(`랜딩·릴스·SmartEditor 전체 대기열 감시 시작 (${config.siteOrigin}, ${config.pollSeconds}초 간격)`);
   for (;;) {
     const jobs = await loadQueue(context, config);
