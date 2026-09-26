@@ -8,7 +8,6 @@ import {
   orderedJobImages,
   parseArgs,
   parseLinkedImageData,
-  reelJobImages,
 } from "../tools/naver-cafe-smarteditor/cli.mjs";
 
 test("SmartEditor runner parses publish and video options", () => {
@@ -45,11 +44,6 @@ test("SmartEditor runner keeps contact images last and resolves local URLs", () 
   assert.equal(images[3].url, "https://cdn.example/kakao.png");
 });
 
-test("desktop full automation renders ten-second Reels by default", () => {
-  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
-  assert.match(source, /locator\("#duration"\)\.selectOption\("10"\)/);
-});
-
 test("desktop automation uses the Windows Chrome sandbox and opens the work screen", () => {
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   assert.match(source, /chromiumSandbox:\s*true/);
@@ -57,21 +51,17 @@ test("desktop automation uses the Windows Chrome sandbox and opens the work scre
   assert.match(source, /monitorPage\.goto\(`\$\{config\.siteOrigin\}\/admin\/cafe-reels`/);
 });
 
+test("desktop automation posts from the original work tab and never auto-selects Reel images", () => {
+  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
+  assert.match(source, /processJob\(context, config, job, options, monitorPage\)/);
+  assert.doesNotMatch(source, /locator\("#localAssets"\)\.setInputFiles/);
+  assert.doesNotMatch(source, /videoStatus === "render-queued"/);
+});
+
 test("Windows installer validates the packaged app and stops an old instance", () => {
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);
   assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
-});
-
-test("full automation selects the first ten regular images for Reels", () => {
-  const images = [
-    ...Array.from({ length: 12 }, (_, index) => ({ slot: String(index + 1).padStart(2, "0"), url: `/assets/${index + 1}.jpg` })),
-    { slot: "phone", url: "/phone.jpg" },
-    { slot: "kakao", url: "/kakao.jpg" },
-  ];
-  const selected = reelJobImages({ images }, "https://gnlaw-criminal.co.kr");
-  assert.equal(selected.length, 10);
-  assert.deepEqual(selected.map((image) => image.slot), ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]);
 });
 
 test("SmartEditor runner resolves a saved Reels video URL", () => {

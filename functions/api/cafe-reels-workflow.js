@@ -54,7 +54,7 @@ export async function onRequestPost({ request, env }) {
         expectedCafeUrl,
         cafeUrl: built.cafeUrl || previous?.cafeUrl || expectedCafeUrl,
         cafeStatus: autoFlow ? "awaiting-reel" : (previous?.cafeStatus || built.cafeStatus),
-        videoStatus: autoFlow ? "render-queued" : (previous?.videoStatus || built.videoStatus),
+        videoStatus: autoFlow ? "awaiting-images" : (previous?.videoStatus || built.videoStatus),
         automationMode: autoFlow ? "full" : (previous?.automationMode || "manual"),
         instagramStatus: previous?.instagramStatus || built.instagramStatus,
         instagramContainerId: previous?.instagramContainerId || "",

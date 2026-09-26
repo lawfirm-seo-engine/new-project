@@ -10,6 +10,7 @@ import {
   saveInstagramToken,
 } from "../functions/_instagram.js";
 import { buildCaption, onRequestPost as onWorkflowPost } from "../functions/api/cafe-reels-workflow.js";
+import { isExactLandingIdentity } from "../functions/api/generate-cafe-draft.js";
 
 function testEnv(initial = []) {
   const stored = new Map(initial);
@@ -62,6 +63,23 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /class="bulk-part"/);
   assert.match(pageSource, /class="bulk-type"/);
   assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
+  assert.match(pageSource, /id="generate" type="button">자동화 실행<\/button>/);
+  assert.match(pageSource, /function applyJob[\s\S]*syncVideoTitle\(\)/);
+});
+
+test("Cafe landing reuse requires the exact case instead of generic fraud tags", () => {
+  const incoming = {
+    slug: "keuryuba-peurojegteu-saching",
+    caseName: "크류바 프로젝트 사칭 사기",
+    tags: ["프로젝트", "사기피해", "피해금회수"],
+  };
+  const wrongExisting = {
+    slug: "eurobitx",
+    caseName: "eurobitx 사칭 사기",
+    tags: ["사기피해", "피해금회수"],
+  };
+  assert.equal(isExactLandingIdentity(incoming, wrongExisting), false);
+  assert.equal(isExactLandingIdentity(incoming, { ...incoming, title: "다른 부제" }), true);
 });
 
 test("caption templates use the case, landing, and reserved Cafe URL", () => {
@@ -114,7 +132,7 @@ test("new automation jobs reserve Naver Cafe numbers from 134 in order", async (
   const second = await save("second");
   assert.equal(first.job.reservedNaverArticleId, "134");
   assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/134");
-  assert.equal(first.job.videoStatus, "render-queued");
+  assert.equal(first.job.videoStatus, "awaiting-images");
   assert.equal(second.job.reservedNaverArticleId, "135");
 });
 

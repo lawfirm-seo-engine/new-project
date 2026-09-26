@@ -91,7 +91,7 @@
       </div>
       <div id="bulkRows" class="bulk-list"></div>
       <div id="bulkMsg" class="message"></div>
-      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트와 사건 유형을 선택합니다. 중복 검수와 랜딩페이지 생성을 마치면 카페 글 번호를 134부터 순서대로 예약합니다. 설치한 Windows 프로그램이 릴스 영상 생성·Instagram 게시·네이버 카페 원고/이미지/영상 게시를 순차 처리합니다.</p>
+      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트와 사건 유형을 선택합니다. 작업 등록 후 처리할 사건을 선택하면 입력한 사건명이 영상 제목에 자동 반영됩니다. 로컬 이미지 10장을 직접 선택하고 자동화 실행을 누르면 영상 생성·Instagram 게시·네이버 카페 게시가 순서대로 진행됩니다.</p>
     </section>
 
     <section class="panel">
@@ -189,7 +189,7 @@
       <div id="scenes"></div>
       <section class="pipeline">
         <div class="flow">로컬 이미지 10장 → 영상 스타일 → H.264 MP4 → 로컬 PC 저장</div>
-        <button class="btn warn big" id="generate" type="button">영상 바로 생성</button>
+        <button class="btn warn big" id="generate" type="button">자동화 실행</button>
         <p class="status" id="jobText">로컬 이미지 10장을 선택하세요</p>
         <p class="status" id="status">대기 중</p>
         <div class="media" id="media">
@@ -231,7 +231,7 @@
 </main>
 
 <template id="sceneTpl"><section class="scene"><div class="sceneTop"><strong class="num"></strong><div class="actions"><button class="btn up" type="button">↑</button><button class="btn down" type="button">↓</button><button class="btn warn del" type="button">삭제</button></div></div><div class="sceneBody"><div class="scenePreview"><img class="preview" alt="장면 이미지"></div><div><div class="whiteboard-row"><label>역할<input class="role"></label><label>시간 가중치<input class="weight" type="number" min="0.1" step="0.1" value="1"></label></div><label>내레이션<textarea class="narration" rows="2"></textarea></label><label>그림 상황 설명<textarea class="visual" rows="2"></textarea></label></div></div></section></template>
-<script src="/admin/whiteboard-local-v2.js?v=20260926-1"></script>
+<script src="/admin/whiteboard-local-v2.js?v=20260926-2"></script>
 <script>
   const $ = (id) => document.getElementById(id);
   const caseNameEl = $("caseName");
@@ -258,6 +258,8 @@
     partTypeEl.addEventListener("change", syncPartSelection);
     caseNameEl.addEventListener("input", syncVideoTitle);
     window.addEventListener("whiteboard:video-ready", handleGeneratedVideo);
+    window.addEventListener("whiteboard:automation-failed", handleAutomationFailure);
+    window.gnlawBeforeVideoRender = beforeVideoRender;
     syncPartSelection();
     loadAssets();
     loadJobs();
@@ -368,6 +370,7 @@
     const button = $("bulkCreateBtn");
     button.disabled = true;
     let completed = 0;
+    let firstSavedJob = null;
     const failures = [];
     try {
       for (const item of rows) {
@@ -377,9 +380,6 @@
         const selectedImages = assetImagesForKey(imageSetKey);
         show("bulkMsg", `${completed + 1}/${rows.length} · ${caseName} 중복 검수 및 랜딩페이지 생성 중...`);
         try {
-          if (selectedImages.filter((image) => image.slot !== "phone" && image.slot !== "kakao").length < 10) {
-            throw new Error("선택한 파트의 영상용 이미지가 10장 이상 등록되어 있어야 합니다.");
-          }
           const draftResponse = await fetch("/api/generate-cafe-draft", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -400,6 +400,7 @@
             autoFlow: true,
           });
           completed += 1;
+          firstSavedJob ||= saved.job;
           item.row.dataset.registered = "true";
           item.row.style.opacity = ".55";
           show("bulkMsg", `${completed}/${rows.length} · ${caseName} · 카페 글 ${saved.job.reservedNaverArticleId}번 작업 등록 완료`);
@@ -408,9 +409,14 @@
         }
       }
       await loadJobs();
+      if (firstSavedJob) {
+        applyJob(firstSavedJob);
+        $("draftPanel").hidden = false;
+        $("whiteboardPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
       show("bulkMsg", failures.length
         ? `${completed}건 등록, ${failures.length}건 실패\n${failures.join("\n")}`
-        : `${completed}건 전체 작업 등록 완료. Windows 자동화 프로그램이 순차 처리합니다.`, failures.length > 0);
+        : `${completed}건 전체 작업 등록 완료. 첫 작업의 이미지 10장을 선택한 뒤 자동화 실행을 눌러주세요.`, failures.length > 0);
     } finally {
       button.disabled = false;
     }
@@ -675,6 +681,7 @@
   }
 
   function applyJob(job) {
+    const previousJobId = currentJob?.id || "";
     currentJob = job;
     draft = job.draft || draft;
     caseNameEl.value = job.caseName || "";
@@ -689,6 +696,8 @@
     videoUrlEl.value = job.videoUrl || "";
     captionOutput.value = job.caption || buildLocalCaption();
     renderAssetSet();
+    syncVideoTitle();
+    if (previousJobId && previousJobId !== job.id) window.resetWhiteboardLocalAssets?.();
   }
 
   function currentAssetImages() {
@@ -746,6 +755,23 @@
     } finally {
       instagramAutoUploadInProgress = false;
     }
+  }
+
+  async function beforeVideoRender() {
+    if (!currentJob) throw new Error("먼저 랜딩·릴스·카페 전체 작업을 등록하거나 최근 작업을 선택해주세요.");
+    syncVideoTitle();
+    const data = await postWorkflow({ action: "report-render", jobId: currentJob.id, status: "rendering" });
+    applyJob(data.job);
+    show("reelsMsg", "선택한 이미지로 릴스 영상을 생성하고 있습니다...");
+  }
+
+  async function handleAutomationFailure(event) {
+    const message = event.detail?.message || "릴스 영상 생성 실패";
+    if (currentJob) {
+      await postWorkflow({ action: "report-render", jobId: currentJob.id, status: "failed", message }).catch(() => {});
+    }
+    show("reelsMsg", message, true);
+    loadJobs();
   }
 
   function buildLocalCaption() {

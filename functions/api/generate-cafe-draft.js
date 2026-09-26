@@ -3,7 +3,7 @@ import {
   buildLandingUrl,
   landingUrlForItem,
 } from "../_seo.js";
-import { compareCaseIdentity, hangulToRoman } from "../_searchNormalize.js";
+import { hangulToRoman } from "../_searchNormalize.js";
 import { onRequestPost as createCaseLanding } from "./create-case.js";
 import { onRequestPost as createRecoveryLanding } from "./create-recovery-landing.js";
 import { onRequestPost as generateLandingDraft } from "./generate-draft.js";
@@ -339,13 +339,35 @@ async function ensureRecoveryLandingPage(context, { rawCaseName, draft }) {
 async function findExistingLanding(env, incoming, group) {
   const cases = await loadCaseIndex(env);
   const landingKey = group.landingKey || group.key;
-  const exact = cases.find((item) => item.slug === incoming.slug && hasLandingForGroup(item, landingKey));
-  if (exact) return exact;
-  return cases.find((item) => {
-    if (!hasLandingForGroup(item, landingKey)) return false;
-    const result = compareCaseIdentity(incoming, item);
-    return result.score >= 0.99;
-  }) || null;
+  return cases.find((item) => (
+    hasLandingForGroup(item, landingKey) && isExactLandingIdentity(incoming, item)
+  )) || null;
+}
+
+export function isExactLandingIdentity(incoming = {}, existing = {}) {
+  const incomingSlug = strictIdentity(incoming.slug || "");
+  const existingSlug = strictIdentity(existing.slug || "");
+  if (incomingSlug && existingSlug && incomingSlug === existingSlug) return true;
+
+  const incomingNames = identityNames(incoming);
+  const existingNames = new Set(identityNames(existing));
+  return incomingNames.some((name) => existingNames.has(name));
+}
+
+function identityNames(item = {}) {
+  return [...new Set([
+    item.caseName,
+    item.name,
+    item.title,
+    item.h1,
+  ].map(strictIdentity).filter((value) => value.length >= 3))];
+}
+
+function strictIdentity(value = "") {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^0-9a-z가-힣]+/g, "");
 }
 
 function hasLandingForGroup(item = {}, landingKey = "") {
