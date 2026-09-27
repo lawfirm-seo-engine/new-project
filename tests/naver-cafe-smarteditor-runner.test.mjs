@@ -69,6 +69,14 @@ test("both Cafe image sets stay in filename order even when saved job data is sh
   );
 });
 
+test("SmartEditor retries Naver's temporary image transfer limit without reordering", () => {
+  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
+  assert.match(source, /for \(let attempt = 1; attempt <= 3 && !uploaded; attempt \+= 1\)/);
+  assert.match(source, /getByText\("파일 전송 오류", \{ exact: true \}\)/);
+  assert.match(source, /const backoff = attempt \* 15_000/);
+  assert.match(source, /await verifyEditorImageSequence\(page, files\.slice\(0, index \+ 1\)\)/);
+});
+
 test("payment Cafe image filenames retain the user's original content order", () => {
   const expectedHashes = {
     "01.png": "BAEAE5794CFD",
@@ -179,7 +187,7 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /네이버가 복원한 이전 임시 원고를 초기화하지 못했습니다/);
   assert.match(source, /async function chooseImageFiles/);
   assert.match(source, /async function uploadImagesInOrder/);
-  assert.match(source, /await chooseImageFiles\(page, \[file\.path\], \{ preferExistingInput: index > 0 \}\)/);
+  assert.match(source, /await chooseImageFiles\(page, \[file\.path\], \{ preferExistingInput: index > 0 && attempt === 1 \}\)/);
   assert.match(source, /기존 파일 입력기를 재사용했습니다/);
   assert.match(source, /await waitForImageCount\(page, index \+ 1\)/);
   assert.match(source, /await verifyEditorImageSequence\(page, files\.slice\(0, index \+ 1\)\)/);
@@ -269,14 +277,14 @@ test("Windows installer validates the packaged app and stops an old instance", (
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);
   assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
-  assert.match(source, /v1\.69\.0/);
+  assert.match(source, /v1\.70\.0/);
 
   const gui = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/GNLAWSmartEditor.cs", import.meta.url), "utf8");
   assert.match(gui, /StopStaleAutomationProcesses\(nodePath, cliPath\)/);
   assert.match(gui, /ManagementObjectSearcher\("SELECT ProcessId, Name, CommandLine FROM Win32_Process"\)/);
   assert.match(gui, /commandLine\.IndexOf\(profilePath/);
   assert.match(gui, /기존 자동화 프로세스/);
-  assert.match(gui, /v1\.69\.0 · 수정 69차/);
+  assert.match(gui, /v1\.70\.0 · 수정 70차/);
   assert.match(gui, /gui\.log/);
   assert.match(gui, /File\.AppendAllText/);
 });
@@ -285,10 +293,10 @@ test("automation surfaces expose the same revision version", () => {
   const cli = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   const page = fs.readFileSync(new URL("../admin/cafe-reels.html", import.meta.url), "utf8");
   const version = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/VERSION.txt", import.meta.url), "utf8").trim();
-  assert.equal(version, "v1.69.0 · 수정 69차");
-  assert.match(cli, /v1\.69\.0 · 수정 69차/);
-  assert.match(page, /v1\.69\.0 · 수정 69차/);
-  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.69\.0/);
+  assert.equal(version, "v1.70.0 · 수정 70차");
+  assert.match(cli, /v1\.70\.0 · 수정 70차/);
+  assert.match(page, /v1\.70\.0 · 수정 70차/);
+  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.70\.0/);
 });
 
 test("queue watcher relaunches Chrome after a renderer crash", () => {

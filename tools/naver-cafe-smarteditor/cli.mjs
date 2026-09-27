@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.69.0 · 수정 69차";
+export const APP_VERSION = "v1.70.0 · 수정 70차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -631,12 +631,34 @@ async function chooseImageFiles(page, filePaths, options = {}) {
 async function uploadImagesInOrder(page, files) {
   for (let index = 0; index < files.length; index += 1) {
     const file = files[index];
-    await focusEditorParagraph(page);
-    await page.keyboard.press("Control+End");
-    await chooseImageFiles(page, [file.path], { preferExistingInput: index > 0 });
-    await waitForImageCount(page, index + 1);
+    let uploaded = false;
+    let lastError;
+    for (let attempt = 1; attempt <= 3 && !uploaded; attempt += 1) {
+      try {
+        await focusEditorParagraph(page);
+        await page.keyboard.press("Control+End");
+        await chooseImageFiles(page, [file.path], { preferExistingInput: index > 0 && attempt === 1 });
+        await waitForImageCount(page, index + 1);
+        uploaded = true;
+      } catch (error) {
+        lastError = error;
+        const transferError = page.getByText("파일 전송 오류", { exact: true });
+        if (await transferError.isVisible().catch(() => false)) {
+          console.log(`[사진] 네이버 파일 전송 일시 제한을 감지했습니다 (${file.slot}, ${attempt}/3).`);
+          await page.getByRole("button", { name: "확인", exact: true }).click({ force: true }).catch(() => {});
+          await transferError.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => {});
+        }
+        if (attempt < 3) {
+          const backoff = attempt * 15_000;
+          console.log(`[사진] ${Math.round(backoff / 1000)}초 후 ${file.slot} 이미지를 다시 업로드합니다.`);
+          await delay(backoff);
+        }
+      }
+    }
+    if (!uploaded) throw new Error(`${file.slot} 이미지 업로드 3회 실패: ${lastError?.message || "네이버 파일 전송 오류"}`);
     await verifyEditorImageSequence(page, files.slice(0, index + 1));
     console.log(`[사진] ${file.slot} 이미지 실제 배치 순서 확인 완료 (${index + 1}/${files.length})`);
+    await delay(1_500);
   }
 }
 
@@ -1093,6 +1115,9 @@ async function waitForImageCount(page, expected) {
   const components = page.locator("div.se-component.se-image");
   const deadline = Date.now() + 120_000;
   while (Date.now() < deadline) {
+    if (await page.getByText("파일 전송 오류", { exact: true }).isVisible().catch(() => false)) {
+      throw new Error("네이버 파일 전송 일시 제한");
+    }
     const state = await components.evaluateAll((items) => ({
       count: items.length,
       ready: items.filter((item) => {
