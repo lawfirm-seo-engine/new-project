@@ -11,6 +11,7 @@ import {
 } from "../functions/_instagram.js";
 import {
   buildCaption,
+  instagramStoryLinkDetails,
   onRequestGet as onWorkflowGet,
   onRequestPost as onWorkflowPost,
 } from "../functions/api/cafe-reels-workflow.js";
@@ -168,6 +169,23 @@ test("caption templates use the case, landing, and reserved Cafe URL", () => {
   assert.match(payment, /gnlawfintech\/135/);
 });
 
+test("Instagram Story metadata uses the part-specific center label and landing URL", () => {
+  assert.deepEqual(instagramStoryLinkDetails({
+    imageSetKey: "fraud",
+    draft: { landingUrl: "https://gnlaw-criminal.co.kr/prosecute/example-litigation/" },
+  }), {
+    text: "법무법인 선린-금융사기피해 Fintech센터",
+    url: "https://gnlaw-criminal.co.kr/prosecute/example-litigation/",
+  });
+  assert.deepEqual(instagramStoryLinkDetails({
+    imageSetKey: "payment-suspension-release",
+    draft: { landingUrl: "https://gnlaw-recovery.co.kr/success/example-result/" },
+  }), {
+    text: "법무법인 선린 계좌 지급정지 대응센터",
+    url: "https://gnlaw-recovery.co.kr/success/example-result/",
+  });
+});
+
 test("bulk jobs receive Cafe numbers one-by-one only after the previous SmartEditor post succeeds", async () => {
   const { env } = testEnv([["cafe-reels:jobs:index:v1", []]]);
   const save = async (caseName, batchOrder) => {
@@ -249,7 +267,11 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
     caseName: "테스트 사건",
     fraudType: "institution-exchange",
     imageSetKey: "fraud",
-    draft: { title: "테스트 릴스", body: "본문" },
+    draft: {
+      title: "테스트 릴스",
+      body: "본문",
+      landingUrl: "https://gnlaw-criminal.co.kr/prosecute/test-litigation/",
+    },
     images: [{ slot: "01", url: "https://images.example/1.jpg" }],
     videoUrl: "https://videos.example/reel.mp4",
     caption: "테스트 캡션",
@@ -274,19 +296,29 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
     calls.push({ url, init });
     if (url.pathname.endsWith("/17841400000000000/media")) {
       const form = new URLSearchParams(init.body);
-      assert.equal(form.get("media_type"), "REELS");
       assert.equal(form.get("video_url"), "https://videos.example/reel.mp4");
-      assert.equal(form.get("share_to_feed"), "true");
       assert.equal(form.get("access_token"), "instagram-access-token");
-      return Response.json({ id: "container-123" });
+      if (form.get("media_type") === "REELS") {
+        assert.equal(form.get("share_to_feed"), "true");
+        return Response.json({ id: "container-123" });
+      }
+      assert.equal(form.get("media_type"), "STORIES");
+      assert.equal(form.has("caption"), false);
+      assert.equal(form.has("link"), false);
+      assert.equal(form.has("link_sticker"), false);
+      return Response.json({ id: "story-container-789" });
     }
     if (url.pathname.endsWith("/container-123")) {
       return Response.json({ id: "container-123", status_code: "FINISHED", status: "Finished" });
     }
+    if (url.pathname.endsWith("/story-container-789")) {
+      return Response.json({ id: "story-container-789", status_code: "FINISHED", status: "Finished" });
+    }
     if (url.pathname.endsWith("/17841400000000000/media_publish")) {
       const form = new URLSearchParams(init.body);
-      assert.equal(form.get("creation_id"), "container-123");
-      return Response.json({ id: "media-456" });
+      if (form.get("creation_id") === "container-123") return Response.json({ id: "media-456" });
+      assert.equal(form.get("creation_id"), "story-container-789");
+      return Response.json({ id: "story-media-987" });
     }
     if (url.pathname.endsWith("/media-456")) {
       return Response.json({ id: "media-456", permalink: "https://www.instagram.com/reel/example/" });
@@ -314,13 +346,23 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
 
     const checked = await post({ action: "check-instagram-reel", jobId });
     assert.equal(checked.response.status, 200);
-    assert.equal(checked.result.done, true);
+    assert.equal(checked.result.done, false);
     assert.equal(checked.result.job.instagramStatus, "posted");
     assert.equal(checked.result.job.instagramMediaId, "media-456");
     assert.equal(checked.result.job.instagramPermalink, "https://www.instagram.com/reel/example/");
+    assert.equal(checked.result.job.instagramStoryStatus, "processing");
+    assert.equal(checked.result.job.instagramStoryContainerId, "story-container-789");
+    assert.equal(checked.result.job.instagramStoryLinkText, "법무법인 선린-금융사기피해 Fintech센터");
+    assert.equal(checked.result.job.instagramStoryLinkUrl, "https://gnlaw-criminal.co.kr/prosecute/test-litigation/");
     assert.equal(checked.result.job.cafeStatus, "smarteditor-queued");
     assert.equal(checked.result.job.draft.body, "본문");
-    assert.equal(calls.length, 4);
+
+    const storyChecked = await post({ action: "check-instagram-reel", jobId });
+    assert.equal(storyChecked.response.status, 200);
+    assert.equal(storyChecked.result.done, true);
+    assert.equal(storyChecked.result.job.instagramStoryStatus, "posted");
+    assert.equal(storyChecked.result.job.instagramStoryMediaId, "story-media-987");
+    assert.equal(calls.length, 7);
   } finally {
     globalThis.fetch = originalFetch;
   }

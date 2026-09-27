@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.65.0 · 수정 65차";
+export const APP_VERSION = "v1.66.0 · 수정 66차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -126,6 +126,11 @@ export function articleBodyPartsForJob(job = {}) {
     manuscript: manuscript.join("\n\n"),
     links: linkBlocks.join("\n\n"),
   };
+}
+
+export function articleLinkUrls(body = "") {
+  return [...String(body || "").matchAll(/https?:\/\/[^\s<>"']+/gi)]
+    .map((match) => match[0].replace(/[),.;!?]+$/g, ""));
 }
 
 export function manuscriptBatches(body = "") {
@@ -390,6 +395,7 @@ async function processJob(context, apiContext, config, job, options, existingPag
 
     if (articleParts.links) {
       await insertArticleBody(page, articleParts.links, { append: true });
+      await waitForEditorLinksStable(page, articleLinkUrls(articleParts.links));
     }
 
     if (videoFile) {
@@ -430,6 +436,9 @@ async function processJob(context, apiContext, config, job, options, existingPag
     const publishedImages = await verifyPublishedImageSequence(page, files);
     const publishedLinks = await verifyPublishedLinks(page, [config.phoneLink, config.kakaoLink]);
     if (videoFile) await verifyPublishedVideo(page);
+    if (job.instagramPermalink) {
+      await verifyPublishedInstagramOrder(page, articleLinkUrls(articleParts.links), job.instagramPermalink);
+    }
     await reportStatus(apiContext, config, job.id, "posted", { cafeUrl });
     console.log(`게시 완료: ${cafeUrl}`);
     console.log(`공개 글 이미지 순서 검증: ${publishedImages.join(" → ")}`);
@@ -668,6 +677,70 @@ async function insertArticleBody(page, body, options = {}) {
   await page.keyboard.press("Control+End");
 }
 
+function comparableUrl(value = "") {
+  let result = String(value || "").trim().replace(/\s+/g, "");
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const decoded = decodeURIComponent(result);
+      if (decoded === result) break;
+      result = decoded;
+    } catch {
+      break;
+    }
+  }
+  return result.replace(/\/$/, "");
+}
+
+async function waitForEditorLinksStable(page, expectedUrls) {
+  const expected = expectedUrls.map(comparableUrl).filter(Boolean);
+  if (!expected.length) return;
+
+  await focusEditorParagraph(page);
+  await page.keyboard.press("Control+End");
+  await page.keyboard.press("Enter");
+
+  const deadline = Date.now() + 45_000;
+  let stableChecks = 0;
+  let previousSignature = "";
+  let observed = [];
+  while (Date.now() < deadline) {
+    observed = await page.locator("a[href]:visible").evaluateAll((anchors) => anchors.map((anchor) => ({
+      href: anchor.getAttribute("href") || "",
+      text: anchor.textContent || "",
+    }))).catch(() => []);
+    const comparableObserved = observed.flatMap((item) => [item.href, item.text]).map(comparableUrl);
+    const complete = expected.every((url) => comparableObserved.some((value) => value.includes(url)));
+    const signature = JSON.stringify(observed);
+    if (complete && signature === previousSignature) stableChecks += 1;
+    else stableChecks = complete ? 1 : 0;
+    previousSignature = signature;
+    if (stableChecks >= 3) {
+      console.log(`[링크] 관련 랜딩페이지 ${expected.length}개 변환 완료와 위치 안정화를 확인했습니다.`);
+      return;
+    }
+    await delay(500);
+  }
+  throw new Error(`관련 랜딩페이지 링크 변환 검증 실패: ${expectedUrls.join(", ")}`);
+}
+
+async function createCleanEditorTailParagraph(page) {
+  const marker = `GNLAW_TAIL_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  await focusEditorParagraph(page);
+  await page.keyboard.press("Control+End");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  await page.keyboard.insertText(marker);
+  const paragraph = page.locator("p.se-text-paragraph:visible").filter({ hasText: marker }).last();
+  await paragraph.waitFor({ state: "visible", timeout: 15_000 });
+  await paragraph.click({ position: { x: 8, y: 8 } });
+  await page.keyboard.press("End");
+  await page.keyboard.press("Shift+Home");
+  await page.keyboard.press("Backspace");
+  const remaining = await paragraph.innerText().catch(() => marker);
+  if (remaining.includes(marker)) throw new Error("Instagram 미리보기용 독립 문단을 만들지 못했습니다.");
+  return paragraph;
+}
+
 async function insertInstagramReelPreview(page, rawPermalink) {
   const permalink = String(rawPermalink || "").trim();
   let url;
@@ -688,13 +761,9 @@ async function insertInstagramReelPreview(page, rawPermalink) {
   ].join(", "));
   const beforeCount = await previews.count();
 
-  await focusEditorParagraph(page);
-  await page.keyboard.press("Control+End");
-  await page.keyboard.press("Enter");
-  await page.keyboard.press("Enter");
+  const activeParagraph = await createCleanEditorTailParagraph(page);
   await page.keyboard.insertText(url.href);
 
-  const activeParagraph = page.locator("p.se-text-paragraph:visible").last();
   const typedUrl = await activeParagraph.innerText().catch(() => "");
   if (!typedUrl.includes(url.href)) {
     throw new Error("Instagram 릴스 주소를 SmartEditor에 입력하지 못했습니다.");
@@ -918,6 +987,43 @@ async function verifyPublishedVideo(page) {
   throw new Error("공개 글에서 릴스 영상을 확인하지 못했습니다.");
 }
 
+async function verifyPublishedInstagramOrder(page, landingUrls, instagramPermalink) {
+  const expectedLanding = landingUrls.map(comparableUrl).filter(Boolean);
+  const expectedInstagram = comparableUrl(instagramPermalink);
+  const deadline = Date.now() + 60_000;
+  let diagnostic = "";
+  while (Date.now() < deadline) {
+    try {
+      for (const frame of page.frames()) {
+        const components = await frame.locator("div.se-main-container div.se-component, div.ArticleContentBox div.se-component")
+          .evaluateAll((items) => items.map((item) => ({
+            text: item.textContent || "",
+            links: [...item.querySelectorAll("a[href]")].map((anchor) => anchor.getAttribute("href") || ""),
+            html: item.innerHTML || "",
+          }))).catch(() => []);
+        if (!components.length) continue;
+        const values = components.map((component) => comparableUrl([
+          component.text,
+          ...component.links,
+          component.html,
+        ].join("\n")));
+        const landingIndexes = expectedLanding.map((url) => values.findIndex((value) => value.includes(url)));
+        const instagramIndex = values.findIndex((value) => value.includes(expectedInstagram) || /instagram\.com/i.test(value));
+        diagnostic = `landing=${landingIndexes.join(",")}, instagram=${instagramIndex}, components=${components.length}`;
+        if (landingIndexes.every((index) => index >= 0)
+          && instagramIndex > Math.max(...landingIndexes)) {
+          console.log("[게시 검증] 관련 랜딩페이지 뒤에 Instagram 링크·미리보기 카드가 독립 배치된 것을 확인했습니다.");
+          return;
+        }
+      }
+    } catch (error) {
+      if (!/execution context was destroyed|navigation/i.test(String(error?.message || error))) throw error;
+    }
+    await delay(750);
+  }
+  throw new Error(`공개 글에서 랜딩페이지와 Instagram 미리보기 순서를 확인하지 못했습니다 (${diagnostic || "본문 구성요소 없음"}).`);
+}
+
 async function waitForImageCount(page, expected) {
   const components = page.locator("div.se-component.se-image");
   const deadline = Date.now() + 120_000;
@@ -986,8 +1092,7 @@ async function uploadVideo(page, videoFile, title) {
   let uploaderOpened = false;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     await page.keyboard.press("Escape").catch(() => {});
-    await focusEditorParagraph(page, true);
-    await page.keyboard.press("Control+Home");
+    await createCleanEditorTailParagraph(page);
     await toolbarButton.click();
     uploaderOpened = await uploader.waitFor({ state: "visible", timeout: 5_000 }).then(() => true).catch(() => false);
     if (uploaderOpened) break;

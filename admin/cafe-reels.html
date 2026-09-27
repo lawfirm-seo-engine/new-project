@@ -78,9 +78,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.65.0 · 수정 65차</div>
+      <div class="status">자동화 프로그램 v1.66.0 · 수정 66차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.65.0" download>Windows 자동화 프로그램 v1.65.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.66.0" download>Windows 자동화 프로그램 v1.66.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -224,12 +224,12 @@
       <div class="actions">
         <button class="btn" type="button" onclick="saveCafeUrl()">카페 URL 저장</button>
         <button class="btn" type="button" onclick="saveVideoUrl()">영상 URL 저장</button>
-        <button class="btn green" id="instagramPublishBtn" type="button" onclick="publishInstagramReel()">Instagram 릴스 자동 업로드</button>
+        <button class="btn green" id="instagramPublishBtn" type="button" onclick="publishInstagramReel()">Instagram 릴스·스토리 자동 업로드</button>
         <button class="btn" type="button" onclick="markInstagramReady()">수동 업로드 준비만</button>
         <button class="btn" type="button" onclick="copyValue(captionOutput.value, this)">캡션 복사</button>
       </div>
       <div id="reelsMsg" class="message"></div>
-      <p class="note">생성한 MP4를 먼저 공개 URL로 저장한 뒤 Instagram 릴스 자동 업로드를 누르면 영상 처리 완료를 확인해 게시합니다. Instagram 앱 설정과 프로페셔널 계정 권한 연결은 관리자 설정에서 최초 1회 완료해야 합니다.</p>
+      <p class="note">생성한 MP4를 공개 URL로 저장한 뒤 버튼을 누르면 릴스 게시에 이어 스토리도 자동 게시합니다. 파트별 센터 문구와 랜딩 URL은 작업에 함께 저장됩니다. 단, Meta 공식 게시 API는 스토리 링크 스티커 생성을 지원하지 않아 클릭 가능한 스티커는 Instagram 앱에서 추가해야 합니다. Instagram 앱 설정과 프로페셔널 계정 권한 연결은 관리자 설정에서 최초 1회 완료해야 합니다.</p>
     </section>
   </div>
 </main>
@@ -619,15 +619,19 @@
     button.disabled = true;
     show("reelsMsg", "Instagram에 릴스 업로드를 시작합니다...");
     try {
-      if (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId) {
+      if (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId
+        && currentJob.instagramStoryStatus === "posted" && currentJob.instagramStoryMediaId) {
         show("reelsMsg", currentJob.instagramPermalink
-          ? `이미 게시된 릴스입니다: ${currentJob.instagramPermalink}`
-          : "이미 Instagram에 게시된 릴스입니다.");
+          ? `이미 게시된 릴스·스토리입니다: ${currentJob.instagramPermalink}`
+          : "이미 Instagram에 릴스·스토리가 게시되었습니다.");
         return true;
       }
       let data;
-      if (currentJob.instagramStatus === "processing" && currentJob.instagramContainerId) {
-        data = { job: currentJob, message: "기존 Instagram 영상 처리 상태를 이어서 확인합니다." };
+      if ((currentJob.instagramStatus === "processing" && currentJob.instagramContainerId)
+        || (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId)) {
+        data = { job: currentJob, message: currentJob.instagramStatus === "posted"
+          ? "게시된 릴스에 이어 Instagram 스토리 자동 게시를 진행합니다."
+          : "기존 Instagram 영상 처리 상태를 이어서 확인합니다." };
       } else {
         data = await postWorkflow({
           action: "start-instagram-reel",

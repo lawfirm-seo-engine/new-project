@@ -74,6 +74,12 @@ export async function onRequestPost({ request, env }) {
         instagramMediaId: previous?.instagramMediaId || "",
         instagramPermalink: previous?.instagramPermalink || "",
         instagramPublishedAt: previous?.instagramPublishedAt || "",
+        instagramStoryStatus: previous?.instagramStoryStatus || built.instagramStoryStatus,
+        instagramStoryContainerId: previous?.instagramStoryContainerId || "",
+        instagramStoryMediaId: previous?.instagramStoryMediaId || "",
+        instagramStoryPublishedAt: previous?.instagramStoryPublishedAt || "",
+        instagramStoryLinkText: previous?.instagramStoryLinkText || "",
+        instagramStoryLinkUrl: previous?.instagramStoryLinkUrl || "",
         naverArticleId: previous?.naverArticleId || "",
         caption: "",
       };
@@ -206,13 +212,25 @@ export async function onRequestPost({ request, env }) {
         const result = await checkInstagramReel(env, job);
         return json({ ok: true, job: result.job, done: result.done, message: result.message });
       } catch (error) {
+        const latest = await loadJob(env, job.id) || job;
+        const reelWasPosted = latest.instagramStatus === "posted" && latest.instagramMediaId;
         const next = await saveJob(env, {
-          ...job,
-          instagramStatus: "failed",
-          instagramError: String(error?.message || error).slice(0, 1200),
+          ...latest,
+          ...(reelWasPosted ? {
+            instagramStoryStatus: "failed",
+            instagramStoryError: String(error?.message || error).slice(0, 1200),
+            instagramStoryUpdatedAt: new Date().toISOString(),
+          } : {
+            instagramStatus: "failed",
+            instagramError: String(error?.message || error).slice(0, 1200),
+          }),
           instagramUpdatedAt: new Date().toISOString(),
         });
-        return json({ ok: false, job: next, message: next.instagramError }, 502);
+        return json({
+          ok: false,
+          job: next,
+          message: reelWasPosted ? next.instagramStoryError : next.instagramError,
+        }, 502);
       }
     }
 
@@ -264,6 +282,7 @@ function buildJob(body = {}) {
     videoKey: String(body.videoKey || "").slice(0, 300),
     videoStatus: body.videoUrl ? "ready" : "empty",
     instagramStatus: "empty",
+    instagramStoryStatus: "empty",
     createdAt: now,
     updatedAt: now,
   };
@@ -303,6 +322,7 @@ async function updateIndex(env, job) {
     title: job.draft?.title || "",
     cafeStatus: job.cafeStatus || "",
     instagramStatus: job.instagramStatus || "",
+    instagramStoryStatus: job.instagramStoryStatus || "",
     videoStatus: job.videoStatus || "",
     reservedNaverArticleId: job.reservedNaverArticleId || "",
     expectedCafeUrl: job.expectedCafeUrl || "",
@@ -429,11 +449,12 @@ async function startInstagramReel(env, job, requestedCaption = "") {
 }
 
 async function checkInstagramReel(env, job) {
+  if (job.instagramStatus === "posted" && job.instagramMediaId) {
+    return continueInstagramStory(env, job);
+  }
+
   const containerId = normalizeText(job.instagramContainerId || "");
   if (!containerId) throw new Error("확인할 Instagram 릴스 컨테이너가 없습니다. 자동 업로드를 다시 시작해주세요.");
-  if (job.instagramStatus === "posted" && job.instagramMediaId) {
-    return { job, done: true, message: "Instagram 릴스 게시가 이미 완료되었습니다." };
-  }
 
   const access = await getInstagramAccess(env);
   const statusUrl = new URL(`${instagramGraphBase(env)}/${encodeURIComponent(containerId)}`);
@@ -475,7 +496,7 @@ async function checkInstagramReel(env, job) {
     permalink = normalizeHttpUrl(media.permalink || "");
   } catch { /* 게시 성공 자체는 유지 */ }
 
-  const next = await saveJob(env, {
+  const reelJob = await saveJob(env, {
     ...job,
     instagramStatus: "posted",
     instagramMediaId: mediaId,
@@ -491,12 +512,113 @@ async function checkInstagramReel(env, job) {
       body: job.draft?.body || "",
     },
   });
+  if (!permalink) {
+    return {
+      job: reelJob,
+      done: true,
+      message: "Instagram 릴스 게시물 주소를 확인하지 못해 카페 자동 게시 대기 등록을 보류했습니다.",
+    };
+  }
+  return continueInstagramStory(env, reelJob);
+}
+
+export function instagramStoryLinkDetails(job = {}) {
+  const payment = job.imageSetKey === "payment-suspension-release" || job.fraudType === "payment-suspension-release";
+  return {
+    text: payment
+      ? "법무법인 선린 계좌 지급정지 대응센터"
+      : "법무법인 선린-금융사기피해 Fintech센터",
+    url: normalizeHttpUrl(job.draft?.landingUrl || job.landingUrl || ""),
+  };
+}
+
+async function startInstagramStory(env, job, access = null) {
+  const videoUrl = normalizeHttpUrl(job.videoUrl || "");
+  if (!videoUrl) throw new Error("Instagram 스토리에 게시할 공개 영상 URL이 없습니다.");
+  const credentials = access || await getInstagramAccess(env);
+  const endpoint = `${instagramGraphBase(env)}/${encodeURIComponent(credentials.igUserId)}/media`;
+  const form = new URLSearchParams();
+  form.set("media_type", "STORIES");
+  form.set("video_url", videoUrl);
+  form.set("access_token", credentials.accessToken);
+  const data = await instagramApiJson(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: form.toString(),
+  }, "Instagram 스토리 컨테이너 생성");
+  const containerId = normalizeText(data.id || "");
+  if (!containerId) throw new Error("Instagram 스토리 컨테이너 ID를 받지 못했습니다.");
+  const link = instagramStoryLinkDetails(job);
+  return saveJob(env, {
+    ...job,
+    instagramStoryStatus: "processing",
+    instagramStoryContainerId: containerId,
+    instagramStoryMediaId: "",
+    instagramStoryError: "",
+    instagramStoryLinkText: link.text,
+    instagramStoryLinkUrl: link.url,
+    instagramStoryStartedAt: new Date().toISOString(),
+    instagramStoryUpdatedAt: new Date().toISOString(),
+  });
+}
+
+async function continueInstagramStory(env, job) {
+  if (job.instagramStoryStatus === "posted" && job.instagramStoryMediaId) {
+    return { job, done: true, message: "Instagram 릴스와 스토리 게시가 이미 완료되었습니다." };
+  }
+
+  const access = await getInstagramAccess(env);
+  const containerId = normalizeText(job.instagramStoryContainerId || "");
+  if (!containerId || job.instagramStoryStatus === "failed") {
+    const next = await startInstagramStory(env, job, access);
+    return {
+      job: next,
+      done: false,
+      message: "Instagram 릴스 게시 완료 · 스토리 영상을 처리하고 있습니다.",
+    };
+  }
+
+  const statusUrl = new URL(`${instagramGraphBase(env)}/${encodeURIComponent(containerId)}`);
+  statusUrl.searchParams.set("fields", "status_code,status");
+  statusUrl.searchParams.set("access_token", access.accessToken);
+  const status = await instagramApiJson(statusUrl, {}, "Instagram 스토리 처리 상태 확인");
+  const statusCode = String(status.status_code || "").toUpperCase();
+  if (["ERROR", "EXPIRED"].includes(statusCode)) {
+    throw new Error(`Instagram 스토리 처리 실패: ${status.status || statusCode}`);
+  }
+  if (statusCode !== "FINISHED") {
+    const next = await saveJob(env, {
+      ...job,
+      instagramStoryStatus: "processing",
+      instagramStoryProcessingStatus: String(status.status || statusCode || "IN_PROGRESS").slice(0, 500),
+      instagramStoryUpdatedAt: new Date().toISOString(),
+    });
+    return { job: next, done: false, message: `Instagram 스토리 처리 중: ${status.status || statusCode || "IN_PROGRESS"}` };
+  }
+
+  const publishUrl = `${instagramGraphBase(env)}/${encodeURIComponent(access.igUserId)}/media_publish`;
+  const form = new URLSearchParams();
+  form.set("creation_id", containerId);
+  form.set("access_token", access.accessToken);
+  const published = await instagramApiJson(publishUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: form.toString(),
+  }, "Instagram 스토리 게시");
+  const mediaId = normalizeText(published.id || "");
+  if (!mediaId) throw new Error("Instagram 스토리 게시물 ID를 받지 못했습니다.");
+  const next = await saveJob(env, {
+    ...job,
+    instagramStoryStatus: "posted",
+    instagramStoryMediaId: mediaId,
+    instagramStoryError: "",
+    instagramStoryPublishedAt: new Date().toISOString(),
+    instagramStoryUpdatedAt: new Date().toISOString(),
+  });
   return {
     job: next,
     done: true,
-    message: permalink
-      ? `Instagram 릴스 게시 완료 및 SmartEditor 자동 게시 대기 등록: ${permalink}`
-      : "Instagram 릴스 게시물 주소를 확인하지 못해 카페 자동 게시 대기 등록을 보류했습니다.",
+    message: `Instagram 릴스·스토리 게시 완료 및 SmartEditor 자동 게시 대기 등록: ${next.instagramPermalink}`,
   };
 }
 
