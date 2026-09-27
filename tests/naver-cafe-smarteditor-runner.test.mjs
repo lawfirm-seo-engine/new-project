@@ -10,6 +10,7 @@ import {
   isBrowserClosedError,
   isTransientNetworkError,
   jobVideoUrl,
+  manuscriptBatches,
   orderedJobImages,
   parseArgs,
   parseLinkedImageData,
@@ -86,6 +87,18 @@ test("Cafe manuscript stays before landing links", () => {
   });
 });
 
+test("long Cafe manuscripts are entered in a few large batches", () => {
+  const batches = manuscriptBatches([
+    "첫 문단 ".repeat(100),
+    "둘째 문단 ".repeat(100),
+    "셋째 문단 ".repeat(100),
+  ].join("\n\n"), 1_000);
+  assert.equal(batches.length, 3);
+  assert.match(batches[0], /^첫 문단/);
+  assert.match(batches[2], /^셋째 문단/);
+  assert.deepEqual(manuscriptBatches("첫 문단\n\n둘째 문단", 1_000), ["첫 문단\n\n둘째 문단"]);
+});
+
 test("desktop automation uses the Windows Chrome sandbox and opens the work screen", () => {
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   assert.match(source, /chromiumSandbox:\s*true/);
@@ -120,7 +133,8 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /locator\("p\.se-text-paragraph:visible"\)\.first\(\)/);
   assert.match(source, /page\.keyboard\.press\("Enter"\)/);
   assert.match(source, /split\(\/\\n\{2,\}\/\)/);
-  assert.match(source, /paragraphs\[index\]/);
+  assert.match(source, /manuscriptBatches\(content\)/);
+  assert.match(source, /page\.keyboard\.insertText\(batches\[index\]\)/);
   assert.match(source, /카페 원고 본문 입력 검증 실패/);
   assert.match(source, /clearNaverDraftState\(page\)/);
   assert.match(source, /localStorage\.clear\(\)/);
@@ -130,14 +144,14 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /네이버가 복원한 이전 임시 원고를 초기화하지 못했습니다/);
   assert.match(source, /async function chooseImageFiles/);
   assert.match(source, /async function uploadImagesInOrder/);
-  assert.match(source, /await chooseImageFiles\(page, \[file\.path\]\)/);
+  assert.match(source, /await chooseImageFiles\(page, \[file\.path\], \{ preferExistingInput: index > 0 \}\)/);
+  assert.match(source, /기존 파일 입력기를 재사용했습니다/);
   assert.match(source, /await waitForImageCount\(page, index \+ 1\)/);
   assert.match(source, /await uploadImagesInOrder\(page, files\)/);
   assert.match(source, /insertArticleBody\(page, articleParts\.manuscript, \{ append: true \}\)/);
   assert.match(source, /insertArticleBody\(page, articleParts\.links, \{ append: true \}\)/);
   assert.match(source, /기본 이미지 파일 선택 실패 \(3회 재시도\)/);
-  assert.match(source, /chooseIndividualPhotoMode\(page\)/);
-  assert.match(source, /getByText\("개별사진", \{ exact: true \}\)\.last\(\)\.click\(\)/);
+  assert.doesNotMatch(source, /chooseImageFiles\(page, \[file\.path\][\s\S]{0,180}chooseIndividualPhotoMode\(page\)/);
   assert.match(source, /await fillArticleTitle\(page, articleTitle\)/);
   assert.match(source, /await uploadVideo\(page, videoFile/);
   assert.match(source, /await insertInstagramReelPreview\(page, job\.instagramPermalink\)/);

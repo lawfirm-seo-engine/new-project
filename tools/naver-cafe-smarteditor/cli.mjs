@@ -125,6 +125,23 @@ export function articleBodyPartsForJob(job = {}) {
   };
 }
 
+export function manuscriptBatches(body = "", maxCharacters = 3_500) {
+  const paragraphs = String(body || "")
+    .replace(/\r\n?/g, "\n")
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+  const batches = [];
+  for (const paragraph of paragraphs) {
+    const current = batches.at(-1) || "";
+    const candidate = current ? `${current}\n\n${paragraph}` : paragraph;
+    if (current && candidate.length > maxCharacters) batches.push(paragraph);
+    else if (batches.length) batches[batches.length - 1] = candidate;
+    else batches.push(candidate);
+  }
+  return batches;
+}
+
 export function hasNaverSessionCookies(cookies = []) {
   const names = new Set((Array.isArray(cookies) ? cookies : []).map((cookie) => String(cookie?.name || "")));
   return names.has("NID_SES") || names.has("NID_AUT");
@@ -493,7 +510,11 @@ async function focusEditorParagraph(page, atStart = false) {
   return paragraph;
 }
 
-async function chooseImageFiles(page, filePaths) {
+async function chooseImageFiles(page, filePaths, options = {}) {
+  if (options.preferExistingInput && await setFilesOnMatchingInput(page, filePaths, /image/i)) {
+    console.log("[사진] 기존 파일 입력기를 재사용했습니다.");
+    return;
+  }
   const addButton = page.getByRole("button", { name: "사진 추가", exact: true });
   let lastError;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -528,8 +549,7 @@ async function uploadImagesInOrder(page, files) {
     const file = files[index];
     await focusEditorParagraph(page);
     await page.keyboard.press("Control+End");
-    await chooseImageFiles(page, [file.path]);
-    await chooseIndividualPhotoMode(page);
+    await chooseImageFiles(page, [file.path], { preferExistingInput: index > 0 });
     await waitForImageCount(page, index + 1);
     console.log(`[사진] ${file.slot} 이미지 순서 확인 완료 (${index + 1}/${files.length})`);
   }
@@ -572,21 +592,12 @@ async function insertArticleBody(page, body, options = {}) {
   }
 
   const lines = content.replace(/\r\n?/g, "\n").split("\n");
-  const paragraphs = content.replace(/\r\n?/g, "\n")
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
-  for (let index = 0; index < paragraphs.length; index += 1) {
-    await page.keyboard.insertText(paragraphs[index]);
-    await delay(40);
-    if (index < paragraphs.length - 1) {
+  const batches = manuscriptBatches(content);
+  for (let index = 0; index < batches.length; index += 1) {
+    await page.keyboard.insertText(batches[index]);
+    if (index < batches.length - 1) {
       await page.keyboard.press("Enter");
-      await delay(75);
-      await page.keyboard.press("Escape").catch(() => {});
-      await focusEditorParagraph(page);
       await page.keyboard.press("Enter");
-      await delay(40);
-      await focusEditorParagraph(page);
     }
   }
   await page.keyboard.press("Escape").catch(() => {});
