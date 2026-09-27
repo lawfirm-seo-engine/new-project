@@ -135,6 +135,9 @@ test("desktop automation uses the Windows Chrome sandbox and opens the work scre
   assert.match(source, /await page\.goto\(config\.cafeUrl/);
   assert.equal((source.match(/ca-fe\/cafes\/\$\{encodeURIComponent\(config\.clubId\)\}/g) || []).length, 2);
   assert.match(source, /articles\/\$\{editArticleId\}\/modify/);
+  assert.match(source, /async function openExistingArticleEditor/);
+  assert.match(source, /직접 수정 주소가 열리지 않아 공개 글/);
+  assert.match(source, /getByText\("수정", \{ exact: true \}\)/);
 });
 
 test("desktop automation pre-checks the persisted Naver login cookies", () => {

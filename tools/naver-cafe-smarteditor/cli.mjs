@@ -384,6 +384,10 @@ async function processJob(context, apiContext, config, job, options, existingPag
     await clearNaverDraftState(page);
     await page.goto(`${writeUrl}?gnlawRun=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
     await assertNaverLogin(page);
+    if (editArticleId && !await page.locator("p.se-text-paragraph:visible").first()
+      .waitFor({ state: "visible", timeout: 8_000 }).then(() => true).catch(() => false)) {
+      await openExistingArticleEditor(page, config, editArticleId);
+    }
     if (!editArticleId) await selectBoard(page, board);
 
     const articleTitle = String(job.draft.title || job.title || "");
@@ -464,6 +468,45 @@ async function processJob(context, apiContext, config, job, options, existingPag
     else await page.goto(`${config.siteOrigin}/admin/cafe-reels`, { waitUntil: "domcontentloaded", timeout: 60_000 }).catch(() => {});
     await rm(tempDir, { recursive: true, force: true });
   }
+}
+
+async function openExistingArticleEditor(page, config, articleId) {
+  const articleUrl = `${config.cafeUrl}/${articleId}`;
+  console.log(`[편집기] 직접 수정 주소가 열리지 않아 공개 글 ${articleId}번의 수정 메뉴로 다시 진입합니다.`);
+  await page.goto(articleUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await assertNaverLogin(page);
+  await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    for (const frame of page.frames()) {
+      const direct = frame.getByText("수정", { exact: true });
+      for (let index = await direct.count() - 1; index >= 0; index -= 1) {
+        const candidate = direct.nth(index);
+        if (!await candidate.isVisible().catch(() => false)) continue;
+        await candidate.click();
+        if (await page.locator("p.se-text-paragraph:visible").first()
+          .waitFor({ state: "visible", timeout: 15_000 }).then(() => true).catch(() => false)) return;
+      }
+
+      const more = frame.getByRole("button", { name: /더보기|메뉴/ });
+      for (let index = await more.count() - 1; index >= 0; index -= 1) {
+        const button = more.nth(index);
+        if (!await button.isVisible().catch(() => false)) continue;
+        await button.click().catch(() => {});
+        const modify = frame.getByText("수정", { exact: true }).last();
+        if (await modify.isVisible().catch(() => false)) {
+          await modify.click();
+          if (await page.locator("p.se-text-paragraph:visible").first()
+            .waitFor({ state: "visible", timeout: 15_000 }).then(() => true).catch(() => false)) return;
+        }
+      }
+    }
+    if (attempt < 3) {
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 60_000 });
+      await delay(1_000);
+    }
+  }
+  throw new Error(`네이버 카페 ${articleId}번 글의 수정 메뉴를 찾지 못했습니다. 작성 계정과 글 소유권을 확인해주세요.`);
 }
 
 async function fillArticleTitle(page, title) {
