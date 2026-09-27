@@ -7,6 +7,7 @@ import {
   boardForJob,
   hasNaverSessionCookies,
   isBrowserClosedError,
+  isTransientNetworkError,
   jobVideoUrl,
   orderedJobImages,
   parseArgs,
@@ -156,11 +157,17 @@ test("SmartEditor runner recovers a crashed Chrome without losing a queued job",
   assert.equal(isBrowserClosedError(new Error("apiRequestContext.get: Target page, context or browser has been closed")), true);
   assert.equal(isBrowserClosedError(new Error("Browser has been closed")), true);
   assert.equal(isBrowserClosedError(new Error("HTTP 500")), false);
+  assert.equal(isTransientNetworkError(new Error("apiRequestContext.get: read ECONNRESET")), true);
+  assert.equal(isTransientNetworkError(new Error("socket hang up")), true);
+  assert.equal(isTransientNetworkError(new Error("HTTP 400")), false);
 
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   assert.match(source, /request\.newContext\(\{ storageState: await context\.storageState\(\) \}\)/);
   assert.match(source, /watchWithBrowserRecovery\(config, chromePath, runOptions\)/);
   assert.match(source, /Chrome 재실행 완료/);
+  assert.match(source, /API 연결이 끊겨 재시도합니다/);
+  assert.match(source, /function safeErrorMessage/);
+  assert.match(source, /Call log:/);
   assert.match(source, /queueSmartEditor\(apiContext, config, job\.id\)/);
   assert.match(source, /게시 요청 이후 Chrome이 종료되었습니다\. 중복 방지를 위해 자동 재시도하지 않습니다/);
   assert.doesNotMatch(source, /context\.request\.(?:get|post)/);

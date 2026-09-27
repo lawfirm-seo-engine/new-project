@@ -122,6 +122,18 @@ export function isBrowserClosedError(error) {
   return /target (?:page, )?context or browser has been closed|browser has been closed|browser.*(?:closed|crashed)|page.*closed|context.*closed/i.test(message);
 }
 
+export function isTransientNetworkError(error) {
+  const message = String(error?.message || error || "");
+  return /ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|socket hang up|network.*(?:changed|failed)|connection.*(?:closed|reset)/i.test(message);
+}
+
+function safeErrorMessage(error) {
+  return String(error?.message || error || "알 수 없는 오류")
+    .split(/\nCall log:/i)[0]
+    .replace(/^\s*-\s*cookie:.*$/gim, "")
+    .trim();
+}
+
 async function launchRunnerContext(config, chromePath) {
   return chromium.launchPersistentContext(config.profileDir, {
     executablePath: chromePath,
@@ -188,9 +200,13 @@ async function watchWithBrowserRecovery(config, chromePath, options) {
       if (restart > 0) console.log(`[복구] Chrome 재실행 완료 (${restart}/${maxRestarts}) · 대기열 감시를 재개합니다.`);
       return await watchQueue(context, apiContext, config, options);
     } catch (error) {
-      if (!isBrowserClosedError(error) || options.once || restart >= maxRestarts) throw error;
-      console.error(`[복구] 자동화용 Chrome이 종료되었습니다: ${error?.message || error}`);
-      console.error(`[복구] 로그인 세션을 유지한 채 Chrome을 다시 실행합니다 (${restart + 1}/${maxRestarts}).`);
+      const browserClosed = isBrowserClosedError(error);
+      const transientNetwork = isTransientNetworkError(error);
+      if ((!browserClosed && !transientNetwork) || options.once || restart >= maxRestarts) throw error;
+      console.error(browserClosed
+        ? `[복구] 자동화용 Chrome이 종료되었습니다: ${safeErrorMessage(error)}`
+        : `[복구] 서버 연결이 일시적으로 끊겼습니다: ${safeErrorMessage(error)}`);
+      console.error(`[복구] 로그인 세션을 유지한 채 자동화를 다시 연결합니다 (${restart + 1}/${maxRestarts}).`);
     } finally {
       await apiContext?.dispose().catch(() => {});
       await context?.close().catch(() => {});
@@ -384,8 +400,8 @@ async function processJob(context, apiContext, config, job, options, existingPag
       console.error("[복구] 게시 전 Chrome 종료를 감지해 작업을 SmartEditor 대기열로 되돌렸습니다.");
     } else if (options.publish) {
       const message = isBrowserClosedError(error) && submitStarted
-        ? `게시 요청 이후 Chrome이 종료되었습니다. 중복 방지를 위해 자동 재시도하지 않습니다: ${error?.message || error}`
-        : error?.message || String(error);
+        ? `게시 요청 이후 Chrome이 종료되었습니다. 중복 방지를 위해 자동 재시도하지 않습니다: ${safeErrorMessage(error)}`
+        : safeErrorMessage(error);
       await reportStatus(apiContext, config, job.id, "failed", { message }).catch(() => {});
     }
     throw error;
@@ -929,15 +945,26 @@ async function queueSmartEditor(context, config, jobId) {
 }
 
 async function apiJson(context, method, url, options = {}) {
-  const response = method === "POST"
-    ? await context.post(url, options)
-    : await context.get(url, options);
-  const text = await response.text();
-  let data;
-  try { data = JSON.parse(text); }
-  catch { throw new Error(`관리자 로그인이 필요하거나 API 응답이 잘못되었습니다 (HTTP ${response.status()}).`); }
-  if (!response.ok() || !data.ok) throw new Error(data.message || `API 요청 실패 (HTTP ${response.status()})`);
-  return data;
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = method === "POST"
+        ? await context.post(url, options)
+        : await context.get(url, options);
+      const text = await response.text();
+      let data;
+      try { data = JSON.parse(text); }
+      catch { throw new Error(`관리자 로그인이 필요하거나 API 응답이 잘못되었습니다 (HTTP ${response.status()}).`); }
+      if (!response.ok() || !data.ok) throw new Error(data.message || `API 요청 실패 (HTTP ${response.status()})`);
+      return data;
+    } catch (error) {
+      lastError = error;
+      if (!isTransientNetworkError(error) || attempt >= 3) throw error;
+      console.error(`[네트워크] API 연결이 끊겨 재시도합니다 (${attempt}/3): ${safeErrorMessage(error)}`);
+      await delay(attempt * 1_000);
+    }
+  }
+  throw lastError;
 }
 
 async function assertNaverLogin(page) {
@@ -1020,7 +1047,7 @@ function printHelp() {
 const entryUrl = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : "";
 if (import.meta.url === entryUrl) {
   main().catch((error) => {
-    console.error(`\n실패: ${error?.message || error}`);
+    console.error(`\n실패: ${safeErrorMessage(error)}`);
     process.exitCode = 1;
   });
 }
