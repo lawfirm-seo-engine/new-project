@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   articleBodyForJob,
+  articleBodyPartsForJob,
   boardForJob,
   hasNaverSessionCookies,
   isBrowserClosedError,
@@ -74,6 +75,17 @@ test("legacy Instagram URL text is removed before SmartEditor creates a proper p
   assert.equal(articleBodyForJob({ draft: { body: "기존 본문" } }), "기존 본문");
 });
 
+test("Cafe manuscript stays before landing links", () => {
+  assert.deepEqual(articleBodyPartsForJob({
+    draft: {
+      body: "첫 문단\n\n둘째 문단\n\n관련 랜딩페이지\nhttps://gnlaw-recovery.co.kr/success/example/",
+    },
+  }), {
+    manuscript: "첫 문단\n\n둘째 문단",
+    links: "관련 랜딩페이지\nhttps://gnlaw-recovery.co.kr/success/example/",
+  });
+});
+
 test("desktop automation uses the Windows Chrome sandbox and opens the work screen", () => {
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   assert.match(source, /chromiumSandbox:\s*true/);
@@ -117,6 +129,12 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /page\.mouse\.click/);
   assert.match(source, /네이버가 복원한 이전 임시 원고를 초기화하지 못했습니다/);
   assert.match(source, /async function chooseImageFiles/);
+  assert.match(source, /async function uploadImagesInOrder/);
+  assert.match(source, /await chooseImageFiles\(page, \[file\.path\]\)/);
+  assert.match(source, /await waitForImageCount\(page, index \+ 1\)/);
+  assert.match(source, /await uploadImagesInOrder\(page, files\)/);
+  assert.match(source, /insertArticleBody\(page, articleParts\.manuscript, \{ append: true \}\)/);
+  assert.match(source, /insertArticleBody\(page, articleParts\.links, \{ append: true \}\)/);
   assert.match(source, /기본 이미지 파일 선택 실패 \(3회 재시도\)/);
   assert.match(source, /chooseIndividualPhotoMode\(page\)/);
   assert.match(source, /getByText\("개별사진", \{ exact: true \}\)\.last\(\)\.click\(\)/);
@@ -145,6 +163,10 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /await setImageLink\(page, kakaoIndex, config\.kakaoLink\)/);
   assert.match(source, /verifyPublishedLinks\(page, \[config\.phoneLink, config\.kakaoLink\]\)/);
   assert.match(source, /if \(videoFile\) await verifyPublishedVideo\(page\)/);
+  assert.match(source, /openPublishedArticleForVerification\(page, cafeUrl\)/);
+  assert.match(source, /공개 글 화면을 안정적으로 불러왔습니다/);
+  assert.match(source, /execution context was destroyed\|navigation/);
+  assert.match(source, /expectedLinks\.every\(\(expected\) => links\.includes\(expected\)\)/);
   assert.match(source, /async function waitForPublishedArticleView/);
   assert.match(source, /articleIdFromNaverUrl/);
   assert.match(source, /\/gnlawfintech\\\/\(\\d\+\)/);
