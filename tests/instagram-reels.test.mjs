@@ -78,6 +78,9 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /orderedJobIds\.slice\(completedIndex \+ 1\)/);
   assert.match(pageSource, /generateButton\.click\(\)/);
   assert.match(pageSource, /bulkAutomationRunning = true/);
+  assert.match(pageSource, /data\.job\?\.instagramStatus === "posted" && data\.job\.instagramMediaId/);
+  assert.match(pageSource, /continueInstagramStoryInBackground\(data\.job\)/);
+  assert.match(pageSource, /Instagram 스토리 게시 실패, 대량 자동화는 계속 진행/);
   assert.match(generatorSource, /window\.setWhiteboardLocalFiles=setLocalFiles/);
   assert.match(generatorSource, /selectedLocalFiles/);
   assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
@@ -363,6 +366,72 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
     assert.equal(storyChecked.result.job.instagramStoryStatus, "posted");
     assert.equal(storyChecked.result.job.instagramStoryMediaId, "story-media-987");
     assert.equal(calls.length, 7);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("a Story failure after Reel publication does not stop the bulk workflow", async () => {
+  const jobId = "instagram-story-failure-job";
+  const job = {
+    id: jobId,
+    caseName: "연속 자동화 테스트 사건",
+    fraudType: "institution-exchange",
+    imageSetKey: "fraud",
+    draft: {
+      title: "연속 자동화 테스트",
+      body: "본문",
+      landingUrl: "https://gnlaw-criminal.co.kr/prosecute/test-litigation/",
+    },
+    images: [{ slot: "01", url: "https://images.example/1.jpg" }],
+    videoUrl: "https://videos.example/reel.mp4",
+    cafeStatus: "smarteditor-queued",
+    instagramStatus: "posted",
+    instagramMediaId: "reel-media-already-posted",
+    instagramPermalink: "https://www.instagram.com/reel/already-posted/",
+    instagramStoryStatus: "processing",
+    instagramStoryContainerId: "story-container-error",
+  };
+  const { env } = testEnv([
+    [`cafe-reels:job:${jobId}`, job],
+    ["cafe-reels:jobs:index:v1", []],
+  ]);
+  await saveInstagramToken(env, {
+    accessToken: "instagram-access-token",
+    igUserId: "17841400000000000",
+    username: "gnlaw_test",
+    expiresAt: "2099-01-01T00:00:00.000Z",
+  });
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const url = new URL(String(input));
+    if (url.pathname.endsWith("/story-container-error")) {
+      return Response.json({ status_code: "ERROR", status: "Story processing failed" });
+    }
+    throw new Error(`Unexpected fetch: ${url}`);
+  };
+
+  try {
+    const response = await onWorkflowPost({
+      request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "check-instagram-reel", jobId }),
+      }),
+      env,
+    });
+    const result = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(result.ok, true);
+    assert.equal(result.done, true);
+    assert.equal(result.reelDone, true);
+    assert.equal(result.storyDone, false);
+    assert.equal(result.storyFailed, true);
+    assert.equal(result.job.instagramStatus, "posted");
+    assert.equal(result.job.instagramStoryStatus, "failed");
+    assert.equal(result.job.cafeStatus, "smarteditor-queued");
+    assert.match(result.message, /다음 사건은 계속 진행/);
   } finally {
     globalThis.fetch = originalFetch;
   }

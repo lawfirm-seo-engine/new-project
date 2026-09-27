@@ -210,7 +210,14 @@ export async function onRequestPost({ request, env }) {
       const job = await requireJob(env, body?.jobId);
       try {
         const result = await checkInstagramReel(env, job);
-        return json({ ok: true, job: result.job, done: result.done, message: result.message });
+        return json({
+          ok: true,
+          job: result.job,
+          done: result.done,
+          reelDone: result.job.instagramStatus === "posted" && Boolean(result.job.instagramMediaId),
+          storyDone: result.job.instagramStoryStatus === "posted" && Boolean(result.job.instagramStoryMediaId),
+          message: result.message,
+        });
       } catch (error) {
         const latest = await loadJob(env, job.id) || job;
         const reelWasPosted = latest.instagramStatus === "posted" && latest.instagramMediaId;
@@ -226,11 +233,18 @@ export async function onRequestPost({ request, env }) {
           }),
           instagramUpdatedAt: new Date().toISOString(),
         });
-        return json({
-          ok: false,
-          job: next,
-          message: reelWasPosted ? next.instagramStoryError : next.instagramError,
-        }, 502);
+        if (reelWasPosted) {
+          return json({
+            ok: true,
+            job: next,
+            done: true,
+            reelDone: true,
+            storyDone: false,
+            storyFailed: true,
+            message: `Instagram 릴스 게시 완료 · 스토리 게시 실패(다음 사건은 계속 진행): ${next.instagramStoryError}`,
+          });
+        }
+        return json({ ok: false, job: next, message: next.instagramError }, 502);
       }
     }
 

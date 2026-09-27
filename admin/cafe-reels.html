@@ -78,9 +78,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.66.0 · 수정 66차</div>
+      <div class="status">자동화 프로그램 v1.67.0 · 수정 67차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.66.0" download>Windows 자동화 프로그램 v1.66.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.67.0" download>Windows 자동화 프로그램 v1.67.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -256,6 +256,7 @@
   let instagramAutoUploadInProgress = false;
   let bulkAutomationRunning = false;
   const bulkLocalFiles = new Map();
+  const instagramStoryBackgroundJobs = new Set();
 
   document.addEventListener("DOMContentLoaded", () => {
     $("generateBtn").addEventListener("click", generateDraft);
@@ -619,11 +620,11 @@
     button.disabled = true;
     show("reelsMsg", "Instagram에 릴스 업로드를 시작합니다...");
     try {
-      if (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId
-        && currentJob.instagramStoryStatus === "posted" && currentJob.instagramStoryMediaId) {
+      if (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId) {
+        continueInstagramStoryInBackground(currentJob);
         show("reelsMsg", currentJob.instagramPermalink
-          ? `이미 게시된 릴스·스토리입니다: ${currentJob.instagramPermalink}`
-          : "이미 Instagram에 릴스·스토리가 게시되었습니다.");
+          ? `릴스 게시 완료: ${currentJob.instagramPermalink} · 스토리는 별도로 처리합니다.`
+          : "Instagram 릴스 게시 완료 · 스토리는 별도로 처리합니다.");
         return true;
       }
       let data;
@@ -648,7 +649,13 @@
         data = await postWorkflow({ action: "check-instagram-reel", jobId: currentJob.id });
         applyJob(data.job);
         show("reelsMsg", data.message || "Instagram 영상 처리 상태 확인 중...");
-        if (data.done) {
+        if (data.job?.instagramStatus === "posted" && data.job.instagramMediaId) {
+          console.info("[bulk] Instagram 릴스 게시 완료, 스토리와 분리하여 다음 단계 진행", {
+            jobId: data.job.id,
+            caseName: data.job.caseName,
+            storyStatus: data.job.instagramStoryStatus || "not-started",
+          });
+          continueInstagramStoryInBackground(data.job);
           loadJobs();
           return true;
         }
@@ -796,6 +803,49 @@
     } finally {
       instagramAutoUploadInProgress = false;
     }
+  }
+
+  function continueInstagramStoryInBackground(job) {
+    const jobId = job?.id;
+    if (!jobId
+      || job.instagramStoryStatus === "posted"
+      || job.instagramStoryStatus === "failed"
+      || instagramStoryBackgroundJobs.has(jobId)) return;
+
+    instagramStoryBackgroundJobs.add(jobId);
+    console.info("[story] Instagram 스토리 백그라운드 처리 시작", { jobId, caseName: job.caseName });
+    void (async () => {
+      const deadline = Date.now() + 5 * 60 * 1000;
+      try {
+        while (Date.now() < deadline) {
+          await wait(5000);
+          const data = await postWorkflow({ action: "check-instagram-reel", jobId });
+          const latest = data.job;
+          if (currentJob?.id === jobId) applyJob(latest);
+          if (latest?.instagramStoryStatus === "posted") {
+            console.info("[story] Instagram 스토리 게시 완료", { jobId, storyMediaId: latest.instagramStoryMediaId });
+            loadJobs();
+            return;
+          }
+          if (latest?.instagramStoryStatus === "failed" || data.storyFailed) {
+            console.warn("[story] Instagram 스토리 게시 실패, 대량 자동화는 계속 진행", {
+              jobId,
+              message: latest?.instagramStoryError || data.message || "스토리 게시 실패",
+            });
+            loadJobs();
+            return;
+          }
+        }
+        console.warn("[story] Instagram 스토리 처리 제한 시간 초과, 대량 자동화는 계속 진행", { jobId });
+      } catch (error) {
+        console.warn("[story] Instagram 스토리 백그라운드 처리 오류, 대량 자동화는 계속 진행", {
+          jobId,
+          message: error?.message || String(error),
+        });
+      } finally {
+        instagramStoryBackgroundJobs.delete(jobId);
+      }
+    })();
   }
 
   async function waitForCafePost(job) {
