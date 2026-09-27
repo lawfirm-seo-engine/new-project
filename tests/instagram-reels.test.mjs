@@ -9,7 +9,11 @@ import {
   saveInstagramConfig,
   saveInstagramToken,
 } from "../functions/_instagram.js";
-import { buildCaption, onRequestPost as onWorkflowPost } from "../functions/api/cafe-reels-workflow.js";
+import {
+  buildCaption,
+  onRequestGet as onWorkflowGet,
+  onRequestPost as onWorkflowPost,
+} from "../functions/api/cafe-reels-workflow.js";
 import { buildFraudCafeTitle, isExactLandingIdentity } from "../functions/api/generate-cafe-draft.js";
 
 function testEnv(initial = []) {
@@ -66,6 +70,10 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /bulkLocalFiles\.set\(saved\.job\.id, item\.files\.slice\(\)\)/);
   assert.match(pageSource, /batchId/);
   assert.match(pageSource, /async function startNextBulkAutomation/);
+  assert.match(pageSource, /async function waitForCafePost/);
+  assert.match(pageSource, /completedJob = await waitForCafePost\(completedJob\)/);
+  assert.match(pageSource, /deferArticleNumber: completed > 0/);
+  assert.match(pageSource, /batchOrder: completed/);
   assert.match(pageSource, /orderedJobIds\.slice\(completedIndex \+ 1\)/);
   assert.match(pageSource, /generateButton\.click\(\)/);
   assert.match(pageSource, /bulkAutomationRunning = true/);
@@ -123,9 +131,9 @@ test("caption templates use the case, landing, and reserved Cafe URL", () => {
   assert.match(payment, /gnlawfintech\/135/);
 });
 
-test("Naver Cafe number stays at 138 until a SmartEditor post succeeds", async () => {
+test("bulk jobs receive Cafe numbers one-by-one only after the previous SmartEditor post succeeds", async () => {
   const { env } = testEnv([["cafe-reels:jobs:index:v1", []]]);
-  const save = async (caseName) => {
+  const save = async (caseName, batchOrder) => {
     const response = await onWorkflowPost({
       request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
         method: "POST",
@@ -139,19 +147,32 @@ test("Naver Cafe number stays at 138 until a SmartEditor post succeeds", async (
           images: [{ slot: "01", url: "https://images.example/1.jpg" }],
           autoFlow: true,
           batchId: "bulk-test",
+          batchOrder,
+          deferArticleNumber: batchOrder > 0,
         }),
       }),
       env,
     });
     return response.json();
   };
-  const first = await save("first");
-  const second = await save("second");
+  const first = await save("first", 0);
+  const second = await save("second", 1);
+  const third = await save("third", 2);
   assert.equal(first.job.reservedNaverArticleId, "138");
   assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/138");
   assert.equal(first.job.videoStatus, "awaiting-images");
   assert.equal(first.job.batchId, "bulk-test");
-  assert.equal(second.job.reservedNaverArticleId, "138");
+  assert.equal(second.job.reservedNaverArticleId, "");
+  assert.equal(second.job.articleNumberPending, true);
+  assert.doesNotMatch(second.job.caption, /gnlawfintech\/138/);
+  assert.equal(third.job.reservedNaverArticleId, "");
+
+  const beforeFirstPosted = await onWorkflowGet({
+    request: new Request(`https://gnlaw-criminal.co.kr/api/cafe-reels-workflow?jobId=${second.job.id}`),
+    env,
+  });
+  const waitingSecond = await beforeFirstPosted.json();
+  assert.equal(waitingSecond.job.reservedNaverArticleId, "");
 
   const postedResponse = await onWorkflowPost({
     request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
@@ -167,8 +188,21 @@ test("Naver Cafe number stays at 138 until a SmartEditor post succeeds", async (
     env,
   });
   assert.equal(postedResponse.status, 200);
-  const third = await save("third");
-  assert.equal(third.job.reservedNaverArticleId, "139");
+  const secondReadyResponse = await onWorkflowGet({
+    request: new Request(`https://gnlaw-criminal.co.kr/api/cafe-reels-workflow?jobId=${second.job.id}`),
+    env,
+  });
+  const secondReady = await secondReadyResponse.json();
+  assert.equal(secondReady.job.reservedNaverArticleId, "139");
+  assert.equal(secondReady.job.articleNumberPending, false);
+  assert.match(secondReady.job.caption, /gnlawfintech\/139/);
+
+  const thirdStillWaitingResponse = await onWorkflowGet({
+    request: new Request(`https://gnlaw-criminal.co.kr/api/cafe-reels-workflow?jobId=${third.job.id}`),
+    env,
+  });
+  const thirdStillWaiting = await thirdStillWaitingResponse.json();
+  assert.equal(thirdStillWaiting.job.reservedNaverArticleId, "");
 });
 
 test("Instagram Reel automation creates, checks, and publishes a Reel", async () => {

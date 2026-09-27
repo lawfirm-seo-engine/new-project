@@ -408,13 +408,16 @@
             images: selectedImages,
             autoFlow: true,
             batchId,
+            batchOrder: completed,
+            deferArticleNumber: completed > 0,
           });
           completed += 1;
           firstSavedJob ||= saved.job;
           bulkLocalFiles.set(saved.job.id, item.files.slice());
           item.row.dataset.registered = "true";
           item.row.style.opacity = ".55";
-          show("bulkMsg", `${completed}/${rows.length} · ${caseName} · 카페 글 ${saved.job.reservedNaverArticleId}번 작업 등록 완료`);
+          const cafeNumber = saved.job.reservedNaverArticleId ? `${saved.job.reservedNaverArticleId}번` : "순차 대기";
+          show("bulkMsg", `${completed}/${rows.length} · ${caseName} · 카페 글 ${cafeNumber} 작업 등록 완료`);
         } catch (error) {
           failures.push(`${caseName}: ${error.message}`);
         }
@@ -683,7 +686,7 @@
         <div class="job-item" onclick="loadJob('${escAttr(job.id)}')">
           <strong>${esc(job.caseName || job.title || job.id)}</strong>
           <span>${esc(job.title || "")}</span>
-          <span><b class="status">카페 ${esc(job.reservedNaverArticleId || "-")}번</b> <b class="status">${esc(job.videoStatus || "-")}</b> <b class="status">${esc(job.cafeStatus || "-")}</b> <b class="status">${esc(job.instagramStatus || "-")}</b> ${esc(formatDate(job.updatedAt))}</span>
+          <span><b class="status">카페 ${job.reservedNaverArticleId ? `${esc(job.reservedNaverArticleId)}번` : "순차 대기"}</b> <b class="status">${esc(job.videoStatus || "-")}</b> <b class="status">${esc(job.cafeStatus || "-")}</b> <b class="status">${esc(job.instagramStatus || "-")}</b> ${esc(formatDate(job.updatedAt))}</span>
         </div>
       `).join("") : "<div class='note'>저장된 작업이 없습니다.</div>";
     } catch (error) {
@@ -778,8 +781,9 @@
     show("reelsMsg", "영상 생성 완료. Instagram 자동 업로드를 시작합니다...");
     try {
       const posted = await publishInstagramReel();
-      const completedJob = currentJob;
+      let completedJob = currentJob;
       if (posted && bulkAutomationRunning && completedJob?.batchId) {
+        completedJob = await waitForCafePost(completedJob);
         await startNextBulkAutomation(completedJob);
       } else if (!posted) {
         bulkAutomationRunning = false;
@@ -787,6 +791,33 @@
     } finally {
       instagramAutoUploadInProgress = false;
     }
+  }
+
+  async function waitForCafePost(job) {
+    const deadline = Date.now() + 20 * 60 * 1000;
+    const articleNumber = job.reservedNaverArticleId || "확정된";
+    show("bulkMsg", `${job.caseName} · 네이버 카페 ${articleNumber}번 게시 완료를 기다립니다.`);
+    while (Date.now() < deadline) {
+      const response = await fetch(`/api/cafe-reels-workflow?jobId=${encodeURIComponent(job.id)}`);
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "카페 게시 상태를 확인하지 못했습니다.");
+      const latest = data.job;
+      if (latest.smartEditorStatus === "posted" || latest.cafeStatus === "smarteditor-posted" || latest.cafeStatus === "posted") {
+        show("bulkMsg", `${latest.caseName} · 네이버 카페 ${latest.reservedNaverArticleId}번 게시 완료. 다음 사건 번호를 확정합니다.`);
+        return latest;
+      }
+      if (latest.smartEditorStatus === "failed" || latest.cafeStatus === "smarteditor-failed") {
+        bulkAutomationRunning = false;
+        throw new Error(`${latest.caseName}: 네이버 카페 게시 실패 · ${latest.smartEditorError || "PC 자동화 프로그램 로그를 확인해주세요."}`);
+      }
+      if (latest.cafeStatus === "awaiting-instagram-permalink") {
+        bulkAutomationRunning = false;
+        throw new Error(`${latest.caseName}: Instagram 게시물 주소를 확인하지 못해 카페 게시가 보류되었습니다.`);
+      }
+      await wait(5000);
+    }
+    bulkAutomationRunning = false;
+    throw new Error(`${job.caseName}: 네이버 카페 게시 완료 대기 시간이 20분을 넘었습니다.`);
   }
 
   async function startNextBulkAutomation(completedJob) {
@@ -818,7 +849,7 @@
     }
 
     bulkAutomationRunning = false;
-    show("bulkMsg", "대량 작업의 모든 릴스가 Instagram 게시 대기열로 전달되었습니다. 카페 포스팅은 PC 자동화 프로그램이 사건별로 이어서 처리합니다.");
+    show("bulkMsg", "대량 작업의 모든 릴스·네이버 카페 게시가 사건별 순서대로 완료되었습니다.");
     return false;
   }
 

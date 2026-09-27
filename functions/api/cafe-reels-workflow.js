@@ -43,20 +43,27 @@ export async function onRequestPost({ request, env }) {
     if (action === "save-job") {
       const built = buildJob(body);
       const previous = body?.jobId ? await loadJob(env, built.id) : null;
+      const autoFlow = Boolean(body?.autoFlow);
+      const deferArticleNumber = autoFlow && Boolean(body?.deferArticleNumber) && previous?.smartEditorStatus !== "posted";
       const reservedNaverArticleId = normalizeText(
-        previous?.smartEditorStatus === "posted"
+        deferArticleNumber
+          ? ""
+          : previous?.smartEditorStatus === "posted"
           ? previous.reservedNaverArticleId
           : await currentNaverArticleId(env),
       );
-      const expectedCafeUrl = `https://cafe.naver.com/${NAVER_CAFE_SLUG}/${reservedNaverArticleId}`;
-      const autoFlow = Boolean(body?.autoFlow);
+      const expectedCafeUrl = reservedNaverArticleId
+        ? `https://cafe.naver.com/${NAVER_CAFE_SLUG}/${reservedNaverArticleId}`
+        : "";
       const prepared = {
         ...built,
         createdAt: previous?.createdAt || built.createdAt,
         batchId: built.batchId || previous?.batchId || "",
+        batchOrder: batchOrderValue(body?.batchOrder) ?? batchOrderValue(previous?.batchOrder),
         reservedNaverArticleId,
         expectedCafeUrl,
-        cafeUrl: built.cafeUrl || previous?.cafeUrl || expectedCafeUrl,
+        cafeUrl: deferArticleNumber ? "" : (built.cafeUrl || previous?.cafeUrl || expectedCafeUrl),
+        articleNumberPending: deferArticleNumber,
         cafeStatus: autoFlow ? "awaiting-reel" : (previous?.cafeStatus || built.cafeStatus),
         videoStatus: autoFlow ? "awaiting-images" : (previous?.videoStatus || built.videoStatus),
         automationMode: autoFlow ? "full" : (previous?.automationMode || "manual"),
@@ -286,6 +293,9 @@ async function updateIndex(env, job) {
   const item = {
     id: job.id,
     batchId: job.batchId || "",
+    batchOrder: batchOrderValue(job.batchOrder),
+    automationMode: job.automationMode || "",
+    createdAt: job.createdAt || "",
     caseName: job.caseName,
     fraudType: job.fraudType,
     title: job.draft?.title || "",
@@ -327,19 +337,52 @@ async function advanceNaverArticleId(env, completedArticleId = "") {
 
 async function refreshPendingArticleNumber(env, job) {
   if (!job || job.smartEditorStatus === "posted" || job.cafeStatus === "smarteditor-posted") return job;
+  if (await hasIncompleteEarlierBatchJob(env, job)) {
+    if (!job.reservedNaverArticleId && !job.cafeUrl && job.articleNumberPending) return job;
+    return saveJob(env, {
+      ...job,
+      reservedNaverArticleId: "",
+      expectedCafeUrl: "",
+      cafeUrl: "",
+      articleNumberPending: true,
+      caption: buildCaption({ ...job, reservedNaverArticleId: "", expectedCafeUrl: "", cafeUrl: "" }),
+    });
+  }
   const reservedNaverArticleId = await currentNaverArticleId(env);
-  if (String(job.reservedNaverArticleId || "") === reservedNaverArticleId) return job;
+  if (String(job.reservedNaverArticleId || "") === reservedNaverArticleId && !job.articleNumberPending) return job;
   const expectedCafeUrl = `https://cafe.naver.com/${NAVER_CAFE_SLUG}/${reservedNaverArticleId}`;
   return saveJob(env, {
     ...job,
     reservedNaverArticleId,
     expectedCafeUrl,
     cafeUrl: expectedCafeUrl,
+    articleNumberPending: false,
     caption: buildCaption({ ...job, reservedNaverArticleId, expectedCafeUrl, cafeUrl: expectedCafeUrl }),
   });
 }
 
+async function hasIncompleteEarlierBatchJob(env, job) {
+  if (!job?.batchId || job.automationMode !== "full") return false;
+  const currentOrder = batchOrderValue(job.batchOrder);
+  if (currentOrder === null) return false;
+  const index = await loadIndex(env);
+  const ids = index.filter((item) => item.batchId === job.batchId).map((item) => item.id);
+  const batchJobs = (await Promise.all(ids.map((id) => loadJob(env, id))))
+    .filter((item) => item && batchOrderValue(item.batchOrder) !== null)
+    .sort((left, right) => batchOrderValue(left.batchOrder) - batchOrderValue(right.batchOrder));
+  const position = batchJobs.findIndex((item) => item.id === job.id);
+  if (position <= 0) return false;
+  return batchJobs.slice(0, position).some((item) => (
+    item.smartEditorStatus !== "posted"
+    && item.cafeStatus !== "smarteditor-posted"
+    && item.cafeStatus !== "posted"
+  ));
+}
+
 async function startInstagramReel(env, job, requestedCaption = "") {
+  if (job.batchId && job.automationMode === "full" && !normalizeText(job.reservedNaverArticleId || "")) {
+    throw new Error("이전 사건의 네이버 카페 게시가 완료된 뒤 현재 사건의 카페 번호가 확정됩니다.");
+  }
   const videoUrl = normalizeHttpUrl(job.videoUrl || "");
   if (!videoUrl) throw new Error("먼저 공개 접근 가능한 릴스 영상 URL을 저장해주세요.");
   const caption = normalizeCaption(requestedCaption || job.caption || buildCaption(job));
@@ -1017,6 +1060,12 @@ export function buildCaption(job = {}) {
     "",
     `#${compactTag} #투자사기 #리딩방사기 #팀미션사기 #법무법인선린 #금융사기피해센터 #금융사기 #피해회복`,
   ].filter((line) => line !== null).join("\n"));
+}
+
+function batchOrderValue(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isInteger(number) && number >= 0 ? number : null;
 }
 
 function articleIdFromCafeUrl(value = "") {
