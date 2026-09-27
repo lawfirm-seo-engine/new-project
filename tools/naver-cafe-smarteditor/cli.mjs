@@ -6,7 +6,7 @@ import process from "node:process";
 import readline from "node:readline/promises";
 import { pathToFileURL } from "node:url";
 
-import { chromium } from "playwright-core";
+import { chromium, request } from "playwright-core";
 
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
@@ -117,6 +117,26 @@ export function hasNaverSessionCookies(cookies = []) {
   return names.has("NID_SES") || names.has("NID_AUT");
 }
 
+export function isBrowserClosedError(error) {
+  const message = String(error?.message || error || "");
+  return /target (?:page, )?context or browser has been closed|browser has been closed|browser.*(?:closed|crashed)|page.*closed|context.*closed/i.test(message);
+}
+
+async function launchRunnerContext(config, chromePath) {
+  return chromium.launchPersistentContext(config.profileDir, {
+    executablePath: chromePath,
+    headless: false,
+    viewport: null,
+    acceptDownloads: true,
+    chromiumSandbox: true,
+    args: ["--start-maximized"],
+  });
+}
+
+async function createApiContext(context) {
+  return request.newContext({ storageState: await context.storageState() });
+}
+
 async function main() {
   const { command, options } = parseArgs(process.argv.slice(2));
   if (command === "help" || options.help) return printHelp();
@@ -125,31 +145,25 @@ async function main() {
   await mkdir(config.profileDir, { recursive: true });
   await mkdir(config.artifactDir, { recursive: true });
   const chromePath = await resolveChromePath(config.chromePath);
-  const context = await chromium.launchPersistentContext(config.profileDir, {
-    executablePath: chromePath,
-    headless: false,
-    viewport: null,
-    acceptDownloads: true,
-    chromiumSandbox: true,
-    args: ["--start-maximized"],
-  });
+  const runOptions = {
+    publish: Boolean(options.publish),
+    yes: Boolean(options.yes),
+    once: Boolean(options.once),
+    includeVideo: !Boolean(options.skipVideo),
+  };
+  if (command === "watch") return watchWithBrowserRecovery(config, chromePath, runOptions);
 
+  const context = await launchRunnerContext(config, chromePath);
+  let apiContext;
   try {
     await restoreSessionState(context, config);
     if (command === "login") return await login(context, config);
-    if (command === "watch") {
-      return await watchQueue(context, config, {
-        publish: Boolean(options.publish),
-        yes: Boolean(options.yes),
-        once: Boolean(options.once),
-        includeVideo: !Boolean(options.skipVideo),
-      });
-    }
+    apiContext = await createApiContext(context);
     if (command === "prepare" || command === "publish") {
       const job = options.jobFile
         ? JSON.parse(await readFile(path.resolve(options.jobFile), "utf8"))
-        : await loadJob(context, config, requiredOption(options, "jobId"));
-      return await processJob(context, config, job, {
+        : await loadJob(apiContext, config, requiredOption(options, "jobId"));
+      return await processJob(context, apiContext, config, job, {
         publish: command === "publish" || Boolean(options.publish),
         yes: Boolean(options.yes),
         includeVideo: !Boolean(options.skipVideo),
@@ -157,7 +171,31 @@ async function main() {
     }
     throw new Error(`알 수 없는 명령: ${command}`);
   } finally {
-    await context.close();
+    await apiContext?.dispose().catch(() => {});
+    await context.close().catch(() => {});
+  }
+}
+
+async function watchWithBrowserRecovery(config, chromePath, options) {
+  const maxRestarts = 5;
+  for (let restart = 0; restart <= maxRestarts; restart += 1) {
+    let context;
+    let apiContext;
+    try {
+      context = await launchRunnerContext(config, chromePath);
+      await restoreSessionState(context, config);
+      apiContext = await createApiContext(context);
+      if (restart > 0) console.log(`[복구] Chrome 재실행 완료 (${restart}/${maxRestarts}) · 대기열 감시를 재개합니다.`);
+      return await watchQueue(context, apiContext, config, options);
+    } catch (error) {
+      if (!isBrowserClosedError(error) || options.once || restart >= maxRestarts) throw error;
+      console.error(`[복구] 자동화용 Chrome이 종료되었습니다: ${error?.message || error}`);
+      console.error(`[복구] 로그인 세션을 유지한 채 Chrome을 다시 실행합니다 (${restart + 1}/${maxRestarts}).`);
+    } finally {
+      await apiContext?.dispose().catch(() => {});
+      await context?.close().catch(() => {});
+    }
+    await delay(Math.min(2_000 * (restart + 1), 10_000));
   }
 }
 
@@ -171,25 +209,30 @@ async function login(context, config) {
   await prompt("\n두 로그인을 모두 완료했으면 Enter를 누르세요. ");
   await assertNaverLogin(naver);
   await assertSavedNaverSession(context);
-  await loadQueue(context, config);
+  const apiContext = await createApiContext(context);
+  try {
+    await loadQueue(apiContext, config);
+  } finally {
+    await apiContext.dispose().catch(() => {});
+  }
   await saveSessionState(context, config);
   console.log("로그인 상태를 확인하고 다음 실행용 세션을 저장했습니다.");
 }
 
-async function watchQueue(context, config, options) {
+async function watchQueue(context, apiContext, config, options) {
   const monitorPage = context.pages()[0] || await context.newPage();
-  await verifyLoginSessions(context, monitorPage, config);
+  await verifyLoginSessions(context, monitorPage, apiContext, config);
   console.log(`랜딩·릴스·SmartEditor 전체 대기열 감시 시작 (${config.siteOrigin}, ${config.pollSeconds}초 간격)`);
   for (;;) {
-    const jobs = await loadQueue(context, config);
+    const jobs = await loadQueue(apiContext, config);
     const byReservedNumber = (a, b) => Number(a.reservedNaverArticleId || Number.MAX_SAFE_INTEGER) - Number(b.reservedNaverArticleId || Number.MAX_SAFE_INTEGER);
     const cafeQueued = jobs
       .filter((job) => job.cafeStatus === "smarteditor-queued")
       .sort(byReservedNumber)
       .at(0);
     if (cafeQueued) {
-      const job = await loadJob(context, config, cafeQueued.id);
-      const result = await processJob(context, config, job, options, monitorPage);
+      const job = await loadJob(apiContext, config, cafeQueued.id);
+      const result = await processJob(context, apiContext, config, job, options, monitorPage);
       if (!result?.posted && !options.yes) return;
     } else if (options.once) {
       console.log("대기 중인 SmartEditor 작업이 없습니다.");
@@ -200,7 +243,7 @@ async function watchQueue(context, config, options) {
   }
 }
 
-async function verifyLoginSessions(context, page, config) {
+async function verifyLoginSessions(context, page, apiContext, config) {
   console.log("[사전 확인] gnlaw-criminal 관리자 로그인 확인 중...");
   await page.goto(`${config.siteOrigin}/admin/cafe-reels`, {
     waitUntil: "domcontentloaded",
@@ -209,7 +252,7 @@ async function verifyLoginSessions(context, page, config) {
   if (/\/admin\/login/i.test(page.url())) {
     throw new Error("gnlaw-criminal 관리자 로그인이 필요합니다. 프로그램에서 '최초 로그인'을 실행하세요.");
   }
-  await loadQueue(context, config);
+  await loadQueue(apiContext, config);
   console.log("[사전 확인] 관리자 로그인 확인 완료");
 
   console.log("[사전 확인] 네이버 카페 로그인 확인 중...");
@@ -226,7 +269,7 @@ async function verifyLoginSessions(context, page, config) {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await loadQueue(context, config);
+  await loadQueue(apiContext, config);
   console.log("[사전 확인] 두 로그인 확인 완료 · 자동화를 시작합니다.");
 }
 
@@ -258,7 +301,7 @@ async function saveSessionState(context, config) {
   console.log(`[세션] 로그인 상태를 ${config.sessionStatePath}에 저장했습니다.`);
 }
 
-async function processJob(context, config, job, options, existingPage = null) {
+async function processJob(context, apiContext, config, job, options, existingPage = null) {
   validateJob(job);
   const board = boardForJob(job);
   const images = orderedJobImages(job, config.siteOrigin);
@@ -270,10 +313,11 @@ async function processJob(context, config, job, options, existingPage = null) {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "gnlaw-smarteditor-"));
   const page = existingPage || await context.newPage();
   const ownsPage = !existingPage;
+  let submitStarted = false;
   try {
-    if (options.publish) await reportStatus(context, config, job.id, "preparing");
-    const files = await downloadImages(context, images, tempDir);
-    const videoFile = videoUrl ? await downloadVideo(context, videoUrl, tempDir) : null;
+    if (options.publish) await reportStatus(apiContext, config, job.id, "preparing");
+    const files = await downloadImages(apiContext, images, tempDir);
+    const videoFile = videoUrl ? await downloadVideo(apiContext, videoUrl, tempDir) : null;
     const writeUrl = `https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}/menus/${board.menuId}/articles/write`;
     await clearNaverDraftState(page);
     await page.goto(`${writeUrl}?gnlawRun=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
@@ -321,11 +365,12 @@ async function processJob(context, config, job, options, existingPage = null) {
       }
     }
 
+    submitStarted = true;
     await submitArticle(page);
     const cafeUrl = await canonicalCafeArticleUrl(page, config, job.reservedNaverArticleId);
     const publishedLinks = await verifyPublishedLinks(page, [config.phoneLink, config.kakaoLink]);
     if (videoFile) await verifyPublishedVideo(page);
-    await reportStatus(context, config, job.id, "posted", { cafeUrl });
+    await reportStatus(apiContext, config, job.id, "posted", { cafeUrl });
     console.log(`게시 완료: ${cafeUrl}`);
     console.log(`공개 글 링크 검증: ${publishedLinks.join(", ")}`);
     return { posted: true, cafeUrl, screenshotPath, videoUploaded: Boolean(videoFile) };
@@ -334,8 +379,14 @@ async function processJob(context, config, job, options, existingPage = null) {
     if (await page.screenshot({ path: failureScreenshotPath, fullPage: false }).then(() => true).catch(() => false)) {
       console.error(`SmartEditor 실패 화면: ${failureScreenshotPath}`);
     }
-    if (options.publish) {
-      await reportStatus(context, config, job.id, "failed", { message: error?.message || String(error) }).catch(() => {});
+    if (options.publish && isBrowserClosedError(error) && !submitStarted) {
+      await queueSmartEditor(apiContext, config, job.id).catch(() => {});
+      console.error("[복구] 게시 전 Chrome 종료를 감지해 작업을 SmartEditor 대기열로 되돌렸습니다.");
+    } else if (options.publish) {
+      const message = isBrowserClosedError(error) && submitStarted
+        ? `게시 요청 이후 Chrome이 종료되었습니다. 중복 방지를 위해 자동 재시도하지 않습니다: ${error?.message || error}`
+        : error?.message || String(error);
+      await reportStatus(apiContext, config, job.id, "failed", { message }).catch(() => {});
     }
     throw error;
   } finally {
@@ -690,11 +741,11 @@ async function waitForImageCount(page, expected) {
   throw new Error(`이미지 업로드 시간 초과 (예상 ${expected}개)`);
 }
 
-async function downloadImages(context, images, tempDir) {
+async function downloadImages(apiContext, images, tempDir) {
   const files = [];
   for (let index = 0; index < images.length; index += 1) {
     const image = images[index];
-    const response = await context.request.get(image.url, { timeout: 60_000 });
+    const response = await apiContext.get(image.url, { timeout: 60_000 });
     if (!response.ok()) throw new Error(`${image.label || image.slot} 이미지 다운로드 실패 (${response.status()})`);
     const type = response.headers()["content-type"] || "image/jpeg";
     const extension = type.includes("png") ? ".png" : type.includes("webp") ? ".webp" : ".jpg";
@@ -705,8 +756,8 @@ async function downloadImages(context, images, tempDir) {
   return files;
 }
 
-async function downloadVideo(context, videoUrl, tempDir) {
-  const response = await context.request.get(videoUrl, { timeout: 180_000 });
+async function downloadVideo(apiContext, videoUrl, tempDir) {
+  const response = await apiContext.get(videoUrl, { timeout: 180_000 });
   if (!response.ok()) throw new Error(`릴스 영상 다운로드 실패 (${response.status()})`);
 
   const type = String(response.headers()["content-type"] || "").toLowerCase();
@@ -871,10 +922,16 @@ async function reportStatus(context, config, jobId, status, extra = {}) {
   });
 }
 
+async function queueSmartEditor(context, config, jobId) {
+  return apiJson(context, "POST", `${config.siteOrigin}/api/cafe-reels-workflow`, {
+    data: { action: "queue-smarteditor", jobId },
+  });
+}
+
 async function apiJson(context, method, url, options = {}) {
   const response = method === "POST"
-    ? await context.request.post(url, options)
-    : await context.request.get(url, options);
+    ? await context.post(url, options)
+    : await context.get(url, options);
   const text = await response.text();
   let data;
   try { data = JSON.parse(text); }

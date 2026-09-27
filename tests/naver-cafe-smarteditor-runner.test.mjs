@@ -6,6 +6,7 @@ import {
   articleBodyForJob,
   boardForJob,
   hasNaverSessionCookies,
+  isBrowserClosedError,
   jobVideoUrl,
   orderedJobImages,
   parseArgs,
@@ -77,7 +78,7 @@ test("desktop automation uses the Windows Chrome sandbox and opens the work scre
   assert.match(source, /chromiumSandbox:\s*true/);
   assert.doesNotMatch(source, /["']--no-sandbox["']/);
   assert.match(source, /page\.goto\(`\$\{config\.siteOrigin\}\/admin\/cafe-reels`/);
-  assert.match(source, /verifyLoginSessions\(context, monitorPage, config\)/);
+  assert.match(source, /verifyLoginSessions\(context, monitorPage, apiContext, config\)/);
   assert.match(source, /\[사전 확인\] 네이버 카페 로그인 확인 완료/);
   assert.match(source, /DEFAULT_CAFE_URL = "https:\/\/cafe\.naver\.com\/gnlawfintech"/);
   assert.match(source, /await naver\.goto\(config\.cafeUrl/);
@@ -99,7 +100,7 @@ test("desktop automation pre-checks the persisted Naver login cookies", () => {
 
 test("desktop automation posts from the original work tab and never auto-selects Reel images", () => {
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
-  assert.match(source, /processJob\(context, config, job, options, monitorPage\)/);
+  assert.match(source, /processJob\(context, apiContext, config, job, options, monitorPage\)/);
   assert.doesNotMatch(source, /locator\("#localAssets"\)\.setInputFiles/);
   assert.doesNotMatch(source, /videoStatus === "render-queued"/);
   assert.doesNotMatch(source, /frameLocator\('iframe\[id\^="input_buffer"\]'\)/);
@@ -149,6 +150,20 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /async function canonicalCafeArticleUrl/);
   assert.match(source, /filter\(\(job\) => job\.cafeStatus === "smarteditor-queued"\)[\s\S]*\.at\(0\)/);
   assert.doesNotMatch(source, /hasUnfinishedBatchJobs/);
+});
+
+test("SmartEditor runner recovers a crashed Chrome without losing a queued job", () => {
+  assert.equal(isBrowserClosedError(new Error("apiRequestContext.get: Target page, context or browser has been closed")), true);
+  assert.equal(isBrowserClosedError(new Error("Browser has been closed")), true);
+  assert.equal(isBrowserClosedError(new Error("HTTP 500")), false);
+
+  const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
+  assert.match(source, /request\.newContext\(\{ storageState: await context\.storageState\(\) \}\)/);
+  assert.match(source, /watchWithBrowserRecovery\(config, chromePath, runOptions\)/);
+  assert.match(source, /Chrome 재실행 완료/);
+  assert.match(source, /queueSmartEditor\(apiContext, config, job\.id\)/);
+  assert.match(source, /게시 요청 이후 Chrome이 종료되었습니다\. 중복 방지를 위해 자동 재시도하지 않습니다/);
+  assert.doesNotMatch(source, /context\.request\.(?:get|post)/);
 });
 
 test("SmartEditor accepts a board already selected by the menu URL", () => {
