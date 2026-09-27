@@ -16,6 +16,7 @@ const NAVER_CAFE_SLUG = "gnlawfintech";
 const NAVER_CAFE_MAX_IMAGES = 100;
 const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
 const NAVER_CAFE_KAKAO_HREF = "https://gnlaw-criminal.co.kr/kakao_redirect/";
+const VIDEO_RENDER_STALE_MS = 3 * 60 * 1000;
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -25,6 +26,7 @@ export async function onRequestGet({ request, env }) {
     if (jobId) {
       let job = await loadJob(env, jobId);
       if (!job) return json({ ok: false, message: "작업을 찾을 수 없습니다." }, 404);
+      job = await recoverStaleVideoRender(env, job);
       job = await refreshPendingArticleNumber(env, job);
       return json({ ok: true, job });
     }
@@ -314,6 +316,18 @@ async function updateIndex(env, job) {
 
 async function loadIndex(env) {
   return (await env.CASES.get(INDEX_KEY, "json").catch(() => null)) || [];
+}
+
+async function recoverStaleVideoRender(env, job) {
+  if (!job || job.videoStatus !== "rendering" || job.videoUrl) return job;
+  const startedAt = Date.parse(job.videoUpdatedAt || job.updatedAt || "");
+  if (!Number.isFinite(startedAt) || Date.now() - startedAt < VIDEO_RENDER_STALE_MS) return job;
+  return saveJob(env, {
+    ...job,
+    videoStatus: "failed",
+    videoError: "영상 생성이 중단되었습니다. 페이지를 새로고침한 뒤 이미지를 다시 선택하고 자동화를 실행해주세요.",
+    videoUpdatedAt: new Date().toISOString(),
+  });
 }
 
 async function currentNaverArticleId(env) {

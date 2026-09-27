@@ -82,6 +82,36 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
   assert.match(pageSource, /id="generate" type="button">자동화 실행<\/button>/);
   assert.match(pageSource, /function applyJob[\s\S]*syncVideoTitle\(\)/);
+  assert.match(generatorSource, /const duration=Number\(\$\('#duration'\)\.value\)\|\|10/);
+  assert.match(generatorSource, /performance\.now\(\)-startedAt/);
+  assert.doesNotMatch(generatorSource, /for\(let f=0;f<total;f\+\+\)/);
+  assert.match(generatorSource, /function withTimeout/);
+  assert.match(generatorSource, /영상 인코더 종료 시간이 초과되었습니다/);
+});
+
+test("stale browser video rendering is recovered as a retryable failure", async () => {
+  const jobId = "stale-render-job";
+  const staleJob = {
+    id: jobId,
+    caseName: "멈춘 사건",
+    fraudType: "stock-project",
+    imageSetKey: "fraud",
+    draft: { title: "멈춘 사건 원고", body: "본문" },
+    cafeStatus: "awaiting-reel",
+    videoStatus: "rendering",
+    videoUpdatedAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+  };
+  const { env } = testEnv([
+    [`cafe-reels:job:${jobId}`, staleJob],
+    ["cafe-reels:jobs:index:v1", []],
+  ]);
+  const response = await onWorkflowGet({
+    request: new Request(`https://gnlaw-criminal.co.kr/api/cafe-reels-workflow?jobId=${jobId}`),
+    env,
+  });
+  const result = await response.json();
+  assert.equal(result.job.videoStatus, "failed");
+  assert.match(result.job.videoError, /영상 생성이 중단/);
 });
 
 test("Cafe landing reuse requires the exact case instead of generic fraud tags", () => {
