@@ -210,41 +210,35 @@ export async function onRequestPost({ request, env }) {
       const job = await requireJob(env, body?.jobId);
       try {
         const result = await checkInstagramReel(env, job);
-        return json({
-          ok: true,
-          job: result.job,
-          done: result.done,
-          reelDone: result.job.instagramStatus === "posted" && Boolean(result.job.instagramMediaId),
-          storyDone: result.job.instagramStoryStatus === "posted" && Boolean(result.job.instagramStoryMediaId),
-          message: result.message,
-        });
+        return json({ ok: true, job: result.job, done: result.done, message: result.message });
       } catch (error) {
-        const latest = await loadJob(env, job.id) || job;
-        const reelWasPosted = latest.instagramStatus === "posted" && latest.instagramMediaId;
         const next = await saveJob(env, {
-          ...latest,
-          ...(reelWasPosted ? {
-            instagramStoryStatus: "failed",
-            instagramStoryError: String(error?.message || error).slice(0, 1200),
-            instagramStoryUpdatedAt: new Date().toISOString(),
-          } : {
-            instagramStatus: "failed",
-            instagramError: String(error?.message || error).slice(0, 1200),
-          }),
+          ...job,
+          instagramStatus: "failed",
+          instagramError: String(error?.message || error).slice(0, 1200),
           instagramUpdatedAt: new Date().toISOString(),
         });
-        if (reelWasPosted) {
-          return json({
-            ok: true,
-            job: next,
-            done: true,
-            reelDone: true,
-            storyDone: false,
-            storyFailed: true,
-            message: `Instagram 릴스 게시 완료 · 스토리 게시 실패(다음 사건은 계속 진행): ${next.instagramStoryError}`,
-          });
-        }
         return json({ ok: false, job: next, message: next.instagramError }, 502);
+      }
+    }
+
+    if (action === "check-instagram-story") {
+      const job = await requireJob(env, body?.jobId);
+      if (job.instagramStatus !== "posted" || !job.instagramMediaId) {
+        return json({ ok: false, job, message: "릴스 게시 완료 후 스토리를 진행할 수 있습니다." }, 409);
+      }
+      try {
+        const result = await continueInstagramStory(env, job);
+        return json({ ok: true, job: result.job, done: result.done, message: result.message });
+      } catch (error) {
+        const latest = await loadJob(env, job.id) || job;
+        const next = await saveJob(env, {
+          ...latest,
+          instagramStoryStatus: "failed",
+          instagramStoryError: String(error?.message || error).slice(0, 1200),
+          instagramStoryUpdatedAt: new Date().toISOString(),
+        });
+        return json({ ok: false, job: next, message: next.instagramStoryError }, 502);
       }
     }
 
@@ -463,12 +457,11 @@ async function startInstagramReel(env, job, requestedCaption = "") {
 }
 
 async function checkInstagramReel(env, job) {
-  if (job.instagramStatus === "posted" && job.instagramMediaId) {
-    return continueInstagramStory(env, job);
-  }
-
   const containerId = normalizeText(job.instagramContainerId || "");
   if (!containerId) throw new Error("확인할 Instagram 릴스 컨테이너가 없습니다. 자동 업로드를 다시 시작해주세요.");
+  if (job.instagramStatus === "posted" && job.instagramMediaId) {
+    return { job, done: true, message: "Instagram 릴스 게시가 이미 완료되었습니다." };
+  }
 
   const access = await getInstagramAccess(env);
   const statusUrl = new URL(`${instagramGraphBase(env)}/${encodeURIComponent(containerId)}`);
@@ -526,14 +519,13 @@ async function checkInstagramReel(env, job) {
       body: job.draft?.body || "",
     },
   });
-  if (!permalink) {
-    return {
-      job: reelJob,
-      done: true,
-      message: "Instagram 릴스 게시물 주소를 확인하지 못해 카페 자동 게시 대기 등록을 보류했습니다.",
-    };
-  }
-  return continueInstagramStory(env, reelJob);
+  return {
+    job: reelJob,
+    done: true,
+    message: permalink
+      ? `Instagram 릴스 게시 완료 및 SmartEditor 자동 게시 대기 등록: ${permalink}`
+      : "Instagram 릴스 게시물 주소를 확인하지 못해 카페 자동 게시 대기 등록을 보류했습니다.",
+  };
 }
 
 export function instagramStoryLinkDetails(job = {}) {

@@ -62,6 +62,7 @@ test("Instagram authorization URL requests the publishing scopes", () => {
 test("generated whiteboard video starts Instagram publishing automatically", () => {
   const generatorSource = fs.readFileSync(new URL("../admin/whiteboard-local-v2.js", import.meta.url), "utf8");
   const pageSource = fs.readFileSync(new URL("../admin/cafe-reels.html", import.meta.url), "utf8");
+  const workflowSource = fs.readFileSync(new URL("../functions/api/cafe-reels-workflow.js", import.meta.url), "utf8");
 
   assert.match(generatorSource, /whiteboard:video-ready/);
   assert.match(pageSource, /async function handleGeneratedVideo[\s\S]*await publishInstagramReel\(\)/);
@@ -78,9 +79,14 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /orderedJobIds\.slice\(completedIndex \+ 1\)/);
   assert.match(pageSource, /generateButton\.click\(\)/);
   assert.match(pageSource, /bulkAutomationRunning = true/);
-  assert.match(pageSource, /data\.job\?\.instagramStatus === "posted" && data\.job\.instagramMediaId/);
+  assert.match(pageSource, /if \(data\.done\)/);
+  assert.match(pageSource, /if \(posted && bulkAutomationRunning && completedJob\?\.batchId\)/);
   assert.match(pageSource, /continueInstagramStoryInBackground\(data\.job\)/);
+  assert.match(pageSource, /action: "check-instagram-story"/);
   assert.match(pageSource, /Instagram 스토리 게시 실패, 대량 자동화는 계속 진행/);
+  const reelCheckSource = workflowSource.match(/async function checkInstagramReel[\s\S]*?export function instagramStoryLinkDetails/)?.[0] || "";
+  assert.match(reelCheckSource, /done: true/);
+  assert.doesNotMatch(reelCheckSource, /continueInstagramStory/);
   assert.match(generatorSource, /window\.setWhiteboardLocalFiles=setLocalFiles/);
   assert.match(generatorSource, /selectedLocalFiles/);
   assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
@@ -349,18 +355,24 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
 
     const checked = await post({ action: "check-instagram-reel", jobId });
     assert.equal(checked.response.status, 200);
-    assert.equal(checked.result.done, false);
+    assert.equal(checked.result.done, true);
     assert.equal(checked.result.job.instagramStatus, "posted");
     assert.equal(checked.result.job.instagramMediaId, "media-456");
     assert.equal(checked.result.job.instagramPermalink, "https://www.instagram.com/reel/example/");
-    assert.equal(checked.result.job.instagramStoryStatus, "processing");
-    assert.equal(checked.result.job.instagramStoryContainerId, "story-container-789");
-    assert.equal(checked.result.job.instagramStoryLinkText, "법무법인 선린-금융사기피해 Fintech센터");
-    assert.equal(checked.result.job.instagramStoryLinkUrl, "https://gnlaw-criminal.co.kr/prosecute/test-litigation/");
+    assert.notEqual(checked.result.job.instagramStoryStatus, "processing");
     assert.equal(checked.result.job.cafeStatus, "smarteditor-queued");
     assert.equal(checked.result.job.draft.body, "본문");
+    assert.equal(calls.length, 4);
 
-    const storyChecked = await post({ action: "check-instagram-reel", jobId });
+    const storyStarted = await post({ action: "check-instagram-story", jobId });
+    assert.equal(storyStarted.response.status, 200);
+    assert.equal(storyStarted.result.done, false);
+    assert.equal(storyStarted.result.job.instagramStoryStatus, "processing");
+    assert.equal(storyStarted.result.job.instagramStoryContainerId, "story-container-789");
+    assert.equal(storyStarted.result.job.instagramStoryLinkText, "법무법인 선린-금융사기피해 Fintech센터");
+    assert.equal(storyStarted.result.job.instagramStoryLinkUrl, "https://gnlaw-criminal.co.kr/prosecute/test-litigation/");
+
+    const storyChecked = await post({ action: "check-instagram-story", jobId });
     assert.equal(storyChecked.response.status, 200);
     assert.equal(storyChecked.result.done, true);
     assert.equal(storyChecked.result.job.instagramStoryStatus, "posted");
@@ -371,7 +383,7 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
   }
 });
 
-test("a Story failure after Reel publication does not stop the bulk workflow", async () => {
+test("a Story failure is isolated from the already completed Reel and Cafe queue", async () => {
   const jobId = "instagram-story-failure-job";
   const job = {
     id: jobId,
@@ -417,21 +429,17 @@ test("a Story failure after Reel publication does not stop the bulk workflow", a
       request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "check-instagram-reel", jobId }),
+        body: JSON.stringify({ action: "check-instagram-story", jobId }),
       }),
       env,
     });
     const result = await response.json();
-    assert.equal(response.status, 200);
-    assert.equal(result.ok, true);
-    assert.equal(result.done, true);
-    assert.equal(result.reelDone, true);
-    assert.equal(result.storyDone, false);
-    assert.equal(result.storyFailed, true);
+    assert.equal(response.status, 502);
+    assert.equal(result.ok, false);
     assert.equal(result.job.instagramStatus, "posted");
     assert.equal(result.job.instagramStoryStatus, "failed");
     assert.equal(result.job.cafeStatus, "smarteditor-queued");
-    assert.match(result.message, /다음 사건은 계속 진행/);
+    assert.match(result.message, /Instagram 스토리 처리 실패/);
   } finally {
     globalThis.fetch = originalFetch;
   }

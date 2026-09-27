@@ -78,9 +78,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.67.0 · 수정 67차</div>
+      <div class="status">자동화 프로그램 v1.68.0 · 수정 68차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.67.0" download>Windows 자동화 프로그램 v1.67.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.68.0" download>Windows 자동화 프로그램 v1.68.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -623,16 +623,13 @@
       if (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId) {
         continueInstagramStoryInBackground(currentJob);
         show("reelsMsg", currentJob.instagramPermalink
-          ? `릴스 게시 완료: ${currentJob.instagramPermalink} · 스토리는 별도로 처리합니다.`
-          : "Instagram 릴스 게시 완료 · 스토리는 별도로 처리합니다.");
+          ? `이미 게시된 릴스입니다: ${currentJob.instagramPermalink}`
+          : "이미 Instagram에 게시된 릴스입니다.");
         return true;
       }
       let data;
-      if ((currentJob.instagramStatus === "processing" && currentJob.instagramContainerId)
-        || (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId)) {
-        data = { job: currentJob, message: currentJob.instagramStatus === "posted"
-          ? "게시된 릴스에 이어 Instagram 스토리 자동 게시를 진행합니다."
-          : "기존 Instagram 영상 처리 상태를 이어서 확인합니다." };
+      if (currentJob.instagramStatus === "processing" && currentJob.instagramContainerId) {
+        data = { job: currentJob, message: "기존 Instagram 영상 처리 상태를 이어서 확인합니다." };
       } else {
         data = await postWorkflow({
           action: "start-instagram-reel",
@@ -649,12 +646,7 @@
         data = await postWorkflow({ action: "check-instagram-reel", jobId: currentJob.id });
         applyJob(data.job);
         show("reelsMsg", data.message || "Instagram 영상 처리 상태 확인 중...");
-        if (data.job?.instagramStatus === "posted" && data.job.instagramMediaId) {
-          console.info("[bulk] Instagram 릴스 게시 완료, 스토리와 분리하여 다음 단계 진행", {
-            jobId: data.job.id,
-            caseName: data.job.caseName,
-            storyStatus: data.job.instagramStoryStatus || "not-started",
-          });
+        if (data.done) {
           continueInstagramStoryInBackground(data.job);
           loadJobs();
           return true;
@@ -819,7 +811,7 @@
       try {
         while (Date.now() < deadline) {
           await wait(5000);
-          const data = await postWorkflow({ action: "check-instagram-reel", jobId });
+          const data = await postWorkflow({ action: "check-instagram-story", jobId });
           const latest = data.job;
           if (currentJob?.id === jobId) applyJob(latest);
           if (latest?.instagramStoryStatus === "posted") {
