@@ -1,13 +1,14 @@
 @echo off
 setlocal EnableExtensions
-title GNLAW SmartEditor Installer
+title GNLAW SmartEditor Installer v1.60.0
+set "APP_VERSION=v1.60.0 - Revision 60"
 set "TARGET=%LOCALAPPDATA%\GNLAW-SmartEditor"
 set "NODE_ZIP=node-v24.15.0-win-x64.zip"
 set "NODE_URL=https://nodejs.org/dist/v24.15.0/node-v24.15.0-win-x64.zip"
 set "NODE_FOLDER=node-v24.15.0-win-x64"
 set "TEMP_NODE=%TEMP%\gnlaw-node-runtime"
 
-echo [GNLAW] Installing SmartEditor automation...
+echo [GNLAW] Installing SmartEditor automation %APP_VERSION%...
 if not exist "%~dp0app\GNLAWSmartEditor.exe" goto package_error
 taskkill.exe /F /T /IM GNLAWSmartEditor.exe >nul 2>&1
 if not exist "%TARGET%" mkdir "%TARGET%"
@@ -31,7 +32,7 @@ if not exist "%TARGET%\runtime\node.exe" (
 
 cscript.exe //nologo "%~dp0CreateShortcut.vbs" "%TARGET%\GNLAWSmartEditor.exe" "%USERPROFILE%\Desktop\GNLAW SmartEditor.lnk"
 if errorlevel 1 goto install_error
-echo [GNLAW] Installation completed.
+echo [GNLAW] Installation completed: %APP_VERSION%
 start "" "%TARGET%\GNLAWSmartEditor.exe"
 exit /b 0
 

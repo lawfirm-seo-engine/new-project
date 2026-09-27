@@ -3,14 +3,21 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Management;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+
+[assembly: AssemblyTitle("GNLAW SmartEditor")]
+[assembly: AssemblyDescription("법무법인 선린 카페 원고·릴스 자동화")]
+[assembly: AssemblyVersion("1.60.0.0")]
+[assembly: AssemblyFileVersion("1.60.0.0")]
 
 namespace GNLAW.SmartEditor
 {
     public sealed class MainForm : Form
     {
+        private const string AppVersion = "v1.60.0 · 수정 60차";
         private readonly Button loginButton = new Button();
         private readonly Button loginDoneButton = new Button();
         private readonly Button startButton = new Button();
@@ -22,7 +29,7 @@ namespace GNLAW.SmartEditor
 
         public MainForm()
         {
-            Text = "법무법인 선린 · 카페 원고·릴스 자동화";
+            Text = "법무법인 선린 · 카페 원고·릴스 자동화 · " + AppVersion;
             StartPosition = FormStartPosition.CenterScreen;
             MinimumSize = new Size(760, 520);
             Size = new Size(860, 600);
@@ -30,7 +37,7 @@ namespace GNLAW.SmartEditor
             BackColor = Color.FromArgb(244, 246, 251);
 
             var title = new Label {
-                Text = "GNLAW SmartEditor 자동화",
+                Text = "GNLAW SmartEditor 자동화  " + AppVersion,
                 Font = new Font("Malgun Gothic", 18F, FontStyle.Bold),
                 AutoSize = true,
                 Location = new Point(24, 20)

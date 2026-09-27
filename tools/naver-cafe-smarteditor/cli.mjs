@@ -8,6 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
+export const APP_VERSION = "v1.60.0 · 수정 60차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -182,6 +183,7 @@ async function createApiContext(context) {
 async function main() {
   const { command, options } = parseArgs(process.argv.slice(2));
   if (command === "help" || options.help) return printHelp();
+  console.log(`[GNLAW SmartEditor] ${APP_VERSION}`);
 
   const config = runnerConfig(options);
   await mkdir(config.profileDir, { recursive: true });
@@ -1109,6 +1111,7 @@ async function prompt(message) {
 function printHelp() {
   console.log(`
 네이버 카페 SmartEditor PC 업로드 러너
+버전: ${APP_VERSION}
 
   Windows 프로그램: 최초 로그인 → 자동화 시작
   CLI 로그인: node cli.mjs login
