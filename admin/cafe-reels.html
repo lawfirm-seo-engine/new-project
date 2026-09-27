@@ -78,9 +78,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.70.0 · 수정 70차</div>
+      <div class="status">자동화 프로그램 v1.71.0 · 수정 71차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.70.0" download>Windows 자동화 프로그램 v1.70.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.71.0" download>Windows 자동화 프로그램 v1.71.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -255,9 +255,11 @@
   let generatedVideoFile = null;
   let instagramAutoUploadInProgress = false;
   let bulkAutomationRunning = false;
+  let bulkTransitionInProgress = false;
   const bulkLocalFiles = new Map();
   const BULK_FILE_DB_NAME = "gnlaw-cafe-reels-bulk-files-v1";
   const BULK_FILE_STORE_NAME = "job-files";
+  const ACTIVE_BULK_STORAGE_KEY = "gnlaw-cafe-reels-active-batch-v1";
 
   document.addEventListener("DOMContentLoaded", () => {
     $("generateBtn").addEventListener("click", generateDraft);
@@ -271,6 +273,8 @@
     syncPartSelection();
     loadAssets();
     loadJobs();
+    window.setInterval(() => void resumeActiveBulkAutomation(), 7000);
+    window.setTimeout(() => void resumeActiveBulkAutomation(), 1500);
   });
 
   async function generateDraft() {
@@ -429,6 +433,7 @@
       if (firstSavedJob) {
         applyJob(firstSavedJob);
         bulkAutomationRunning = false;
+        clearActiveBulkBatch();
         $("draftPanel").hidden = false;
         $("whiteboardPanel").scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -733,11 +738,18 @@
     return data;
   }
 
+  async function getWorkflowJob(jobId = "") {
+    const params = new URLSearchParams({ _: String(Date.now()) });
+    if (jobId) params.set("jobId", jobId);
+    const response = await fetch(`/api/cafe-reels-workflow?${params}`, { cache: "no-store" });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.message || "작업 상태를 불러오지 못했습니다.");
+    return data;
+  }
+
   async function loadJobs() {
     try {
-      const response = await fetch("/api/cafe-reels-workflow");
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.message || "작업 목록 로드 실패");
+      const data = await getWorkflowJob();
       const jobs = data.jobs || [];
       $("jobList").innerHTML = jobs.length ? jobs.map((job) => `
         <div class="job-item" onclick="loadJob('${escAttr(job.id)}')">
@@ -753,9 +765,7 @@
 
   async function loadJob(jobId) {
     try {
-      const response = await fetch(`/api/cafe-reels-workflow?jobId=${encodeURIComponent(jobId)}`);
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.message || "작업 로드 실패");
+      const data = await getWorkflowJob(jobId);
       applyJob(data.job);
       $("draftPanel").hidden = false;
       $("draftPanel").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -874,9 +884,7 @@
     const articleNumber = job.reservedNaverArticleId || "확정된";
     show("bulkMsg", `${job.caseName} · 네이버 카페 ${articleNumber}번 게시 완료를 기다립니다.`);
     while (Date.now() < deadline) {
-      const response = await fetch(`/api/cafe-reels-workflow?jobId=${encodeURIComponent(job.id)}`);
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.message || "카페 게시 상태를 확인하지 못했습니다.");
+      const data = await getWorkflowJob(job.id);
       const latest = data.job;
       if (latest.smartEditorStatus === "posted" || latest.cafeStatus === "smarteditor-posted" || latest.cafeStatus === "posted") {
         show("bulkMsg", `${latest.caseName} · 네이버 카페 ${latest.reservedNaverArticleId}번 게시 완료. 다음 사건 번호를 확정합니다.`);
@@ -898,9 +906,10 @@
   }
 
   async function startNextBulkAutomation(completedJob) {
-    const listResponse = await fetch("/api/cafe-reels-workflow");
-    const listData = await listResponse.json();
-    if (!listResponse.ok || !listData.ok) throw new Error(listData.message || "대량 작업 순서를 불러오지 못했습니다.");
+    if (bulkTransitionInProgress) return false;
+    bulkTransitionInProgress = true;
+    try {
+    const listData = await getWorkflowJob();
     const orderedJobs = (listData.jobs || [])
       .filter((job) => job.batchId === completedJob.batchId)
       .sort((left, right) => Number(left.batchOrder) - Number(right.batchOrder));
@@ -909,11 +918,13 @@
     await reportBulkTransition(completedJob.id, "next-search", `남은 사건 ${remainingJobs.length}건을 확인했습니다.`);
     for (const queuedJob of remainingJobs) {
       const jobId = queuedJob.id;
-      const response = await fetch(`/api/cafe-reels-workflow?jobId=${encodeURIComponent(jobId)}`);
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.message || "다음 대량 작업을 불러오지 못했습니다.");
+      const data = await getWorkflowJob(jobId);
       const nextJob = data.job;
-      if (nextJob.batchId !== completedJob.batchId || nextJob.instagramStatus === "posted") continue;
+      if (nextJob.batchId !== completedJob.batchId) continue;
+      if (isBulkJobComplete(nextJob)) continue;
+      if (nextJob.videoStatus !== "awaiting-images" || !["", "empty"].includes(nextJob.instagramStatus || "")) {
+        return false;
+      }
 
       const localFiles = await restoreBulkLocalFiles(nextJob.id);
       if (localFiles.length !== 10) {
@@ -936,13 +947,20 @@
     }
 
     bulkAutomationRunning = false;
+    clearActiveBulkBatch();
     show("bulkMsg", "대량 작업의 모든 릴스·네이버 카페 게시가 사건별 순서대로 완료되었습니다.");
     return false;
+    } finally {
+      bulkTransitionInProgress = false;
+    }
   }
 
   async function beforeVideoRender() {
     if (!currentJob) throw new Error("먼저 랜딩·릴스·카페 전체 작업을 등록하거나 최근 작업을 선택해주세요.");
-    if (currentJob.batchId) bulkAutomationRunning = true;
+    if (currentJob.batchId) {
+      bulkAutomationRunning = true;
+      rememberActiveBulkBatch(currentJob.batchId);
+    }
     syncVideoTitle();
     const data = await postWorkflow({ action: "report-render", jobId: currentJob.id, status: "rendering" });
     applyJob(data.job);
@@ -956,6 +974,56 @@
       await postWorkflow({ action: "report-bulk-transition", jobId, status, message });
     } catch (error) {
       console.warn("[bulk] 진행 상태 기록 실패", { jobId, status, message: error?.message || String(error) });
+    }
+  }
+
+  function isBulkJobComplete(job) {
+    return job?.instagramStatus === "posted"
+      && (job.smartEditorStatus === "posted" || job.cafeStatus === "smarteditor-posted" || job.cafeStatus === "posted");
+  }
+
+  function rememberActiveBulkBatch(batchId) {
+    if (!batchId) return;
+    localStorage.setItem(ACTIVE_BULK_STORAGE_KEY, JSON.stringify({ batchId, active: true, updatedAt: Date.now() }));
+  }
+
+  function activeBulkBatchId() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(ACTIVE_BULK_STORAGE_KEY) || "null");
+      return saved?.active ? String(saved.batchId || "") : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function clearActiveBulkBatch() {
+    localStorage.removeItem(ACTIVE_BULK_STORAGE_KEY);
+  }
+
+  async function resumeActiveBulkAutomation() {
+    const batchId = activeBulkBatchId();
+    if (!batchId || instagramAutoUploadInProgress || bulkTransitionInProgress) return;
+    try {
+      const data = await getWorkflowJob();
+      const jobs = (data.jobs || [])
+        .filter((job) => job.batchId === batchId)
+        .sort((left, right) => Number(left.batchOrder) - Number(right.batchOrder));
+      if (!jobs.length) return;
+      const nextIndex = jobs.findIndex((job) => !isBulkJobComplete(job));
+      if (nextIndex < 0) {
+        clearActiveBulkBatch();
+        bulkAutomationRunning = false;
+        show("bulkMsg", "대량 작업의 모든 릴스·네이버 카페 게시가 사건별 순서대로 완료되었습니다.");
+        return;
+      }
+      if (nextIndex === 0) return;
+      const queued = jobs[nextIndex];
+      if (queued.videoStatus !== "awaiting-images" || !["", "empty"].includes(queued.instagramStatus || "")) return;
+      bulkAutomationRunning = true;
+      show("bulkMsg", `${queued.caseName} · 중단된 연속 자동화를 자동 복구합니다.`);
+      await startNextBulkAutomation(jobs[nextIndex - 1]);
+    } catch (error) {
+      console.warn("[bulk] 연속 자동화 복구 대기", error);
     }
   }
 

@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.70.0 · 수정 70차";
+export const APP_VERSION = "v1.71.0 · 수정 71차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
