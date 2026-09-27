@@ -78,9 +78,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.68.0 · 수정 68차</div>
+      <div class="status">자동화 프로그램 v1.69.0 · 수정 69차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.68.0" download>Windows 자동화 프로그램 v1.68.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.69.0" download>Windows 자동화 프로그램 v1.69.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -95,7 +95,7 @@
       </div>
       <div id="bulkRows" class="bulk-list"></div>
       <div id="bulkMsg" class="message"></div>
-      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트·사건 유형·릴스 이미지 10장을 각각 지정합니다. 작업 등록 후 해당 사건을 선택하면 그 사건의 이미지 10장과 영상 제목이 자동 적용됩니다. 로컬 파일은 서버에 업로드되지 않으므로 브라우저를 닫거나 새로고침하면 다시 선택해야 합니다.</p>
+      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트·사건 유형·릴스 이미지 10장을 각각 지정합니다. 선택한 이미지는 서버로 전송하지 않고 이 브라우저의 로컬 저장소에 보관하므로, 새로고침 후에도 같은 브라우저에서는 다음 사건 자동화를 이어갈 수 있습니다.</p>
     </section>
 
     <section class="panel">
@@ -224,12 +224,12 @@
       <div class="actions">
         <button class="btn" type="button" onclick="saveCafeUrl()">카페 URL 저장</button>
         <button class="btn" type="button" onclick="saveVideoUrl()">영상 URL 저장</button>
-        <button class="btn green" id="instagramPublishBtn" type="button" onclick="publishInstagramReel()">Instagram 릴스·스토리 자동 업로드</button>
+        <button class="btn green" id="instagramPublishBtn" type="button" onclick="publishInstagramReel()">Instagram 릴스 자동 업로드</button>
         <button class="btn" type="button" onclick="markInstagramReady()">수동 업로드 준비만</button>
         <button class="btn" type="button" onclick="copyValue(captionOutput.value, this)">캡션 복사</button>
       </div>
       <div id="reelsMsg" class="message"></div>
-      <p class="note">생성한 MP4를 공개 URL로 저장한 뒤 버튼을 누르면 릴스 게시에 이어 스토리도 자동 게시합니다. 파트별 센터 문구와 랜딩 URL은 작업에 함께 저장됩니다. 단, Meta 공식 게시 API는 스토리 링크 스티커 생성을 지원하지 않아 클릭 가능한 스티커는 Instagram 앱에서 추가해야 합니다. Instagram 앱 설정과 프로페셔널 계정 권한 연결은 관리자 설정에서 최초 1회 완료해야 합니다.</p>
+      <p class="note">생성한 MP4를 공개 URL로 저장한 뒤 Instagram 릴스에 자동 게시합니다. 대량 자동화에서는 릴스와 카페 게시가 완료되면 서버의 사건 순서에 따라 다음 사건을 자동으로 시작합니다.</p>
     </section>
   </div>
 </main>
@@ -256,7 +256,8 @@
   let instagramAutoUploadInProgress = false;
   let bulkAutomationRunning = false;
   const bulkLocalFiles = new Map();
-  const instagramStoryBackgroundJobs = new Set();
+  const BULK_FILE_DB_NAME = "gnlaw-cafe-reels-bulk-files-v1";
+  const BULK_FILE_STORE_NAME = "job-files";
 
   document.addEventListener("DOMContentLoaded", () => {
     $("generateBtn").addEventListener("click", generateDraft);
@@ -415,7 +416,7 @@
           });
           completed += 1;
           firstSavedJob ||= saved.job;
-          bulkLocalFiles.set(saved.job.id, item.files.slice());
+          await rememberBulkLocalFiles(saved.job.id, item.files);
           item.row.dataset.registered = "true";
           item.row.style.opacity = ".55";
           const cafeNumber = saved.job.reservedNaverArticleId ? `${saved.job.reservedNaverArticleId}번` : "순차 대기";
@@ -454,6 +455,60 @@
     });
     $("bulkCaseNames").value = "";
     show("bulkMsg", `${names.length}개 사건명을 유형 선택 목록에 추가했습니다.`);
+  }
+
+  function openBulkFileDatabase() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(BULK_FILE_DB_NAME, 1);
+      request.onupgradeneeded = () => {
+        const database = request.result;
+        if (!database.objectStoreNames.contains(BULK_FILE_STORE_NAME)) {
+          database.createObjectStore(BULK_FILE_STORE_NAME, { keyPath: "jobId" });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error("릴스 이미지 저장소를 열지 못했습니다."));
+    });
+  }
+
+  async function rememberBulkLocalFiles(jobId, files) {
+    const selected = [...files];
+    bulkLocalFiles.set(jobId, selected);
+    try {
+      const database = await openBulkFileDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = database.transaction(BULK_FILE_STORE_NAME, "readwrite");
+        transaction.objectStore(BULK_FILE_STORE_NAME).put({ jobId, files: selected, updatedAt: Date.now() });
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error || new Error("릴스 이미지를 저장하지 못했습니다."));
+        transaction.onabort = () => reject(transaction.error || new Error("릴스 이미지 저장이 중단되었습니다."));
+      });
+      database.close();
+    } catch (error) {
+      console.warn("[bulk] 릴스 이미지 영구 저장 실패 · 현재 페이지에서는 계속 진행합니다.", error);
+    }
+    return selected;
+  }
+
+  async function restoreBulkLocalFiles(jobId) {
+    const memoryFiles = bulkLocalFiles.get(jobId);
+    if (memoryFiles?.length) return memoryFiles;
+    try {
+      const database = await openBulkFileDatabase();
+      const record = await new Promise((resolve, reject) => {
+        const request = database.transaction(BULK_FILE_STORE_NAME, "readonly")
+          .objectStore(BULK_FILE_STORE_NAME).get(jobId);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error || new Error("저장된 릴스 이미지를 읽지 못했습니다."));
+      });
+      database.close();
+      const restored = Array.isArray(record?.files) ? record.files : [];
+      if (restored.length) bulkLocalFiles.set(jobId, restored);
+      return restored;
+    } catch (error) {
+      console.warn("[bulk] 저장된 릴스 이미지 복원 실패", error);
+      return [];
+    }
   }
 
   function addBulkRow(caseName) {
@@ -621,7 +676,6 @@
     show("reelsMsg", "Instagram에 릴스 업로드를 시작합니다...");
     try {
       if (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId) {
-        continueInstagramStoryInBackground(currentJob);
         show("reelsMsg", currentJob.instagramPermalink
           ? `이미 게시된 릴스입니다: ${currentJob.instagramPermalink}`
           : "이미 Instagram에 게시된 릴스입니다.");
@@ -647,7 +701,6 @@
         applyJob(data.job);
         show("reelsMsg", data.message || "Instagram 영상 처리 상태 확인 중...");
         if (data.done) {
-          continueInstagramStoryInBackground(data.job);
           loadJobs();
           return true;
         }
@@ -730,7 +783,17 @@
     syncVideoTitle();
     const localFiles = bulkLocalFiles.get(job.id);
     if (localFiles?.length) window.setWhiteboardLocalFiles?.(localFiles);
-    else if (previousJobId && previousJobId !== job.id) window.resetWhiteboardLocalAssets?.();
+    else {
+      if (previousJobId && previousJobId !== job.id) window.resetWhiteboardLocalAssets?.();
+      if (job.batchId) {
+        void restoreBulkLocalFiles(job.id).then((restored) => {
+          if (currentJob?.id === job.id && restored.length === 10) {
+            window.setWhiteboardLocalFiles?.(restored);
+            show("bulkMsg", `${job.caseName} · 저장된 릴스 이미지 10장을 복원했습니다.`);
+          }
+        });
+      }
+    }
   }
 
   function currentAssetImages() {
@@ -778,6 +841,7 @@
   async function handleGeneratedVideo(event) {
     const { blob, fileName } = event.detail || {};
     if (!blob) return;
+    const renderedJob = currentJob;
     generatedVideoFile = new File([blob], fileName || "reels.mp4", { type: "video/mp4" });
     videoUrlEl.value = "";
     if (instagramAutoUploadInProgress) return;
@@ -785,59 +849,24 @@
     show("reelsMsg", "영상 생성 완료. Instagram 자동 업로드를 시작합니다...");
     try {
       const posted = await publishInstagramReel();
-      let completedJob = currentJob;
-      if (posted && bulkAutomationRunning && completedJob?.batchId) {
+      let completedJob = renderedJob;
+      if (posted && completedJob?.batchId) {
+        bulkAutomationRunning = true;
+        await reportBulkTransition(completedJob.id, "reel-posted", "릴스 게시 완료 · 카페 게시 완료를 기다립니다.");
         completedJob = await waitForCafePost(completedJob);
         await startNextBulkAutomation(completedJob);
       } else if (!posted) {
         bulkAutomationRunning = false;
       }
+    } catch (error) {
+      bulkAutomationRunning = false;
+      const message = error?.message || String(error);
+      if (renderedJob?.id) await reportBulkTransition(renderedJob.id, "failed", message);
+      show("bulkMsg", `연속 자동화 중단: ${message}`, true);
+      show("reelsMsg", message, true);
     } finally {
       instagramAutoUploadInProgress = false;
     }
-  }
-
-  function continueInstagramStoryInBackground(job) {
-    const jobId = job?.id;
-    if (!jobId
-      || job.instagramStoryStatus === "posted"
-      || job.instagramStoryStatus === "failed"
-      || instagramStoryBackgroundJobs.has(jobId)) return;
-
-    instagramStoryBackgroundJobs.add(jobId);
-    console.info("[story] Instagram 스토리 백그라운드 처리 시작", { jobId, caseName: job.caseName });
-    void (async () => {
-      const deadline = Date.now() + 5 * 60 * 1000;
-      try {
-        while (Date.now() < deadline) {
-          await wait(5000);
-          const data = await postWorkflow({ action: "check-instagram-story", jobId });
-          const latest = data.job;
-          if (currentJob?.id === jobId) applyJob(latest);
-          if (latest?.instagramStoryStatus === "posted") {
-            console.info("[story] Instagram 스토리 게시 완료", { jobId, storyMediaId: latest.instagramStoryMediaId });
-            loadJobs();
-            return;
-          }
-          if (latest?.instagramStoryStatus === "failed" || data.storyFailed) {
-            console.warn("[story] Instagram 스토리 게시 실패, 대량 자동화는 계속 진행", {
-              jobId,
-              message: latest?.instagramStoryError || data.message || "스토리 게시 실패",
-            });
-            loadJobs();
-            return;
-          }
-        }
-        console.warn("[story] Instagram 스토리 처리 제한 시간 초과, 대량 자동화는 계속 진행", { jobId });
-      } catch (error) {
-        console.warn("[story] Instagram 스토리 백그라운드 처리 오류, 대량 자동화는 계속 진행", {
-          jobId,
-          message: error?.message || String(error),
-        });
-      } finally {
-        instagramStoryBackgroundJobs.delete(jobId);
-      }
-    })();
   }
 
   async function waitForCafePost(job) {
@@ -851,6 +880,7 @@
       const latest = data.job;
       if (latest.smartEditorStatus === "posted" || latest.cafeStatus === "smarteditor-posted" || latest.cafeStatus === "posted") {
         show("bulkMsg", `${latest.caseName} · 네이버 카페 ${latest.reservedNaverArticleId}번 게시 완료. 다음 사건 번호를 확정합니다.`);
+        await reportBulkTransition(latest.id, "cafe-posted", "카페 게시 완료 · 다음 사건을 조회합니다.");
         return latest;
       }
       if (latest.smartEditorStatus === "failed" || latest.cafeStatus === "smarteditor-failed") {
@@ -868,23 +898,32 @@
   }
 
   async function startNextBulkAutomation(completedJob) {
-    const orderedJobIds = [...bulkLocalFiles.keys()];
-    const completedIndex = orderedJobIds.indexOf(completedJob.id);
-    const remainingIds = completedIndex >= 0 ? orderedJobIds.slice(completedIndex + 1) : [];
-    for (const jobId of remainingIds) {
+    const listResponse = await fetch("/api/cafe-reels-workflow");
+    const listData = await listResponse.json();
+    if (!listResponse.ok || !listData.ok) throw new Error(listData.message || "대량 작업 순서를 불러오지 못했습니다.");
+    const orderedJobs = (listData.jobs || [])
+      .filter((job) => job.batchId === completedJob.batchId)
+      .sort((left, right) => Number(left.batchOrder) - Number(right.batchOrder));
+    const completedIndex = orderedJobs.findIndex((job) => job.id === completedJob.id);
+    const remainingJobs = completedIndex >= 0 ? orderedJobs.slice(completedIndex + 1) : [];
+    await reportBulkTransition(completedJob.id, "next-search", `남은 사건 ${remainingJobs.length}건을 확인했습니다.`);
+    for (const queuedJob of remainingJobs) {
+      const jobId = queuedJob.id;
       const response = await fetch(`/api/cafe-reels-workflow?jobId=${encodeURIComponent(jobId)}`);
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.message || "다음 대량 작업을 불러오지 못했습니다.");
       const nextJob = data.job;
       if (nextJob.batchId !== completedJob.batchId || nextJob.instagramStatus === "posted") continue;
 
-      const localFiles = bulkLocalFiles.get(nextJob.id) || [];
+      const localFiles = await restoreBulkLocalFiles(nextJob.id);
       if (localFiles.length !== 10) {
         bulkAutomationRunning = false;
         throw new Error(`${nextJob.caseName}: 저장된 릴스 이미지가 10장이 아닙니다. 이미지를 다시 선택해주세요.`);
       }
       applyJob(nextJob);
+      window.setWhiteboardLocalFiles?.(localFiles);
       show("bulkMsg", `${nextJob.caseName} · 다음 릴스 영상 자동화를 시작합니다.`);
+      await reportBulkTransition(nextJob.id, "next-starting", "저장된 이미지 10장을 복원하고 다음 영상 생성을 시작합니다.");
       await wait(300);
       const generateButton = $("generate");
       if (generateButton.disabled) {
@@ -892,6 +931,7 @@
         throw new Error(`${nextJob.caseName}: 릴스 이미지 적용에 실패했습니다.`);
       }
       generateButton.click();
+      await reportBulkTransition(nextJob.id, "next-started", "다음 영상 생성 버튼을 실행했습니다.");
       return true;
     }
 
@@ -902,11 +942,21 @@
 
   async function beforeVideoRender() {
     if (!currentJob) throw new Error("먼저 랜딩·릴스·카페 전체 작업을 등록하거나 최근 작업을 선택해주세요.");
-    if (currentJob.batchId && bulkLocalFiles.has(currentJob.id)) bulkAutomationRunning = true;
+    if (currentJob.batchId) bulkAutomationRunning = true;
     syncVideoTitle();
     const data = await postWorkflow({ action: "report-render", jobId: currentJob.id, status: "rendering" });
     applyJob(data.job);
+    if (data.job.batchId) await reportBulkTransition(data.job.id, "rendering", "릴스 영상 생성을 시작했습니다.");
     show("reelsMsg", "선택한 이미지로 릴스 영상을 생성하고 있습니다...");
+  }
+
+  async function reportBulkTransition(jobId, status, message) {
+    if (!jobId) return;
+    try {
+      await postWorkflow({ action: "report-bulk-transition", jobId, status, message });
+    } catch (error) {
+      console.warn("[bulk] 진행 상태 기록 실패", { jobId, status, message: error?.message || String(error) });
+    }
   }
 
   async function handleAutomationFailure(event) {

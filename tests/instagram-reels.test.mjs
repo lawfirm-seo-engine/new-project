@@ -69,21 +69,24 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /class="bulk-part"/);
   assert.match(pageSource, /class="bulk-type"/);
   assert.match(pageSource, /class="bulk-images"/);
-  assert.match(pageSource, /bulkLocalFiles\.set\(saved\.job\.id, item\.files\.slice\(\)\)/);
+  assert.match(pageSource, /await rememberBulkLocalFiles\(saved\.job\.id, item\.files\)/);
+  assert.match(pageSource, /indexedDB\.open\(BULK_FILE_DB_NAME, 1\)/);
+  assert.match(pageSource, /await restoreBulkLocalFiles\(nextJob\.id\)/);
   assert.match(pageSource, /batchId/);
   assert.match(pageSource, /async function startNextBulkAutomation/);
   assert.match(pageSource, /async function waitForCafePost/);
   assert.match(pageSource, /completedJob = await waitForCafePost\(completedJob\)/);
   assert.match(pageSource, /deferArticleNumber: completed > 0/);
   assert.match(pageSource, /batchOrder: completed/);
-  assert.match(pageSource, /orderedJobIds\.slice\(completedIndex \+ 1\)/);
+  assert.match(pageSource, /filter\(\(job\) => job\.batchId === completedJob\.batchId\)/);
+  assert.match(pageSource, /sort\(\(left, right\) => Number\(left\.batchOrder\) - Number\(right\.batchOrder\)\)/);
   assert.match(pageSource, /generateButton\.click\(\)/);
   assert.match(pageSource, /bulkAutomationRunning = true/);
   assert.match(pageSource, /if \(data\.done\)/);
-  assert.match(pageSource, /if \(posted && bulkAutomationRunning && completedJob\?\.batchId\)/);
-  assert.match(pageSource, /continueInstagramStoryInBackground\(data\.job\)/);
-  assert.match(pageSource, /action: "check-instagram-story"/);
-  assert.match(pageSource, /Instagram 스토리 게시 실패, 대량 자동화는 계속 진행/);
+  assert.match(pageSource, /if \(posted && completedJob\?\.batchId\)/);
+  assert.doesNotMatch(pageSource, /continueInstagramStoryInBackground/);
+  assert.doesNotMatch(pageSource, /action: "check-instagram-story"/);
+  assert.match(pageSource, /action: "report-bulk-transition"/);
   const reelCheckSource = workflowSource.match(/async function checkInstagramReel[\s\S]*?export function instagramStoryLinkDetails/)?.[0] || "";
   assert.match(reelCheckSource, /done: true/);
   assert.doesNotMatch(reelCheckSource, /continueInstagramStory/);
@@ -196,7 +199,19 @@ test("Instagram Story metadata uses the part-specific center label and landing U
 });
 
 test("bulk jobs receive Cafe numbers one-by-one only after the previous SmartEditor post succeeds", async () => {
-  const { env } = testEnv([["cafe-reels:jobs:index:v1", []]]);
+  const { env } = testEnv([
+    ["cafe-reels:jobs:index:v1", []],
+    ["cafe-reels:naver-article-sequence:v2", { next: 148 }],
+  ]);
+  const resetSequence = await onWorkflowPost({
+    request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "set-naver-article-sequence", nextArticleId: 147 }),
+    }),
+    env,
+  });
+  assert.equal(resetSequence.status, 200);
   const save = async (caseName, batchOrder) => {
     const response = await onWorkflowPost({
       request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
@@ -222,13 +237,13 @@ test("bulk jobs receive Cafe numbers one-by-one only after the previous SmartEdi
   const first = await save("first", 0);
   const second = await save("second", 1);
   const third = await save("third", 2);
-  assert.equal(first.job.reservedNaverArticleId, "138");
-  assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/138");
+  assert.equal(first.job.reservedNaverArticleId, "147");
+  assert.equal(first.job.cafeUrl, "https://cafe.naver.com/gnlawfintech/147");
   assert.equal(first.job.videoStatus, "awaiting-images");
   assert.equal(first.job.batchId, "bulk-test");
   assert.equal(second.job.reservedNaverArticleId, "");
   assert.equal(second.job.articleNumberPending, true);
-  assert.doesNotMatch(second.job.caption, /gnlawfintech\/138/);
+  assert.doesNotMatch(second.job.caption, /gnlawfintech\/147/);
   assert.equal(third.job.reservedNaverArticleId, "");
 
   const beforeFirstPosted = await onWorkflowGet({
@@ -246,7 +261,7 @@ test("bulk jobs receive Cafe numbers one-by-one only after the previous SmartEdi
         action: "report-smarteditor",
         jobId: first.job.id,
         status: "posted",
-        cafeUrl: "https://cafe.naver.com/gnlawfintech/138",
+        cafeUrl: "https://cafe.naver.com/gnlawfintech/147",
       }),
     }),
     env,
@@ -257,9 +272,9 @@ test("bulk jobs receive Cafe numbers one-by-one only after the previous SmartEdi
     env,
   });
   const secondReady = await secondReadyResponse.json();
-  assert.equal(secondReady.job.reservedNaverArticleId, "139");
+  assert.equal(secondReady.job.reservedNaverArticleId, "148");
   assert.equal(secondReady.job.articleNumberPending, false);
-  assert.match(secondReady.job.caption, /gnlawfintech\/139/);
+  assert.match(secondReady.job.caption, /gnlawfintech\/148/);
 
   const thirdStillWaitingResponse = await onWorkflowGet({
     request: new Request(`https://gnlaw-criminal.co.kr/api/cafe-reels-workflow?jobId=${third.job.id}`),
@@ -364,27 +379,13 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
     assert.equal(checked.result.job.draft.body, "본문");
     assert.equal(calls.length, 4);
 
-    const storyStarted = await post({ action: "check-instagram-story", jobId });
-    assert.equal(storyStarted.response.status, 200);
-    assert.equal(storyStarted.result.done, false);
-    assert.equal(storyStarted.result.job.instagramStoryStatus, "processing");
-    assert.equal(storyStarted.result.job.instagramStoryContainerId, "story-container-789");
-    assert.equal(storyStarted.result.job.instagramStoryLinkText, "법무법인 선린-금융사기피해 Fintech센터");
-    assert.equal(storyStarted.result.job.instagramStoryLinkUrl, "https://gnlaw-criminal.co.kr/prosecute/test-litigation/");
-
-    const storyChecked = await post({ action: "check-instagram-story", jobId });
-    assert.equal(storyChecked.response.status, 200);
-    assert.equal(storyChecked.result.done, true);
-    assert.equal(storyChecked.result.job.instagramStoryStatus, "posted");
-    assert.equal(storyChecked.result.job.instagramStoryMediaId, "story-media-987");
-    assert.equal(calls.length, 7);
   } finally {
     globalThis.fetch = originalFetch;
   }
 });
 
-test("a Story failure is isolated from the already completed Reel and Cafe queue", async () => {
-  const jobId = "instagram-story-failure-job";
+test("Instagram Story automation is disabled and cannot block Reel or Cafe processing", async () => {
+  const jobId = "instagram-story-disabled-job";
   const job = {
     id: jobId,
     caseName: "연속 자동화 테스트 사건",
@@ -401,46 +402,25 @@ test("a Story failure is isolated from the already completed Reel and Cafe queue
     instagramStatus: "posted",
     instagramMediaId: "reel-media-already-posted",
     instagramPermalink: "https://www.instagram.com/reel/already-posted/",
-    instagramStoryStatus: "processing",
-    instagramStoryContainerId: "story-container-error",
+    instagramStoryStatus: "empty",
   };
   const { env } = testEnv([
     [`cafe-reels:job:${jobId}`, job],
     ["cafe-reels:jobs:index:v1", []],
   ]);
-  await saveInstagramToken(env, {
-    accessToken: "instagram-access-token",
-    igUserId: "17841400000000000",
-    username: "gnlaw_test",
-    expiresAt: "2099-01-01T00:00:00.000Z",
+  const response = await onWorkflowPost({
+    request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "check-instagram-story", jobId }),
+    }),
+    env,
   });
-
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (input) => {
-    const url = new URL(String(input));
-    if (url.pathname.endsWith("/story-container-error")) {
-      return Response.json({ status_code: "ERROR", status: "Story processing failed" });
-    }
-    throw new Error(`Unexpected fetch: ${url}`);
-  };
-
-  try {
-    const response = await onWorkflowPost({
-      request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "check-instagram-story", jobId }),
-      }),
-      env,
-    });
-    const result = await response.json();
-    assert.equal(response.status, 502);
-    assert.equal(result.ok, false);
-    assert.equal(result.job.instagramStatus, "posted");
-    assert.equal(result.job.instagramStoryStatus, "failed");
-    assert.equal(result.job.cafeStatus, "smarteditor-queued");
-    assert.match(result.message, /Instagram 스토리 처리 실패/);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+  const result = await response.json();
+  assert.equal(response.status, 400);
+  assert.equal(result.ok, false);
+  const unchanged = await env.CASES.get(`cafe-reels:job:${jobId}`, "json");
+  assert.equal(unchanged.instagramStatus, "posted");
+  assert.equal(unchanged.instagramStoryStatus, "empty");
+  assert.equal(unchanged.cafeStatus, "smarteditor-queued");
 });

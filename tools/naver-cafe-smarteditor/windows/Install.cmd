@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
-title GNLAW SmartEditor Installer v1.68.0
-set "APP_VERSION=v1.68.0 - Revision 68"
+title GNLAW SmartEditor Installer v1.69.0
+set "APP_VERSION=v1.69.0 - Revision 69"
 set "TARGET=%LOCALAPPDATA%\GNLAW-SmartEditor"
 set "NODE_ZIP=node-v24.15.0-win-x64.zip"
 set "NODE_URL=https://nodejs.org/dist/v24.15.0/node-v24.15.0-win-x64.zip"

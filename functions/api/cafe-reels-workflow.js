@@ -11,7 +11,7 @@ const NAVER_TOKEN_KEY = "naver-cafe:oauth:v1";
 const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
 const NAVER_ARTICLE_SEQUENCE_KEY = "cafe-reels:naver-article-sequence:v2";
-const NAVER_ARTICLE_START = 138;
+const NAVER_ARTICLE_START = 147;
 const NAVER_CAFE_SLUG = "gnlawfintech";
 const NAVER_CAFE_MAX_IMAGES = 100;
 const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
@@ -163,6 +163,29 @@ export async function onRequestPost({ request, env }) {
       return json({ ok: true, job: next, message: "영상 생성 상태를 저장했습니다." });
     }
 
+    if (action === "report-bulk-transition") {
+      const job = await requireJob(env, body?.jobId);
+      const next = await saveJob(env, {
+        ...job,
+        bulkTransitionStatus: normalizeText(body?.status || "unknown").slice(0, 80),
+        bulkTransitionMessage: String(body?.message || "").slice(0, 1200),
+        bulkTransitionUpdatedAt: new Date().toISOString(),
+      });
+      return json({ ok: true, job: next, message: "대량 자동화 진행 상태를 저장했습니다." });
+    }
+
+    if (action === "set-naver-article-sequence") {
+      const nextArticleId = Number(body?.nextArticleId);
+      if (!Number.isInteger(nextArticleId) || nextArticleId < NAVER_ARTICLE_START || nextArticleId > 999999999) {
+        return json({ ok: false, message: `카페 시작 번호는 ${NAVER_ARTICLE_START} 이상의 정수여야 합니다.` }, 400);
+      }
+      await env.CASES.put(NAVER_ARTICLE_SEQUENCE_KEY, JSON.stringify({
+        next: nextArticleId,
+        updatedAt: new Date().toISOString(),
+      }));
+      return json({ ok: true, nextArticleId: String(nextArticleId), message: `카페 시작 번호를 ${nextArticleId}번으로 설정했습니다.` });
+    }
+
     if (action === "set-cafe-url") {
       const job = await requireJob(env, body?.jobId);
       const cafeUrl = normalizeHttpUrl(body?.cafeUrl);
@@ -219,26 +242,6 @@ export async function onRequestPost({ request, env }) {
           instagramUpdatedAt: new Date().toISOString(),
         });
         return json({ ok: false, job: next, message: next.instagramError }, 502);
-      }
-    }
-
-    if (action === "check-instagram-story") {
-      const job = await requireJob(env, body?.jobId);
-      if (job.instagramStatus !== "posted" || !job.instagramMediaId) {
-        return json({ ok: false, job, message: "릴스 게시 완료 후 스토리를 진행할 수 있습니다." }, 409);
-      }
-      try {
-        const result = await continueInstagramStory(env, job);
-        return json({ ok: true, job: result.job, done: result.done, message: result.message });
-      } catch (error) {
-        const latest = await loadJob(env, job.id) || job;
-        const next = await saveJob(env, {
-          ...latest,
-          instagramStoryStatus: "failed",
-          instagramStoryError: String(error?.message || error).slice(0, 1200),
-          instagramStoryUpdatedAt: new Date().toISOString(),
-        });
-        return json({ ok: false, job: next, message: next.instagramStoryError }, 502);
       }
     }
 
