@@ -2,7 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Management;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace GNLAW.SmartEditor
@@ -100,6 +102,8 @@ namespace GNLAW.SmartEditor
             }
 
             logBox.Clear();
+            var stopped = StopStaleAutomationProcesses(nodePath, cliPath);
+            if (stopped > 0) AppendLog("기존 자동화 프로세스 " + stopped + "개를 종료하고 전용 Chrome 프로필 잠금을 해제했습니다.");
             AppendLog(loginMode
                 ? "Chrome이 열리면 네이버와 관리자 로그인을 완료한 뒤 '로그인 확인 완료'를 누르세요."
                 : "관리자·네이버 카페 로그인을 먼저 확인한 뒤 전체 자동화 대기열 감시를 시작합니다.");
@@ -150,11 +154,50 @@ namespace GNLAW.SmartEditor
             try {
                 if (runner != null && !runner.HasExited) runner.Kill();
             } catch { }
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            StopStaleAutomationProcesses(
+                Path.Combine(baseDir, "runtime", "node.exe"),
+                Path.Combine(baseDir, "cli.mjs")
+            );
             loginDoneButton.Enabled = false;
             stopButton.Enabled = false;
             loginButton.Enabled = true;
             startButton.Enabled = true;
             statusLabel.Text = "중지됨";
+        }
+
+        private static int StopStaleAutomationProcesses(string nodePath, string cliPath)
+        {
+            var stopped = 0;
+            var profilePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "gnlaw-smarteditor-runner",
+                "chrome-profile"
+            );
+            try {
+                using (var searcher = new ManagementObjectSearcher("SELECT ProcessId, Name, CommandLine FROM Win32_Process"))
+                using (var processes = searcher.Get()) {
+                    foreach (ManagementObject item in processes) {
+                        var processId = Convert.ToInt32((uint)item["ProcessId"]);
+                        if (processId == Process.GetCurrentProcess().Id) continue;
+                        var name = Convert.ToString(item["Name"] ?? "");
+                        var commandLine = Convert.ToString(item["CommandLine"] ?? "");
+                        var isRunner = name.Equals("node.exe", StringComparison.OrdinalIgnoreCase)
+                            && (commandLine.IndexOf(cliPath, StringComparison.OrdinalIgnoreCase) >= 0
+                                || commandLine.IndexOf(nodePath, StringComparison.OrdinalIgnoreCase) >= 0);
+                        var isProfileBrowser = (name.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
+                                || name.Equals("msedge.exe", StringComparison.OrdinalIgnoreCase))
+                            && commandLine.IndexOf(profilePath, StringComparison.OrdinalIgnoreCase) >= 0;
+                        if (!isRunner && !isProfileBrowser) continue;
+                        try {
+                            Process.GetProcessById(processId).Kill();
+                            stopped += 1;
+                        } catch { }
+                    }
+                }
+            } catch { }
+            if (stopped > 0) Thread.Sleep(1500);
+            return stopped;
         }
 
         private void AppendLog(string text)

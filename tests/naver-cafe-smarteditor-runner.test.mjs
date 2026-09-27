@@ -185,6 +185,12 @@ test("Windows installer validates the packaged app and stops an old instance", (
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);
   assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
+
+  const gui = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/GNLAWSmartEditor.cs", import.meta.url), "utf8");
+  assert.match(gui, /StopStaleAutomationProcesses\(nodePath, cliPath\)/);
+  assert.match(gui, /ManagementObjectSearcher\("SELECT ProcessId, Name, CommandLine FROM Win32_Process"\)/);
+  assert.match(gui, /commandLine\.IndexOf\(profilePath/);
+  assert.match(gui, /기존 자동화 프로세스/);
 });
 
 test("SmartEditor runner resolves a saved Reels video URL", () => {
