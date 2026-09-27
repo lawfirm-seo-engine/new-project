@@ -736,12 +736,24 @@ async function resolveCafeImages(env, job) {
   const sets = await env.CASES.get(ASSET_CONFIG_KEY, "json").catch(() => null);
   const setKey = isPaymentSuspensionJob(job) ? "payment-suspension-release" : "fraud";
   const configured = sanitizeImages(sets?.[setKey]?.slots || []);
-  if (configured.length) return configured.map((image) => withCanonicalArticleImage(image, setKey)).map(withFixedContactHref);
+  if (configured.length) return orderCafeImages(configured, setKey).map((image) => withCanonicalArticleImage(image, setKey)).map(withFixedContactHref);
 
   // A saved job contains a snapshot of the image set. Prefer the current set so
   // retries also receive corrected or optimized assets, while keeping the job
   // snapshot as a fallback when no set has been configured yet.
-  return sanitizeImages(job.images).map(withFixedContactHref);
+  return orderCafeImages(sanitizeImages(job.images), setKey).map(withFixedContactHref);
+}
+
+function orderCafeImages(images, setKey) {
+  const sequence = setKey === "payment-suspension-release"
+    ? ["phone", "01", "02", "03", "04", "05", "06", "07", "08", "kakao", "09", "10"]
+    : ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "kakao", "phone"];
+  const rank = new Map(sequence.map((slot, index) => [slot, index]));
+  return [...images].sort((left, right) => {
+    const leftRank = rank.get(left.slot) ?? Number.MAX_SAFE_INTEGER;
+    const rightRank = rank.get(right.slot) ?? Number.MAX_SAFE_INTEGER;
+    return leftRank - rightRank;
+  });
 }
 
 function withCanonicalArticleImage(image, setKey) {
@@ -755,9 +767,7 @@ function withCanonicalArticleImage(image, setKey) {
 
 function selectNaverUploadImages(images = []) {
   const normalized = sanitizeImages(images);
-  const contacts = normalized.filter((image) => image.slot === "phone" || image.slot === "kakao");
-  const regular = normalized.filter((image) => image.slot !== "phone" && image.slot !== "kakao");
-  return [...regular, ...contacts].slice(0, NAVER_CAFE_MAX_IMAGES);
+  return normalized.slice(0, NAVER_CAFE_MAX_IMAGES);
 }
 
 function withFixedContactHref(image) {

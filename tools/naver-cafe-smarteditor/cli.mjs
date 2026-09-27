@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.60.0 · 수정 60차";
+export const APP_VERSION = "v1.61.0 · 수정 61차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -67,17 +67,19 @@ export function orderedJobImages(job = [], siteOrigin = DEFAULT_SITE_ORIGIN) {
       slot: String(image.slot || index + 1),
       url: new URL(String(image.url), `${cleanOrigin(siteOrigin)}/`).href,
     }));
-  const contactOrder = new Map([["phone", 0], ["kakao", 1]]);
-  const contacts = images
-    .filter((image) => contactOrder.has(image.slot))
-    .sort((left, right) => contactOrder.get(left.slot) - contactOrder.get(right.slot));
-  const regular = images
-    .filter((image) => !contactOrder.has(image.slot))
-    .sort((left, right) => left.slot.localeCompare(right.slot, undefined, {
-      numeric: true,
-      sensitivity: "base",
-    }));
-  return [...regular, ...contacts];
+  const payment = !Array.isArray(job)
+    ? job.imageSetKey === "payment-suspension-release" || job.fraudType === "payment-suspension-release"
+    : images.some((image) => /\/payment-suspension-release\//i.test(image.url));
+  const sequence = payment
+    ? ["phone", "01", "02", "03", "04", "05", "06", "07", "08", "kakao", "09", "10"]
+    : ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "kakao", "phone"];
+  const order = new Map(sequence.map((slot, index) => [slot, index]));
+  return images.sort((left, right) => {
+    const leftOrder = order.get(left.slot) ?? Number.MAX_SAFE_INTEGER;
+    const rightOrder = order.get(right.slot) ?? Number.MAX_SAFE_INTEGER;
+    if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+    return left.slot.localeCompare(right.slot, undefined, { numeric: true, sensitivity: "base" });
+  });
 }
 
 export function parseLinkedImageData(raw = "") {
@@ -126,21 +128,12 @@ export function articleBodyPartsForJob(job = {}) {
   };
 }
 
-export function manuscriptBatches(body = "", maxCharacters = 3_500) {
-  const paragraphs = String(body || "")
+export function manuscriptBatches(body = "") {
+  return String(body || "")
     .replace(/\r\n?/g, "\n")
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
-  const batches = [];
-  for (const paragraph of paragraphs) {
-    const current = batches.at(-1) || "";
-    const candidate = current ? `${current}\n\n${paragraph}` : paragraph;
-    if (current && candidate.length > maxCharacters) batches.push(paragraph);
-    else if (batches.length) batches[batches.length - 1] = candidate;
-    else batches.push(candidate);
-  }
-  return batches;
 }
 
 export function hasNaverSessionCookies(cookies = []) {
@@ -211,6 +204,7 @@ async function main() {
         publish: command === "publish" || Boolean(options.publish),
         yes: Boolean(options.yes),
         includeVideo: !Boolean(options.skipVideo),
+        editArticleId: options.editArticleId || "",
       });
     }
     throw new Error(`알 수 없는 명령: ${command}`);
@@ -367,11 +361,14 @@ async function processJob(context, apiContext, config, job, options, existingPag
     if (options.publish) await reportStatus(apiContext, config, job.id, "preparing");
     const files = await downloadImages(apiContext, images, tempDir);
     const videoFile = videoUrl ? await downloadVideo(apiContext, videoUrl, tempDir) : null;
-    const writeUrl = `https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}/menus/${board.menuId}/articles/write`;
+    const editArticleId = String(options.editArticleId || "").replace(/\D/g, "");
+    const writeUrl = editArticleId
+      ? `https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}/articles/${editArticleId}/modify`
+      : `https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(config.clubId)}/menus/${board.menuId}/articles/write`;
     await clearNaverDraftState(page);
     await page.goto(`${writeUrl}?gnlawRun=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
     await assertNaverLogin(page);
-    await selectBoard(page, board);
+    if (!editArticleId) await selectBoard(page, board);
 
     const articleTitle = String(job.draft.title || job.title || "");
     await page.locator("p.se-text-paragraph:visible").first().waitFor({ state: "visible", timeout: 30_000 });
@@ -380,11 +377,12 @@ async function processJob(context, apiContext, config, job, options, existingPag
     await uploadImagesInOrder(page, files);
     await insertArticleBody(page, articleParts.manuscript, { append: true });
 
-    if (videoFile) {
-      await uploadVideo(page, videoFile, String(job.caseName || job.draft.title || "릴스 영상"));
-    }
     if (articleParts.links) {
       await insertArticleBody(page, articleParts.links, { append: true });
+    }
+
+    if (videoFile) {
+      await uploadVideo(page, videoFile, String(job.caseName || job.draft.title || "릴스 영상"));
     }
     if (job.instagramPermalink) {
       await insertInstagramReelPreview(page, job.instagramPermalink);
@@ -416,7 +414,7 @@ async function processJob(context, apiContext, config, job, options, existingPag
 
     submitStarted = true;
     await submitArticle(page);
-    const cafeUrl = await canonicalCafeArticleUrl(page, config, job.reservedNaverArticleId);
+    const cafeUrl = await canonicalCafeArticleUrl(page, config, editArticleId || job.reservedNaverArticleId);
     await openPublishedArticleForVerification(page, cafeUrl);
     const publishedLinks = await verifyPublishedLinks(page, [config.phoneLink, config.kakaoLink]);
     if (videoFile) await verifyPublishedVideo(page);
@@ -553,7 +551,27 @@ async function uploadImagesInOrder(page, files) {
     await page.keyboard.press("Control+End");
     await chooseImageFiles(page, [file.path], { preferExistingInput: index > 0 });
     await waitForImageCount(page, index + 1);
-    console.log(`[사진] ${file.slot} 이미지 순서 확인 완료 (${index + 1}/${files.length})`);
+    await verifyEditorImageSequence(page, files.slice(0, index + 1));
+    console.log(`[사진] ${file.slot} 이미지 실제 배치 순서 확인 완료 (${index + 1}/${files.length})`);
+  }
+}
+
+async function verifyEditorImageSequence(page, expectedFiles) {
+  const dimensions = await page.locator("div.se-component.se-image img.se-image-resource").evaluateAll((images) => (
+    images.map((image) => ({ width: image.naturalWidth, height: image.naturalHeight }))
+  ));
+  if (dimensions.length < expectedFiles.length) {
+    throw new Error(`이미지 실제 배치 순서 검증 실패: ${expectedFiles.length}개 중 ${dimensions.length}개만 확인됨`);
+  }
+  for (let index = 0; index < expectedFiles.length; index += 1) {
+    const expected = expectedFiles[index];
+    if (!expected.width || !expected.height) continue;
+    const actual = dimensions[index];
+    const expectedRatio = expected.height / expected.width;
+    const actualRatio = actual.height / actual.width;
+    if (!Number.isFinite(actualRatio) || Math.abs(expectedRatio - actualRatio) > 0.003) {
+      throw new Error(`이미지 실제 배치 순서 검증 실패: ${index + 1}번째는 ${expected.slot} 이미지가 아닙니다.`);
+    }
   }
 }
 
@@ -593,36 +611,45 @@ async function insertArticleBody(page, body, options = {}) {
     await page.keyboard.press("Enter");
   }
 
-  const lines = content.replace(/\r\n?/g, "\n").split("\n");
-  const batches = manuscriptBatches(content);
-  for (let index = 0; index < batches.length; index += 1) {
-    await page.keyboard.insertText(batches[index]);
-    if (index < batches.length - 1) {
-      await page.keyboard.press("Enter");
+  const normalizedContent = content.replace(/\r\n?/g, "\n");
+  const blocks = manuscriptBatches(normalizedContent);
+  const contentLines = blocks.flatMap((block) => block.split("\n").map((line) => line.trim()).filter(Boolean));
+  const compactText = (value) => String(value || "").normalize("NFKC").replace(/[^0-9A-Za-z가-힣]/g, "");
+  let verifiedLines = 0;
+  for (let blockIndex = 0; blockIndex < blocks.length; blockIndex += 1) {
+    if (blockIndex > 0) {
+      await focusEditorParagraph(page);
+      await page.keyboard.press("Control+End");
+    }
+    const blockLines = blocks[blockIndex].split("\n").map((line) => line.trim()).filter(Boolean);
+    for (const line of blockLines) {
+      await page.keyboard.insertText(line);
+      const expectedToken = compactText(line).slice(0, 16);
+      const activeText = compactText(await activeEditorParagraphText(page));
+      const lastParagraphText = compactText(await page.locator("p.se-text-paragraph:visible").last().innerText().catch(() => ""));
+      if (expectedToken && !activeText.includes(expectedToken) && !lastParagraphText.includes(expectedToken)) {
+        throw new Error(`카페 원고 문단 입력 검증 실패: ${line.slice(0, 80)}`);
+      }
+      verifiedLines += 1;
       await page.keyboard.press("Enter");
     }
+    if (blockIndex < blocks.length - 1) await page.keyboard.press("Enter");
   }
-  await page.keyboard.press("Escape").catch(() => {});
-
-  const editorText = (await page.locator(".se-component-content").allInnerTexts()).join("\n");
-  const compactText = (value) => String(value || "").normalize("NFKC").replace(/[^0-9A-Za-z가-힣]/g, "");
-  const normalizedEditorText = compactText(editorText);
-  const verifiableLines = lines
-    .map((line) => line.trim())
-    .filter((line) => line && !/https?:\/\//i.test(line))
-    .map((line) => compactText(line.replace(/^(?:[-*•·]+|\d+[.)])\s*/, "")))
-    .filter(Boolean);
-  const expectedLength = verifiableLines.join("").length;
-  if (normalizedEditorText.length < Math.max(80, expectedLength * 0.45)) {
-    throw new Error(`카페 원고 본문 입력 분량 검증 실패: 예상 ${expectedLength}자 / 확인 ${normalizedEditorText.length}자`);
-  }
-  const firstLine = verifiableLines[0] || "";
-  if (firstLine && !normalizedEditorText.includes(firstLine.slice(0, Math.min(12, firstLine.length)))) {
-    throw new Error(`카페 원고 본문 입력 검증 실패: ${firstLine.slice(0, 80)}`);
-  }
+  await delay(300);
+  if (verifiedLines !== contentLines.length) throw new Error(`카페 원고 입력 줄 수 검증 실패: ${verifiedLines}/${contentLines.length}`);
+  console.log(`[본문] ${contentLines.length}개 줄을 ${blocks.length}개 문단 블록으로 입력하고 줄바꿈을 확인했습니다.`);
 
   await focusEditorParagraph(page);
   await page.keyboard.press("Control+End");
+}
+
+async function activeEditorParagraphText(page) {
+  return page.evaluate(() => {
+    const selection = window.getSelection();
+    const anchor = selection?.anchorNode;
+    const element = anchor?.nodeType === Node.ELEMENT_NODE ? anchor : anchor?.parentElement;
+    return element?.closest?.("p.se-text-paragraph")?.innerText || element?.closest?.(".se-text-paragraph")?.innerText || "";
+  });
 }
 
 async function insertInstagramReelPreview(page, rawPermalink) {
@@ -781,8 +808,8 @@ async function openPublishedArticleForVerification(page, cafeUrl) {
       await delay(attempt === 1 ? 1_000 : 2_000);
       await page.goto(cafeUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
       await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
-      const article = page.locator("div.se-main-container, div.ArticleContentBox, div.se-component").first();
-      await article.waitFor({ state: "attached", timeout: 20_000 });
+      const found = await waitForSelectorInAnyFrame(page, "div.se-main-container, div.ArticleContentBox, div.se-component", 20_000);
+      if (!found) throw new Error("공개 글 본문 DOM을 찾지 못했습니다.");
       console.log(`[게시 검증] 공개 글 화면을 안정적으로 불러왔습니다 (${attempt}/3).`);
       return;
     } catch (error) {
@@ -793,6 +820,17 @@ async function openPublishedArticleForVerification(page, cafeUrl) {
   throw new Error(`게시된 공개 글 화면을 불러오지 못했습니다: ${safeErrorMessage(lastError)}`);
 }
 
+async function waitForSelectorInAnyFrame(page, selector, timeout) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    for (const frame of page.frames()) {
+      if (await frame.locator(selector).count().catch(() => 0)) return true;
+    }
+    await delay(500);
+  }
+  return false;
+}
+
 async function verifyPublishedLinks(page, expectedLinks) {
   const deadline = Date.now() + 60_000;
   let links = [];
@@ -800,9 +838,12 @@ async function verifyPublishedLinks(page, expectedLinks) {
   while (Date.now() < deadline) {
     try {
       await page.waitForLoadState("domcontentloaded");
-      const raw = await page.locator('a.__se_image_link[data-linkdata]').evaluateAll((anchors) => (
-        anchors.map((anchor) => anchor.getAttribute("data-linkdata") || "")
-      ));
+      const raw = [];
+      for (const frame of page.frames()) {
+        raw.push(...await frame.locator('a.__se_image_link[data-linkdata]').evaluateAll((anchors) => (
+          anchors.map((anchor) => anchor.getAttribute("data-linkdata") || "")
+        )).catch(() => []));
+      }
       links = raw.map(parseLinkedImageData).map((item) => item.link).filter(Boolean);
       if (expectedLinks.every((expected) => links.includes(expected))) return links;
     } catch (error) {
@@ -816,11 +857,12 @@ async function verifyPublishedLinks(page, expectedLinks) {
 }
 
 async function verifyPublishedVideo(page) {
-  const video = page.locator("div.se-component.se-video, div.se-video, .se-module-video, video");
   const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
     try {
-      if (await video.count() > 0) return;
+      for (const frame of page.frames()) {
+        if (await frame.locator("div.se-component.se-video, div.se-video, .se-module-video, video").count() > 0) return;
+      }
     } catch (error) {
       if (!/execution context was destroyed|navigation/i.test(String(error?.message || error))) throw error;
     }
@@ -833,11 +875,25 @@ async function waitForImageCount(page, expected) {
   const components = page.locator("div.se-component.se-image");
   const deadline = Date.now() + 120_000;
   while (Date.now() < deadline) {
-    const count = await components.count();
-    if (count >= expected) return;
+    const state = await components.evaluateAll((items) => ({
+      count: items.length,
+      ready: items.filter((item) => {
+        const image = item.querySelector("img.se-image-resource");
+        return Boolean(image && image.complete && image.naturalWidth > 0 && image.getAttribute("src"));
+      }).length,
+    }));
+    const uploadBusy = await page.getByText(/전송중|업로드 준비 중|업로드 중/, { exact: false })
+      .filter({ visible: true })
+      .count()
+      .then((count) => count > 0)
+      .catch(() => false);
+    if (state.count >= expected && state.ready >= expected && !uploadBusy) {
+      await delay(300);
+      return;
+    }
     await delay(500);
   }
-  throw new Error(`이미지 업로드 시간 초과 (예상 ${expected}개)`);
+  throw new Error(`이미지 업로드 완료 대기 시간 초과 (예상 ${expected}개)`);
 }
 
 async function downloadImages(apiContext, images, tempDir) {
@@ -849,8 +905,10 @@ async function downloadImages(apiContext, images, tempDir) {
     const type = response.headers()["content-type"] || "image/jpeg";
     const extension = type.includes("png") ? ".png" : type.includes("webp") ? ".webp" : ".jpg";
     const filePath = path.join(tempDir, `${String(index + 1).padStart(2, "0")}-${safeFileName(image.slot)}${extension}`);
-    await writeFile(filePath, await response.body());
-    files.push({ ...image, path: filePath });
+    const bytes = await response.body();
+    await writeFile(filePath, bytes);
+    const dimensions = pngDimensions(bytes);
+    files.push({ ...image, path: filePath, ...dimensions });
   }
   return files;
 }
@@ -938,6 +996,13 @@ async function uploadVideo(page, videoFile, title) {
     await delay(750);
   }
   throw new Error("릴스 영상 업로드 시간 초과 (5분)");
+}
+
+function pngDimensions(bytes) {
+  if (!bytes || bytes.byteLength < 24) return {};
+  const buffer = Buffer.from(bytes);
+  if (buffer.toString("ascii", 12, 16) !== "IHDR") return {};
+  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
 }
 
 async function chooseVideoFile(page, uploader, videoPath) {
@@ -1121,6 +1186,7 @@ function printHelp() {
   --yes                 최종 게시 확인 문구 생략
   --once                대기열을 한 번만 확인
   --skip-video          작업에 저장된 릴스 영상을 첨부하지 않음
+  --edit-article-id <N> 기존 카페 글 번호를 중복 없이 수정
   --phone-link <URL>    전화 이미지 링크
   --kakao-link <URL>    카카오 이미지 링크
   --chrome-path <PATH>  Chrome/Edge 실행 파일

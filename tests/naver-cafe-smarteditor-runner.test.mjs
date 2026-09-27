@@ -37,7 +37,7 @@ test("SmartEditor runner maps jobs to the two Naver Cafe boards", () => {
   });
 });
 
-test("SmartEditor runner sorts numbered images and keeps phone then Kakao last", () => {
+test("SmartEditor runner follows the original fraud image-set order", () => {
   const images = orderedJobImages([
     { slot: "phone", url: "/phone.jpg" },
     { slot: "10", url: "/ten.jpg" },
@@ -46,9 +46,9 @@ test("SmartEditor runner sorts numbered images and keeps phone then Kakao last",
     { slot: "01", url: "/one.jpg" },
   ], "https://gnlaw-criminal.co.kr/");
 
-  assert.deepEqual(images.map((image) => image.slot), ["01", "02", "10", "phone", "kakao"]);
+  assert.deepEqual(images.map((image) => image.slot), ["01", "02", "10", "kakao", "phone"]);
   assert.equal(images[0].url, "https://gnlaw-criminal.co.kr/one.jpg");
-  assert.equal(images[4].url, "https://cdn.example/kakao.png");
+  assert.equal(images[3].url, "https://cdn.example/kakao.png");
 });
 
 test("both Cafe image sets stay in filename order even when saved job data is shuffled", () => {
@@ -59,11 +59,11 @@ test("both Cafe image sets stay in filename order even when saved job data is sh
 
   assert.deepEqual(
     orderedJobImages(shuffledFraud).map((image) => image.slot),
-    ["01", "02", "03", "11", "12", "phone", "kakao"],
+    ["01", "02", "03", "11", "12", "kakao", "phone"],
   );
   assert.deepEqual(
     orderedJobImages(shuffledPayment).map((image) => image.slot),
-    ["01", "02", "03", "09", "10", "phone", "kakao"],
+    ["phone", "01", "02", "03", "kakao", "09", "10"],
   );
 });
 
@@ -87,16 +87,16 @@ test("Cafe manuscript stays before landing links", () => {
   });
 });
 
-test("long Cafe manuscripts are entered in a few large batches", () => {
+test("Cafe manuscripts are separated into paragraph-sized batches", () => {
   const batches = manuscriptBatches([
     "첫 문단 ".repeat(100),
     "둘째 문단 ".repeat(100),
     "셋째 문단 ".repeat(100),
-  ].join("\n\n"), 1_000);
+  ].join("\n\n"));
   assert.equal(batches.length, 3);
   assert.match(batches[0], /^첫 문단/);
   assert.match(batches[2], /^셋째 문단/);
-  assert.deepEqual(manuscriptBatches("첫 문단\n\n둘째 문단", 1_000), ["첫 문단\n\n둘째 문단"]);
+  assert.deepEqual(manuscriptBatches("첫 문단\n\n둘째 문단"), ["첫 문단", "둘째 문단"]);
 });
 
 test("desktop automation uses the Windows Chrome sandbox and opens the work screen", () => {
@@ -109,7 +109,8 @@ test("desktop automation uses the Windows Chrome sandbox and opens the work scre
   assert.match(source, /DEFAULT_CAFE_URL = "https:\/\/cafe\.naver\.com\/gnlawfintech"/);
   assert.match(source, /await naver\.goto\(config\.cafeUrl/);
   assert.match(source, /await page\.goto\(config\.cafeUrl/);
-  assert.equal((source.match(/ca-fe\/cafes\/\$\{encodeURIComponent\(config\.clubId\)\}/g) || []).length, 1);
+  assert.equal((source.match(/ca-fe\/cafes\/\$\{encodeURIComponent\(config\.clubId\)\}/g) || []).length, 2);
+  assert.match(source, /articles\/\$\{editArticleId\}\/modify/);
 });
 
 test("desktop automation pre-checks the persisted Naver login cookies", () => {
@@ -133,9 +134,14 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /locator\("p\.se-text-paragraph:visible"\)\.first\(\)/);
   assert.match(source, /page\.keyboard\.press\("Enter"\)/);
   assert.match(source, /split\(\/\\n\{2,\}\/\)/);
-  assert.match(source, /manuscriptBatches\(content\)/);
-  assert.match(source, /page\.keyboard\.insertText\(batches\[index\]\)/);
-  assert.match(source, /카페 원고 본문 입력 검증 실패/);
+  assert.match(source, /manuscriptBatches\(normalizedContent\)/);
+  assert.match(source, /page\.keyboard\.insertText\(line\)/);
+  assert.match(source, /block\.split\("\\n"\)/);
+  assert.match(source, /async function activeEditorParagraphText/);
+  assert.match(source, /lastParagraphText\.includes\(expectedToken\)/);
+  assert.match(source, /카페 원고 문단 입력 검증 실패/);
+  assert.match(source, /verifiedLines !== contentLines\.length/);
+  assert.doesNotMatch(source, /\.se-component-content"\)\.allInnerTexts/);
   assert.match(source, /clearNaverDraftState\(page\)/);
   assert.match(source, /localStorage\.clear\(\)/);
   assert.match(source, /async function resetEditorForJob/);
@@ -147,9 +153,16 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /await chooseImageFiles\(page, \[file\.path\], \{ preferExistingInput: index > 0 \}\)/);
   assert.match(source, /기존 파일 입력기를 재사용했습니다/);
   assert.match(source, /await waitForImageCount\(page, index \+ 1\)/);
+  assert.match(source, /await verifyEditorImageSequence\(page, files\.slice\(0, index \+ 1\)\)/);
+  assert.match(source, /이미지 실제 배치 순서 검증 실패/);
+  assert.match(source, /image\.complete && image\.naturalWidth > 0/);
+  assert.match(source, /전송중\|업로드 준비 중\|업로드 중/);
+  assert.match(source, /state\.ready >= expected && !uploadBusy/);
   assert.match(source, /await uploadImagesInOrder\(page, files\)/);
-  assert.match(source, /insertArticleBody\(page, articleParts\.manuscript, \{ append: true \}\)/);
-  assert.match(source, /insertArticleBody\(page, articleParts\.links, \{ append: true \}\)/);
+  const manuscriptIndex = source.indexOf("insertArticleBody(page, articleParts.manuscript, { append: true })");
+  const linksIndex = source.indexOf("insertArticleBody(page, articleParts.links, { append: true })");
+  const videoIndex = source.indexOf("uploadVideo(page, videoFile");
+  assert.ok(manuscriptIndex > 0 && linksIndex > manuscriptIndex && videoIndex > linksIndex);
   assert.match(source, /기본 이미지 파일 선택 실패 \(3회 재시도\)/);
   assert.doesNotMatch(source, /chooseImageFiles\(page, \[file\.path\][\s\S]{0,180}chooseIndividualPhotoMode\(page\)/);
   assert.match(source, /await fillArticleTitle\(page, articleTitle\)/);
@@ -221,24 +234,24 @@ test("Windows installer validates the packaged app and stops an old instance", (
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);
   assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
-  assert.match(source, /v1\.60\.0/);
+  assert.match(source, /v1\.61\.0/);
 
   const gui = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/GNLAWSmartEditor.cs", import.meta.url), "utf8");
   assert.match(gui, /StopStaleAutomationProcesses\(nodePath, cliPath\)/);
   assert.match(gui, /ManagementObjectSearcher\("SELECT ProcessId, Name, CommandLine FROM Win32_Process"\)/);
   assert.match(gui, /commandLine\.IndexOf\(profilePath/);
   assert.match(gui, /기존 자동화 프로세스/);
-  assert.match(gui, /v1\.60\.0 · 수정 60차/);
+  assert.match(gui, /v1\.61\.0 · 수정 61차/);
 });
 
 test("automation surfaces expose the same revision version", () => {
   const cli = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   const page = fs.readFileSync(new URL("../admin/cafe-reels.html", import.meta.url), "utf8");
   const version = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/VERSION.txt", import.meta.url), "utf8").trim();
-  assert.equal(version, "v1.60.0 · 수정 60차");
-  assert.match(cli, /v1\.60\.0 · 수정 60차/);
-  assert.match(page, /v1\.60\.0 · 수정 60차/);
-  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.60\.0/);
+  assert.equal(version, "v1.61.0 · 수정 61차");
+  assert.match(cli, /v1\.61\.0 · 수정 61차/);
+  assert.match(page, /v1\.61\.0 · 수정 61차/);
+  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.61\.0/);
 });
 
 test("SmartEditor runner resolves a saved Reels video URL", () => {

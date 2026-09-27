@@ -15,17 +15,19 @@ test("bundled Cafe image sets use the replacement PNG assets", async () => {
     result.sets.fraud.slots.map((item) => item.url),
     [
       ...Array.from({ length: 12 }, (_, index) => `/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.png`),
-      "/assets/cafe-reels/fraud/phone.png",
       "/assets/cafe-reels/fraud/kakao.png",
+      "/assets/cafe-reels/fraud/phone.png",
     ],
   );
   assert.equal(result.sets["payment-suspension-release"].slots.length, 12);
   assert.deepEqual(
     result.sets["payment-suspension-release"].slots.map((item) => item.url),
     [
-      ...Array.from({ length: 10 }, (_, index) => `/assets/cafe-reels/payment-suspension-release/${String(index + 1).padStart(2, "0")}.png`),
       "/assets/cafe-reels/payment-suspension-release/phone.png",
+      ...Array.from({ length: 8 }, (_, index) => `/assets/cafe-reels/payment-suspension-release/${String(index + 1).padStart(2, "0")}.png`),
       "/assets/cafe-reels/payment-suspension-release/kakao.png",
+      "/assets/cafe-reels/payment-suspension-release/09.png",
+      "/assets/cafe-reels/payment-suspension-release/10.png",
     ],
   );
 });
@@ -184,8 +186,8 @@ test("Naver Cafe upload appends clickable phone and Kakao bridge URLs", async ()
       requestedImageUrls,
       [
         ...Array.from({ length: 12 }, (_, index) => `https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/${String(index + 1).padStart(2, "0")}.png`),
-        "https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/phone.png",
         "https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/kakao.png",
+        "https://gnlaw-criminal.co.kr/assets/cafe-reels/fraud/phone.png",
       ],
     );
     assert.doesNotMatch(multipart, /%3Ca(?:%20|%3E)|src%3D%22%23/i);
