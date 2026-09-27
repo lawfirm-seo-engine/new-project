@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import test from "node:test";
 
@@ -65,6 +66,27 @@ test("both Cafe image sets stay in filename order even when saved job data is sh
     orderedJobImages(shuffledPayment).map((image) => image.slot),
     ["01", "02", "03", "09", "10", "kakao", "phone"],
   );
+});
+
+test("payment Cafe image filenames retain the user's original content order", () => {
+  const expectedHashes = {
+    "01.png": "BAEAE5794CFD",
+    "02.png": "A13B2D627617",
+    "03.png": "427E68649625",
+    "04.png": "9B73F371F97B",
+    "05.png": "8C0BDCB03258",
+    "06.png": "E2F06067FDC4",
+    "07.png": "BC729EE38D40",
+    "08.png": "238155D7CAF9",
+    "09.png": "48EB8C98183B",
+    "10.png": "6BD351831702",
+    "kakao.png": "74D72C5C5102",
+    "phone.png": "8B8B4ECE688A",
+  };
+  for (const [name, expected] of Object.entries(expectedHashes)) {
+    const bytes = fs.readFileSync(new URL(`../criminal-cafe-assets/payment-suspension-release/${name}`, import.meta.url));
+    assert.equal(crypto.createHash("sha256").update(bytes).digest("hex").slice(0, 12).toUpperCase(), expected, name);
+  }
 });
 
 test("legacy Instagram URL text is removed before SmartEditor creates a proper preview card", () => {
@@ -191,6 +213,8 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /await setImageLink\(page, phoneIndex, config\.phoneLink\)/);
   assert.match(source, /await setImageLink\(page, kakaoIndex, config\.kakaoLink\)/);
   assert.match(source, /verifyPublishedLinks\(page, \[config\.phoneLink, config\.kakaoLink\]\)/);
+  assert.match(source, /verifyPublishedImageSequence\(page, files\)/);
+  assert.match(source, /공개 글 이미지 순서 검증 실패/);
   assert.match(source, /if \(videoFile\) await verifyPublishedVideo\(page\)/);
   assert.match(source, /openPublishedArticleForVerification\(page, cafeUrl\)/);
   assert.match(source, /공개 글 화면을 안정적으로 불러왔습니다/);
@@ -236,14 +260,14 @@ test("Windows installer validates the packaged app and stops an old instance", (
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);
   assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
-  assert.match(source, /v1\.64\.0/);
+  assert.match(source, /v1\.65\.0/);
 
   const gui = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/GNLAWSmartEditor.cs", import.meta.url), "utf8");
   assert.match(gui, /StopStaleAutomationProcesses\(nodePath, cliPath\)/);
   assert.match(gui, /ManagementObjectSearcher\("SELECT ProcessId, Name, CommandLine FROM Win32_Process"\)/);
   assert.match(gui, /commandLine\.IndexOf\(profilePath/);
   assert.match(gui, /기존 자동화 프로세스/);
-  assert.match(gui, /v1\.64\.0 · 수정 64차/);
+  assert.match(gui, /v1\.65\.0 · 수정 65차/);
   assert.match(gui, /gui\.log/);
   assert.match(gui, /File\.AppendAllText/);
 });
@@ -252,10 +276,10 @@ test("automation surfaces expose the same revision version", () => {
   const cli = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   const page = fs.readFileSync(new URL("../admin/cafe-reels.html", import.meta.url), "utf8");
   const version = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/VERSION.txt", import.meta.url), "utf8").trim();
-  assert.equal(version, "v1.64.0 · 수정 64차");
-  assert.match(cli, /v1\.64\.0 · 수정 64차/);
-  assert.match(page, /v1\.64\.0 · 수정 64차/);
-  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.64\.0/);
+  assert.equal(version, "v1.65.0 · 수정 65차");
+  assert.match(cli, /v1\.65\.0 · 수정 65차/);
+  assert.match(page, /v1\.65\.0 · 수정 65차/);
+  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.65\.0/);
 });
 
 test("queue watcher relaunches Chrome after a renderer crash", () => {

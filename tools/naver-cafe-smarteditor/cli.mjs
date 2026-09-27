@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.64.0 · 수정 64차";
+export const APP_VERSION = "v1.65.0 · 수정 65차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -427,10 +427,12 @@ async function processJob(context, apiContext, config, job, options, existingPag
     await submitArticle(page);
     const cafeUrl = await canonicalCafeArticleUrl(page, config, editArticleId || job.reservedNaverArticleId);
     await openPublishedArticleForVerification(page, cafeUrl);
+    const publishedImages = await verifyPublishedImageSequence(page, files);
     const publishedLinks = await verifyPublishedLinks(page, [config.phoneLink, config.kakaoLink]);
     if (videoFile) await verifyPublishedVideo(page);
     await reportStatus(apiContext, config, job.id, "posted", { cafeUrl });
     console.log(`게시 완료: ${cafeUrl}`);
+    console.log(`공개 글 이미지 순서 검증: ${publishedImages.join(" → ")}`);
     console.log(`공개 글 링크 검증: ${publishedLinks.join(", ")}`);
     return { posted: true, cafeUrl, screenshotPath, videoUploaded: Boolean(videoFile) };
   } catch (error) {
@@ -843,6 +845,37 @@ async function waitForSelectorInAnyFrame(page, selector, timeout) {
     await delay(500);
   }
   return false;
+}
+
+async function verifyPublishedImageSequence(page, expectedFiles) {
+  const expected = expectedFiles.map((file) => path.basename(file.path).toLowerCase());
+  const deadline = Date.now() + 60_000;
+  let actual = [];
+  let lastError;
+  while (Date.now() < deadline) {
+    try {
+      actual = [];
+      for (const frame of page.frames()) {
+        actual.push(...await frame.locator("div.se-component.se-image img.se-image-resource").evaluateAll((images) => (
+          images.map((image) => {
+            try {
+              return decodeURIComponent(new URL(image.currentSrc || image.src).pathname.split("/").at(-1) || "").toLowerCase();
+            } catch {
+              return "";
+            }
+          }).filter(Boolean)
+        )).catch(() => []));
+      }
+      if (actual.length >= expected.length && expected.every((name, index) => actual[index] === name)) {
+        return actual.slice(0, expected.length);
+      }
+    } catch (error) {
+      lastError = error;
+      if (!/execution context was destroyed|navigation|target page.*closed/i.test(String(error?.message || error))) throw error;
+    }
+    await delay(750);
+  }
+  throw new Error(`공개 글 이미지 순서 검증 실패: 예상 ${expected.join(" → ")} / 실제 ${actual.join(" → ")}${lastError ? ` (${safeErrorMessage(lastError)})` : ""}`);
 }
 
 async function verifyPublishedLinks(page, expectedLinks) {
