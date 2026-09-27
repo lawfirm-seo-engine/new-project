@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.62.0 · 수정 62차";
+export const APP_VERSION = "v1.63.0 · 수정 63차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -626,41 +626,44 @@ async function insertArticleBody(page, body, options = {}) {
   const blocks = manuscriptBatches(normalizedContent);
   const contentLines = blocks.flatMap((block) => block.split("\n").map((line) => line.trim()).filter(Boolean));
   const compactText = (value) => String(value || "").normalize("NFKC").replace(/[^0-9A-Za-z가-힣]/g, "");
-  let verifiedLines = 0;
-  for (let blockIndex = 0; blockIndex < blocks.length; blockIndex += 1) {
-    if (blockIndex > 0) {
-      await focusEditorParagraph(page);
-      await page.keyboard.press("Control+End");
-    }
-    const blockLines = blocks[blockIndex].split("\n").map((line) => line.trim()).filter(Boolean);
-    for (const line of blockLines) {
-      await page.keyboard.insertText(line);
-      const expectedToken = compactText(line).slice(0, 16);
-      const activeText = compactText(await activeEditorParagraphText(page));
-      const lastParagraphText = compactText(await page.locator("p.se-text-paragraph:visible").last().innerText().catch(() => ""));
-      if (expectedToken && !activeText.includes(expectedToken) && !lastParagraphText.includes(expectedToken)) {
-        throw new Error(`카페 원고 문단 입력 검증 실패: ${line.slice(0, 80)}`);
-      }
-      verifiedLines += 1;
-      await page.keyboard.press("Enter");
-    }
-    if (blockIndex < blocks.length - 1) await page.keyboard.press("Enter");
+  const expected = contentLines
+    .map((line) => ({ line, token: compactText(line).slice(0, 24) }))
+    .filter((item) => item.token);
+  const beforeParagraphs = await page.locator("p.se-text-paragraph:visible").count();
+
+  let clipboardPaste = false;
+  try {
+    const origin = new URL(page.url()).origin;
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin });
+    await page.evaluate(async (text) => navigator.clipboard.writeText(text), normalizedContent);
+    await page.keyboard.press("Control+V");
+    clipboardPaste = true;
+  } catch (error) {
+    console.log(`[본문] 클립보드 일괄 입력을 사용할 수 없어 직접 일괄 입력합니다: ${safeErrorMessage(error)}`);
+    await page.keyboard.insertText(normalizedContent);
   }
-  await delay(300);
-  if (verifiedLines !== contentLines.length) throw new Error(`카페 원고 입력 줄 수 검증 실패: ${verifiedLines}/${contentLines.length}`);
-  console.log(`[본문] ${contentLines.length}개 줄을 ${blocks.length}개 문단 블록으로 입력하고 줄바꿈을 확인했습니다.`);
+
+  const deadline = Date.now() + 15_000;
+  let missing = expected;
+  while (Date.now() < deadline) {
+    await delay(400);
+    const paragraphTexts = await page.locator("p.se-text-paragraph:visible").allInnerTexts().catch(() => []);
+    const linkedUrls = await page.locator("a[href]:visible").evaluateAll((anchors) => (
+      anchors.map((anchor) => anchor.getAttribute("href") || "")
+    )).catch(() => []);
+    const editorText = compactText([...paragraphTexts, ...linkedUrls].join("\n"));
+    missing = expected.filter((item) => !editorText.includes(item.token));
+    if (!missing.length) break;
+  }
+  if (missing.length) {
+    throw new Error(`카페 원고 일괄 입력 검증 실패 (${missing.length}/${expected.length}개 누락): ${missing[0].line.slice(0, 80)}`);
+  }
+
+  const afterParagraphs = await page.locator("p.se-text-paragraph:visible").count();
+  console.log(`[본문] ${contentLines.length}개 줄·${blocks.length}개 문단 블록을 ${clipboardPaste ? "한 번에 붙여넣고" : "한 번에 입력하고"} 전체 내용을 확인했습니다 (문단 ${beforeParagraphs}→${afterParagraphs}).`);
 
   await focusEditorParagraph(page);
   await page.keyboard.press("Control+End");
-}
-
-async function activeEditorParagraphText(page) {
-  return page.evaluate(() => {
-    const selection = window.getSelection();
-    const anchor = selection?.anchorNode;
-    const element = anchor?.nodeType === Node.ELEMENT_NODE ? anchor : anchor?.parentElement;
-    return element?.closest?.("p.se-text-paragraph")?.innerText || element?.closest?.(".se-text-paragraph")?.innerText || "";
-  });
 }
 
 async function insertInstagramReelPreview(page, rawPermalink) {
