@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.61.0 · 수정 61차";
+export const APP_VERSION = "v1.62.0 · 수정 62차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -165,7 +165,12 @@ async function launchRunnerContext(config, chromePath) {
     viewport: null,
     acceptDownloads: true,
     chromiumSandbox: true,
-    args: ["--start-maximized"],
+    args: [
+      "--start-maximized",
+      "--disable-accelerated-video-encode",
+      "--disable-accelerated-video-decode",
+      "--disable-accelerated-2d-canvas",
+    ],
   });
 }
 
@@ -266,6 +271,9 @@ async function watchQueue(context, apiContext, config, options) {
   await verifyLoginSessions(context, monitorPage, apiContext, config);
   console.log(`랜딩·릴스·SmartEditor 전체 대기열 감시 시작 (${config.siteOrigin}, ${config.pollSeconds}초 간격)`);
   for (;;) {
+    if (monitorPage.isClosed() || context.pages().length === 0) {
+      throw new Error("Browser has been closed while the queue watcher was running.");
+    }
     const jobs = await loadQueue(apiContext, config);
     const byReservedNumber = (a, b) => Number(a.reservedNaverArticleId || Number.MAX_SAFE_INTEGER) - Number(b.reservedNaverArticleId || Number.MAX_SAFE_INTEGER);
     const cafeQueued = jobs
@@ -282,6 +290,9 @@ async function watchQueue(context, apiContext, config, options) {
     }
     if (options.once) return;
     await delay(config.pollSeconds * 1000);
+    if (monitorPage.isClosed() || context.pages().length === 0) {
+      throw new Error("Browser has been closed while the queue watcher was running.");
+    }
   }
 }
 

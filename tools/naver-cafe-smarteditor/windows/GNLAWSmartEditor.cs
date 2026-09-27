@@ -10,14 +10,14 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("GNLAW SmartEditor")]
 [assembly: AssemblyDescription("법무법인 선린 카페 원고·릴스 자동화")]
-[assembly: AssemblyVersion("1.61.0.0")]
-[assembly: AssemblyFileVersion("1.61.0.0")]
+[assembly: AssemblyVersion("1.62.0.0")]
+[assembly: AssemblyFileVersion("1.62.0.0")]
 
 namespace GNLAW.SmartEditor
 {
     public sealed class MainForm : Form
     {
-        private const string AppVersion = "v1.61.0 · 수정 61차";
+        private const string AppVersion = "v1.62.0 · 수정 62차";
         private readonly Button loginButton = new Button();
         private readonly Button loginDoneButton = new Button();
         private readonly Button startButton = new Button();
@@ -25,6 +25,11 @@ namespace GNLAW.SmartEditor
         private readonly Button adminButton = new Button();
         private readonly TextBox logBox = new TextBox();
         private readonly Label statusLabel = new Label();
+        private readonly string logFilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "gnlaw-smarteditor-runner",
+            "gui.log"
+        );
         private Process runner;
 
         public MainForm()
@@ -80,6 +85,7 @@ namespace GNLAW.SmartEditor
 
             Controls.AddRange(new Control[] { title, description, loginButton, loginDoneButton, startButton, stopButton, adminButton, statusLabel, logBox });
             FormClosing += (sender, args) => StopRunner();
+            AppendLog("프로그램 시작 · " + AppVersion);
         }
 
         private static void ConfigureButton(Button button, string text, int x, int y, int width, Color color)
@@ -133,13 +139,16 @@ namespace GNLAW.SmartEditor
             runner.OutputDataReceived += (sender, args) => { if (args.Data != null) AppendLog(args.Data); };
             runner.ErrorDataReceived += (sender, args) => { if (args.Data != null) AppendLog("오류: " + args.Data); };
             runner.Exited += (sender, args) => BeginInvoke((Action)(() => {
-                statusLabel.Text = runner.ExitCode == 0 ? "작업 종료" : "오류로 종료됨";
+                var exitCode = runner.ExitCode;
+                AppendLog("자동화 프로세스 종료 · exit code " + exitCode);
+                statusLabel.Text = exitCode == 0 ? "작업 종료" : "오류로 종료됨";
                 loginDoneButton.Enabled = false;
                 stopButton.Enabled = false;
                 loginButton.Enabled = true;
                 startButton.Enabled = true;
             }));
             runner.Start();
+            AppendLog("자동화 프로세스 시작 · PID " + runner.Id);
             runner.BeginOutputReadLine();
             runner.BeginErrorReadLine();
             stopButton.Enabled = true;
@@ -211,7 +220,12 @@ namespace GNLAW.SmartEditor
         {
             if (InvokeRequired) { BeginInvoke((Action<string>)AppendLog, text); return; }
             if (text.Contains("두 로그인 확인 완료")) statusLabel.Text = "자동화 실행 중";
-            logBox.AppendText("[" + DateTime.Now.ToString("HH:mm:ss") + "] " + text + Environment.NewLine);
+            var line = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + text;
+            logBox.AppendText(line + Environment.NewLine);
+            try {
+                Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
+                File.AppendAllText(logFilePath, line + Environment.NewLine, Encoding.UTF8);
+            } catch { }
         }
 
         [STAThread]

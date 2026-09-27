@@ -82,12 +82,18 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
   assert.match(pageSource, /id="generate" type="button">자동화 실행<\/button>/);
   assert.match(pageSource, /function applyJob[\s\S]*syncVideoTitle\(\)/);
-  assert.match(pageSource, /whiteboard-local-v2\.js\?v=20260927-1/);
+  assert.match(pageSource, /whiteboard-local-v2\.js\?v=20260927-2/);
   assert.match(generatorSource, /const duration=Number\(\$\('#duration'\)\.value\)\|\|10/);
   assert.match(generatorSource, /performance\.now\(\)-startedAt/);
   assert.doesNotMatch(generatorSource, /for\(let f=0;f<total;f\+\+\)/);
   assert.match(generatorSource, /function withTimeout/);
   assert.match(generatorSource, /영상 인코더 종료 시간이 초과되었습니다/);
+  assert.match(generatorSource, /\?\[720,1280\]/);
+  assert.match(generatorSource, /fps=24/);
+  assert.match(generatorSource, /videoBitsPerSecond:2500000/);
+  assert.match(generatorSource, /rec\.requestData\(\)/);
+  assert.match(generatorSource, /stream\.getTracks\(\)\.forEach/);
+  assert.doesNotMatch(generatorSource, /a\.click\(\)/);
 });
 
 test("stale browser video rendering is recovered as a retryable failure", async () => {
