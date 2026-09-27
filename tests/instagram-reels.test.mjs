@@ -82,6 +82,7 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
   assert.match(pageSource, /id="generate" type="button">자동화 실행<\/button>/);
   assert.match(pageSource, /function applyJob[\s\S]*syncVideoTitle\(\)/);
+  assert.match(pageSource, /whiteboard-local-v2\.js\?v=20260927-1/);
   assert.match(generatorSource, /const duration=Number\(\$\('#duration'\)\.value\)\|\|10/);
   assert.match(generatorSource, /performance\.now\(\)-startedAt/);
   assert.doesNotMatch(generatorSource, /for\(let f=0;f<total;f\+\+\)/);
