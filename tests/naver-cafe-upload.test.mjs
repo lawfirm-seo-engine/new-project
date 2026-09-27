@@ -23,11 +23,9 @@ test("bundled Cafe image sets use the replacement PNG assets", async () => {
   assert.deepEqual(
     result.sets["payment-suspension-release"].slots.map((item) => item.url),
     [
-      "/assets/cafe-reels/payment-suspension-release/phone.png",
-      ...Array.from({ length: 8 }, (_, index) => `/assets/cafe-reels/payment-suspension-release/${String(index + 1).padStart(2, "0")}.png`),
+      ...Array.from({ length: 10 }, (_, index) => `/assets/cafe-reels/payment-suspension-release/${String(index + 1).padStart(2, "0")}.png`),
       "/assets/cafe-reels/payment-suspension-release/kakao.png",
-      "/assets/cafe-reels/payment-suspension-release/09.png",
-      "/assets/cafe-reels/payment-suspension-release/10.png",
+      "/assets/cafe-reels/payment-suspension-release/phone.png",
     ],
   );
 });

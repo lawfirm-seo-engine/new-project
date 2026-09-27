@@ -24,20 +24,14 @@ const DEFAULT_SETS = {
     label: "계좌지급정지해제 원고",
     description: "지급정지해제 카페 원고에 함께 쓰는 고정 이미지 세트입니다.",
     slots: [
-      { slot: "phone", label: "전화 이미지", href: "tel:02-6348-0406", url: bundledImageUrl("payment-suspension-release", "phone") },
-      ...Array.from({ length: 8 }, (_, index) => ({
+      ...Array.from({ length: 10 }, (_, index) => ({
         slot: String(index + 1).padStart(2, "0"),
         label: `${String(index + 1).padStart(2, "0")} 이미지`,
         href: "",
         url: bundledImageUrl("payment-suspension-release", String(index + 1).padStart(2, "0")),
       })),
       { slot: "kakao", label: "카카오톡 이미지", href: "https://pf.kakao.com/_WkdxfX/chat", url: bundledImageUrl("payment-suspension-release", "kakao") },
-      ...Array.from({ length: 2 }, (_, index) => ({
-        slot: String(index + 9).padStart(2, "0"),
-        label: `${String(index + 9).padStart(2, "0")} 이미지`,
-        href: "",
-        url: bundledImageUrl("payment-suspension-release", String(index + 9).padStart(2, "0")),
-      })),
+      { slot: "phone", label: "전화 이미지", href: "tel:02-6348-0406", url: bundledImageUrl("payment-suspension-release", "phone") },
     ],
   },
 };

@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.63.0 · 수정 63차";
+export const APP_VERSION = "v1.64.0 · 수정 64차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -71,7 +71,7 @@ export function orderedJobImages(job = [], siteOrigin = DEFAULT_SITE_ORIGIN) {
     ? job.imageSetKey === "payment-suspension-release" || job.fraudType === "payment-suspension-release"
     : images.some((image) => /\/payment-suspension-release\//i.test(image.url));
   const sequence = payment
-    ? ["phone", "01", "02", "03", "04", "05", "06", "07", "08", "kakao", "09", "10"]
+    ? ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "kakao", "phone"]
     : ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "kakao", "phone"];
   const order = new Map(sequence.map((slot, index) => [slot, index]));
   return images.sort((left, right) => {

@@ -746,7 +746,7 @@ async function resolveCafeImages(env, job) {
 
 function orderCafeImages(images, setKey) {
   const sequence = setKey === "payment-suspension-release"
-    ? ["phone", "01", "02", "03", "04", "05", "06", "07", "08", "kakao", "09", "10"]
+    ? ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "kakao", "phone"]
     : ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "kakao", "phone"];
   const rank = new Map(sequence.map((slot, index) => [slot, index]));
   return [...images].sort((left, right) => {

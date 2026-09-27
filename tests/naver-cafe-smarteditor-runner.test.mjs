@@ -63,7 +63,7 @@ test("both Cafe image sets stay in filename order even when saved job data is sh
   );
   assert.deepEqual(
     orderedJobImages(shuffledPayment).map((image) => image.slot),
-    ["phone", "01", "02", "03", "kakao", "09", "10"],
+    ["01", "02", "03", "09", "10", "kakao", "phone"],
   );
 });
 
@@ -236,14 +236,14 @@ test("Windows installer validates the packaged app and stops an old instance", (
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);
   assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
-  assert.match(source, /v1\.63\.0/);
+  assert.match(source, /v1\.64\.0/);
 
   const gui = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/GNLAWSmartEditor.cs", import.meta.url), "utf8");
   assert.match(gui, /StopStaleAutomationProcesses\(nodePath, cliPath\)/);
   assert.match(gui, /ManagementObjectSearcher\("SELECT ProcessId, Name, CommandLine FROM Win32_Process"\)/);
   assert.match(gui, /commandLine\.IndexOf\(profilePath/);
   assert.match(gui, /기존 자동화 프로세스/);
-  assert.match(gui, /v1\.63\.0 · 수정 63차/);
+  assert.match(gui, /v1\.64\.0 · 수정 64차/);
   assert.match(gui, /gui\.log/);
   assert.match(gui, /File\.AppendAllText/);
 });
@@ -252,10 +252,10 @@ test("automation surfaces expose the same revision version", () => {
   const cli = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   const page = fs.readFileSync(new URL("../admin/cafe-reels.html", import.meta.url), "utf8");
   const version = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/VERSION.txt", import.meta.url), "utf8").trim();
-  assert.equal(version, "v1.63.0 · 수정 63차");
-  assert.match(cli, /v1\.63\.0 · 수정 63차/);
-  assert.match(page, /v1\.63\.0 · 수정 63차/);
-  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.63\.0/);
+  assert.equal(version, "v1.64.0 · 수정 64차");
+  assert.match(cli, /v1\.64\.0 · 수정 64차/);
+  assert.match(page, /v1\.64\.0 · 수정 64차/);
+  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.64\.0/);
 });
 
 test("queue watcher relaunches Chrome after a renderer crash", () => {
