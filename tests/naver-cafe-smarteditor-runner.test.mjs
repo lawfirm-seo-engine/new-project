@@ -6,7 +6,6 @@ import {
   articleBodyForJob,
   boardForJob,
   hasNaverSessionCookies,
-  hasUnfinishedBatchJobs,
   jobVideoUrl,
   orderedJobImages,
   parseArgs,
@@ -98,19 +97,6 @@ test("desktop automation pre-checks the persisted Naver login cookies", () => {
   assert.match(source, /await page\.goto\(config\.cafeUrl[\s\S]*await assertSavedNaverSession\(context\)/);
 });
 
-test("a bulk batch waits for every case Reel before Cafe posting starts", () => {
-  const queued = { id: "one", batchId: "batch-1", cafeStatus: "smarteditor-queued" };
-  assert.equal(hasUnfinishedBatchJobs([
-    queued,
-    { id: "two", batchId: "batch-1", cafeStatus: "awaiting-reel" },
-  ], queued), true);
-  assert.equal(hasUnfinishedBatchJobs([
-    queued,
-    { id: "two", batchId: "batch-1", cafeStatus: "smarteditor-queued" },
-  ], queued), false);
-  assert.equal(hasUnfinishedBatchJobs([queued, { id: "other", batchId: "batch-2", cafeStatus: "awaiting-reel" }], queued), false);
-});
-
 test("desktop automation posts from the original work tab and never auto-selects Reel images", () => {
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   assert.match(source, /processJob\(context, config, job, options, monitorPage\)/);
@@ -161,6 +147,8 @@ test("desktop automation posts from the original work tab and never auto-selects
   assert.match(source, /articleIdFromNaverUrl/);
   assert.match(source, /\/gnlawfintech\\\/\(\\d\+\)/);
   assert.match(source, /async function canonicalCafeArticleUrl/);
+  assert.match(source, /filter\(\(job\) => job\.cafeStatus === "smarteditor-queued"\)[\s\S]*\.at\(0\)/);
+  assert.doesNotMatch(source, /hasUnfinishedBatchJobs/);
 });
 
 test("SmartEditor accepts a board already selected by the menu URL", () => {

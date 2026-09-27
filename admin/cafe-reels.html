@@ -253,6 +253,7 @@
   let assetSets = {};
   let generatedVideoFile = null;
   let instagramAutoUploadInProgress = false;
+  let bulkAutomationRunning = false;
   const bulkLocalFiles = new Map();
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -421,6 +422,7 @@
       await loadJobs();
       if (firstSavedJob) {
         applyJob(firstSavedJob);
+        bulkAutomationRunning = false;
         $("draftPanel").hidden = false;
         $("whiteboardPanel").scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -617,7 +619,7 @@
         show("reelsMsg", currentJob.instagramPermalink
           ? `이미 게시된 릴스입니다: ${currentJob.instagramPermalink}`
           : "이미 Instagram에 게시된 릴스입니다.");
-        return;
+        return true;
       }
       let data;
       if (currentJob.instagramStatus === "processing" && currentJob.instagramContainerId) {
@@ -640,13 +642,14 @@
         show("reelsMsg", data.message || "Instagram 영상 처리 상태 확인 중...");
         if (data.done) {
           loadJobs();
-          return;
+          return true;
         }
       }
       throw new Error("Instagram 영상 처리 시간이 5분을 넘었습니다. 잠시 후 같은 작업에서 다시 시도해주세요.");
     } catch (error) {
       show("reelsMsg", error.message, true);
       loadJobs();
+      return false;
     } finally {
       button.disabled = false;
     }
@@ -774,14 +777,54 @@
     instagramAutoUploadInProgress = true;
     show("reelsMsg", "영상 생성 완료. Instagram 자동 업로드를 시작합니다...");
     try {
-      await publishInstagramReel();
+      const posted = await publishInstagramReel();
+      const completedJob = currentJob;
+      if (posted && bulkAutomationRunning && completedJob?.batchId) {
+        await startNextBulkAutomation(completedJob);
+      } else if (!posted) {
+        bulkAutomationRunning = false;
+      }
     } finally {
       instagramAutoUploadInProgress = false;
     }
   }
 
+  async function startNextBulkAutomation(completedJob) {
+    const orderedJobIds = [...bulkLocalFiles.keys()];
+    const completedIndex = orderedJobIds.indexOf(completedJob.id);
+    const remainingIds = completedIndex >= 0 ? orderedJobIds.slice(completedIndex + 1) : [];
+    for (const jobId of remainingIds) {
+      const response = await fetch(`/api/cafe-reels-workflow?jobId=${encodeURIComponent(jobId)}`);
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || "다음 대량 작업을 불러오지 못했습니다.");
+      const nextJob = data.job;
+      if (nextJob.batchId !== completedJob.batchId || nextJob.instagramStatus === "posted") continue;
+
+      const localFiles = bulkLocalFiles.get(nextJob.id) || [];
+      if (localFiles.length !== 10) {
+        bulkAutomationRunning = false;
+        throw new Error(`${nextJob.caseName}: 저장된 릴스 이미지가 10장이 아닙니다. 이미지를 다시 선택해주세요.`);
+      }
+      applyJob(nextJob);
+      show("bulkMsg", `${nextJob.caseName} · 다음 릴스 영상 자동화를 시작합니다.`);
+      await wait(300);
+      const generateButton = $("generate");
+      if (generateButton.disabled) {
+        bulkAutomationRunning = false;
+        throw new Error(`${nextJob.caseName}: 릴스 이미지 적용에 실패했습니다.`);
+      }
+      generateButton.click();
+      return true;
+    }
+
+    bulkAutomationRunning = false;
+    show("bulkMsg", "대량 작업의 모든 릴스가 Instagram 게시 대기열로 전달되었습니다. 카페 포스팅은 PC 자동화 프로그램이 사건별로 이어서 처리합니다.");
+    return false;
+  }
+
   async function beforeVideoRender() {
     if (!currentJob) throw new Error("먼저 랜딩·릴스·카페 전체 작업을 등록하거나 최근 작업을 선택해주세요.");
+    if (currentJob.batchId && bulkLocalFiles.has(currentJob.id)) bulkAutomationRunning = true;
     syncVideoTitle();
     const data = await postWorkflow({ action: "report-render", jobId: currentJob.id, status: "rendering" });
     applyJob(data.job);
@@ -789,6 +832,7 @@
   }
 
   async function handleAutomationFailure(event) {
+    bulkAutomationRunning = false;
     const message = event.detail?.message || "릴스 영상 생성 실패";
     if (currentJob) {
       await postWorkflow({ action: "report-render", jobId: currentJob.id, status: "failed", message }).catch(() => {});

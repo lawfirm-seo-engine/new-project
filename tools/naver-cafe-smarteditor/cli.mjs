@@ -117,17 +117,6 @@ export function hasNaverSessionCookies(cookies = []) {
   return names.has("NID_SES") || names.has("NID_AUT");
 }
 
-export function hasUnfinishedBatchJobs(jobs = [], queuedJob = {}) {
-  const batchId = String(queuedJob?.batchId || "");
-  if (!batchId) return false;
-  const readyStatuses = new Set(["smarteditor-queued", "smarteditor-preparing", "smarteditor-posted"]);
-  return (Array.isArray(jobs) ? jobs : []).some((job) => (
-    job?.id !== queuedJob.id
-    && String(job?.batchId || "") === batchId
-    && !readyStatuses.has(String(job?.cafeStatus || ""))
-  ));
-}
-
 async function main() {
   const { command, options } = parseArgs(process.argv.slice(2));
   if (command === "help" || options.help) return printHelp();
@@ -197,7 +186,7 @@ async function watchQueue(context, config, options) {
     const cafeQueued = jobs
       .filter((job) => job.cafeStatus === "smarteditor-queued")
       .sort(byReservedNumber)
-      .find((job) => !hasUnfinishedBatchJobs(jobs, job));
+      .at(0);
     if (cafeQueued) {
       const job = await loadJob(context, config, cafeQueued.id);
       const result = await processJob(context, config, job, options, monitorPage);
