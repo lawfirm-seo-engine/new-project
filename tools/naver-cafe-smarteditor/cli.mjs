@@ -471,11 +471,13 @@ async function processJob(context, apiContext, config, job, options, existingPag
 }
 
 async function openExistingArticleEditor(page, config, articleId) {
-  const articleUrl = `${config.cafeUrl}/${articleId}`;
+  const iframePath = `/ArticleRead.nhn?clubid=${config.clubId}&articleid=${articleId}`;
+  const articleUrl = `${config.cafeUrl}?iframe_url=${encodeURIComponent(iframePath)}`;
   console.log(`[편집기] 직접 수정 주소가 열리지 않아 공개 글 ${articleId}번의 수정 메뉴로 다시 진입합니다.`);
   await page.goto(articleUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await assertNaverLogin(page);
   await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
+  await dismissNaverCafeDialogs(page);
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     for (const frame of page.frames()) {
@@ -503,10 +505,27 @@ async function openExistingArticleEditor(page, config, articleId) {
     }
     if (attempt < 3) {
       await page.reload({ waitUntil: "domcontentloaded", timeout: 60_000 });
+      await dismissNaverCafeDialogs(page);
       await delay(1_000);
     }
   }
   throw new Error(`네이버 카페 ${articleId}번 글의 수정 메뉴를 찾지 못했습니다. 작성 계정과 글 소유권을 확인해주세요.`);
+}
+
+async function dismissNaverCafeDialogs(page) {
+  const acknowledgements = [
+    page.getByText(/확인했어요!\s*더 이상 보지 않을래요/, { exact: false }),
+    page.getByRole("button", { name: /닫기/ }),
+  ];
+  for (const candidates of acknowledgements) {
+    for (let index = await candidates.count() - 1; index >= 0; index -= 1) {
+      const candidate = candidates.nth(index);
+      if (await candidate.isVisible().catch(() => false)) {
+        await candidate.click().catch(() => {});
+        await delay(300);
+      }
+    }
+  }
 }
 
 async function fillArticleTitle(page, title) {
@@ -747,11 +766,15 @@ async function waitForEditorLinksStable(page, expectedUrls) {
   let previousSignature = "";
   let observed = [];
   while (Date.now() < deadline) {
-    observed = await page.locator("a[href]:visible").evaluateAll((anchors) => anchors.map((anchor) => ({
-      href: anchor.getAttribute("href") || "",
-      text: anchor.textContent || "",
-    }))).catch(() => []);
-    const comparableObserved = observed.flatMap((item) => [item.href, item.text]).map(comparableUrl);
+    observed = await page.locator("a[href]:visible, [data-linkdata]:visible, p.se-text-paragraph:visible")
+      .evaluateAll((elements) => elements.map((element) => ({
+        href: element.getAttribute("href") || "",
+        linkData: element.getAttribute("data-linkdata") || "",
+        text: element.textContent || "",
+      }))).catch(() => []);
+    const comparableObserved = observed
+      .flatMap((item) => [item.href, item.linkData, item.text])
+      .map(comparableUrl);
     const complete = expected.every((url) => comparableObserved.some((value) => value.includes(url)));
     const signature = JSON.stringify(observed);
     if (complete && signature === previousSignature) stableChecks += 1;
@@ -767,20 +790,19 @@ async function waitForEditorLinksStable(page, expectedUrls) {
 }
 
 async function createCleanEditorTailParagraph(page) {
-  const marker = `GNLAW_TAIL_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const paragraphs = page.locator("p.se-text-paragraph:visible");
+  const beforeCount = await paragraphs.count();
   await focusEditorParagraph(page);
   await page.keyboard.press("Control+End");
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
-  await page.keyboard.insertText(marker);
-  const paragraph = page.locator("p.se-text-paragraph:visible").filter({ hasText: marker }).last();
+  await delay(300);
+  const afterCount = await paragraphs.count();
+  if (afterCount <= beforeCount) throw new Error("영상·Instagram 미리보기용 독립 문단을 만들지 못했습니다.");
+  const paragraph = paragraphs.last();
   await paragraph.waitFor({ state: "visible", timeout: 15_000 });
   await paragraph.click({ position: { x: 8, y: 8 } });
   await page.keyboard.press("End");
-  await page.keyboard.press("Shift+Home");
-  await page.keyboard.press("Backspace");
-  const remaining = await paragraph.innerText().catch(() => marker);
-  if (remaining.includes(marker)) throw new Error("Instagram 미리보기용 독립 문단을 만들지 못했습니다.");
   return paragraph;
 }
 
