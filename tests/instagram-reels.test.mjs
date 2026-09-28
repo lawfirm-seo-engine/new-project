@@ -102,6 +102,13 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(generatorSource, /RENDER_MODE_KEY='gnlaw-cafe-reels-render-mode-v1'/);
   assert.match(generatorSource, /window\.getWhiteboardRenderMode=getRenderMode/);
   assert.match(generatorSource, /window\.setWhiteboardRenderMode=setRenderMode/);
+  assert.match(pageSource, /id="bulkQueueLoadBtn"/);
+  assert.match(pageSource, /id="naverArticleSequence"[^>]*value="199"/);
+  assert.match(pageSource, /async function loadRegisteredBulkQueues/);
+  assert.match(pageSource, /async function resumeRegisteredBulkQueue/);
+  assert.match(pageSource, /async function continueRegisteredBulkBatch/);
+  assert.match(pageSource, /params\.set\("batchId", options\.batchId\)/);
+  assert.match(workflowSource, /url\.searchParams\.get\("batchId"\)/);
   assert.match(generatorSource, /const duration=Number\(\$\('#duration'\)\.value\)\|\|10/);
   assert.match(generatorSource, /performance\.now\(\)-startedAt/);
   assert.doesNotMatch(generatorSource, /for\(let f=0;f<total;f\+\+\)/);
@@ -138,6 +145,64 @@ test("stale browser video rendering is recovered as a retryable failure", async 
   const result = await response.json();
   assert.equal(result.job.videoStatus, "failed");
   assert.match(result.job.videoError, /영상 생성이 중단/);
+});
+
+test("a registered bulk queue can be loaded in order and resumed from its first incomplete job", async () => {
+  const batchId = "bulk-resume-test";
+  const first = {
+    id: "resume-first",
+    batchId,
+    batchOrder: 0,
+    automationMode: "full",
+    caseName: "완료 사건",
+    instagramStatus: "posted",
+    cafeStatus: "smarteditor-posted",
+    smartEditorStatus: "posted",
+    videoStatus: "ready",
+    reservedNaverArticleId: "153",
+  };
+  const second = {
+    id: "resume-second",
+    batchId,
+    batchOrder: 1,
+    automationMode: "full",
+    caseName: "중단 사건",
+    instagramStatus: "",
+    cafeStatus: "awaiting-reel",
+    smartEditorStatus: "",
+    videoStatus: "rendering",
+    videoUpdatedAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+    articleNumberPending: true,
+  };
+  const index = [second, first].map((job) => ({
+    id: job.id,
+    batchId: job.batchId,
+    batchOrder: job.batchOrder,
+    automationMode: job.automationMode,
+    caseName: job.caseName,
+    instagramStatus: job.instagramStatus,
+    cafeStatus: job.cafeStatus,
+    smartEditorStatus: job.smartEditorStatus,
+    videoStatus: job.videoStatus,
+    updatedAt: new Date().toISOString(),
+  }));
+  const { env } = testEnv([
+    [`cafe-reels:job:${first.id}`, first],
+    [`cafe-reels:job:${second.id}`, second],
+    ["cafe-reels:jobs:index:v1", index],
+    ["cafe-reels:naver-article-sequence:v2", { next: 154 }],
+  ]);
+
+  const response = await onWorkflowGet({
+    request: new Request(`https://gnlaw-criminal.co.kr/api/cafe-reels-workflow?batchId=${batchId}`),
+    env,
+  });
+  const result = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(result.jobs.map((job) => job.id), [first.id, second.id]);
+  assert.equal(result.jobs[0].smartEditorStatus, "posted");
+  assert.equal(result.jobs[1].videoStatus, "failed");
+  assert.equal(result.jobs[1].reservedNaverArticleId, "154");
 });
 
 test("Cafe landing reuse requires the exact case instead of generic fraud tags", () => {

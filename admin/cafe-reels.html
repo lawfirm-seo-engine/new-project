@@ -47,6 +47,11 @@
     .status{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;background:#edf2ff;color:#1f4fd8;font-size:11px;font-weight:900}
     .bulk-cases{min-height:150px}
     .bulk-list{display:grid;gap:8px;margin-top:12px}
+    .bulk-queue-list{display:grid;gap:10px;margin-top:12px}
+    .bulk-queue-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 14px;border:1px solid #d8e1ef;border-radius:10px;background:#f8faff}
+    .bulk-queue-item strong{display:block;font-size:14px}
+    .bulk-queue-item span{display:block;margin-top:5px;color:#667085;font-size:12px;line-height:1.45}
+    .bulk-queue-item .btn{white-space:nowrap}
     .bulk-row{display:grid;grid-template-columns:minmax(210px,1.3fr) minmax(150px,.75fr) minmax(220px,1.1fr) minmax(220px,1fr) auto;gap:8px;align-items:center;padding:10px;border:1px solid #e1e7f0;border-radius:9px;background:#f8faff}
     .bulk-row .btn{min-height:42px}
     .bulk-image-picker{display:grid;gap:4px;padding:7px 9px;border:1px solid #ccd7e7;border-radius:8px;background:#fff;cursor:pointer;font-weight:700;color:#24324a}
@@ -68,7 +73,7 @@
     .media video{display:block;width:100%;max-height:580px;background:#000;border-radius:8px}
     .big{font-size:17px;padding:14px 28px}
     .footer{position:sticky;bottom:12px;background:#ffffffee;border:1px solid #dde4ee;border-radius:12px;padding:14px;margin-top:18px;justify-content:flex-start}
-    @media(max-width:960px){.grid,.split,.form-grid,.row,.whiteboard-row,.sceneBody,.bulk-row{grid-template-columns:1fr}.slots{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:960px){.grid,.split,.form-grid,.row,.whiteboard-row,.sceneBody,.bulk-row,.bulk-queue-item{grid-template-columns:1fr}.slots{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:560px){.wrap{padding:22px 14px 50px}.top{align-items:flex-start;flex-direction:column}.slots{grid-template-columns:1fr}.actions .btn{width:100%}}
   </style>
 </head>
@@ -78,9 +83,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.74.0 · 수정 74차</div>
+      <div class="status">자동화 프로그램 v1.75.0 · 수정 75차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.74.0" download>Windows 자동화 프로그램 v1.74.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.75.0" download>Windows 자동화 프로그램 v1.75.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -92,17 +97,19 @@
       <div class="actions">
         <button id="bulkAddBtn" class="btn" type="button">입력한 사건명을 유형 선택 목록에 추가</button>
         <button id="bulkCreateBtn" class="btn primary" type="button">랜딩·릴스·카페 전체 작업 등록</button>
+        <button id="bulkQueueLoadBtn" class="btn green" type="button">등록한 대기열 불러오기</button>
       </div>
+      <div id="bulkQueueList" class="bulk-queue-list" hidden></div>
       <div class="copy-row" style="margin-top:12px">
         <label style="min-width:220px">카페 시작 번호
-          <input id="naverArticleSequence" type="number" min="147" step="1" value="153">
+          <input id="naverArticleSequence" type="number" min="147" step="1" value="199">
         </label>
         <button id="naverArticleSequenceBtn" class="btn" type="button">카페 시작 번호 저장</button>
       </div>
       <div id="sequenceMsg" class="message"></div>
       <div id="bulkRows" class="bulk-list"></div>
       <div id="bulkMsg" class="message"></div>
-      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트·사건 유형·릴스 이미지 10장을 각각 지정합니다. 선택한 이미지는 서버로 전송하지 않고 이 브라우저의 로컬 저장소에 보관하므로, 새로고침 후에도 같은 브라우저에서는 다음 사건 자동화를 이어갈 수 있습니다.</p>
+      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트·사건 유형·릴스 이미지 10장을 각각 지정합니다. 중단되면 <b>등록한 대기열 불러오기</b>에서 해당 배치의 <b>멈춘 곳부터 이어하기</b>를 누르세요. 선택한 이미지는 서버로 전송하지 않고 이 브라우저의 로컬 저장소에 보관됩니다.</p>
     </section>
 
     <section class="panel">
@@ -263,6 +270,7 @@
   let instagramAutoUploadInProgress = false;
   let bulkAutomationRunning = false;
   let bulkTransitionInProgress = false;
+  let bulkQueueResumeInProgress = false;
   const bulkLocalFiles = new Map();
   const BULK_FILE_DB_NAME = "gnlaw-cafe-reels-bulk-files-v1";
   const BULK_FILE_STORE_NAME = "job-files";
@@ -273,6 +281,7 @@
     $("generateBtn").addEventListener("click", generateDraft);
     $("bulkAddBtn").addEventListener("click", addBulkRowsFromInput);
     $("bulkCreateBtn").addEventListener("click", createBulkJobs);
+    $("bulkQueueLoadBtn").addEventListener("click", loadRegisteredBulkQueues);
     $("naverArticleSequenceBtn").addEventListener("click", setNaverArticleSequence);
     partTypeEl.addEventListener("change", syncPartSelection);
     caseNameEl.addEventListener("input", syncVideoTitle);
@@ -758,11 +767,20 @@
 
   async function postJson(path, payload, options = {}, attempt = 0) {
     const retries = Number.isInteger(options.retries) ? options.retries : 0;
-    const response = await fetch(path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    let response;
+    try {
+      response = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      if (attempt < retries) {
+        await wait(1500 * (attempt + 1));
+        return postJson(path, payload, options, attempt + 1);
+      }
+      throw error;
+    }
     const text = await response.text();
     const retryable = isRetryableStatus(response.status);
     let data;
@@ -787,16 +805,44 @@
   }
 
   function isRetryableStatus(status) {
-    return status === 502 || status === 503 || status === 504 || status === 524;
+    return status === 429 || status === 500 || status === 502 || status === 503 || status === 504 || status === 524;
   }
 
-  async function getWorkflowJob(jobId = "") {
+  async function getWorkflowJob(jobId = "", options = {}, attempt = 0) {
+    const retries = Number.isInteger(options.retries) ? options.retries : 4;
     const params = new URLSearchParams({ _: String(Date.now()) });
     if (jobId) params.set("jobId", jobId);
-    const response = await fetch(`/api/cafe-reels-workflow?${params}`, { cache: "no-store" });
-    const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error(data.message || "작업 상태를 불러오지 못했습니다.");
-    return data;
+    if (options.batchId) params.set("batchId", options.batchId);
+    try {
+      const response = await fetch(`/api/cafe-reels-workflow?${params}`, { cache: "no-store" });
+      const text = await response.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        if (isRetryableStatus(response.status) && attempt < retries) {
+          await wait(1500 * (attempt + 1));
+          return getWorkflowJob(jobId, options, attempt + 1);
+        }
+        throw new Error(`작업 상태 응답을 읽지 못했습니다. (HTTP ${response.status})`);
+      }
+      if (isRetryableStatus(response.status) && attempt < retries) {
+        await wait(1500 * (attempt + 1));
+        return getWorkflowJob(jobId, options, attempt + 1);
+      }
+      if (!response.ok || !data.ok) throw new Error(data.message || "작업 상태를 불러오지 못했습니다.");
+      return data;
+    } catch (error) {
+      if (attempt < retries && (error instanceof TypeError || /fetch|network|failed|timeout/i.test(error?.message || ""))) {
+        await wait(1500 * (attempt + 1));
+        return getWorkflowJob(jobId, options, attempt + 1);
+      }
+      throw error;
+    }
+  }
+
+  function getWorkflowBatch(batchId) {
+    return getWorkflowJob("", { batchId, retries: 4 });
   }
 
   async function loadJobs() {
@@ -813,6 +859,148 @@
     } catch (error) {
       $("jobList").innerHTML = `<div class="note">${esc(error.message)}</div>`;
     }
+  }
+
+  async function loadRegisteredBulkQueues() {
+    const button = $("bulkQueueLoadBtn");
+    const container = $("bulkQueueList");
+    button.disabled = true;
+    container.hidden = false;
+    container.innerHTML = "<div class='note'>서버에 등록된 대량 대기열을 불러오는 중...</div>";
+    try {
+      const data = await getWorkflowJob("", { retries: 4 });
+      const grouped = new Map();
+      for (const job of data.jobs || []) {
+        if (!job.batchId) continue;
+        if (!grouped.has(job.batchId)) grouped.set(job.batchId, []);
+        grouped.get(job.batchId).push(job);
+      }
+      const batches = [...grouped.entries()].map(([batchId, jobs]) => {
+        const ordered = jobs.sort((left, right) => Number(left.batchOrder) - Number(right.batchOrder));
+        const completed = ordered.filter(isBulkJobComplete).length;
+        const next = ordered.find((job) => !isBulkJobComplete(job)) || null;
+        const updatedAt = ordered.reduce((latest, job) => String(job.updatedAt || "") > latest ? String(job.updatedAt || "") : latest, "");
+        return { batchId, jobs: ordered, completed, next, updatedAt };
+      }).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)).slice(0, 30);
+
+      if (!batches.length) {
+        container.innerHTML = "<div class='note'>불러올 대량 대기열이 없습니다.</div>";
+        return;
+      }
+      container.innerHTML = batches.map((batch) => {
+        const caseNames = batch.jobs.map((job) => job.caseName || job.title || job.id).join(" → ");
+        const state = batch.next
+          ? `${batch.completed}/${batch.jobs.length}건 완료 · 다음: ${batch.next.caseName || batch.next.title || batch.next.id}`
+          : `${batch.jobs.length}/${batch.jobs.length}건 모두 완료`;
+        return `<div class="bulk-queue-item">
+          <div>
+            <strong>${esc(state)}</strong>
+            <span>${esc(caseNames)}</span>
+            <span>${esc(formatDate(batch.updatedAt))} · ${esc(batch.batchId)}</span>
+          </div>
+          <button class="btn ${batch.next ? "primary" : ""}" type="button" data-batch-id="${escAttr(batch.batchId)}" onclick="resumeRegisteredBulkQueue('${escAttr(batch.batchId)}')">${batch.next ? "멈춘 곳부터 이어하기" : "완료 내용 불러오기"}</button>
+        </div>`;
+      }).join("");
+    } catch (error) {
+      container.innerHTML = `<div class="note">${esc(error.message)}</div>`;
+      show("bulkMsg", `대기열 불러오기 실패: ${error.message}`, true);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function resumeRegisteredBulkQueue(batchId) {
+    if (!batchId || bulkQueueResumeInProgress || instagramAutoUploadInProgress) return;
+    bulkQueueResumeInProgress = true;
+    const button = document.querySelector(`[data-batch-id="${CSS.escape(batchId)}"]`);
+    if (button) button.disabled = true;
+    show("bulkMsg", "대기열 상태를 확인하고 완료된 사건 다음부터 복구하는 중...");
+    try {
+      const data = await getWorkflowBatch(batchId);
+      const jobs = (data.jobs || []).sort((left, right) => Number(left.batchOrder) - Number(right.batchOrder));
+      if (!jobs.length) throw new Error("해당 대기열의 작업을 찾을 수 없습니다.");
+      const nextIndex = jobs.findIndex((job) => !isBulkJobComplete(job));
+      if (nextIndex < 0) {
+        applyJob(jobs.at(-1));
+        if (activeBulkBatchId() === batchId) clearActiveBulkBatch();
+        show("bulkMsg", `${jobs.length}건이 모두 완료된 대기열입니다.`);
+        return;
+      }
+      rememberActiveBulkBatch(batchId);
+      applyBulkRenderMode(batchId);
+      bulkAutomationRunning = true;
+      await continueRegisteredBulkBatch(jobs, nextIndex);
+    } catch (error) {
+      bulkAutomationRunning = false;
+      const message = error?.message || String(error);
+      show("bulkMsg", `대기열 복구 중단: ${message}`, true);
+      show("reelsMsg", message, true);
+    } finally {
+      bulkQueueResumeInProgress = false;
+      if (button) button.disabled = false;
+      await loadRegisteredBulkQueues();
+      await loadJobs();
+    }
+  }
+
+  async function continueRegisteredBulkBatch(jobs, startIndex) {
+    for (let index = startIndex; index < jobs.length; index += 1) {
+      let job = jobs[index];
+      if (isBulkJobComplete(job)) continue;
+      applyJob(job);
+      $("draftPanel").hidden = false;
+
+      if (job.instagramStatus === "posted") {
+        if (!job.instagramPermalink) {
+          throw new Error(`${job.caseName}: Instagram 게시물 주소가 없어 카페 자동 등록을 재개할 수 없습니다.`);
+        }
+        if (!isCafePosted(job) && !["queued", "preparing"].includes(job.smartEditorStatus || "")) {
+          const queued = await postWorkflow({ action: "queue-smarteditor", jobId: job.id }, { retries: 2 });
+          job = queued.job;
+          applyJob(job);
+        }
+        if (!isCafePosted(job)) job = await waitForCafePost(job);
+        jobs[index] = job;
+        continue;
+      }
+
+      if ((job.videoUrl && ["ready", "uploaded", "processing", "failed"].includes(job.videoStatus || "")) || job.instagramStatus === "processing") {
+        instagramAutoUploadInProgress = true;
+        try {
+          const posted = await publishInstagramReel();
+          if (!posted) throw new Error(`${job.caseName}: Instagram 릴스 업로드를 재개하지 못했습니다.`);
+          job = currentJob;
+          job = await waitForCafePost(job);
+          jobs[index] = job;
+          continue;
+        } finally {
+          instagramAutoUploadInProgress = false;
+        }
+      }
+
+      const localFiles = await restoreBulkLocalFiles(job.id);
+      if (localFiles.length !== 10) {
+        throw new Error(`${job.caseName}: 이 브라우저에 저장된 릴스 이미지가 ${localFiles.length}장입니다. 작업을 등록한 PC·Chrome에서 이어하거나 이미지 10장을 다시 지정해주세요.`);
+      }
+      window.setWhiteboardLocalFiles?.(localFiles);
+      applyBulkRenderMode(job.batchId);
+      show("bulkMsg", `${job.caseName} · 저장된 이미지 10장을 복원해 멈춘 지점에서 릴스 제작을 재개합니다.`);
+      await reportBulkTransition(job.id, "resume-starting", "등록된 대기열에서 이미지 10장을 복원해 자동화를 재개합니다.");
+      await wait(300);
+      const generateButton = $("generate");
+      if (generateButton.disabled) throw new Error(`${job.caseName}: 릴스 이미지 적용에 실패했습니다.`);
+      generateButton.click();
+      return true;
+    }
+
+    bulkAutomationRunning = false;
+    clearActiveBulkBatch();
+    show("bulkMsg", "대기열의 모든 릴스·네이버 카페 게시가 완료되었습니다.");
+    return false;
+  }
+
+  function isCafePosted(job) {
+    return job?.smartEditorStatus === "posted" || job?.cafeStatus === "smarteditor-posted" || job?.cafeStatus === "posted";
   }
 
   async function loadJob(jobId) {
@@ -1032,8 +1220,7 @@
   }
 
   function isBulkJobComplete(job) {
-    return job?.instagramStatus === "posted"
-      && (job.smartEditorStatus === "posted" || job.cafeStatus === "smarteditor-posted" || job.cafeStatus === "posted");
+    return job?.instagramStatus === "posted" && isCafePosted(job);
   }
 
   function rememberActiveBulkBatch(batchId) {

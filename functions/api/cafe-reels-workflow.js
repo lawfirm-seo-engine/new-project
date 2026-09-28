@@ -25,12 +25,28 @@ export async function onRequestGet({ request, env }) {
     if (!env?.CASES) return json({ ok: false, message: "KV 바인딩이 없습니다." }, 500);
     const url = new URL(request.url);
     const jobId = safeId(url.searchParams.get("jobId") || "");
+    const batchId = safeId(url.searchParams.get("batchId") || "");
     if (jobId) {
       let job = await loadJob(env, jobId);
       if (!job) return json({ ok: false, message: "작업을 찾을 수 없습니다." }, 404);
       job = await recoverStaleVideoRender(env, job);
       job = await refreshPendingArticleNumber(env, job);
       return json({ ok: true, job });
+    }
+    if (batchId) {
+      const index = await loadIndex(env);
+      const summaries = index
+        .filter((item) => item.batchId === batchId)
+        .sort((left, right) => batchOrderValue(left.batchOrder) - batchOrderValue(right.batchOrder));
+      const jobs = [];
+      for (const summary of summaries) {
+        let job = await loadJob(env, summary.id);
+        if (!job) continue;
+        job = await recoverStaleVideoRender(env, job);
+        job = await refreshPendingArticleNumber(env, job);
+        jobs.push(job);
+      }
+      return json({ ok: true, batchId, jobs });
     }
     return json({ ok: true, jobs: await loadIndex(env) });
   } catch (error) {
@@ -344,6 +360,7 @@ async function updateIndex(env, job) {
     fraudType: job.fraudType,
     title: job.draft?.title || "",
     cafeStatus: job.cafeStatus || "",
+    smartEditorStatus: job.smartEditorStatus || "",
     instagramStatus: job.instagramStatus || "",
     instagramStoryStatus: job.instagramStoryStatus || "",
     videoStatus: job.videoStatus || "",

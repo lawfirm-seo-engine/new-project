@@ -277,14 +277,14 @@ test("Windows installer validates the packaged app and stops an old instance", (
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);
   assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
-  assert.match(source, /v1\.73\.0/);
+  assert.match(source, /v1\.75\.0/);
 
   const gui = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/GNLAWSmartEditor.cs", import.meta.url), "utf8");
   assert.match(gui, /StopStaleAutomationProcesses\(nodePath, cliPath\)/);
   assert.match(gui, /ManagementObjectSearcher\("SELECT ProcessId, Name, CommandLine FROM Win32_Process"\)/);
   assert.match(gui, /commandLine\.IndexOf\(profilePath/);
   assert.match(gui, /기존 자동화 프로세스/);
-  assert.match(gui, /v1\.74\.0 · 수정 74차/);
+  assert.match(gui, /v1\.75\.0 · 수정 75차/);
   assert.match(gui, /gui\.log/);
   assert.match(gui, /File\.AppendAllText/);
 });
@@ -293,10 +293,10 @@ test("automation surfaces expose the same revision version", () => {
   const cli = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   const page = fs.readFileSync(new URL("../admin/cafe-reels.html", import.meta.url), "utf8");
   const version = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/VERSION.txt", import.meta.url), "utf8").trim();
-  assert.equal(version, "v1.74.0 · 수정 74차");
-  assert.match(cli, /v1\.74\.0 · 수정 74차/);
-  assert.match(page, /v1\.74\.0 · 수정 74차/);
-  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.73\.0/);
+  assert.equal(version, "v1.75.0 · 수정 75차");
+  assert.match(cli, /v1\.75\.0 · 수정 75차/);
+  assert.match(page, /v1\.75\.0 · 수정 75차/);
+  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.75\.0/);
 });
 
 test("queue watcher relaunches Chrome after a renderer crash", () => {
