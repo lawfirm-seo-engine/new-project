@@ -93,6 +93,13 @@
         <button id="bulkAddBtn" class="btn" type="button">입력한 사건명을 유형 선택 목록에 추가</button>
         <button id="bulkCreateBtn" class="btn primary" type="button">랜딩·릴스·카페 전체 작업 등록</button>
       </div>
+      <div class="copy-row" style="margin-top:12px">
+        <label style="min-width:220px">카페 시작 번호
+          <input id="naverArticleSequence" type="number" min="147" step="1" value="153">
+        </label>
+        <button id="naverArticleSequenceBtn" class="btn" type="button">카페 시작 번호 저장</button>
+      </div>
+      <div id="sequenceMsg" class="message"></div>
       <div id="bulkRows" class="bulk-list"></div>
       <div id="bulkMsg" class="message"></div>
       <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트·사건 유형·릴스 이미지 10장을 각각 지정합니다. 선택한 이미지는 서버로 전송하지 않고 이 브라우저의 로컬 저장소에 보관하므로, 새로고침 후에도 같은 브라우저에서는 다음 사건 자동화를 이어갈 수 있습니다.</p>
@@ -265,6 +272,7 @@
     $("generateBtn").addEventListener("click", generateDraft);
     $("bulkAddBtn").addEventListener("click", addBulkRowsFromInput);
     $("bulkCreateBtn").addEventListener("click", createBulkJobs);
+    $("naverArticleSequenceBtn").addEventListener("click", setNaverArticleSequence);
     partTypeEl.addEventListener("change", syncPartSelection);
     caseNameEl.addEventListener("input", syncVideoTitle);
     window.addEventListener("whiteboard:video-ready", handleGeneratedVideo);
@@ -460,6 +468,25 @@
     });
     $("bulkCaseNames").value = "";
     show("bulkMsg", `${names.length}개 사건명을 유형 선택 목록에 추가했습니다.`);
+  }
+
+  async function setNaverArticleSequence() {
+    const input = $("naverArticleSequence");
+    const button = $("naverArticleSequenceBtn");
+    const nextArticleId = Number(input.value);
+    if (!Number.isInteger(nextArticleId) || nextArticleId < 147) {
+      return show("sequenceMsg", "카페 시작 번호는 147 이상의 정수로 입력해주세요.", true);
+    }
+    button.disabled = true;
+    show("sequenceMsg", `${nextArticleId}번으로 설정 중...`);
+    try {
+      const data = await postWorkflow({ action: "set-naver-article-sequence", nextArticleId });
+      show("sequenceMsg", data.message || `카페 시작 번호를 ${nextArticleId}번으로 설정했습니다.`);
+    } catch (error) {
+      show("sequenceMsg", error.message, true);
+    } finally {
+      button.disabled = false;
+    }
   }
 
   function openBulkFileDatabase() {
