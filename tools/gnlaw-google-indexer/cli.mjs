@@ -7,10 +7,15 @@
 // 이 도구는 사람이 하던 "URL 검사 → 색인 생성 요청" 조작을 서치콘솔 화면에서
 // 그대로 자동화한다(Playwright + 기존 Chrome 프로필).
 //
-// ⚠️ 서치콘솔 화면 구성은 로그인 후에만 보이는 영역이라 개발 중 실제 화면으로
-// 검증하지 못했다. 텍스트/역할 기반의 견고한 selector로 작성했지만, 실제 실행
-// 중 화면 문구가 다르면 조정이 필요할 수 있다 — 오류 로그와 스크린샷을 참고해
-// selectSearchConsoleLocators() 부근을 수정하면 된다.
+// 실제 화면으로 검증된 내용(2026-09-29):
+// - resource_id는 "도메인" 속성 형식(sc-domain:호스트)이다. 처음엔 "URL 접두어"
+//   형식(https://호스트/)으로 잘못 가정해서 404가 났었다.
+// - URL 검사 결과 페이지(/search-console/inspect?...&id=)의 id 파라미터는 대상
+//   URL이 아니라 구글이 내부적으로 발급하는 불투명 토큰이다 — 그래서 리다이렉트
+//   URL을 직접 조립해 바로 이동하는 방식은 원천적으로 불가능하고, 반드시 대시보드
+//   상단의 "URL 검사" 검색창에 URL을 입력해 구글이 직접 그 페이지로 이동하게 해야
+//   한다.
+// - "이미 색인됨" 상태의 정확한 문구는 "URL이 Google에 등록되어 있음"이다.
 
 import { access, mkdir } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
@@ -31,11 +36,13 @@ const DEFAULT_POLL_SECONDS = 300; // 5분
 const SEARCH_CONSOLE_HOME = "https://search.google.com/search-console";
 
 // 서치콘솔 속성이 "URL 접두어" 방식인지 "도메인" 방식인지에 따라 resource_id 형식이 다르다.
-// 기본값은 URL 접두어(https://호스트/) 방식으로 가정하며, GNLAW_SC_RESOURCE_<HOST> 환경변수로
-// 사이트별로 재정의할 수 있다(예: 도메인 속성이면 "sc-domain:gnlaw-criminal.co.kr").
+// gnlaw-criminal.co.kr은 실제 화면으로 "도메인" 속성(sc-domain:)임을 확인했다.
+// gnlaw-recovery.co.kr도 같은 방식일 가능성이 높아 기본값을 동일하게 두지만, 실제로
+// 달라 화면이 열리지 않으면 GNLAW_SC_RESOURCE_GNLAW_RECOVERY_CO_KR 환경변수로
+// 재정의할 수 있다(예: URL 접두어 속성이면 "https://gnlaw-recovery.co.kr/").
 const DEFAULT_RESOURCE_BY_HOST = {
-  "gnlaw-criminal.co.kr": "https://gnlaw-criminal.co.kr/",
-  "gnlaw-recovery.co.kr": "https://gnlaw-recovery.co.kr/",
+  "gnlaw-criminal.co.kr": "sc-domain:gnlaw-criminal.co.kr",
+  "gnlaw-recovery.co.kr": "sc-domain:gnlaw-recovery.co.kr",
 };
 
 export function parseArgs(argv = []) {
@@ -73,8 +80,8 @@ export function resourceIdForHost(host) {
   return process.env[key] || DEFAULT_RESOURCE_BY_HOST[host] || `https://${host}/`;
 }
 
-export function inspectionUrl(resourceId, targetUrl) {
-  return `https://search.google.com/search-console/inspect?resource_id=${encodeURIComponent(resourceId)}&id=${encodeURIComponent(targetUrl)}`;
+export function dashboardUrl(resourceId) {
+  return `https://search.google.com/search-console?resource_id=${encodeURIComponent(resourceId)}`;
 }
 
 function cleanOrigin(value) {
@@ -186,7 +193,12 @@ async function watch(context, config, options) {
 async function inspectAndRequestIndexing(page, config, targetUrl) {
   const host = new URL(targetUrl).hostname;
   const resourceId = resourceIdForHost(host);
-  await page.goto(inspectionUrl(resourceId, targetUrl), { waitUntil: "domcontentloaded", timeout: 60_000 });
+  const beforeUrl = page.url();
+  if (!beforeUrl.startsWith("https://search.google.com/search-console") || page.url().indexOf(encodeURIComponent(resourceId)) === -1) {
+    await page.goto(dashboardUrl(resourceId), { waitUntil: "domcontentloaded", timeout: 60_000 });
+  }
+
+  await openUrlInspection(page, config, targetUrl);
 
   const locators = searchConsoleLocators(page);
   await waitForInspectionResult(page, locators);
@@ -198,6 +210,7 @@ async function inspectAndRequestIndexing(page, config, targetUrl) {
   const requestButton = locators.requestIndexing.first();
   const hasRequestButton = await requestButton.isVisible().catch(() => false);
   if (!hasRequestButton) {
+    await screenshotArtifact(page, config, safeFileName(targetUrl), "no-request-button");
     throw new Error("색인 생성 요청 버튼을 찾지 못했습니다 (화면 구성이 예상과 다를 수 있음).");
   }
   await requestButton.click();
@@ -207,11 +220,49 @@ async function inspectAndRequestIndexing(page, config, targetUrl) {
   return outcome;
 }
 
+// 상단의 "'{호스트}'에 있는 모든 URL 검사" 검색창을 클릭 → 대상 URL 입력 → Enter.
+// 구글이 자체적으로 결과 페이지(불투명 id= 토큰이 붙은 URL)로 이동시켜 준다 — 그
+// 결과 URL을 직접 조립하는 건 불가능하므로 반드시 이 방식으로 진입해야 한다.
+async function openUrlInspection(page, config, targetUrl) {
+  const searchTrigger = page.getByText(/에 있는 모든 URL 검사/).first();
+  await searchTrigger.waitFor({ state: "visible", timeout: 30_000 }).catch(async () => {
+    await screenshotArtifact(page, config, "search-box-not-found", "error");
+    throw new Error("서치콘솔 상단 URL 검사 검색창을 찾지 못했습니다.");
+  });
+  await searchTrigger.click();
+
+  // 클릭 후 실제로 포커스를 받는 입력 요소를 찾는다. 검색창 자체가 input일 수도 있고,
+  // 클릭으로 새로 열리는 오버레이의 input/combobox일 수도 있어 여러 후보를 순서대로 시도한다.
+  const inputCandidates = [
+    page.locator('input[type="text"]:visible'),
+    page.locator('[role="combobox"] input:visible'),
+    page.locator('[contenteditable="true"]:visible'),
+  ];
+  let typed = false;
+  for (const candidate of inputCandidates) {
+    const target = candidate.first();
+    if (await target.isVisible().catch(() => false)) {
+      await target.fill(targetUrl).catch(() => {});
+      typed = true;
+      break;
+    }
+  }
+  if (!typed) {
+    // 입력 요소를 특정하지 못했으면 포커스가 이미 검색창에 있다고 가정하고 키보드로 직접 입력.
+    await page.keyboard.type(targetUrl, { delay: 20 });
+  }
+  await page.keyboard.press("Enter");
+
+  await page.waitForURL(/[?&]id=/, { timeout: 30_000 }).catch(async () => {
+    await screenshotArtifact(page, config, safeFileName(targetUrl), "no-navigation");
+  });
+}
+
 function searchConsoleLocators(page) {
   return {
-    // "URL이 Google에 있습니다" 계열 — 이미 색인된 경우
-    isIndexed: page.getByText(/URL이 Google에 등록되어 있습니다|URL is on Google/i),
-    isNotIndexed: page.getByText(/URL이 Google에 등록되어 있지 않습니다|URL is not on Google/i),
+    // 확인된 정확한 문구: "URL이 Google에 등록되어 있음" (이전엔 "...있습니다"로 잘못 가정했었음)
+    isIndexed: page.getByText(/URL이 Google에 등록되어 있음|URL is on Google/i),
+    isNotIndexed: page.getByText(/URL이 Google에 등록되어 있지 않음|URL is not on Google/i),
     requestIndexing: page.getByRole("button", { name: /색인 생성 요청|Request indexing/i }),
     requestInProgress: page.getByText(/색인 생성 확인 중|Validating|테스트 실행 중|Testing/i),
     requestSucceeded: page.getByText(/색인이 생성되도록 요청했습니다|Indexing requested|URL을 처리 대기열에 추가했습니다/i),
