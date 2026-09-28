@@ -86,6 +86,13 @@ async function enqueue(env, body) {
   const existing = await loadItem(env, id);
   if (existing) return { ok: true, item: existing, created: false };
 
+  // 라이브 점검은 반드시 "새로 큐에 넣는" 이 경로에서만, Cloudflare 자체 네트워크로 한 번만
+  // 실행한다. 예전 버전은 스캐너(GitHub Actions)가 매 실행마다 이미 등록된 URL까지 포함해
+  // 수천 건을 직접 라이브로 다시 점검했는데, 그 대량·고속 순차 요청 패턴이 봇 트래픽으로
+  // 오인되어 사이트 자체에서 403으로 막히는 문제가 있었다.
+  const checks = await runChecks(canonicalUrl);
+  if (!checks.pass) return { ok: true, created: false, rejected: true, reason: checks.reason };
+
   const now = new Date().toISOString();
   const naver = await pingNaverIndexNow(parsed.hostname, canonicalUrl).catch((error) => ({
     ok: false,
@@ -99,8 +106,8 @@ async function enqueue(env, body) {
     status: "pending",
     createdAt: now,
     updatedAt: now,
-    checkedAt: body?.checks ? now : "",
-    checks: body?.checks || null,
+    checkedAt: now,
+    checks: checks.detail,
     naverStatus: naver.ok ? "submitted" : "failed",
     naverRespondedAt: now,
     naverMessage: naver.message || "",
@@ -110,6 +117,50 @@ async function enqueue(env, body) {
   };
   await saveItem(env, item);
   return { ok: true, item, created: true };
+}
+
+async function runChecks(url) {
+  const pageRes = await fetch(url, { redirect: "manual" }).catch((error) => ({ error }));
+  if (pageRes?.error) return { pass: false, reason: `요청 실패: ${pageRes.error.message}` };
+  if (pageRes.status !== 200) return { pass: false, reason: `HTTP ${pageRes.status}` };
+
+  const html = await pageRes.text();
+
+  const canonicalMatch = html.match(/<link[^>]+rel=["']canonical["'][^>]*href=["']([^"']+)["']/i);
+  const canonicalHref = canonicalMatch?.[1] || "";
+  if (!canonicalHref || normalizeCheckUrl(canonicalHref) !== normalizeCheckUrl(url)) {
+    return { pass: false, reason: `canonical 불일치: ${canonicalHref || "(없음)"}` };
+  }
+
+  const robotsMatch = html.match(/<meta[^>]+name=["']robots["'][^>]*content=["']([^"']+)["']/i);
+  const robotsContent = (robotsMatch?.[1] || "").toLowerCase();
+  if (robotsContent.includes("noindex")) {
+    return { pass: false, reason: `robots noindex: ${robotsContent}` };
+  }
+
+  const siteUrl = new URL(url).origin;
+  const inSitemap = await urlInSitemap(siteUrl, url);
+  if (!inSitemap) return { pass: false, reason: "sitemap에 없음" };
+
+  return { pass: true, detail: { http200: true, canonical: true, robotsIndex: true, sitemap: true } };
+}
+
+async function urlInSitemap(siteUrl, url) {
+  for (const sitemapPath of ["/sitemap-recent.xml", "/sitemap.xml"]) {
+    try {
+      const res = await fetch(`${siteUrl}${sitemapPath}`);
+      if (!res.ok) continue;
+      const xml = await res.text();
+      if (xml.includes(url)) return true;
+    } catch {
+      // 다음 sitemap으로 계속 시도
+    }
+  }
+  return false;
+}
+
+function normalizeCheckUrl(value) {
+  return String(value || "").trim().replace(/\/$/, "");
 }
 
 async function report(env, body) {
