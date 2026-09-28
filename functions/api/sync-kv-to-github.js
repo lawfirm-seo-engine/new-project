@@ -15,8 +15,25 @@ import { filterDeletedCases } from "../_caseDeletion.js";
  *  5. 결과 반환
  */
 export async function onRequestPost(context) {
-  const { env } = context;
+  const { env, request } = context;
+  const body = await request.json().catch(() => ({}));
 
+  if (body?.defer === true && typeof context.waitUntil === "function") {
+    context.waitUntil(
+      syncKvToGitHub(env)
+        .then(async (response) => {
+          if (response.ok) return;
+          console.warn("Deferred KV→GitHub sync failed", response.status, await response.text().catch(() => ""));
+        })
+        .catch((error) => console.warn("Deferred KV→GitHub sync failed", error?.message || error)),
+    );
+    return json({ ok: true, deferred: true, message: "KV→GitHub 동기화를 백그라운드로 시작했습니다." });
+  }
+
+  return syncKvToGitHub(env);
+}
+
+async function syncKvToGitHub(env) {
   if (!env.CASES) {
     return json({ ok: false, message: "CASES KV 바인딩이 없습니다." }, 500);
   }

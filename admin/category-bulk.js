@@ -147,9 +147,10 @@
       setMessage(`생성 ${success}건 완료. 저장소 동기화 중...`, "info");
       await sleep(1200);
       try {
-        const sync = await postJson("/api/sync-kv-to-github", {});
+        const sync = await postJson("/api/sync-kv-to-github", config.deferSync === true ? { defer: true } : {});
         if (!sync.data.ok) throw new Error(sync.data.message || "저장소 동기화 실패");
-        setMessage(`완료: ${success}건 생성${failed ? `, ${failed}건 오류` : ""} · GitHub 동기화 완료`, failed ? "warn" : "ok");
+        const syncMessage = sync.data.deferred ? "GitHub 동기화 백그라운드 시작" : "GitHub 동기화 완료";
+        setMessage(`완료: ${success}건 생성${failed ? `, ${failed}건 오류` : ""} · ${syncMessage}`, failed ? "warn" : "ok");
       } catch (error) {
         setMessage(`생성 ${success}건 완료${failed ? `, ${failed}건 오류` : ""}. GitHub 동기화는 확인이 필요합니다: ${error.message}`, "warn");
       }
@@ -246,22 +247,30 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload || {}),
     });
+    const retryable = isRetryableStatus(response.status);
     const text = await response.text();
     let data;
     try {
       data = text ? JSON.parse(text) : {};
     } catch {
-      if (response.status === 503 && retry < 2) {
-        await sleep(900 * (retry + 1));
+      if (retryable && retry < 2) {
+        await sleep(1200 * (retry + 1));
         return postJson(path, payload, retry + 1);
+      }
+      if (retryable) {
+        throw new Error(`서버 처리 시간이 길어져 시간 초과가 발생했습니다. 잠시 후 다시 시도하거나 나눠서 생성하세요. (HTTP ${response.status})`);
       }
       throw new Error(`서버 응답 파싱 실패 (HTTP ${response.status})${text ? `: ${text.slice(0, 80)}` : ""}`);
     }
-    if (response.status === 503 && retry < 2) {
-      await sleep(900 * (retry + 1));
+    if (retryable && retry < 2) {
+      await sleep(1200 * (retry + 1));
       return postJson(path, payload, retry + 1);
     }
     return { status: response.status, data };
+  }
+
+  function isRetryableStatus(status){
+    return status === 502 || status === 503 || status === 504 || status === 524;
   }
 
   function renderSuccess(target, url, label){
