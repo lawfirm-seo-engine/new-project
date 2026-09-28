@@ -1,0 +1,29 @@
+name: Scan search index queue
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        run: npm install
+
+      - name: Scan and enqueue
+        env:
+          INDEX_QUEUE_TOKEN: ${{ secrets.INDEX_QUEUE_TOKEN }}
+        run: node scripts/scan-index-queue.js
