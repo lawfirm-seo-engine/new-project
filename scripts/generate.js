@@ -41,9 +41,10 @@ const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 1
 const FRESH_LIST_LABEL = "오늘 추가/갱신된 목록";
 const FRESH_LIST_ANCHOR = "fresh-landings";
 const HOME_FRESH_LIST_LIMIT = 10;
-const LOGSCAN_SCRIPT = `<!-- LogScan -->
-<script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
-<!-- End LogScan Code -->`;
+const LOGSCAN_SITE_IDS = {
+  "https://gnlaw-criminal.co.kr": "h5y08t",
+  "https://gnlaw-recovery.co.kr": "uwylwb",
+};
 
 const GA_MEASUREMENT_IDS = {
   "https://gnlaw-criminal.co.kr": "G-KK457HFNPS",
@@ -1645,9 +1646,11 @@ function createHubFloatingWidgets(group) {
 }
 
 function logScanScriptForSite(siteUrl = "") {
-  return String(siteUrl).replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
-    ? LOGSCAN_SCRIPT
-    : "";
+  const sid = LOGSCAN_SITE_IDS[String(siteUrl).replace(/\/$/, "")];
+  if (!sid) return "";
+  return `<!-- LogScan -->
+<script src="//logs.ai.kr/logs_init.php?sid=${sid}"></script>
+<!-- End LogScan Code -->`;
 }
 
 function createHubContent(group) {

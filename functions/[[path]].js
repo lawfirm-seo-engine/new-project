@@ -236,9 +236,10 @@ const SEO_XML_ROUTES = new Set([
   "/rss.xml",
 ]);
 
-const LOGSCAN_SCRIPT = `<!-- LogScan -->
-<script src="//logs.ai.kr/logs_init.php?sid=h5y08t"></script>
-<!-- End LogScan Code -->`;
+const LOGSCAN_SITE_IDS = {
+  "https://gnlaw-criminal.co.kr": "h5y08t",
+  "https://gnlaw-recovery.co.kr": "uwylwb",
+};
 const READ_REPAIR_SLUGS = new Set(["jusigridingbang"]);
 
 // 카카오톡 상담 채널 실제 이동 대상
@@ -1338,9 +1339,11 @@ function normalizePowerlinkRobots(value = "") {
 }
 
 function logScanScriptForSite(siteUrl = "") {
-  return String(siteUrl).replace(/\/$/, "") === "https://gnlaw-criminal.co.kr"
-    ? LOGSCAN_SCRIPT
-    : "";
+  const sid = LOGSCAN_SITE_IDS[String(siteUrl).replace(/\/$/, "")];
+  if (!sid) return "";
+  return `<!-- LogScan -->
+<script src="//logs.ai.kr/logs_init.php?sid=${sid}"></script>
+<!-- End LogScan Code -->`;
 }
 
 function createCenterHeaderNav(group = {}, { includeCriminal = true } = {}) {
