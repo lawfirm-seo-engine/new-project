@@ -15,11 +15,10 @@ gnlaw-criminal.co.kr / gnlaw-recovery.co.kr 랜딩페이지를 구글에 색인 
    ```
 2. gnlaw-criminal.co.kr, gnlaw-recovery.co.kr 두 속성 모두 구글 서치콘솔에서 색인 생성 요청 권한이
    있는 구글 계정이 필요합니다(소유자 또는 전체 권한).
-3. 두 속성이 **URL 접두어** 방식이 아니라 **도메인** 속성으로 등록되어 있다면, 아래 환경변수로
-   재정의해야 합니다(기본값은 URL 접두어 `https://호스트/`로 가정):
+3. 기본값은 두 속성 모두 **도메인** 속성(`sc-domain:호스트`)으로 가정합니다(gnlaw-criminal.co.kr은
+   실제 화면으로 확인함). 만약 **URL 접두어** 방식으로 등록되어 있다면 아래처럼 재정의하세요:
    ```powershell
-   setx GNLAW_SC_RESOURCE_GNLAW_CRIMINAL_CO_KR "sc-domain:gnlaw-criminal.co.kr"
-   setx GNLAW_SC_RESOURCE_GNLAW_RECOVERY_CO_KR "sc-domain:gnlaw-recovery.co.kr"
+   setx GNLAW_SC_RESOURCE_GNLAW_RECOVERY_CO_KR "https://gnlaw-recovery.co.kr/"
    ```
 
 ## 2. 최초 로그인
@@ -47,13 +46,20 @@ npm run google-indexer
 
 ## ⚠️ 알려진 한계
 
-이 도구가 찾는 화면 문구·버튼(`색인 생성 요청`, `URL이 Google에 등록되어 있습니다` 등)은
-실제 로그인된 서치콘솔 화면으로 검증하지 못한 상태로 작성되었습니다. 실행 중 다음과 같은
-오류가 나면:
+실제 화면으로 확인된 것: `sc-domain:` 리소스 형식, "URL이 Google에 등록되어 있음" 문구,
+"색인 생성 요청" 버튼 문구, URL 검사 결과 페이지의 `id=` 파라미터가 URL이 아니라 구글이
+발급하는 불투명 토큰이라는 점(그래서 직접 링크 이동 대신 대시보드 상단 검색창에 URL을
+입력하는 방식으로 동작합니다).
 
-- `색인 생성 요청 버튼을 찾지 못했습니다`
+아직 검증 못 한 부분: 검색창을 클릭했을 때 실제로 포커스를 받는 입력 요소의 정확한
+구조(`openUrlInspection()`의 후보 셀렉터들 중 어느 것이 맞는지). 실행 중 다음과 같은
+오류가 나면 이 부분이 원인일 가능성이 높습니다:
+
+- `서치콘솔 상단 URL 검사 검색창을 찾지 못했습니다`
 - `URL 검사 결과가 시간 내에 표시되지 않았습니다`
+- `색인 생성 요청 버튼을 찾지 못했습니다`
 
-`cli.mjs`의 `searchConsoleLocators()` 함수에서 텍스트 패턴을 실제 화면 문구에 맞게 조정해야
-합니다. 처리할 때마다 스크린샷이 `%LOCALAPPDATA%\gnlaw-google-indexer\artifacts`에 저장되니
-문제가 생기면 그 화면을 보고 알려주세요.
+`cli.mjs`의 `openUrlInspection()` / `searchConsoleLocators()` 함수를 실제 화면 구조에 맞게
+조정하면 됩니다. 처리할 때마다(및 오류 시) 스크린샷이
+`%LOCALAPPDATA%\gnlaw-google-indexer\artifacts`에 저장되니 문제가 생기면 그 화면을 보고
+알려주세요.
