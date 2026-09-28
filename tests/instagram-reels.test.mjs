@@ -69,9 +69,10 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /class="bulk-part"/);
   assert.match(pageSource, /class="bulk-type"/);
   assert.match(pageSource, /class="bulk-images"/);
-  assert.match(pageSource, /await rememberBulkLocalFiles\(saved\.job\.id, item\.files\)/);
+  assert.match(pageSource, /await rememberBulkLocalFiles\(jobId, item\.files\)/);
+  assert.match(pageSource, /await uploadBulkServerFiles\(jobId, item\.files\)/);
   assert.match(pageSource, /indexedDB\.open\(BULK_FILE_DB_NAME, 1\)/);
-  assert.match(pageSource, /await restoreBulkLocalFiles\(nextJob\.id\)/);
+  assert.match(pageSource, /await restoreBulkFiles\(nextJob\.id\)/);
   assert.match(pageSource, /batchId/);
   assert.match(pageSource, /async function startNextBulkAutomation/);
   assert.match(pageSource, /async function waitForCafePost/);
@@ -95,7 +96,7 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /<option value="10" selected>10초<\/option>/);
   assert.match(pageSource, /id="generate" type="button">자동화 실행<\/button>/);
   assert.match(pageSource, /function applyJob[\s\S]*syncVideoTitle\(\)/);
-  assert.match(pageSource, /whiteboard-local-v2\.js\?v=20260928-1/);
+  assert.match(pageSource, /whiteboard-local-v2\.js\?v=20260929-1/);
   assert.match(pageSource, /BULK_RENDER_MODE_STORAGE_KEY/);
   assert.match(pageSource, /rememberBulkRenderMode\(currentJob\.batchId\)/);
   assert.match(pageSource, /applyBulkRenderMode\(nextJob\.batchId\)/);
@@ -107,6 +108,9 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /async function loadRegisteredBulkQueues/);
   assert.match(pageSource, /async function resumeRegisteredBulkQueue/);
   assert.match(pageSource, /async function continueRegisteredBulkBatch/);
+  assert.match(pageSource, /\.slice\(0, 3\)/);
+  assert.match(pageSource, /whiteboard:local-files-selected/);
+  assert.match(generatorSource, /whiteboard:local-files-selected/);
   assert.match(pageSource, /params\.set\("batchId", options\.batchId\)/);
   assert.match(workflowSource, /url\.searchParams\.get\("batchId"\)/);
   assert.match(generatorSource, /const duration=Number\(\$\('#duration'\)\.value\)\|\|10/);

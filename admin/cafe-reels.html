@@ -83,9 +83,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.75.0 · 수정 75차</div>
+      <div class="status">자동화 프로그램 v1.76.0 · 수정 76차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.75.0" download>Windows 자동화 프로그램 v1.75.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.76.0" download>Windows 자동화 프로그램 v1.76.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -109,7 +109,7 @@
       <div id="sequenceMsg" class="message"></div>
       <div id="bulkRows" class="bulk-list"></div>
       <div id="bulkMsg" class="message"></div>
-      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트·사건 유형·릴스 이미지 10장을 각각 지정합니다. 중단되면 <b>등록한 대기열 불러오기</b>에서 해당 배치의 <b>멈춘 곳부터 이어하기</b>를 누르세요. 선택한 이미지는 서버로 전송하지 않고 이 브라우저의 로컬 저장소에 보관됩니다.</p>
+      <p class="note">사건명을 목록에 추가한 뒤 각 사건마다 원고 파트·사건 유형·릴스 이미지 10장을 각각 지정합니다. 작업 등록 시 이미지 10장을 복구용 서버 저장소에도 백업하므로 다른 PC에서도 <b>등록한 대기열 불러오기</b>로 이어갈 수 있습니다. 대기열 목록은 최근 3개만 표시됩니다.</p>
     </section>
 
     <section class="panel">
@@ -200,7 +200,7 @@
         </label>
       </div>
       <div data-whiteboard-options-host></div>
-      <div class="note"><strong>로컬 이미지 10장 전용</strong> · PC에서 직접 선택한 10장만 사용합니다. 영상과 원본 이미지는 서버에 업로드하지 않고 브라우저에서 먼저 MP4로 생성합니다.</div>
+      <div class="note"><strong>이미지 10장 전용</strong> · PC에서 직접 선택한 10장만 영상에 사용합니다. 대량 작업의 원본 이미지는 중단 복구용으로 서버에도 백업하고, MP4 영상은 브라우저에서 생성합니다.</div>
       <div class="sceneHead">
         <div><strong>장면 구성</strong><div class="status">PC에서 선택한 로컬 이미지 10장만 사용</div></div>
       </div>
@@ -249,7 +249,7 @@
 </main>
 
 <template id="sceneTpl"><section class="scene"><div class="sceneTop"><strong class="num"></strong><div class="actions"><button class="btn up" type="button">↑</button><button class="btn down" type="button">↓</button><button class="btn warn del" type="button">삭제</button></div></div><div class="sceneBody"><div class="scenePreview"><img class="preview" alt="장면 이미지"></div><div><div class="whiteboard-row"><label>역할<input class="role"></label><label>시간 가중치<input class="weight" type="number" min="0.1" step="0.1" value="1"></label></div><label>내레이션<textarea class="narration" rows="2"></textarea></label><label>그림 상황 설명<textarea class="visual" rows="2"></textarea></label></div></div></section></template>
-<script src="/admin/whiteboard-local-v2.js?v=20260928-1"></script>
+<script src="/admin/whiteboard-local-v2.js?v=20260929-1"></script>
 <script>
   const $ = (id) => document.getElementById(id);
   const caseNameEl = $("caseName");
@@ -287,6 +287,7 @@
     caseNameEl.addEventListener("input", syncVideoTitle);
     window.addEventListener("whiteboard:video-ready", handleGeneratedVideo);
     window.addEventListener("whiteboard:automation-failed", handleAutomationFailure);
+    window.addEventListener("whiteboard:local-files-selected", handleManualBulkFilesSelected);
     window.gnlawBeforeVideoRender = beforeVideoRender;
     syncPartSelection();
     loadAssets();
@@ -418,6 +419,9 @@
           const generatedDraft = draftData.draft;
           const jobId = item.row.dataset.jobId || crypto.randomUUID();
           item.row.dataset.jobId = jobId;
+          await rememberBulkLocalFiles(jobId, item.files);
+          show("bulkMsg", `${completed + 1}/${rows.length} · ${caseName} · 복구용 이미지 10장 서버 백업 중...`);
+          await uploadBulkServerFiles(jobId, item.files);
           const saved = await postWorkflow({
             action: "save-job",
             jobId,
@@ -435,7 +439,6 @@
           }, { retries: 2 });
           completed += 1;
           firstSavedJob ||= saved.job;
-          await rememberBulkLocalFiles(saved.job.id, item.files);
           item.row.dataset.registered = "true";
           item.row.style.opacity = ".55";
           const cafeNumber = saved.job.reservedNaverArticleId ? `${saved.job.reservedNaverArticleId}번` : "순차 대기";
@@ -554,6 +557,76 @@
     } catch (error) {
       console.warn("[bulk] 저장된 릴스 이미지 복원 실패", error);
       return [];
+    }
+  }
+
+  function naturalSortBulkFiles(files) {
+    return [...files].sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), undefined, { numeric: true, sensitivity: "base" }));
+  }
+
+  async function uploadBulkServerFiles(jobId, files, attempt = 0) {
+    const ordered = naturalSortBulkFiles(files);
+    if (ordered.length !== 10) throw new Error(`복구용 릴스 이미지는 정확히 10장이 필요합니다. (현재 ${ordered.length}장)`);
+    const form = new FormData();
+    form.set("jobId", jobId);
+    ordered.forEach((file) => form.append("image", file, file.name));
+    try {
+      const response = await fetch("/api/cafe-reels-bulk-images", { method: "POST", body: form });
+      const text = await response.text();
+      let data = {};
+      try { data = JSON.parse(text); } catch {}
+      if (!response.ok || !data.ok) throw new Error(data.message || `복구용 이미지 서버 백업 실패 (${response.status})`);
+      return data.images || [];
+    } catch (error) {
+      if (attempt < 2) {
+        await wait(1200 * (attempt + 1));
+        return uploadBulkServerFiles(jobId, ordered, attempt + 1);
+      }
+      throw error;
+    }
+  }
+
+  async function restoreBulkServerFiles(jobId) {
+    const manifestResponse = await fetch(`/api/cafe-reels-bulk-images?jobId=${encodeURIComponent(jobId)}&_=${Date.now()}`, { cache: "no-store" });
+    if (manifestResponse.status === 404) return [];
+    const manifest = await manifestResponse.json().catch(() => ({}));
+    if (!manifestResponse.ok || !manifest.ok) throw new Error(manifest.message || "서버의 복구용 이미지 목록을 읽지 못했습니다.");
+    const images = [...(manifest.images || [])].sort((left, right) => Number(left.slot) - Number(right.slot));
+    if (images.length !== 10) return [];
+    const restored = await Promise.all(images.map(async (item) => {
+      const response = await fetch(`/api/cafe-reels-bulk-images?jobId=${encodeURIComponent(jobId)}&slot=${encodeURIComponent(item.slot)}&_=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`${item.slot}번 복구용 이미지를 내려받지 못했습니다.`);
+      const blob = await response.blob();
+      return new File([blob], item.name || `${item.slot}.png`, { type: item.type || blob.type || "image/png", lastModified: Number(item.lastModified) || Date.now() });
+    }));
+    await rememberBulkLocalFiles(jobId, restored);
+    return restored;
+  }
+
+  async function restoreBulkFiles(jobId) {
+    const local = await restoreBulkLocalFiles(jobId);
+    if (local.length === 10) return local;
+    try {
+      const server = await restoreBulkServerFiles(jobId);
+      if (server.length === 10) return server;
+    } catch (error) {
+      console.warn("[bulk] 서버 복구용 이미지 복원 실패", error);
+      throw error;
+    }
+    return local;
+  }
+
+  async function handleManualBulkFilesSelected(event) {
+    const files = [...(event.detail?.files || [])];
+    const job = currentJob;
+    if (!job?.batchId || files.length !== 10) return;
+    try {
+      show("bulkMsg", `${job.caseName} · 다시 지정한 이미지 10장을 서버에 백업 중...`);
+      await rememberBulkLocalFiles(job.id, files);
+      await uploadBulkServerFiles(job.id, files);
+      show("bulkMsg", `${job.caseName} · 이미지 10장 서버 백업 완료. 대기열에서 다시 이어할 수 있습니다.`);
+    } catch (error) {
+      show("bulkMsg", `${job.caseName} · 이미지 서버 백업 실패: ${error.message}`, true);
     }
   }
 
@@ -881,14 +954,15 @@
         const next = ordered.find((job) => !isBulkJobComplete(job)) || null;
         const updatedAt = ordered.reduce((latest, job) => String(job.updatedAt || "") > latest ? String(job.updatedAt || "") : latest, "");
         return { batchId, jobs: ordered, completed, next, updatedAt };
-      }).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)).slice(0, 30);
+      }).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)).slice(0, 3);
 
       if (!batches.length) {
         container.innerHTML = "<div class='note'>불러올 대량 대기열이 없습니다.</div>";
         return;
       }
       container.innerHTML = batches.map((batch) => {
-        const caseNames = batch.jobs.map((job) => job.caseName || job.title || job.id).join(" → ");
+        const names = batch.jobs.map((job) => job.caseName || job.title || job.id);
+        const caseNames = names.length > 3 ? `${names.slice(0, 3).join(" → ")} 외 ${names.length - 3}건` : names.join(" → ");
         const state = batch.next
           ? `${batch.completed}/${batch.jobs.length}건 완료 · 다음: ${batch.next.caseName || batch.next.title || batch.next.id}`
           : `${batch.jobs.length}/${batch.jobs.length}건 모두 완료`;
@@ -978,9 +1052,10 @@
         }
       }
 
-      const localFiles = await restoreBulkLocalFiles(job.id);
+      const localFiles = await restoreBulkFiles(job.id);
       if (localFiles.length !== 10) {
-        throw new Error(`${job.caseName}: 이 브라우저에 저장된 릴스 이미지가 ${localFiles.length}장입니다. 작업을 등록한 PC·Chrome에서 이어하거나 이미지 10장을 다시 지정해주세요.`);
+        $("whiteboardPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+        throw new Error(`${job.caseName}: 로컬·서버에 저장된 릴스 이미지가 ${localFiles.length}장입니다. 아래 '로컬 이미지 10장 불러오기'에서 한 번 다시 지정하면 서버에 백업되어 이후부터 대기열 복구가 가능합니다.`);
       }
       window.setWhiteboardLocalFiles?.(localFiles);
       applyBulkRenderMode(job.batchId);
@@ -1036,12 +1111,12 @@
     else {
       if (previousJobId && previousJobId !== job.id) window.resetWhiteboardLocalAssets?.();
       if (job.batchId) {
-        void restoreBulkLocalFiles(job.id).then((restored) => {
+        void restoreBulkFiles(job.id).then((restored) => {
           if (currentJob?.id === job.id && restored.length === 10) {
             window.setWhiteboardLocalFiles?.(restored);
             show("bulkMsg", `${job.caseName} · 저장된 릴스 이미지 10장을 복원했습니다.`);
           }
-        });
+        }).catch((error) => console.warn("[bulk] 작업 이미지 자동 복원 실패", error));
       }
     }
   }
@@ -1166,7 +1241,7 @@
         return false;
       }
 
-      const localFiles = await restoreBulkLocalFiles(nextJob.id);
+      const localFiles = await restoreBulkFiles(nextJob.id);
       if (localFiles.length !== 10) {
         bulkAutomationRunning = false;
         throw new Error(`${nextJob.caseName}: 저장된 릴스 이미지가 10장이 아닙니다. 이미지를 다시 선택해주세요.`);
