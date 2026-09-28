@@ -10,14 +10,14 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("GNLAW SmartEditor")]
 [assembly: AssemblyDescription("법무법인 선린 카페 원고·릴스 자동화")]
-[assembly: AssemblyVersion("1.73.0.0")]
-[assembly: AssemblyFileVersion("1.73.0.0")]
+[assembly: AssemblyVersion("1.74.0.0")]
+[assembly: AssemblyFileVersion("1.74.0.0")]
 
 namespace GNLAW.SmartEditor
 {
     public sealed class MainForm : Form
     {
-        private const string AppVersion = "v1.73.0 · 수정 73차";
+        private const string AppVersion = "v1.74.0 · 수정 74차";
         private readonly Button loginButton = new Button();
         private readonly Button loginDoneButton = new Button();
         private readonly Button startButton = new Button();

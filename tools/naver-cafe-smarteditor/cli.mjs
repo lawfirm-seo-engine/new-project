@@ -9,7 +9,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.73.0 · 수정 73차";
+export const APP_VERSION = "v1.74.0 · 수정 74차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -49,7 +49,6 @@ export function runnerConfig(options = {}) {
     phoneLink: options.phoneLink || process.env.GNLAW_PHONE_LINK || DEFAULT_PHONE_LINK,
     kakaoLink: options.kakaoLink || process.env.GNLAW_KAKAO_LINK || DEFAULT_KAKAO_LINK,
     pollSeconds: Math.max(5, Number(options.pollSeconds || process.env.GNLAW_POLL_SECONDS || 15)),
-    idleExitSeconds: Math.max(0, Number(options.idleExitSeconds || process.env.GNLAW_IDLE_EXIT_SECONDS || 300)),
     runnerId: String(options.runnerId || process.env.GNLAW_RUNNER_ID || randomUUID()).toLowerCase(),
     runnerName: String(options.runnerName || process.env.GNLAW_RUNNER_NAME || `${os.hostname()} / ${os.userInfo().username || "user"} / PID ${process.pid}`).slice(0, 120),
   };
@@ -201,7 +200,6 @@ async function main() {
     yes: Boolean(options.yes),
     once: Boolean(options.once),
     includeVideo: !Boolean(options.skipVideo),
-    keepAlive: Boolean(options.keepAlive),
     stopAfterCurrent: false,
   };
   if (command === "watch") return watchWithBrowserRecovery(config, chromePath, runOptions);
@@ -283,8 +281,7 @@ async function watchQueue(context, apiContext, config, options) {
   await waitForRunnerTurn(apiContext, config, options);
   const stopHeartbeat = startRunnerHeartbeat(apiContext, config, options);
   console.log(`랜딩·릴스·SmartEditor 전체 대기열 감시 시작 (${config.siteOrigin}, ${config.pollSeconds}초 간격)`);
-  let processedCount = 0;
-  let idleSince = 0;
+  let emptyQueueLogged = false;
   try {
     for (;;) {
       if (monitorPage.isClosed() || context.pages().length === 0) {
@@ -302,10 +299,9 @@ async function watchQueue(context, apiContext, config, options) {
         .sort(byReservedNumber)
         .at(0);
       if (cafeQueued) {
-        idleSince = 0;
+        emptyQueueLogged = false;
         const job = await loadJob(apiContext, config, cafeQueued.id);
         const result = await processJob(context, apiContext, config, job, options, monitorPage);
-        processedCount += 1;
         const afterJobLease = await heartbeatRunner(apiContext, config, "after-job");
         if (afterJobLease.shouldStopAfterCurrent || options.stopAfterCurrent) {
           console.log("[인계] 현재 글을 완료했습니다. 다른 PC가 이어받을 수 있도록 자동화를 종료합니다.");
@@ -317,19 +313,9 @@ async function watchQueue(context, apiContext, config, options) {
           console.log("대기 중인 SmartEditor 작업이 없습니다.");
           return;
         }
-        if (!options.keepAlive) {
-          if (!processedCount) {
-            console.log("대기 중인 SmartEditor 작업이 없어 자동화를 종료합니다.");
-            return;
-          }
-          if (!idleSince) {
-            idleSince = Date.now();
-            console.log(`[대기열] 남은 SmartEditor 작업이 없습니다. ${config.idleExitSeconds}초 동안 새 작업이 없으면 자동 종료합니다.`);
-          }
-          if (Date.now() - idleSince >= config.idleExitSeconds * 1000) {
-            console.log("[대기열] 대기열이 비어 있어 자동화를 종료합니다.");
-            return;
-          }
+        if (!emptyQueueLogged) {
+          console.log("[대기열] 대기 작업이 없습니다. 새 작업이 등록될 때까지 계속 감시합니다.");
+          emptyQueueLogged = true;
         }
       }
       if (options.once) return;
@@ -1585,13 +1571,11 @@ function printHelp() {
   Windows 프로그램: 최초 로그인 → 자동화 시작
   CLI 로그인: node cli.mjs login
   CLI 전체 자동화: node cli.mjs watch --publish --yes
-  기본 동작: 다른 PC가 시작하면 현재 글 완료 후 종료, 대기열이 비면 자동 종료
+  기본 동작: 다른 PC가 시작하면 현재 글 완료 후 종료, 대기열이 비어도 계속 감시
 
 주요 옵션
   --yes                 최종 게시 확인 문구 생략
   --once                대기열을 한 번만 확인
-  --keep-alive          대기열이 비어도 계속 감시
-  --idle-exit-seconds <N> 작업 후 대기열이 비었을 때 자동 종료 대기 시간
   --skip-video          작업에 저장된 릴스 영상을 첨부하지 않음
   --edit-article-id <N> 기존 카페 글 번호를 중복 없이 수정
   --phone-link <URL>    전화 이미지 링크
