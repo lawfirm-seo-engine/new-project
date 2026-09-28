@@ -78,9 +78,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.72.0 · 수정 72차</div>
+      <div class="status">자동화 프로그램 v1.73.0 · 수정 73차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.72.0" download>Windows 자동화 프로그램 v1.72.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.73.0" download>Windows 자동화 프로그램 v1.73.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -242,7 +242,7 @@
 </main>
 
 <template id="sceneTpl"><section class="scene"><div class="sceneTop"><strong class="num"></strong><div class="actions"><button class="btn up" type="button">↑</button><button class="btn down" type="button">↓</button><button class="btn warn del" type="button">삭제</button></div></div><div class="sceneBody"><div class="scenePreview"><img class="preview" alt="장면 이미지"></div><div><div class="whiteboard-row"><label>역할<input class="role"></label><label>시간 가중치<input class="weight" type="number" min="0.1" step="0.1" value="1"></label></div><label>내레이션<textarea class="narration" rows="2"></textarea></label><label>그림 상황 설명<textarea class="visual" rows="2"></textarea></label></div></div></section></template>
-<script src="/admin/whiteboard-local-v2.js?v=20260927-4"></script>
+<script src="/admin/whiteboard-local-v2.js?v=20260928-1"></script>
 <script>
   const $ = (id) => document.getElementById(id);
   const caseNameEl = $("caseName");
@@ -267,6 +267,7 @@
   const BULK_FILE_DB_NAME = "gnlaw-cafe-reels-bulk-files-v1";
   const BULK_FILE_STORE_NAME = "job-files";
   const ACTIVE_BULK_STORAGE_KEY = "gnlaw-cafe-reels-active-batch-v1";
+  const BULK_RENDER_MODE_STORAGE_KEY = "gnlaw-cafe-reels-bulk-render-mode-v1";
 
   document.addEventListener("DOMContentLoaded", () => {
     $("generateBtn").addEventListener("click", generateDraft);
@@ -983,6 +984,7 @@
         throw new Error(`${nextJob.caseName}: 저장된 릴스 이미지가 10장이 아닙니다. 이미지를 다시 선택해주세요.`);
       }
       applyJob(nextJob);
+      applyBulkRenderMode(nextJob.batchId);
       window.setWhiteboardLocalFiles?.(localFiles);
       show("bulkMsg", `${nextJob.caseName} · 다음 릴스 영상 자동화를 시작합니다.`);
       await reportBulkTransition(nextJob.id, "next-starting", "저장된 이미지 10장을 복원하고 다음 영상 생성을 시작합니다.");
@@ -1011,6 +1013,7 @@
     if (currentJob.batchId) {
       bulkAutomationRunning = true;
       rememberActiveBulkBatch(currentJob.batchId);
+      rememberBulkRenderMode(currentJob.batchId);
     }
     syncVideoTitle();
     const data = await postWorkflow({ action: "report-render", jobId: currentJob.id, status: "rendering" });
@@ -1038,6 +1041,21 @@
     localStorage.setItem(ACTIVE_BULK_STORAGE_KEY, JSON.stringify({ batchId, active: true, updatedAt: Date.now() }));
   }
 
+  function rememberBulkRenderMode(batchId) {
+    if (!batchId) return;
+    const renderMode = window.getWhiteboardRenderMode?.() || "slide";
+    localStorage.setItem(BULK_RENDER_MODE_STORAGE_KEY, JSON.stringify({ batchId, renderMode, updatedAt: Date.now() }));
+    window.setWhiteboardRenderMode?.(renderMode);
+  }
+
+  function applyBulkRenderMode(batchId) {
+    if (!batchId) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(BULK_RENDER_MODE_STORAGE_KEY) || "null");
+      if (saved?.batchId === batchId && saved.renderMode) window.setWhiteboardRenderMode?.(saved.renderMode);
+    } catch {}
+  }
+
   function activeBulkBatchId() {
     try {
       const saved = JSON.parse(localStorage.getItem(ACTIVE_BULK_STORAGE_KEY) || "null");
@@ -1049,6 +1067,7 @@
 
   function clearActiveBulkBatch() {
     localStorage.removeItem(ACTIVE_BULK_STORAGE_KEY);
+    localStorage.removeItem(BULK_RENDER_MODE_STORAGE_KEY);
   }
 
   async function resumeActiveBulkAutomation() {

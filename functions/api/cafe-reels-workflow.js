@@ -11,12 +11,14 @@ const NAVER_TOKEN_KEY = "naver-cafe:oauth:v1";
 const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
 const NAVER_ARTICLE_SEQUENCE_KEY = "cafe-reels:naver-article-sequence:v2";
+const SMARTEDITOR_RUNNER_KEY = "cafe-reels:smarteditor-runner:v1";
 const NAVER_ARTICLE_START = 147;
 const NAVER_CAFE_SLUG = "gnlawfintech";
 const NAVER_CAFE_MAX_IMAGES = 100;
 const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
 const NAVER_CAFE_KAKAO_HREF = "https://gnlaw-criminal.co.kr/kakao_redirect/";
 const VIDEO_RENDER_STALE_MS = 3 * 60 * 1000;
+const SMARTEDITOR_RUNNER_STALE_MS = 2 * 60 * 1000;
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -41,6 +43,16 @@ export async function onRequestPost({ request, env }) {
     if (!env?.CASES) return json({ ok: false, message: "KV 바인딩이 없습니다." }, 500);
     const body = await request.json().catch(() => null);
     const action = String(body?.action || "save-job");
+
+    if (action === "smarteditor-runner-heartbeat") {
+      const state = await heartbeatSmartEditorRunner(env, body);
+      return json({ ok: true, ...state });
+    }
+
+    if (action === "smarteditor-runner-release") {
+      const state = await releaseSmartEditorRunner(env, body);
+      return json({ ok: true, ...state });
+    }
 
     if (action === "save-job") {
       const built = buildJob(body);
@@ -347,6 +359,87 @@ async function updateIndex(env, job) {
 
 async function loadIndex(env) {
   return (await env.CASES.get(INDEX_KEY, "json").catch(() => null)) || [];
+}
+
+async function loadSmartEditorRunner(env) {
+  return (await env.CASES.get(SMARTEDITOR_RUNNER_KEY, "json").catch(() => null)) || null;
+}
+
+function publicRunnerState(state) {
+  if (!state) return null;
+  return {
+    runnerId: state.runnerId || "",
+    runnerName: state.runnerName || "",
+    startedAt: state.startedAt || "",
+    heartbeatAt: state.heartbeatAt || "",
+    takeoverRequestedBy: state.takeoverRequestedBy || "",
+    takeoverRequestedName: state.takeoverRequestedName || "",
+    takeoverRequestedAt: state.takeoverRequestedAt || "",
+  };
+}
+
+function isSmartEditorRunnerStale(state, now = Date.now()) {
+  if (!state?.heartbeatAt) return true;
+  const heartbeatAt = Date.parse(state.heartbeatAt);
+  return !Number.isFinite(heartbeatAt) || now - heartbeatAt > SMARTEDITOR_RUNNER_STALE_MS;
+}
+
+async function heartbeatSmartEditorRunner(env, body = {}) {
+  const runnerId = safeId(body?.runnerId || "");
+  if (!runnerId) throw new Error("SmartEditor 실행기 ID가 필요합니다.");
+  const runnerName = normalizeText(body?.runnerName || "GNLAW SmartEditor");
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const active = await loadSmartEditorRunner(env);
+  const stale = !active || isSmartEditorRunnerStale(active, now);
+
+  if (stale || active.runnerId === runnerId) {
+    const sameRunner = active?.runnerId === runnerId;
+    const takeoverRequestedBy = sameRunner ? normalizeText(active.takeoverRequestedBy || "") : "";
+    const takeoverRequestedName = sameRunner ? normalizeText(active.takeoverRequestedName || "") : "";
+    const takeoverRequestedAt = sameRunner ? normalizeText(active.takeoverRequestedAt || "") : "";
+    const next = {
+      runnerId,
+      runnerName,
+      startedAt: sameRunner ? (active.startedAt || nowIso) : nowIso,
+      heartbeatAt: nowIso,
+      phase: normalizeText(body?.phase || ""),
+      takeoverRequestedBy,
+      takeoverRequestedName,
+      takeoverRequestedAt,
+    };
+    await env.CASES.put(SMARTEDITOR_RUNNER_KEY, JSON.stringify(next));
+    return {
+      canRun: true,
+      shouldStopAfterCurrent: Boolean(takeoverRequestedBy && takeoverRequestedBy !== runnerId),
+      activeRunner: publicRunnerState(next),
+    };
+  }
+
+  const next = {
+    ...active,
+    takeoverRequestedBy: runnerId,
+    takeoverRequestedName: runnerName,
+    takeoverRequestedAt: nowIso,
+  };
+  await env.CASES.put(SMARTEDITOR_RUNNER_KEY, JSON.stringify(next));
+  return {
+    canRun: false,
+    shouldStopAfterCurrent: false,
+    activeRunner: publicRunnerState(next),
+    message: `${active.runnerName || "다른 PC"}에서 SmartEditor 자동화가 실행 중입니다. 기존 PC가 현재 글을 끝낸 뒤 종료하도록 요청했습니다.`,
+  };
+}
+
+async function releaseSmartEditorRunner(env, body = {}) {
+  const runnerId = safeId(body?.runnerId || "");
+  if (!runnerId) throw new Error("SmartEditor 실행기 ID가 필요합니다.");
+  const active = await loadSmartEditorRunner(env);
+  if (!active || active.runnerId === runnerId || isSmartEditorRunnerStale(active)) {
+    await env.CASES.delete(SMARTEDITOR_RUNNER_KEY);
+    return { released: true, activeRunner: null };
+  }
+  return { released: false, activeRunner: publicRunnerState(active) };
 }
 
 async function recoverStaleVideoRender(env, job) {
