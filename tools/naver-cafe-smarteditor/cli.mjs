@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.71.0 · 수정 71차";
+export const APP_VERSION = "v1.72.0 · 수정 72차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -433,8 +433,7 @@ async function processJob(context, apiContext, config, job, options, existingPag
       }
     }
 
-    submitStarted = true;
-    await submitArticle(page);
+    submitStarted = await submitArticle(page);
     const cafeUrl = await canonicalCafeArticleUrl(page, config, editArticleId || job.reservedNaverArticleId);
     await openPublishedArticleForVerification(page, cafeUrl);
     const publishedImages = await verifyPublishedImageSequence(page, files);
@@ -453,9 +452,9 @@ async function processJob(context, apiContext, config, job, options, existingPag
     if (await page.screenshot({ path: failureScreenshotPath, fullPage: false }).then(() => true).catch(() => false)) {
       console.error(`SmartEditor 실패 화면: ${failureScreenshotPath}`);
     }
-    if (options.publish && isBrowserClosedError(error) && !submitStarted) {
+    if (options.publish && shouldRequeueSmartEditor(error, submitStarted)) {
       await queueSmartEditor(apiContext, config, job.id).catch(() => {});
-      console.error("[복구] 게시 전 Chrome 종료를 감지해 작업을 SmartEditor 대기열로 되돌렸습니다.");
+      console.error("[복구] 게시 요청 전 오류를 감지해 작업을 SmartEditor 대기열로 되돌렸습니다.");
     } else if (options.publish) {
       const message = isBrowserClosedError(error) && submitStarted
         ? `게시 요청 이후 Chrome이 종료되었습니다. 중복 방지를 위해 자동 재시도하지 않습니다: ${safeErrorMessage(error)}`
@@ -923,16 +922,76 @@ async function setImageLink(page, imageIndex, href) {
 }
 
 async function submitArticle(page) {
-  const register = page.getByRole("button", { name: "등록", exact: true });
-  await register.first().click();
-  if (await waitForPublishedArticleView(page, 10_000)) return;
-  const count = await register.count();
-  if (count > 1 && await register.last().isVisible()) {
-    await register.last().click();
-  }
+  await prepareEditorForSubmit(page);
+  const clicked = await clickRegisterButton(page);
+  if (await waitForPublishedArticleView(page, 10_000)) return clicked;
+  await clickRegisterButton(page, { preferLast: true, optional: true });
   if (!await waitForPublishedArticleView(page, 60_000)) {
     throw new Error(`카페 등록 후 게시글 화면을 확인하지 못했습니다: ${page.url()}`);
   }
+  return clicked;
+}
+
+function shouldRequeueSmartEditor(error, submitStarted) {
+  if (submitStarted) return false;
+  if (isBrowserClosedError(error)) return true;
+  return /등록 버튼 클릭 실패|locator\.click: Timeout|게시 요청 전/i.test(String(error?.message || error || ""));
+}
+
+async function prepareEditorForSubmit(page) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await page.keyboard.press("Escape").catch(() => {});
+    await delay(250);
+  }
+  await page.evaluate(() => window.scrollTo(0, 0)).catch(() => {});
+  await delay(500);
+}
+
+async function clickRegisterButton(page, { preferLast = false, optional = false } = {}) {
+  const register = page.getByRole("button", { name: "등록", exact: true });
+  const attached = await register.first()
+    .waitFor({ state: "attached", timeout: optional ? 3_000 : 15_000 })
+    .then(() => true)
+    .catch((error) => {
+      if (optional) return false;
+      throw error;
+    });
+  if (!attached) return false;
+  const count = await register.count();
+  const indexes = [...Array(count).keys()];
+  if (preferLast) indexes.reverse();
+  let lastError;
+
+  for (const index of indexes) {
+    const candidate = register.nth(index);
+    if (!await candidate.isVisible().catch(() => false)) continue;
+    if (!await candidate.isEnabled().catch(() => true)) continue;
+
+    await candidate.scrollIntoViewIfNeeded().catch(() => {});
+    for (const options of [{ timeout: 5_000 }, { timeout: 5_000, force: true }]) {
+      try {
+        await candidate.click(options);
+        return true;
+      } catch (error) {
+        lastError = error;
+        await page.keyboard.press("Escape").catch(() => {});
+        await delay(300);
+      }
+    }
+
+    const box = await candidate.boundingBox().catch(() => null);
+    if (box) {
+      try {
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        return true;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+  }
+
+  if (optional) return false;
+  throw new Error(`SmartEditor 등록 버튼 클릭 실패: ${safeErrorMessage(lastError)}`);
 }
 
 async function waitForPublishedArticleView(page, timeout) {
