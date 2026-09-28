@@ -404,16 +404,13 @@
         const selectedImages = assetImagesForKey(imageSetKey);
         show("bulkMsg", `${completed + 1}/${rows.length} · ${caseName} 중복 검수 및 랜딩페이지 생성 중...`);
         try {
-          const draftResponse = await fetch("/api/generate-cafe-draft", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ caseName, fraudType }),
-          });
-          const draftData = await draftResponse.json();
-          if (!draftResponse.ok || !draftData.ok) throw new Error(draftData.message || "원고 생성 실패");
+          const draftData = await postJson("/api/generate-cafe-draft", { caseName, fraudType }, { retries: 2 });
           const generatedDraft = draftData.draft;
+          const jobId = item.row.dataset.jobId || crypto.randomUUID();
+          item.row.dataset.jobId = jobId;
           const saved = await postWorkflow({
             action: "save-job",
+            jobId,
             caseName,
             fraudType,
             title: generatedDraft.title || "",
@@ -425,7 +422,7 @@
             batchId,
             batchOrder: completed,
             deferArticleNumber: completed > 0,
-          });
+          }, { retries: 2 });
           completed += 1;
           firstSavedJob ||= saved.job;
           await rememberBulkLocalFiles(saved.job.id, item.files);
@@ -435,6 +432,13 @@
           show("bulkMsg", `${completed}/${rows.length} · ${caseName} · 카페 글 ${cafeNumber} 작업 등록 완료`);
         } catch (error) {
           failures.push(`${caseName}: ${error.message}`);
+        }
+      }
+      if (completed > 0) {
+        try {
+          await postJson("/api/sync-kv-to-github", { defer: true }, { retries: 1 });
+        } catch (error) {
+          failures.push(`GitHub 동기화: ${error.message}`);
         }
       }
       await loadJobs();
@@ -747,22 +751,42 @@
     }
   }
 
-  async function postWorkflow(payload) {
-    const response = await fetch("/api/cafe-reels-workflow", {
+  async function postWorkflow(payload, options = {}) {
+    return postJson("/api/cafe-reels-workflow", payload, options);
+  }
+
+  async function postJson(path, payload, options = {}, attempt = 0) {
+    const retries = Number.isInteger(options.retries) ? options.retries : 0;
+    const response = await fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     const text = await response.text();
+    const retryable = isRetryableStatus(response.status);
     let data;
     try {
-      data = JSON.parse(text);
+      data = text ? JSON.parse(text) : {};
     } catch {
+      if (retryable && attempt < retries) {
+        await wait(1200 * (attempt + 1));
+        return postJson(path, payload, options, attempt + 1);
+      }
       const detail = text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
-      throw new Error(`업로드 서버 오류 (HTTP ${response.status}). ${detail || "잠시 후 다시 시도해주세요."}`);
+      throw new Error(retryable
+        ? `서버 처리량이 초과되어 재시도 후에도 실패했습니다. 잠시 후 실패 항목만 다시 등록해주세요. (HTTP ${response.status})`
+        : `업로드 서버 오류 (HTTP ${response.status}). ${detail || "잠시 후 다시 시도해주세요."}`);
+    }
+    if (retryable && attempt < retries) {
+      await wait(1200 * (attempt + 1));
+      return postJson(path, payload, options, attempt + 1);
     }
     if (!response.ok || !data.ok) throw new Error(data.message || "작업 처리 실패");
     return data;
+  }
+
+  function isRetryableStatus(status) {
+    return status === 502 || status === 503 || status === 504 || status === 524;
   }
 
   async function getWorkflowJob(jobId = "") {

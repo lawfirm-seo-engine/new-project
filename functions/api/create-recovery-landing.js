@@ -30,12 +30,14 @@ export async function onRequestPost(context) {
     const imageAlt = normalizeSpace(body.imageAlt).slice(0, 160);
     const imageCaption = normalizeSpace(body.imageCaption).slice(0, 220);
     const imageDescription = normalizeSpace(body.imageDescription).slice(0, 300);
+    const batchMode = body.batchMode === true;
 
     if (!title || !slug || !rawArticleBody) {
       return json({ ok: false, message: "제목, URL slug, 원고는 필수입니다." }, 400);
     }
 
-    const existing = await loadExisting(env, slug);
+    const kvIndex = env.CASES ? await loadIndexFromKv(env) : null;
+    const existing = await loadExisting(env, slug, kvIndex);
     if (existing && !isRecoveryManual(existing)) {
       return json({
         ok: false,
@@ -83,28 +85,32 @@ export async function onRequestPost(context) {
 
     if (env.CASES) {
       await env.CASES.put(`case:${slug}`, JSON.stringify(item));
-      const index = await loadIndexFromKv(env);
+      const index = Array.isArray(kvIndex) ? kvIndex : await loadIndexFromKv(env);
       upsertIndex(index, item);
       await env.CASES.put("cases:index", JSON.stringify(index));
-      context.waitUntil?.(upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} recovery landing ${slug}`).catch(() => {}));
+      if (!batchMode) context.waitUntil?.(upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} recovery landing ${slug}`).catch(() => {}));
 
       const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
-      context.waitUntil?.(pingIndexNow(publicSlug, indexNowKey).catch(() => {}));
-      context.waitUntil?.(warmRecoveryCache(publicSlug).catch(() => {}));
+      if (!batchMode) {
+        context.waitUntil?.(pingIndexNow(publicSlug, indexNowKey).catch(() => {}));
+        context.waitUntil?.(warmRecoveryCache(publicSlug).catch(() => {}));
+      }
 
       return json({
         ok: true,
         message: existing ? "리커버리 랜딩이 갱신되었습니다." : "리커버리 랜딩이 생성되었습니다.",
         landing: item,
         url: buildLandingUrl(RECOVERY_GROUP, publicSlug),
-        storage: "kv+github",
+        storage: batchMode ? "kv" : "kv+github",
       });
     }
 
     await upsertCaseInGitHub(env, item, `${existing ? "Update" : "Add"} recovery landing ${slug}`);
     const indexNowKey = env.INDEXNOW_KEY || DEFAULT_INDEXNOW_KEY;
-    context.waitUntil?.(pingIndexNow(publicSlug, indexNowKey).catch(() => {}));
-    context.waitUntil?.(warmRecoveryCache(publicSlug).catch(() => {}));
+    if (!batchMode) {
+      context.waitUntil?.(pingIndexNow(publicSlug, indexNowKey).catch(() => {}));
+      context.waitUntil?.(warmRecoveryCache(publicSlug).catch(() => {}));
+    }
 
     return json({
       ok: true,
@@ -118,10 +124,15 @@ export async function onRequestPost(context) {
   }
 }
 
-async function loadExisting(env, slug) {
+async function loadExisting(env, slug, index = null) {
   if (env.CASES) {
     const raw = await env.CASES.get(`case:${slug}`);
     if (raw) return JSON.parse(raw);
+    if (Array.isArray(index)) {
+      const entry = index.find((item) => item.slug === slug);
+      if (entry) return entry;
+    }
+    return null;
   }
   const all = await loadCasesFromGitHub(env).catch(() => []);
   return all.find((item) => item.slug === slug) || null;

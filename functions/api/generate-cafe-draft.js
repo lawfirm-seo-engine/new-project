@@ -273,7 +273,7 @@ async function ensureStandardLandingPage(context, { rawCaseName, fraudType }) {
     };
   }
 
-  const created = await callFunctionJson(context, createCaseLanding, candidate);
+  const created = await callFunctionJson(context, createCaseLanding, { ...candidate, batchMode: true });
   if (!created.ok) {
     const retryExisting = await findExistingLanding(context.env, candidate, PRIMARY_GROUP);
     if (retryExisting) {
@@ -317,6 +317,7 @@ async function ensureRecoveryLandingPage(context, { rawCaseName, draft }) {
     summary: `${rawCaseName} 계좌 지급정지 해제와 채무부존재확인소송 대응 절차를 정리합니다.`,
     body: draft.body,
     tags: ["지급정지해제", "채무부존재확인소송", "계좌지급정지", rawCaseName],
+    batchMode: true,
   };
   let created = await callFunctionJson(context, createRecoveryLanding, payload);
 

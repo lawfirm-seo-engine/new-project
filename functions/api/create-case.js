@@ -31,6 +31,7 @@ export async function onRequestPost(context) {
     const landingViews = Number.isInteger(body.landingViews) ? body.landingViews : randomInt(140, 8000, slug);
     const reports = Number.isInteger(body.reports) ? body.reports : randomInt(4, 34, `${slug}-reports`);
     const fraudType = normalizeFraudTypeKey(body.fraudType || body.scamType, { caseName, slug, summary });
+    const batchMode = body.batchMode === true;
 
     if (!caseName || !slug || !summary) {
       return json({ ok: false, message: "필수 입력값이 누락되었습니다." }, 400);
@@ -76,23 +77,25 @@ export async function onRequestPost(context) {
       const repoName = env.GITHUB_REPO_NAME;
       const branch = env.GITHUB_BRANCH || "main";
       const token = env.GITHUB_TOKEN;
-      if (repoOwner && repoName && token) {
+      if (!batchMode && repoOwner && repoName && token) {
         context.waitUntil?.(syncAllCasesToGitHub(env, repoOwner, repoName, branch, token).catch(() => {}));
       }
 
       const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
       // warmLandingCaches 완료 후 pingIndexNow — Naver가 크롤할 때 og:image가 CDN에 캐시된 상태 보장
-      context.waitUntil?.(
-        warmLandingCaches(slug, Boolean(autoLdLanding))
-          .catch(() => {})
-          .then(() => pingIndexNow(slug, indexNowKey, Boolean(autoLdLanding)).catch(() => {})),
-      );
+      if (!batchMode) {
+        context.waitUntil?.(
+          warmLandingCaches(slug, Boolean(autoLdLanding))
+            .catch(() => {})
+            .then(() => pingIndexNow(slug, indexNowKey, Boolean(autoLdLanding)).catch(() => {})),
+        );
+      }
 
       return json({
         ok: true,
         message: "사건이 저장되었습니다.",
         case: newCase,
-        storage: "kv+github",
+        storage: batchMode ? "kv" : "kv+github",
       });
     }
 
@@ -153,11 +156,13 @@ export async function onRequestPost(context) {
 
     const indexNowKey = env.INDEXNOW_KEY || INDEXNOW_KEY;
     // warmLandingCaches 완료 후 pingIndexNow — Naver가 크롤할 때 og:image가 CDN에 캐시된 상태 보장
-    context.waitUntil?.(
-      warmLandingCaches(slug)
-        .catch(() => {})
-        .then(() => pingIndexNow(slug, indexNowKey).catch(() => {})),
-    );
+    if (!batchMode) {
+      context.waitUntil?.(
+        warmLandingCaches(slug)
+          .catch(() => {})
+          .then(() => pingIndexNow(slug, indexNowKey).catch(() => {})),
+      );
+    }
 
     return json({
       ok: true,
