@@ -14,8 +14,13 @@
  * Playwright 도구(tools/gnlaw-google-indexer)가 대기열에서 가져가 서치콘솔로
  * 처리한다.
  *
- * 주기 실행: .github/workflows/index-queue-scan.yml (GitHub Actions cron)
+ * 정기 실행은 Cloudflare Cron Trigger(workers/index-queue-cron, 15분 간격)가
+ * /api/index-queue 의 action:"scan"을 직접 호출하는 방식으로 대체되었다 —
+ * 이 스크립트는 전체 후보를 한 번에 강제로 재스캔하고 싶을 때 쓰는 수동
+ * 백업 도구다.
  * 수동 실행: INDEX_QUEUE_TOKEN=... node scripts/scan-index-queue.js
+ * 또는 GitHub Actions "Scan search index queue (manual backup)" 워크플로를
+ * Run workflow로 직접 실행.
  */
 
 import fs from "fs-extra";

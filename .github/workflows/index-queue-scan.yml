@@ -1,8 +1,9 @@
-name: Scan search index queue
+name: Scan search index queue (manual backup)
 
+# 정기 실행은 Cloudflare Cron Trigger(workers/index-queue-cron)가 맡는다.
+# 이 워크플로는 필요할 때 수동으로 전체 후보를 한 번에 강제 재스캔하고 싶을 때만
+# 쓰는 백업/디버깅용이다.
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch: {}
 
 jobs:
