@@ -251,6 +251,9 @@ test("SmartEditor runner recovers a crashed Chrome without losing a queued job",
   assert.equal(isBrowserClosedError(new Error("HTTP 500")), false);
   assert.equal(isTransientNetworkError(new Error("apiRequestContext.get: read ECONNRESET")), true);
   assert.equal(isTransientNetworkError(new Error("socket hang up")), true);
+  assert.equal(isTransientNetworkError(new Error("getaddrinfo ENOTFOUND gnlaw-criminal.co.kr")), true);
+  assert.equal(isTransientNetworkError(new Error("getaddrinfo ENOENT gnlaw-criminal.co.kr")), true);
+  assert.equal(isTransientNetworkError(new Error("net::ERR_NAME_NOT_RESOLVED")), true);
   assert.equal(isTransientNetworkError(new Error("HTTP 400")), false);
 
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
@@ -258,6 +261,10 @@ test("SmartEditor runner recovers a crashed Chrome without losing a queued job",
   assert.match(source, /watchWithBrowserRecovery\(config, chromePath, runOptions\)/);
   assert.match(source, /Chrome 재실행 완료/);
   assert.match(source, /API 연결이 끊겨 재시도합니다/);
+  assert.match(source, /자동화를 종료하지 않고/);
+  assert.match(source, /async function retryTransientOperation/);
+  assert.match(source, /SmartEditor 대기열 복원/);
+  assert.match(source, /카페 글은 게시되었습니다\. 네트워크 복구 후 완료 상태를 저장했습니다/);
   assert.match(source, /function safeErrorMessage/);
   assert.match(source, /Call log:/);
   assert.match(source, /queueSmartEditor\(apiContext, config, job\.id\)/);
@@ -277,14 +284,14 @@ test("Windows installer validates the packaged app and stops an old instance", (
   const source = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/Install.cmd", import.meta.url), "utf8");
   assert.match(source, /app\\GNLAWSmartEditor\.exe/);
   assert.match(source, /taskkill\.exe \/F \/T \/IM GNLAWSmartEditor\.exe/);
-  assert.match(source, /v1\.76\.0/);
+  assert.match(source, /v1\.77\.0/);
 
   const gui = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/windows/GNLAWSmartEditor.cs", import.meta.url), "utf8");
   assert.match(gui, /StopStaleAutomationProcesses\(nodePath, cliPath\)/);
   assert.match(gui, /ManagementObjectSearcher\("SELECT ProcessId, Name, CommandLine FROM Win32_Process"\)/);
   assert.match(gui, /commandLine\.IndexOf\(profilePath/);
   assert.match(gui, /기존 자동화 프로세스/);
-  assert.match(gui, /v1\.76\.0 · 수정 76차/);
+  assert.match(gui, /v1\.77\.0 · 수정 77차/);
   assert.match(gui, /gui\.log/);
   assert.match(gui, /File\.AppendAllText/);
 });
@@ -293,10 +300,10 @@ test("automation surfaces expose the same revision version", () => {
   const cli = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/cli.mjs", import.meta.url), "utf8");
   const page = fs.readFileSync(new URL("../admin/cafe-reels.html", import.meta.url), "utf8");
   const version = fs.readFileSync(new URL("../tools/naver-cafe-smarteditor/VERSION.txt", import.meta.url), "utf8").trim();
-  assert.equal(version, "v1.76.0 · 수정 76차");
-  assert.match(cli, /v1\.76\.0 · 수정 76차/);
-  assert.match(page, /v1\.76\.0 · 수정 76차/);
-  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.76\.0/);
+  assert.equal(version, "v1.77.0 · 수정 77차");
+  assert.match(cli, /v1\.77\.0 · 수정 77차/);
+  assert.match(page, /v1\.77\.0 · 수정 77차/);
+  assert.match(page, /gnlaw-smarteditor-windows\.zip\?v=1\.77\.0/);
 });
 
 test("queue watcher relaunches Chrome after a renderer crash", () => {

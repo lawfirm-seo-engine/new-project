@@ -13,3 +13,4 @@ The login confirmation step stores the browser session in the current Windows us
 For bulk work, select exactly 10 Reels images in each case row before registering the jobs. Version 1.76 backs up those images to the server for queue recovery on another PC. If automation stops, use "등록한 대기열 불러오기" and resume from the first incomplete case.
 
 The program can be installed on both home and office PCs. Run automation on only one PC at a time.
+Version 1.77 keeps the queue watcher alive during temporary DNS or API connection failures and resumes automatically after the connection recovers.

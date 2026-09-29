@@ -9,7 +9,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, request } from "playwright-core";
 
-export const APP_VERSION = "v1.76.0 · 수정 76차";
+export const APP_VERSION = "v1.77.0 · 수정 77차";
 const DEFAULT_SITE_ORIGIN = "https://gnlaw-criminal.co.kr";
 const DEFAULT_CLUB_ID = "31738465";
 const DEFAULT_CAFE_URL = "https://cafe.naver.com/gnlawfintech";
@@ -156,7 +156,7 @@ export function isBrowserClosedError(error) {
 
 export function isTransientNetworkError(error) {
   const message = String(error?.message || error || "");
-  return /ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|socket hang up|network.*(?:changed|failed)|connection.*(?:closed|reset)/i.test(message);
+  return /ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|ENOENT|ERR_NAME_NOT_RESOLVED|DNS_PROBE|socket hang up|network.*(?:changed|failed)|connection.*(?:closed|reset)|name resolution/i.test(message);
 }
 
 function safeErrorMessage(error) {
@@ -230,28 +230,39 @@ async function main() {
 
 async function watchWithBrowserRecovery(config, chromePath, options) {
   const maxRestarts = 5;
-  for (let restart = 0; restart <= maxRestarts; restart += 1) {
+  let browserRestarts = 0;
+  let networkReconnects = 0;
+  for (;;) {
     let context;
     let apiContext;
+    let retryDelay = 0;
     try {
       context = await launchRunnerContext(config, chromePath);
       await restoreSessionState(context, config);
       apiContext = await createApiContext(context);
-      if (restart > 0) console.log(`[복구] Chrome 재실행 완료 (${restart}/${maxRestarts}) · 대기열 감시를 재개합니다.`);
+      if (browserRestarts > 0) console.log(`[복구] Chrome 재실행 완료 (${browserRestarts}/${maxRestarts}) · 대기열 감시를 재개합니다.`);
+      if (networkReconnects > 0) console.log(`[복구] 서버 연결 복구 완료 · 대기열 감시를 재개합니다.`);
       return await watchQueue(context, apiContext, config, options);
     } catch (error) {
       const browserClosed = isBrowserClosedError(error);
       const transientNetwork = isTransientNetworkError(error);
-      if ((!browserClosed && !transientNetwork) || options.once || restart >= maxRestarts) throw error;
-      console.error(browserClosed
-        ? `[복구] 자동화용 Chrome이 종료되었습니다: ${safeErrorMessage(error)}`
-        : `[복구] 서버 연결이 일시적으로 끊겼습니다: ${safeErrorMessage(error)}`);
-      console.error(`[복구] 로그인 세션을 유지한 채 자동화를 다시 연결합니다 (${restart + 1}/${maxRestarts}).`);
+      if (transientNetwork && !options.once) {
+        networkReconnects += 1;
+        retryDelay = Math.min(5_000 * networkReconnects, 60_000);
+        console.error(`[복구] DNS·서버 연결이 일시적으로 끊겼습니다: ${safeErrorMessage(error)}`);
+        console.error(`[복구] 자동화를 종료하지 않고 ${Math.round(retryDelay / 1000)}초 후 다시 연결합니다 (${networkReconnects}회).`);
+      } else {
+        if (!browserClosed || options.once || browserRestarts >= maxRestarts) throw error;
+        browserRestarts += 1;
+        retryDelay = Math.min(2_000 * browserRestarts, 10_000);
+        console.error(`[복구] 자동화용 Chrome이 종료되었습니다: ${safeErrorMessage(error)}`);
+        console.error(`[복구] 로그인 세션을 유지한 채 자동화를 다시 연결합니다 (${browserRestarts}/${maxRestarts}).`);
+      }
     } finally {
       await apiContext?.dispose().catch(() => {});
       await context?.close().catch(() => {});
     }
-    await delay(Math.min(2_000 * (restart + 1), 10_000));
+    await delay(retryDelay);
   }
 }
 
@@ -282,44 +293,55 @@ async function watchQueue(context, apiContext, config, options) {
   const stopHeartbeat = startRunnerHeartbeat(apiContext, config, options);
   console.log(`랜딩·릴스·SmartEditor 전체 대기열 감시 시작 (${config.siteOrigin}, ${config.pollSeconds}초 간격)`);
   let emptyQueueLogged = false;
+  let consecutiveNetworkFailures = 0;
   try {
     for (;;) {
-      if (monitorPage.isClosed() || context.pages().length === 0) {
-        throw new Error("Browser has been closed while the queue watcher was running.");
-      }
-      const lease = await heartbeatRunner(apiContext, config, "poll");
-      if (lease.shouldStopAfterCurrent || options.stopAfterCurrent) {
-        console.log("[인계] 다른 PC에서 자동화를 시작했습니다. 새 작업을 집지 않고 종료합니다.");
-        return;
-      }
-      const jobs = await loadQueue(apiContext, config);
-      const byReservedNumber = (a, b) => Number(a.reservedNaverArticleId || Number.MAX_SAFE_INTEGER) - Number(b.reservedNaverArticleId || Number.MAX_SAFE_INTEGER);
-      const cafeQueued = jobs
-        .filter((job) => job.cafeStatus === "smarteditor-queued")
-        .sort(byReservedNumber)
-        .at(0);
-      if (cafeQueued) {
-        emptyQueueLogged = false;
-        const job = await loadJob(apiContext, config, cafeQueued.id);
-        const result = await processJob(context, apiContext, config, job, options, monitorPage);
-        const afterJobLease = await heartbeatRunner(apiContext, config, "after-job");
-        if (afterJobLease.shouldStopAfterCurrent || options.stopAfterCurrent) {
-          console.log("[인계] 현재 글을 완료했습니다. 다른 PC가 이어받을 수 있도록 자동화를 종료합니다.");
+      try {
+        if (monitorPage.isClosed() || context.pages().length === 0) {
+          throw new Error("Browser has been closed while the queue watcher was running.");
+        }
+        const lease = await heartbeatRunner(apiContext, config, "poll");
+        if (lease.shouldStopAfterCurrent || options.stopAfterCurrent) {
+          console.log("[인계] 다른 PC에서 자동화를 시작했습니다. 새 작업을 집지 않고 종료합니다.");
           return;
         }
-        if (!result?.posted && !options.yes) return;
-      } else {
-        if (options.once) {
-          console.log("대기 중인 SmartEditor 작업이 없습니다.");
-          return;
+        const jobs = await loadQueue(apiContext, config);
+        const byReservedNumber = (a, b) => Number(a.reservedNaverArticleId || Number.MAX_SAFE_INTEGER) - Number(b.reservedNaverArticleId || Number.MAX_SAFE_INTEGER);
+        const cafeQueued = jobs
+          .filter((job) => job.cafeStatus === "smarteditor-queued")
+          .sort(byReservedNumber)
+          .at(0);
+        if (cafeQueued) {
+          emptyQueueLogged = false;
+          const job = await loadJob(apiContext, config, cafeQueued.id);
+          const result = await processJob(context, apiContext, config, job, options, monitorPage);
+          const afterJobLease = await heartbeatRunner(apiContext, config, "after-job");
+          if (afterJobLease.shouldStopAfterCurrent || options.stopAfterCurrent) {
+            console.log("[인계] 현재 글을 완료했습니다. 다른 PC가 이어받을 수 있도록 자동화를 종료합니다.");
+            return;
+          }
+          if (!result?.posted && !options.yes) return;
+        } else {
+          if (options.once) {
+            console.log("대기 중인 SmartEditor 작업이 없습니다.");
+            return;
+          }
+          if (!emptyQueueLogged) {
+            console.log("[대기열] 대기 작업이 없습니다. 새 작업이 등록될 때까지 계속 감시합니다.");
+            emptyQueueLogged = true;
+          }
         }
-        if (!emptyQueueLogged) {
-          console.log("[대기열] 대기 작업이 없습니다. 새 작업이 등록될 때까지 계속 감시합니다.");
-          emptyQueueLogged = true;
-        }
+        consecutiveNetworkFailures = 0;
+        if (options.once) return;
+        await delay(config.pollSeconds * 1000);
+      } catch (error) {
+        if (!isTransientNetworkError(error) || options.once) throw error;
+        consecutiveNetworkFailures += 1;
+        const retryDelay = Math.min(5_000 * consecutiveNetworkFailures, 60_000);
+        console.error(`[네트워크] DNS·API 연결이 끊겼습니다: ${safeErrorMessage(error)}`);
+        console.error(`[네트워크] 자동화를 종료하지 않고 ${Math.round(retryDelay / 1000)}초 후 대기열 처리를 다시 시도합니다.`);
+        await delay(retryDelay);
       }
-      if (options.once) return;
-      await delay(config.pollSeconds * 1000);
       if (monitorPage.isClosed() || context.pages().length === 0) {
         throw new Error("Browser has been closed while the queue watcher was running.");
       }
@@ -404,6 +426,7 @@ async function processJob(context, apiContext, config, job, options, existingPag
   const page = existingPage || await context.newPage();
   const ownsPage = !existingPage;
   let submitStarted = false;
+  let publishedCafeUrl = "";
   try {
     if (options.publish) await reportStatus(apiContext, config, job.id, "preparing");
     const files = await downloadImages(apiContext, images, tempDir);
@@ -465,26 +488,38 @@ async function processJob(context, apiContext, config, job, options, existingPag
     }
 
     submitStarted = await submitArticle(page);
-    const cafeUrl = await canonicalCafeArticleUrl(page, config, editArticleId || job.reservedNaverArticleId);
-    await openPublishedArticleForVerification(page, cafeUrl);
+    publishedCafeUrl = await canonicalCafeArticleUrl(page, config, editArticleId || job.reservedNaverArticleId);
+    await openPublishedArticleForVerification(page, publishedCafeUrl);
     const publishedImages = await verifyPublishedImageSequence(page, files);
     const publishedLinks = await verifyPublishedLinks(page, [config.phoneLink, config.kakaoLink]);
     if (videoFile) await verifyPublishedVideo(page);
     if (job.instagramPermalink) {
       await verifyPublishedInstagramOrder(page, articleLinkUrls(articleParts.links), job.instagramPermalink);
     }
-    await reportStatus(apiContext, config, job.id, "posted", { cafeUrl });
-    console.log(`게시 완료: ${cafeUrl}`);
+    await reportStatus(apiContext, config, job.id, "posted", { cafeUrl: publishedCafeUrl });
+    console.log(`게시 완료: ${publishedCafeUrl}`);
     console.log(`공개 글 이미지 순서 검증: ${publishedImages.join(" → ")}`);
     console.log(`공개 글 링크 검증: ${publishedLinks.join(", ")}`);
-    return { posted: true, cafeUrl, screenshotPath, videoUploaded: Boolean(videoFile) };
+    return { posted: true, cafeUrl: publishedCafeUrl, screenshotPath, videoUploaded: Boolean(videoFile) };
   } catch (error) {
     const failureScreenshotPath = path.join(config.artifactDir, `${safeFileName(job.id)}-${Date.now()}-failed.png`);
     if (await page.screenshot({ path: failureScreenshotPath, fullPage: false }).then(() => true).catch(() => false)) {
       console.error(`SmartEditor 실패 화면: ${failureScreenshotPath}`);
     }
+    const transientNetwork = isTransientNetworkError(error);
+    if (options.publish && submitStarted && transientNetwork && publishedCafeUrl) {
+      await retryTransientOperation(
+        () => reportStatus(apiContext, config, job.id, "posted", { cafeUrl: publishedCafeUrl }),
+        "게시 완료 상태 저장",
+      );
+      console.log(`[복구] 카페 글은 게시되었습니다. 네트워크 복구 후 완료 상태를 저장했습니다: ${publishedCafeUrl}`);
+      return { posted: true, cafeUrl: publishedCafeUrl, screenshotPath: failureScreenshotPath, videoUploaded: Boolean(videoFile) };
+    }
     if (options.publish && shouldRequeueSmartEditor(error, submitStarted)) {
-      await queueSmartEditor(apiContext, config, job.id).catch(() => {});
+      await retryTransientOperation(
+        () => queueSmartEditor(apiContext, config, job.id),
+        "SmartEditor 대기열 복원",
+      );
       console.error("[복구] 게시 요청 전 오류를 감지해 작업을 SmartEditor 대기열로 되돌렸습니다.");
     } else if (options.publish) {
       const message = isBrowserClosedError(error) && submitStarted
@@ -965,8 +1000,24 @@ async function submitArticle(page) {
 
 function shouldRequeueSmartEditor(error, submitStarted) {
   if (submitStarted) return false;
-  if (isBrowserClosedError(error)) return true;
+  if (isBrowserClosedError(error) || isTransientNetworkError(error)) return true;
   return /등록 버튼 클릭 실패|locator\.click: Timeout|게시 요청 전/i.test(String(error?.message || error || ""));
+}
+
+async function retryTransientOperation(operation, label) {
+  let attempt = 0;
+  for (;;) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (!isTransientNetworkError(error)) throw error;
+      attempt += 1;
+      const retryDelay = Math.min(5_000 * attempt, 60_000);
+      console.error(`[네트워크] ${label} 실패: ${safeErrorMessage(error)}`);
+      console.error(`[네트워크] 자동화를 종료하지 않고 ${Math.round(retryDelay / 1000)}초 후 다시 시도합니다.`);
+      await delay(retryDelay);
+    }
+  }
 }
 
 async function prepareEditorForSubmit(page) {
