@@ -237,27 +237,33 @@ test("Cafe fraud titles use the requested recovery-focused wording", () => {
 
 test("caption templates use the case, landing, and reserved Cafe URL", () => {
   const fraud = buildCaption({
-    caseName: "스크류바 프로젝트",
+    caseName: "소수몽키 사칭 사기",
     fraudType: "stock-project",
     imageSetKey: "fraud",
-    draft: { landingUrl: "https://gnlaw-criminal.co.kr/prosecute/screwbar-litigation/" },
-    cafeUrl: "https://cafe.naver.com/gnlawfintech/134",
+    draft: { landingUrl: "https://gnlaw-criminal.co.kr/prosecute/sosumonkey-litigation/" },
+    cafeUrl: "https://cafe.naver.com/gnlawfintech/245",
   });
-  assert.match(fraud, /🚨\[사기피해주의\] 스크류바 프로젝트 사칭 사기/);
-  assert.match(fraud, /screwbar-litigation/);
-  assert.match(fraud, /gnlawfintech\/134/);
-  assert.match(fraud, /#스크류바프로젝트사칭사기/);
-  assert.match(fraud, /litigation\/\n\n스크류바 프로젝트 사칭 사기/);
+  assert.match(fraud, /^🚨\[사기피해주의\] 소수몽키 사칭 사기 피해가 의심된다면/);
+  assert.match(fraud, /⏳ 소수몽키를 사칭한 사기로 금전을 입금했거나/);
+  assert.match(fraud, /📌 소수몽키 사칭 사기 관련 내용\nhttps:\/\/gnlaw-criminal\.co\.kr\/prosecute\/sosumonkey-litigation\//);
+  assert.match(fraud, /📌 다른 리딩방 사기 사건 및 대응방법\nhttps:\/\/gnlaw-criminal\.co\.kr\/prosecute\/jusigridingbang-litigation\//);
+  assert.match(fraud, /📢 관련 사건 자료\nhttps:\/\/cafe\.naver\.com\/gnlawfintech\/245/);
+  assert.match(fraud, /법무법인 선린 금융사기피해센터\n☎ 02-6348-0406/);
+  assert.match(fraud, /#소수몽키사칭사기 #소수몽키사기 #리딩방사기 #투자사기/);
 
   const payment = buildCaption({
-    caseName: "하나",
+    caseName: "신한은행 계좌지급정지 이의신청 불수용",
     fraudType: "payment-suspension-release",
     imageSetKey: "payment-suspension-release",
-    draft: { landingUrl: "https://gnlaw-recovery.co.kr/success/hana-result/" },
-    cafeUrl: "https://cafe.naver.com/gnlawfintech/135",
+    draft: { landingUrl: "https://gnlaw-recovery.co.kr/success/shinhan-result/" },
+    cafeUrl: "https://cafe.naver.com/gnlawfintech/143",
   });
-  assert.match(payment, /하나은행 계좌지급정지해제/);
-  assert.match(payment, /gnlawfintech\/135/);
+  assert.match(payment, /^🚨 신한은행 계좌지급정지 이의신청 불수용, 어떻게 대응해야 할까요\?/);
+  assert.match(payment, /지금 바로 신한은행 계좌지급정지 이의신청 불수용, 두가지 방법을 상담 드립니다\./);
+  assert.match(payment, /📌 신한은행 계좌지급정지해제 자세히 보기\nhttps:\/\/gnlaw-recovery\.co\.kr\/success\/shinhan-result\//);
+  assert.match(payment, /📢 계좌지급정지해제 관련 사례\nhttps:\/\/cafe\.naver\.com\/gnlawfintech\/143/);
+  assert.match(payment, /#신한은행계좌지급정지해제 #계좌지급정지해제/);
+  assert.doesNotMatch(payment, /신한은행 계좌지급정지 이의신청 불수용은행/);
 });
 
 test("Instagram Story metadata uses the part-specific center label and landing URL", () => {

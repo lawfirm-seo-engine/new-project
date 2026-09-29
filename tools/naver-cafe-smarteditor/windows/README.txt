@@ -16,3 +16,4 @@ The program can be installed on both home and office PCs. Run automation on only
 Version 1.77 keeps the queue watcher alive during temporary DNS or API connection failures and resumes automatically after the connection recovers.
 Version 1.78 reduces bulk registration server load, spaces consecutive case creation requests, and retries temporary 502 responses without dropping the failed row.
 Version 1.79 preserves an existing Instagram Reel container during action limits and resumes it automatically after a progressive cooldown instead of failing queue recovery.
+Version 1.80 applies the new part-specific Instagram Reel caption templates with each case, landing page, and reserved Cafe URL filled in automatically.

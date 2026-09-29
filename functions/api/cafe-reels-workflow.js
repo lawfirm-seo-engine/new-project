@@ -1348,37 +1348,78 @@ export function buildCaption(job = {}) {
   const payment = job.imageSetKey === "payment-suspension-release" || job.fraudType === "payment-suspension-release";
 
   if (payment) {
-    const bankName = /은행(?:\s|$)/.test(caseName) ? caseName : `${caseName}은행`;
-    const subject = /계좌\s*지급정지\s*해제/.test(bankName) ? bankName : `${bankName} 계좌지급정지해제`;
+    const bankName = paymentBankName(caseName);
+    const subject = /계좌\s*지급정지/.test(caseName) ? caseName : `${bankName} 계좌지급정지해제`;
+    const bankTag = bankName.replace(/[^0-9A-Za-z가-힣]/g, "");
     return normalizeCaption([
-      `🚨[계좌지급정지해제] ${subject}⏳02-6348-0406 지금 바로 긴급 상담⏰망설이면 늦습니다.📌${landingUrl}`,
+      `🚨 ${subject}, 어떻게 대응해야 할까요? 📲 02-6348-0406 지금 바로 ${subject}, 두가지 방법을 상담 드립니다.`,
       "",
-      `${subject} 망설이지 않고 상담 받으면 늦지 않습니다.`,
+      "📌 카카오톡 상담",
+      "https://pf.kakao.com/_WkdxfX/chat",
       "",
-      "🚨채무부존재확인소송 법무법인 선린 금융사기피해센터 카카오톡 상담",
-      "📌 https://pf.kakao.com/_WkdxfX/chat",
+      "먼저 계좌가 지급정지된 사유와 피해신고 내용을 확인하고, 거래 경위를 입증할 자료와 이의제기 신청서를 준비하는 순서로 대응합니다.",
       "",
-      "법무법인 선린 계좌 지급정지 대응센터",
-      "📢 https://gnlaw-recovery.co.kr",
-      cafeUrl ? `📢 ${cafeUrl}` : null,
+      "이의제기만으로 지급정지가 해결되지 않는 경우에는 사실관계에 따라 채무부존재확인소송 등 법적 절차를 진행합니다.",
+      "",
+      "특히 지급정지 신청자와 피해신고 내용을 정확히 확인하고, 계좌 거래내역·송금 경위·관련 대화내용 등 객관적인 자료를 보존하는 것이 중요합니다.",
+      "",
+      `📌 ${bankName} 계좌지급정지해제 자세히 보기`,
+      landingUrl,
+      "",
+      "🚨 채무부존재확인소송·계좌지급정지 대응센터",
+      "☎ 02-6348-0406",
+      "",
+      "📢 법무법인 선린 계좌 지급정지 대응센터",
+      "https://gnlaw-recovery.co.kr",
+      "",
+      "📢 계좌지급정지해제 관련 사례",
+      cafeUrl || null,
+      "",
+      `#${bankTag}계좌지급정지해제 #계좌지급정지해제 #계좌지급정지이의신청 #계좌지급정지이의제기 #지급정지해제이의신청불수용 #지급정지해제이의제기불수용 #채무부존재확인소송 #법무법인선린`,
     ].filter((line) => line !== null).join("\n"));
   }
 
   const subject = /사칭\s*사기/.test(caseName) ? caseName : `${caseName} 사칭 사기`;
+  const impersonatedName = subject.replace(/\s*사칭\s*사기.*$/, "").trim() || caseName;
+  const objectParticle = koreanObjectParticle(impersonatedName);
   const compactTag = subject.replace(/[^0-9A-Za-z가-힣]/g, "");
+  const impersonatedTag = impersonatedName.replace(/[^0-9A-Za-z가-힣]/g, "");
   return normalizeCaption([
-    `🚨[사기피해주의] ${subject}⏳02-6348-0406 지금 바로 긴급 상담⏰망설이면 늦습니다.📌${landingUrl}`,
+    `🚨[사기피해주의] ${subject} 피해가 의심된다면 📲 02-6348-0406 지금 바로 상담으로 피해 회복 가능 여부를 확인해야 합니다.`,
     "",
-    `${subject} 투자 리딩방 사기 피해 회복 망설이지 않고 상담 받으면 늦지 않습니다.`,
+    `⏳ ${impersonatedName}${objectParticle} 사칭한 사기로 금전을 입금했거나, 수익금·투자금 출금을 요청하는 과정에서 추가 입금을 요구받았나요? 사이트 폐쇄, 리딩방 폭파, 고객센터 연락두절 상태인가요? 망설이지 않고 상담 받으면 늦지 않습니다.`,
     "",
-    "📌법무법인 선린 금융사기피해센터 카카오톡 상담 https://pf.kakao.com/_WkdxfX/chat",
+    "📌 카카오톡 상담",
+    "https://pf.kakao.com/_WkdxfX/chat",
     "",
-    "다른 리딩방 사기 사건 보기는 이곳",
-    "📢 https://gnlaw-criminal.co.kr/prosecute/jusigridingbang-litigation/",
-    cafeUrl ? `📢 ${cafeUrl}` : null,
+    "⏰ 특히 출금을 이유로 수수료, 세금, 보증금 또는 추가 투자금을 계속 요구한다면 상대방과의 대화 내용, 입금계좌, 이체확인증, 사이트 주소, 문자·카카오톡·텔레그램 등의 자료를 삭제하지 말고 보관하는 것이 중요합니다.",
     "",
-    `#${compactTag} #투자사기 #리딩방사기 #팀미션사기 #법무법인선린 #금융사기피해센터 #금융사기 #피해회복`,
+    `📌 ${subject} 관련 내용`,
+    landingUrl,
+    "",
+    "📌 다른 리딩방 사기 사건 및 대응방법",
+    "https://gnlaw-criminal.co.kr/prosecute/jusigridingbang-litigation/",
+    "",
+    "📢 관련 사건 자료",
+    cafeUrl || null,
+    "",
+    "법무법인 선린 금융사기피해센터",
+    "☎ 02-6348-0406",
+    "",
+    `#${compactTag} #${impersonatedTag}사기 #리딩방사기 #투자사기 #금융사기 #사기피해 #법무법인선린 #리딩방사기 #팀미션사기 #라이브방송사기`,
   ].filter((line) => line !== null).join("\n"));
+}
+
+function paymentBankName(caseName = "") {
+  const match = String(caseName || "").match(/^(.+?(?:은행|뱅크))(?=\s|$)/);
+  return match?.[1] || (/은행$/.test(caseName) ? caseName : `${caseName}은행`);
+}
+
+function koreanObjectParticle(value = "") {
+  const hangul = [...String(value || "").trim()].reverse().find((char) => /[가-힣]/.test(char));
+  if (!hangul) return "을";
+  const code = hangul.charCodeAt(0) - 0xac00;
+  return code >= 0 && code <= 11171 && code % 28 === 0 ? "를" : "을";
 }
 
 function batchOrderValue(value) {
