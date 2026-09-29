@@ -257,7 +257,11 @@ async function ensureLandingPage(context, { rawCaseName, fraudType, draft }) {
 
 async function ensureStandardLandingPage(context, { rawCaseName, fraudType }) {
   if (!PRIMARY_GROUP) throw new Error("형사 랜딩 그룹 설정을 찾지 못했습니다.");
-  const generated = await callFunctionJson(context, generateLandingDraft, { caseName: rawCaseName, fraudType });
+  const generated = await callFunctionJson(context, generateLandingDraft, {
+    caseName: rawCaseName,
+    fraudType,
+    skipDuplicateScan: true,
+  });
   if (!generated.ok || !generated.data?.case) {
     throw new Error(generated.data?.message || "랜딩페이지 원고 생성에 실패했습니다.");
   }
@@ -338,6 +342,19 @@ async function ensureRecoveryLandingPage(context, { rawCaseName, draft }) {
 }
 
 async function findExistingLanding(env, incoming, group) {
+  // Cafe bulk names are converted to deterministic slugs. With KV available,
+  // an exact case lookup is sufficient and avoids loading the 8+ MB index a
+  // second time in the same request. The full-index fallback is retained for
+  // local/GitHub-only environments.
+  if (env?.CASES && incoming?.slug) {
+    const raw = await env.CASES.get(`case:${incoming.slug}`);
+    if (!raw) return null;
+    const item = JSON.parse(raw);
+    const landingKey = group.landingKey || group.key;
+    return hasLandingForGroup(item, landingKey) && isExactLandingIdentity(incoming, item)
+      ? item
+      : null;
+  }
   const cases = await loadCaseIndex(env);
   const landingKey = group.landingKey || group.key;
   return cases.find((item) => (

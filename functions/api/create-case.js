@@ -70,7 +70,11 @@ export async function onRequestPost(context) {
 
       await env.CASES.put(`case:${slug}`, JSON.stringify(newCase));
       await clearCaseDeletion(env, slug);
-      await appendToIndexSafely(env, buildIndexEntry(newCase));
+      if (batchMode) {
+        await appendToIndexForSequentialBatch(env, buildIndexEntry(newCase));
+      } else {
+        await appendToIndexSafely(env, buildIndexEntry(newCase));
+      }
 
       // GitHub에도 동기화 — KV 전체를 덮어쓰는 방식으로 race condition 방지
       const repoOwner = env.GITHUB_REPO_OWNER;
@@ -224,6 +228,18 @@ async function appendToIndexSafely(env, entry, maxAttempts = 3) {
     const verifyIdx = verifyRaw ? JSON.parse(verifyRaw) : [];
     if (verifyIdx.some((e) => e.slug === entry.slug)) return;
   }
+}
+
+// Bulk registration is deliberately sequential in the admin UI. Avoid the
+// repair/verify round trips used by concurrent public creation: on a large
+// index those extra parses and KV reads can exceed a Pages Function invocation
+// budget. The end-of-batch KV-to-GitHub sync remains the durability checkpoint.
+async function appendToIndexForSequentialBatch(env, entry) {
+  const idxRaw = await env.CASES.get("cases:index");
+  const idx = idxRaw ? JSON.parse(idxRaw) : [];
+  if (idx.some((item) => item.slug === entry.slug)) return;
+  idx.push(entry);
+  await env.CASES.put("cases:index", JSON.stringify(idx));
 }
 
 function buildIndexEntry(c) {

@@ -125,10 +125,16 @@ export async function onRequestPost(context) {
       return json({ ok: false, message: "사건명을 입력해주세요." }, 400);
     }
 
-    const cases = await loadCases(env);
     const slug = createSlug(slugBase(rawName));
     const category = DEFAULT_CATEGORY;
-    const duplicateCheck = findDuplicateRisks(caseName, slug, cases);
+    // The cafe bulk workflow performs an exact KV lookup before it creates a
+    // landing.  Re-reading and parsing the multi-megabyte public case index for
+    // every row made the second request in a batch vulnerable to a Workers 502.
+    const skipDuplicateScan = body.skipDuplicateScan === true;
+    const cases = skipDuplicateScan ? [] : await loadCases(env);
+    const duplicateCheck = skipDuplicateScan
+      ? { block: false, warn: false, matches: [] }
+      : findDuplicateRisks(caseName, slug, cases);
     const generated = await createGeneratedData({ caseName, slug, fraudType, duplicateCheck, env });
 
     return json({
@@ -193,7 +199,11 @@ async function createRuleBasedData({ caseName, slug, fraudType, duplicateCheck, 
       : "중복 위험은 낮습니다.",
     "사건명 검색 의도 기준으로 SEO 원고를 생성했습니다.",
   ];
-  const templates = env ? await readTemplates(env) : {};
+  // STANDARD_GROUPS currently contains only group A. Group A's standardized
+  // landing does not consume the legacy text templates, so three GitHub API
+  // reads here were pure overhead on every bulk row.
+  const needsLegacyTemplates = STANDARD_GROUPS.some((group) => group.key !== "a");
+  const templates = env && needsLegacyTemplates ? await readTemplates(env) : {};
   const landings = Object.fromEntries(STANDARD_GROUPS.map((group) => [group.key, createLandingData({ caseName, slug, fraudType, group, templates })]));
 
   return { source: "rule-based", summary, tags, reviewNotes, landings };

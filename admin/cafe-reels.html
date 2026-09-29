@@ -83,9 +83,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.77.0 · 수정 77차</div>
+      <div class="status">자동화 프로그램 v1.78.0 · 수정 78차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.77.0" download>Windows 자동화 프로그램 v1.77.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.78.0" download>Windows 자동화 프로그램 v1.78.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -415,14 +415,21 @@
         const imageSetKey = partType === "payment-suspension-release" ? "payment-suspension-release" : "fraud";
         const selectedImages = assetImagesForKey(imageSetKey);
         show("bulkMsg", `${completed + 1}/${rows.length} · ${caseName} 중복 검수 및 랜딩페이지 생성 중...`);
+        let stage = "원고·랜딩 생성";
         try {
-          const draftData = await postJson("/api/generate-cafe-draft", { caseName, fraudType }, { retries: 2 });
+          const draftData = await postJson("/api/generate-cafe-draft", { caseName, fraudType }, {
+            retries: 4,
+            retryDelays: [3000, 7000, 15000, 30000],
+            label: "원고·랜딩 생성 서버",
+          });
           const generatedDraft = draftData.draft;
           const jobId = item.row.dataset.jobId || crypto.randomUUID();
           item.row.dataset.jobId = jobId;
           await rememberBulkLocalFiles(jobId, item.files);
           show("bulkMsg", `${completed + 1}/${rows.length} · ${caseName} · 복구용 이미지 10장 서버 백업 중...`);
+          stage = "릴스 이미지 백업";
           await uploadBulkServerFiles(jobId, item.files);
+          stage = "자동화 대기열 저장";
           const saved = await postWorkflow({
             action: "save-job",
             jobId,
@@ -437,7 +444,11 @@
             batchId,
             batchOrder: completed,
             deferArticleNumber: completed > 0,
-          }, { retries: 2 });
+          }, {
+            retries: 4,
+            retryDelays: [3000, 7000, 15000, 30000],
+            label: "자동화 대기열 서버",
+          });
           completed += 1;
           if (!firstSavedJob) {
             firstSavedJob = saved.job;
@@ -447,8 +458,9 @@
           item.row.style.opacity = ".55";
           const cafeNumber = saved.job.reservedNaverArticleId ? `${saved.job.reservedNaverArticleId}번` : "순차 대기";
           show("bulkMsg", `${completed}/${rows.length} · ${caseName} · 카페 글 ${cafeNumber} 작업 등록 완료`);
+          if (completed < rows.length) await wait(2500);
         } catch (error) {
-          failures.push(`${caseName}: ${error.message}`);
+          failures.push(`${caseName} (${stage}): ${error.message}`);
         }
       }
       if (completed > 0) {
@@ -855,7 +867,7 @@
       });
     } catch (error) {
       if (attempt < retries) {
-        await wait(1500 * (attempt + 1));
+        await wait(postRetryDelay(options, attempt, 1500));
         return postJson(path, payload, options, attempt + 1);
       }
       throw error;
@@ -867,20 +879,27 @@
       data = text ? JSON.parse(text) : {};
     } catch {
       if (retryable && attempt < retries) {
-        await wait(1200 * (attempt + 1));
+        await wait(postRetryDelay(options, attempt, 1200));
         return postJson(path, payload, options, attempt + 1);
       }
       const detail = text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
+      const label = options.label || "업로드 서버";
       throw new Error(retryable
-        ? `서버 처리량이 초과되어 재시도 후에도 실패했습니다. 잠시 후 실패 항목만 다시 등록해주세요. (HTTP ${response.status})`
+        ? `${label}가 재시도 후에도 응답하지 않았습니다. 이 항목은 등록되지 않았으므로 잠시 후 실패 항목만 다시 등록해주세요. (HTTP ${response.status})`
         : `업로드 서버 오류 (HTTP ${response.status}). ${detail || "잠시 후 다시 시도해주세요."}`);
     }
     if (retryable && attempt < retries) {
-      await wait(1200 * (attempt + 1));
+      await wait(postRetryDelay(options, attempt, 1200));
       return postJson(path, payload, options, attempt + 1);
     }
     if (!response.ok || !data.ok) throw new Error(data.message || "작업 처리 실패");
     return data;
+  }
+
+  function postRetryDelay(options, attempt, baseMs) {
+    const configured = Array.isArray(options.retryDelays) ? Number(options.retryDelays[attempt]) : 0;
+    const delay = Number.isFinite(configured) && configured > 0 ? configured : baseMs * (attempt + 1);
+    return delay + Math.floor(Math.random() * 400);
   }
 
   function isRetryableStatus(status) {
