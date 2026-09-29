@@ -406,6 +406,7 @@
     const batchId = `bulk-${crypto.randomUUID()}`;
     let completed = 0;
     let firstSavedJob = null;
+    let firstSavedFiles = null;
     const failures = [];
     try {
       for (const item of rows) {
@@ -438,7 +439,10 @@
             deferArticleNumber: completed > 0,
           }, { retries: 2 });
           completed += 1;
-          firstSavedJob ||= saved.job;
+          if (!firstSavedJob) {
+            firstSavedJob = saved.job;
+            firstSavedFiles = item.files;
+          }
           item.row.dataset.registered = "true";
           item.row.style.opacity = ".55";
           const cafeNumber = saved.job.reservedNaverArticleId ? `${saved.job.reservedNaverArticleId}번` : "순차 대기";
@@ -457,6 +461,8 @@
       await loadJobs();
       if (firstSavedJob) {
         applyJob(firstSavedJob);
+        applyBulkRenderMode(firstSavedJob.batchId);
+        if (firstSavedFiles?.length === 10) window.setWhiteboardLocalFiles?.(firstSavedFiles);
         bulkAutomationRunning = false;
         clearActiveBulkBatch();
         $("draftPanel").hidden = false;
@@ -1054,8 +1060,14 @@
 
       const localFiles = await restoreBulkFiles(job.id);
       if (localFiles.length !== 10) {
+        bulkAutomationRunning = false;
+        clearActiveBulkBatch();
         $("whiteboardPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-        throw new Error(`${job.caseName}: 로컬·서버에 저장된 릴스 이미지가 ${localFiles.length}장입니다. 아래 '로컬 이미지 10장 불러오기'에서 한 번 다시 지정하면 서버에 백업되어 이후부터 대기열 복구가 가능합니다.`);
+        const message = `${job.caseName}: 로컬·서버에 저장된 릴스 이미지가 ${localFiles.length}장입니다. 아래 '로컬 이미지 10장 불러오기'에서 10장을 다시 지정한 뒤 자동화 실행을 누르세요. 다시 지정한 이미지는 서버에 백업되어 이후부터 대기열 복구가 가능합니다.`;
+        await reportBulkTransition(job.id, "waiting-images", message);
+        show("bulkMsg", message, true);
+        show("reelsMsg", message, true);
+        return false;
       }
       window.setWhiteboardLocalFiles?.(localFiles);
       applyBulkRenderMode(job.batchId);
@@ -1334,7 +1346,8 @@
 
   async function resumeActiveBulkAutomation() {
     const batchId = activeBulkBatchId();
-    if (!batchId || instagramAutoUploadInProgress || bulkTransitionInProgress) return;
+    if (!batchId || instagramAutoUploadInProgress || bulkTransitionInProgress || bulkQueueResumeInProgress) return;
+    if (currentJob && currentJob.batchId !== batchId) return;
     try {
       const data = await getWorkflowJob();
       const jobs = (data.jobs || [])
@@ -1355,6 +1368,10 @@
       show("bulkMsg", `${queued.caseName} · 중단된 연속 자동화를 자동 복구합니다.`);
       await startNextBulkAutomation(jobs[nextIndex - 1]);
     } catch (error) {
+      bulkAutomationRunning = false;
+      clearActiveBulkBatch();
+      const message = error?.message || String(error);
+      show("bulkMsg", `자동 복구를 멈췄습니다. 등록한 대기열 불러오기에서 이어가거나, 필요한 경우 이미지 10장을 다시 지정해주세요. (${message})`, true);
       console.warn("[bulk] 연속 자동화 복구 대기", error);
     }
   }

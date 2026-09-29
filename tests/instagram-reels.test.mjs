@@ -109,6 +109,10 @@ test("generated whiteboard video starts Instagram publishing automatically", () 
   assert.match(pageSource, /async function resumeRegisteredBulkQueue/);
   assert.match(pageSource, /async function continueRegisteredBulkBatch/);
   assert.match(pageSource, /\.slice\(0, 3\)/);
+  assert.match(pageSource, /let firstSavedFiles = null/);
+  assert.match(pageSource, /window\.setWhiteboardLocalFiles\?\.\(firstSavedFiles\)/);
+  assert.match(pageSource, /다시 지정한 뒤 자동화 실행을 누르세요/);
+  assert.match(pageSource, /자동 복구를 멈췄습니다/);
   assert.match(pageSource, /whiteboard:local-files-selected/);
   assert.match(generatorSource, /whiteboard:local-files-selected/);
   assert.match(pageSource, /params\.set\("batchId", options\.batchId\)/);
