@@ -463,6 +463,77 @@ test("Instagram Reel automation creates, checks, and publishes a Reel", async ()
   }
 });
 
+test("Instagram action limits keep the existing Reel container and defer retries", async () => {
+  const jobId = "instagram-rate-limit-job";
+  const job = {
+    id: jobId,
+    caseName: "소수몽키 사칭 사기",
+    fraudType: "institution-exchange",
+    imageSetKey: "fraud",
+    draft: { title: "소수몽키 원고", body: "본문" },
+    videoUrl: "https://videos.example/rate-limit.mp4",
+    instagramStatus: "processing",
+    instagramContainerId: "container-rate-limited",
+    cafeStatus: "awaiting-reel",
+  };
+  const { env } = testEnv([
+    [`cafe-reels:job:${jobId}`, job],
+    ["cafe-reels:jobs:index:v1", []],
+  ]);
+  await saveInstagramToken(env, {
+    accessToken: "instagram-access-token",
+    igUserId: "17841400000000000",
+    expiresAt: "2099-01-01T00:00:00.000Z",
+  });
+
+  const calls = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input, init = {}) => {
+    const url = new URL(String(input));
+    calls.push({ url, init });
+    if (url.pathname.endsWith("/container-rate-limited")) {
+      return Response.json({ status_code: "FINISHED", status: "Finished" });
+    }
+    if (url.pathname.endsWith("/17841400000000000/media_publish")) {
+      return Response.json({ error: { message: "User is performing too many actions", code: 4 } }, { status: 400 });
+    }
+    throw new Error(`Unexpected fetch: ${url}`);
+  };
+
+  const check = async () => {
+    const response = await onWorkflowPost({
+      request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "check-instagram-reel", jobId }),
+      }),
+      env,
+    });
+    return { response, result: await response.json() };
+  };
+
+  try {
+    const limited = await check();
+    assert.equal(limited.response.status, 200);
+    assert.equal(limited.result.ok, true);
+    assert.equal(limited.result.done, false);
+    assert.equal(limited.result.rateLimited, true);
+    assert.equal(limited.result.job.instagramStatus, "rate-limited");
+    assert.equal(limited.result.job.instagramContainerId, "container-rate-limited");
+    assert.match(limited.result.job.instagramError, /User is performing too many actions/);
+    assert.ok(Date.parse(limited.result.job.instagramRetryAt) > Date.now());
+    assert.equal(calls.length, 2);
+
+    const deferred = await check();
+    assert.equal(deferred.response.status, 200);
+    assert.equal(deferred.result.rateLimited, true);
+    assert.ok(deferred.result.retryAfterMs > 0);
+    assert.equal(calls.length, 2, "cooldown must prevent another Instagram API call");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("Instagram Story automation is disabled and cannot block Reel or Cafe processing", async () => {
   const jobId = "instagram-story-disabled-job";
   const job = {

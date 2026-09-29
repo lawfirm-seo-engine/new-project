@@ -139,6 +139,14 @@ export async function instagramApiJson(url, options = {}, label = "Instagram API
   return fetchInstagramJson(url, options, label);
 }
 
+export function isInstagramRateLimitError(error) {
+  const message = String(error?.message || error || "");
+  const code = Number(error?.instagramCode || 0);
+  return Number(error?.httpStatus || 0) === 429
+    || [4, 17, 32, 613].includes(code)
+    || /user is performing too many actions|too many actions|rate limit|temporarily blocked|try again later/i.test(message);
+}
+
 async function loadInstagramProfile(env, accessToken) {
   const fields = ["user_id,username,name,account_type", "id,username"];
   let lastError;
@@ -159,7 +167,13 @@ async function fetchInstagramJson(input, options, label) {
   try { data = JSON.parse(text); } catch { /* handled below */ }
   if (!response.ok || data.error) {
     const message = data.error?.message || data.error_description || data.error || text.slice(0, 300) || "알 수 없는 오류";
-    throw new Error(`${label} 실패 (${response.status}): ${message}`);
+    const error = new Error(`${label} 실패 (${response.status}): ${message}`);
+    error.name = "InstagramApiError";
+    error.httpStatus = response.status;
+    error.instagramCode = Number(data.error?.code || 0);
+    error.instagramSubcode = Number(data.error?.error_subcode || 0);
+    error.retryAfterSeconds = Number(response.headers.get("retry-after") || 0);
+    throw error;
   }
   return data;
 }

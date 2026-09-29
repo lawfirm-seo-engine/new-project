@@ -83,9 +83,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.78.0 · 수정 78차</div>
+      <div class="status">자동화 프로그램 v1.79.0 · 수정 79차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.78.0" download>Windows 자동화 프로그램 v1.78.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.79.0" download>Windows 자동화 프로그램 v1.79.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -271,6 +271,7 @@
   let bulkAutomationRunning = false;
   let bulkTransitionInProgress = false;
   let bulkQueueResumeInProgress = false;
+  let instagramPublishLastError = null;
   const bulkLocalFiles = new Map();
   const BULK_FILE_DB_NAME = "gnlaw-cafe-reels-bulk-files-v1";
   const BULK_FILE_STORE_NAME = "job-files";
@@ -807,43 +808,80 @@
       const saved = await saveVideoUrl();
       if (!saved) return;
     }
+    let publishingJob = currentJob;
+    const publishingCaption = captionOutput.value;
 
     const button = $("instagramPublishBtn");
     button.disabled = true;
+    instagramPublishLastError = null;
     show("reelsMsg", "Instagram에 릴스 업로드를 시작합니다...");
     try {
-      if (currentJob.instagramStatus === "posted" && currentJob.instagramMediaId) {
-        show("reelsMsg", currentJob.instagramPermalink
-          ? `이미 게시된 릴스입니다: ${currentJob.instagramPermalink}`
+      if (publishingJob.instagramStatus === "posted" && publishingJob.instagramMediaId) {
+        show("reelsMsg", publishingJob.instagramPermalink
+          ? `이미 게시된 릴스입니다: ${publishingJob.instagramPermalink}`
           : "이미 Instagram에 게시된 릴스입니다.");
         return true;
       }
-      let data;
-      if (currentJob.instagramStatus === "processing" && currentJob.instagramContainerId) {
-        data = { job: currentJob, message: "기존 Instagram 영상 처리 상태를 이어서 확인합니다." };
-      } else {
+      const rateLimitFailure = /user is performing too many actions|too many actions|rate limit|temporarily blocked/i.test(publishingJob.instagramError || "");
+      const reuseContainer = Boolean(publishingJob.instagramContainerId)
+        && (["processing", "rate-limited"].includes(publishingJob.instagramStatus || "") || rateLimitFailure);
+      let data = { job: publishingJob, message: reuseContainer ? "기존 Instagram 릴스 작업을 이어서 확인합니다." : "" };
+      if (!reuseContainer) {
         data = await postWorkflow({
           action: "start-instagram-reel",
-          jobId: currentJob.id,
-          caption: captionOutput.value,
+          jobId: publishingJob.id,
+          caption: publishingCaption,
         });
+        publishingJob = data.job;
         applyJob(data.job);
       }
       show("reelsMsg", data.message || "Instagram 영상 처리 중...");
 
-      const deadline = Date.now() + 5 * 60 * 1000;
+      const deadline = Date.now() + 8 * 60 * 60 * 1000;
+      let activeChecks = 0;
       while (Date.now() < deadline) {
+        const retryAt = Date.parse(publishingJob.instagramRetryAt || "");
+        if (publishingJob.instagramStatus === "rate-limited" && Number.isFinite(retryAt) && retryAt > Date.now()) {
+          const remainingMs = retryAt - Date.now();
+          const minutes = Math.max(1, Math.ceil(remainingMs / 60000));
+          const message = `${publishingJob.caseName} · Instagram 행동 제한 해제 대기 중 · 약 ${minutes}분 뒤 기존 작업으로 자동 재시도합니다.`;
+          show("reelsMsg", message);
+          show("bulkMsg", message);
+          await wait(Math.min(remainingMs, 60000));
+          continue;
+        }
+        if (!publishingJob.instagramContainerId) {
+          data = await postWorkflow({
+            action: "start-instagram-reel",
+            jobId: publishingJob.id,
+            caption: publishingCaption,
+          });
+          publishingJob = data.job;
+          applyJob(data.job);
+          show("reelsMsg", data.message || "Instagram 영상 처리를 다시 시작합니다...");
+          if (data.rateLimited) continue;
+        }
         await wait(5000);
-        data = await postWorkflow({ action: "check-instagram-reel", jobId: currentJob.id });
+        data = await postWorkflow({ action: "check-instagram-reel", jobId: publishingJob.id });
+        publishingJob = data.job;
         applyJob(data.job);
         show("reelsMsg", data.message || "Instagram 영상 처리 상태 확인 중...");
         if (data.done) {
           loadJobs();
           return true;
         }
+        if (data.rateLimited) {
+          activeChecks = 0;
+          continue;
+        }
+        activeChecks += 1;
+        if (activeChecks >= 120) {
+          throw new Error("Instagram 영상 처리 시간이 10분을 넘었습니다. 저장된 컨테이너에서 다시 이어할 수 있습니다.");
+        }
       }
-      throw new Error("Instagram 영상 처리 시간이 5분을 넘었습니다. 잠시 후 같은 작업에서 다시 시도해주세요.");
+      throw new Error("Instagram 자동 재시도 대기 시간이 8시간을 넘었습니다. 등록한 대기열에서 다시 이어해주세요.");
     } catch (error) {
+      instagramPublishLastError = error;
       show("reelsMsg", error.message, true);
       loadJobs();
       return false;
@@ -1067,7 +1105,7 @@
         instagramAutoUploadInProgress = true;
         try {
           const posted = await publishInstagramReel();
-          if (!posted) throw new Error(`${job.caseName}: Instagram 릴스 업로드를 재개하지 못했습니다.`);
+          if (!posted) throw new Error(`${job.caseName}: ${instagramPublishLastError?.message || "Instagram 릴스 업로드를 재개하지 못했습니다."}`);
           job = currentJob;
           job = await waitForCafePost(job);
           jobs[index] = job;

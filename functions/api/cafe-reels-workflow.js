@@ -2,6 +2,7 @@ import {
   getInstagramAccess,
   instagramApiJson,
   instagramGraphBase,
+  isInstagramRateLimitError,
 } from "../_instagram.js";
 
 const JOB_PREFIX = "cafe-reels:job:";
@@ -19,6 +20,7 @@ const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
 const NAVER_CAFE_KAKAO_HREF = "https://gnlaw-criminal.co.kr/kakao_redirect/";
 const VIDEO_RENDER_STALE_MS = 3 * 60 * 1000;
 const SMARTEDITOR_RUNNER_STALE_MS = 2 * 60 * 1000;
+const INSTAGRAM_RATE_LIMIT_DELAYS_MS = [30, 60, 120, 240].map((minutes) => minutes * 60 * 1000);
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -243,10 +245,16 @@ export async function onRequestPost({ request, env }) {
 
     if (action === "start-instagram-reel") {
       const job = await requireJob(env, body?.jobId);
+      const pendingRetry = instagramRetryWait(job);
+      if (pendingRetry > 0) return instagramRateLimitResponse(job, pendingRetry);
       try {
         const next = await startInstagramReel(env, job, body?.caption);
         return json({ ok: true, job: next, message: "Instagram이 릴스 영상을 처리하고 있습니다." });
       } catch (error) {
+        if (isInstagramRateLimitError(error)) {
+          const next = await deferInstagramRetry(env, job, error);
+          return instagramRateLimitResponse(next, instagramRetryWait(next));
+        }
         const next = await saveJob(env, {
           ...job,
           instagramStatus: "failed",
@@ -259,10 +267,16 @@ export async function onRequestPost({ request, env }) {
 
     if (action === "check-instagram-reel") {
       const job = await requireJob(env, body?.jobId);
+      const pendingRetry = instagramRetryWait(job);
+      if (pendingRetry > 0) return instagramRateLimitResponse(job, pendingRetry);
       try {
         const result = await checkInstagramReel(env, job);
         return json({ ok: true, job: result.job, done: result.done, message: result.message });
       } catch (error) {
+        if (isInstagramRateLimitError(error)) {
+          const next = await deferInstagramRetry(env, job, error);
+          return instagramRateLimitResponse(next, instagramRetryWait(next));
+        }
         const next = await saveJob(env, {
           ...job,
           instagramStatus: "failed",
@@ -564,6 +578,8 @@ async function startInstagramReel(env, job, requestedCaption = "") {
     instagramMediaId: "",
     instagramPermalink: "",
     instagramError: "",
+    instagramRetryAt: "",
+    instagramRateLimitCount: 0,
     instagramStartedAt: new Date().toISOString(),
     instagramUpdatedAt: new Date().toISOString(),
   });
@@ -590,6 +606,7 @@ async function checkInstagramReel(env, job) {
       ...job,
       instagramStatus: "processing",
       instagramProcessingStatus: String(status.status || statusCode || "IN_PROGRESS").slice(0, 500),
+      instagramRetryAt: "",
       instagramUpdatedAt: new Date().toISOString(),
     });
     return { job: next, done: false, message: `Instagram 영상 처리 중: ${status.status || statusCode || "IN_PROGRESS"}` };
@@ -622,6 +639,8 @@ async function checkInstagramReel(env, job) {
     instagramMediaId: mediaId,
     instagramPermalink: permalink,
     instagramError: "",
+    instagramRetryAt: "",
+    instagramRateLimitCount: 0,
     instagramPublishedAt: new Date().toISOString(),
     instagramUpdatedAt: new Date().toISOString(),
     cafeStatus: permalink ? "smarteditor-queued" : "awaiting-instagram-permalink",
@@ -639,6 +658,41 @@ async function checkInstagramReel(env, job) {
       ? `Instagram 릴스 게시 완료 및 SmartEditor 자동 게시 대기 등록: ${permalink}`
       : "Instagram 릴스 게시물 주소를 확인하지 못해 카페 자동 게시 대기 등록을 보류했습니다.",
   };
+}
+
+async function deferInstagramRetry(env, job, error) {
+  const count = Math.max(1, Number(job.instagramRateLimitCount || 0) + 1);
+  const configuredDelay = INSTAGRAM_RATE_LIMIT_DELAYS_MS[Math.min(count - 1, INSTAGRAM_RATE_LIMIT_DELAYS_MS.length - 1)];
+  const headerDelay = Math.max(0, Number(error?.retryAfterSeconds || 0) * 1000);
+  const delayMs = Math.max(configuredDelay, headerDelay);
+  const retryAt = new Date(Date.now() + delayMs).toISOString();
+  return saveJob(env, {
+    ...job,
+    instagramStatus: "rate-limited",
+    instagramError: String(error?.message || error).slice(0, 1200),
+    instagramRetryAt: retryAt,
+    instagramRateLimitCount: count,
+    instagramUpdatedAt: new Date().toISOString(),
+  });
+}
+
+function instagramRetryWait(job) {
+  if (job?.instagramStatus !== "rate-limited") return 0;
+  const retryAt = Date.parse(job.instagramRetryAt || "");
+  return Number.isFinite(retryAt) ? Math.max(0, retryAt - Date.now()) : 0;
+}
+
+function instagramRateLimitResponse(job, retryAfterMs) {
+  const minutes = Math.max(1, Math.ceil(retryAfterMs / 60000));
+  return json({
+    ok: true,
+    done: false,
+    rateLimited: true,
+    retryAfterMs,
+    retryAt: job.instagramRetryAt || "",
+    job,
+    message: `Instagram 행동 제한 감지 · 약 ${minutes}분 뒤 기존 릴스 작업으로 자동 재시도합니다.`,
+  });
 }
 
 export function instagramStoryLinkDetails(job = {}) {
