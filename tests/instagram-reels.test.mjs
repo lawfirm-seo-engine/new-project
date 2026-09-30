@@ -494,6 +494,13 @@ test("Instagram action limits keep the existing Reel container and defer retries
   };
   const { env } = testEnv([
     [`cafe-reels:job:${jobId}`, job],
+    ["cafe-reels:job:instagram-rate-limit-sibling", {
+      ...job,
+      id: "instagram-rate-limit-sibling",
+      caseName: "다음 대기 사건 사칭 사기",
+      instagramStatus: "empty",
+      instagramContainerId: "",
+    }],
     ["cafe-reels:jobs:index:v1", []],
   ]);
   await saveInstagramToken(env, {
@@ -552,6 +559,26 @@ test("Instagram action limits keep the existing Reel container and defer retries
     assert.equal(deferred.result.rateLimited, true);
     assert.ok(deferred.result.retryAfterMs > 0);
     assert.equal(calls.length, 4, "cooldown must prevent another Instagram API call");
+
+    const siblingResponse = await onWorkflowPost({
+      request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "start-instagram-reel",
+          jobId: "instagram-rate-limit-sibling",
+          caption: "다음 사건 캡션",
+        }),
+      }),
+      env,
+    });
+    const sibling = await siblingResponse.json();
+    assert.equal(siblingResponse.status, 200);
+    assert.equal(sibling.rateLimited, true);
+    assert.equal(sibling.job.instagramRateLimitReason, "meta-action-throttle");
+    assert.equal(sibling.job.instagramErrorCode, 4);
+    assert.equal(sibling.job.instagramContainerId, "");
+    assert.equal(calls.length, 4, "an account-wide cooldown must block every other queued job without an API call");
   } finally {
     globalThis.fetch = originalFetch;
   }

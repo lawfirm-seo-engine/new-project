@@ -18,3 +18,4 @@ Version 1.78 reduces bulk registration server load, spaces consecutive case crea
 Version 1.79 preserves an existing Instagram Reel container during action limits and resumes it automatically after a progressive cooldown instead of failing queue recovery.
 Version 1.80 applies the new part-specific Instagram Reel caption templates with each case, landing page, and reserved Cafe URL filled in automatically.
 Version 1.81 checks Instagram's live content publishing quota before creating or publishing a Reel, records Meta error diagnostics, and avoids repeated publish calls while the account is limited.
+Version 1.82 shares one Instagram cooldown across every queued job and PC so a duplicate batch cannot keep triggering an account-wide Meta action restriction.

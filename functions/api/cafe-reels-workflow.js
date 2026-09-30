@@ -13,6 +13,7 @@ const NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 const ASSET_CONFIG_KEY = "cafe-reels:asset-sets:v1";
 const NAVER_ARTICLE_SEQUENCE_KEY = "cafe-reels:naver-article-sequence:v2";
 const SMARTEDITOR_RUNNER_KEY = "cafe-reels:smarteditor-runner:v1";
+const INSTAGRAM_PUBLISH_COOLDOWN_KEY = "instagram:publish-cooldown:v1";
 const NAVER_ARTICLE_START = 147;
 const NAVER_CAFE_SLUG = "gnlawfintech";
 const NAVER_CAFE_MAX_IMAGES = 100;
@@ -245,7 +246,12 @@ export async function onRequestPost({ request, env }) {
     }
 
     if (action === "start-instagram-reel") {
-      const job = await requireJob(env, body?.jobId);
+      let job = await requireJob(env, body?.jobId);
+      const accountDeferred = await applyInstagramAccountCooldown(env, job);
+      if (accountDeferred) {
+        job = accountDeferred;
+        return instagramRateLimitResponse(job, instagramRetryWait(job));
+      }
       const pendingRetry = instagramRetryWait(job);
       if (pendingRetry > 0) return instagramRateLimitResponse(job, pendingRetry);
       try {
@@ -274,7 +280,12 @@ export async function onRequestPost({ request, env }) {
     }
 
     if (action === "check-instagram-reel") {
-      const job = await requireJob(env, body?.jobId);
+      let job = await requireJob(env, body?.jobId);
+      const accountDeferred = await applyInstagramAccountCooldown(env, job);
+      if (accountDeferred) {
+        job = accountDeferred;
+        return instagramRateLimitResponse(job, instagramRetryWait(job));
+      }
       const pendingRetry = instagramRetryWait(job);
       if (pendingRetry > 0) return instagramRateLimitResponse(job, pendingRetry);
       try {
@@ -305,10 +316,14 @@ export async function onRequestPost({ request, env }) {
 
     if (action === "check-instagram-publishing-limit") {
       const quota = await loadInstagramPublishingLimit(env);
+      const cooldown = await loadInstagramAccountCooldown(env);
       return json({
         ok: true,
         quota,
-        message: instagramPublishingQuotaMessage(quota),
+        cooldown,
+        message: cooldown
+          ? `${instagramPublishingQuotaMessage(quota)} · 계정 공통 제한 ${instagramAccountCooldownMessage(cooldown)}`
+          : instagramPublishingQuotaMessage(quota),
       });
     }
 
@@ -700,6 +715,7 @@ async function checkInstagramReel(env, job) {
       body: job.draft?.body || "",
     },
   });
+  await env.CASES.delete(INSTAGRAM_PUBLISH_COOLDOWN_KEY).catch(() => {});
   return {
     job: reelJob,
     done: true,
@@ -710,7 +726,8 @@ async function checkInstagramReel(env, job) {
 }
 
 async function deferInstagramRetry(env, job, error = null, quota = null) {
-  const count = Math.max(1, Number(job.instagramRateLimitCount || 0) + 1);
+  const existingCooldown = await env.CASES.get(INSTAGRAM_PUBLISH_COOLDOWN_KEY, "json").catch(() => null);
+  const count = Math.max(0, Number(job.instagramRateLimitCount || 0), Number(existingCooldown?.count || 0)) + 1;
   const configuredDelay = INSTAGRAM_RATE_LIMIT_DELAYS_MS[Math.min(count - 1, INSTAGRAM_RATE_LIMIT_DELAYS_MS.length - 1)];
   const headerDelay = Math.max(0, Number(error?.retryAfterSeconds || 0) * 1000);
   const quotaFull = instagramPublishingQuotaFull(quota);
@@ -721,7 +738,7 @@ async function deferInstagramRetry(env, job, error = null, quota = null) {
   const errorMessage = quotaFull
     ? instagramPublishingQuotaMessage(quota)
     : String(error?.message || error || "Instagram이 계정 행동을 일시적으로 제한했습니다.");
-  return saveJob(env, {
+  const next = await saveJob(env, {
     ...job,
     instagramStatus: "rate-limited",
     instagramError: errorMessage.slice(0, 1200),
@@ -735,6 +752,24 @@ async function deferInstagramRetry(env, job, error = null, quota = null) {
     instagramRateLimitCount: count,
     instagramUpdatedAt: new Date().toISOString(),
   });
+  await env.CASES.put(INSTAGRAM_PUBLISH_COOLDOWN_KEY, JSON.stringify({
+    retryAt,
+    count,
+    reason: next.instagramRateLimitReason,
+    error: next.instagramError,
+    errorCode: next.instagramErrorCode,
+    errorSubcode: next.instagramErrorSubcode,
+    errorHttpStatus: next.instagramErrorHttpStatus,
+    retryAfterSeconds: next.instagramRetryAfterSeconds,
+    quotaUsage: next.instagramQuotaUsage || 0,
+    quotaTotal: next.instagramQuotaTotal || 0,
+    quotaDurationSeconds: next.instagramQuotaDurationSeconds || 0,
+    quotaCheckedAt: next.instagramQuotaCheckedAt || "",
+    sourceJobId: next.id,
+    sourceCaseName: next.caseName,
+    updatedAt: new Date().toISOString(),
+  }));
+  return next;
 }
 
 function instagramRetryWait(job) {
@@ -757,6 +792,46 @@ function instagramRateLimitResponse(job, retryAfterMs) {
     job,
     message: `${quotaMessage} · 약 ${minutes}분 뒤 상태만 다시 확인하고, 제한이 해제된 경우에만 기존 릴스 작업을 게시합니다.`,
   });
+}
+
+async function loadInstagramAccountCooldown(env) {
+  const cooldown = await env.CASES.get(INSTAGRAM_PUBLISH_COOLDOWN_KEY, "json").catch(() => null);
+  if (!cooldown) return null;
+  const retryAt = Date.parse(cooldown.retryAt || "");
+  if (Number.isFinite(retryAt) && retryAt > Date.now()) return cooldown;
+  await env.CASES.delete(INSTAGRAM_PUBLISH_COOLDOWN_KEY).catch(() => {});
+  return null;
+}
+
+async function applyInstagramAccountCooldown(env, job) {
+  const cooldown = await loadInstagramAccountCooldown(env);
+  if (!cooldown || job.instagramStatus === "posted") return null;
+  return saveJob(env, {
+    ...job,
+    instagramStatus: "rate-limited",
+    instagramError: String(cooldown.error || "Instagram 계정 공통 행동 제한이 적용 중입니다.").slice(0, 1200),
+    instagramRateLimitReason: cooldown.reason || "meta-action-throttle",
+    instagramErrorCode: Number(cooldown.errorCode || 0),
+    instagramErrorSubcode: Number(cooldown.errorSubcode || 0),
+    instagramErrorHttpStatus: Number(cooldown.errorHttpStatus || 0),
+    instagramRetryAfterSeconds: Number(cooldown.retryAfterSeconds || 0),
+    instagramQuotaUsage: Number(cooldown.quotaUsage || 0),
+    instagramQuotaTotal: Number(cooldown.quotaTotal || 0),
+    instagramQuotaDurationSeconds: Number(cooldown.quotaDurationSeconds || 0),
+    instagramQuotaCheckedAt: cooldown.quotaCheckedAt || "",
+    instagramRetryAt: cooldown.retryAt,
+    instagramRateLimitCount: Number(cooldown.count || job.instagramRateLimitCount || 1),
+    instagramUpdatedAt: new Date().toISOString(),
+  });
+}
+
+function instagramAccountCooldownMessage(cooldown) {
+  const reason = cooldown?.reason === "publishing-quota"
+    ? `게시 한도 ${Number(cooldown.quotaUsage || 0)}/${Number(cooldown.quotaTotal || 0)} 소진`
+    : `Meta 행동 제한${cooldown?.errorCode ? ` 코드 ${cooldown.errorCode}${cooldown.errorSubcode ? `/${cooldown.errorSubcode}` : ""}` : ""}`;
+  const retryAt = Date.parse(cooldown?.retryAt || "");
+  const minutes = Number.isFinite(retryAt) ? Math.max(1, Math.ceil((retryAt - Date.now()) / 60000)) : 1;
+  return `${reason} · 약 ${minutes}분 후 재확인`;
 }
 
 async function loadInstagramPublishingLimit(env, providedAccess = null) {
