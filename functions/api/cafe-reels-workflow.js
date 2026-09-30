@@ -20,7 +20,8 @@ const NAVER_CAFE_PHONE_HREF = "https://gnlaw-criminal.co.kr/call_redirect/";
 const NAVER_CAFE_KAKAO_HREF = "https://gnlaw-criminal.co.kr/kakao_redirect/";
 const VIDEO_RENDER_STALE_MS = 3 * 60 * 1000;
 const SMARTEDITOR_RUNNER_STALE_MS = 2 * 60 * 1000;
-const INSTAGRAM_RATE_LIMIT_DELAYS_MS = [30, 60, 120, 240].map((minutes) => minutes * 60 * 1000);
+const INSTAGRAM_RATE_LIMIT_DELAYS_MS = [60, 180, 360, 720].map((minutes) => minutes * 60 * 1000);
+const INSTAGRAM_QUOTA_RECHECK_MS = 30 * 60 * 1000;
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -248,11 +249,18 @@ export async function onRequestPost({ request, env }) {
       const pendingRetry = instagramRetryWait(job);
       if (pendingRetry > 0) return instagramRateLimitResponse(job, pendingRetry);
       try {
-        const next = await startInstagramReel(env, job, body?.caption);
+        const access = await getInstagramAccess(env);
+        const quota = await loadInstagramPublishingLimit(env, access);
+        if (instagramPublishingQuotaFull(quota)) {
+          const next = await deferInstagramRetry(env, job, null, quota);
+          return instagramRateLimitResponse(next, instagramRetryWait(next));
+        }
+        const next = await startInstagramReel(env, job, body?.caption, access, quota);
         return json({ ok: true, job: next, message: "Instagram이 릴스 영상을 처리하고 있습니다." });
       } catch (error) {
         if (isInstagramRateLimitError(error)) {
-          const next = await deferInstagramRetry(env, job, error);
+          const quota = await tryLoadInstagramPublishingLimit(env);
+          const next = await deferInstagramRetry(env, job, error, quota);
           return instagramRateLimitResponse(next, instagramRetryWait(next));
         }
         const next = await saveJob(env, {
@@ -271,10 +279,18 @@ export async function onRequestPost({ request, env }) {
       if (pendingRetry > 0) return instagramRateLimitResponse(job, pendingRetry);
       try {
         const result = await checkInstagramReel(env, job);
-        return json({ ok: true, job: result.job, done: result.done, message: result.message });
+        return json({
+          ok: true,
+          job: result.job,
+          done: result.done,
+          rateLimited: Boolean(result.rateLimited),
+          quota: result.quota || null,
+          message: result.message,
+        });
       } catch (error) {
         if (isInstagramRateLimitError(error)) {
-          const next = await deferInstagramRetry(env, job, error);
+          const quota = await tryLoadInstagramPublishingLimit(env);
+          const next = await deferInstagramRetry(env, job, error, quota);
           return instagramRateLimitResponse(next, instagramRetryWait(next));
         }
         const next = await saveJob(env, {
@@ -285,6 +301,15 @@ export async function onRequestPost({ request, env }) {
         });
         return json({ ok: false, job: next, message: next.instagramError }, 502);
       }
+    }
+
+    if (action === "check-instagram-publishing-limit") {
+      const quota = await loadInstagramPublishingLimit(env);
+      return json({
+        ok: true,
+        quota,
+        message: instagramPublishingQuotaMessage(quota),
+      });
     }
 
     if (action === "mark-instagram-ready") {
@@ -548,14 +573,14 @@ async function hasIncompleteEarlierBatchJob(env, job) {
   ));
 }
 
-async function startInstagramReel(env, job, requestedCaption = "") {
+async function startInstagramReel(env, job, requestedCaption = "", providedAccess = null, providedQuota = null) {
   if (job.batchId && job.automationMode === "full" && !normalizeText(job.reservedNaverArticleId || "")) {
     throw new Error("이전 사건의 네이버 카페 게시가 완료된 뒤 현재 사건의 카페 번호가 확정됩니다.");
   }
   const videoUrl = normalizeHttpUrl(job.videoUrl || "");
   if (!videoUrl) throw new Error("먼저 공개 접근 가능한 릴스 영상 URL을 저장해주세요.");
   const caption = normalizeCaption(requestedCaption || job.caption || buildCaption(job));
-  const access = await getInstagramAccess(env);
+  const access = providedAccess || await getInstagramAccess(env);
   const endpoint = `${instagramGraphBase(env)}/${encodeURIComponent(access.igUserId)}/media`;
   const form = new URLSearchParams();
   form.set("media_type", "REELS");
@@ -580,6 +605,12 @@ async function startInstagramReel(env, job, requestedCaption = "") {
     instagramError: "",
     instagramRetryAt: "",
     instagramRateLimitCount: 0,
+    instagramRateLimitReason: "",
+    instagramErrorCode: 0,
+    instagramErrorSubcode: 0,
+    instagramErrorHttpStatus: 0,
+    instagramRetryAfterSeconds: 0,
+    ...instagramQuotaFields(providedQuota),
     instagramStartedAt: new Date().toISOString(),
     instagramUpdatedAt: new Date().toISOString(),
   });
@@ -612,6 +643,18 @@ async function checkInstagramReel(env, job) {
     return { job: next, done: false, message: `Instagram 영상 처리 중: ${status.status || statusCode || "IN_PROGRESS"}` };
   }
 
+  const quota = await loadInstagramPublishingLimit(env, access);
+  if (instagramPublishingQuotaFull(quota)) {
+    const next = await deferInstagramRetry(env, job, null, quota);
+    return {
+      job: next,
+      done: false,
+      rateLimited: true,
+      quota,
+      message: instagramPublishingQuotaMessage(quota),
+    };
+  }
+
   const publishUrl = `${instagramGraphBase(env)}/${encodeURIComponent(access.igUserId)}/media_publish`;
   const form = new URLSearchParams();
   form.set("creation_id", containerId);
@@ -641,6 +684,12 @@ async function checkInstagramReel(env, job) {
     instagramError: "",
     instagramRetryAt: "",
     instagramRateLimitCount: 0,
+    instagramRateLimitReason: "",
+    instagramErrorCode: 0,
+    instagramErrorSubcode: 0,
+    instagramErrorHttpStatus: 0,
+    instagramRetryAfterSeconds: 0,
+    ...instagramQuotaFields(quota),
     instagramPublishedAt: new Date().toISOString(),
     instagramUpdatedAt: new Date().toISOString(),
     cafeStatus: permalink ? "smarteditor-queued" : "awaiting-instagram-permalink",
@@ -660,16 +709,28 @@ async function checkInstagramReel(env, job) {
   };
 }
 
-async function deferInstagramRetry(env, job, error) {
+async function deferInstagramRetry(env, job, error = null, quota = null) {
   const count = Math.max(1, Number(job.instagramRateLimitCount || 0) + 1);
   const configuredDelay = INSTAGRAM_RATE_LIMIT_DELAYS_MS[Math.min(count - 1, INSTAGRAM_RATE_LIMIT_DELAYS_MS.length - 1)];
   const headerDelay = Math.max(0, Number(error?.retryAfterSeconds || 0) * 1000);
-  const delayMs = Math.max(configuredDelay, headerDelay);
+  const quotaFull = instagramPublishingQuotaFull(quota);
+  const delayMs = quotaFull
+    ? INSTAGRAM_QUOTA_RECHECK_MS
+    : Math.max(configuredDelay, headerDelay);
   const retryAt = new Date(Date.now() + delayMs).toISOString();
+  const errorMessage = quotaFull
+    ? instagramPublishingQuotaMessage(quota)
+    : String(error?.message || error || "Instagram이 계정 행동을 일시적으로 제한했습니다.");
   return saveJob(env, {
     ...job,
     instagramStatus: "rate-limited",
-    instagramError: String(error?.message || error).slice(0, 1200),
+    instagramError: errorMessage.slice(0, 1200),
+    instagramRateLimitReason: quotaFull ? "publishing-quota" : "meta-action-throttle",
+    instagramErrorCode: Number(error?.instagramCode || 0),
+    instagramErrorSubcode: Number(error?.instagramSubcode || 0),
+    instagramErrorHttpStatus: Number(error?.httpStatus || 0),
+    instagramRetryAfterSeconds: Number(error?.retryAfterSeconds || 0),
+    ...instagramQuotaFields(quota),
     instagramRetryAt: retryAt,
     instagramRateLimitCount: count,
     instagramUpdatedAt: new Date().toISOString(),
@@ -684,6 +745,9 @@ function instagramRetryWait(job) {
 
 function instagramRateLimitResponse(job, retryAfterMs) {
   const minutes = Math.max(1, Math.ceil(retryAfterMs / 60000));
+  const quotaMessage = job.instagramRateLimitReason === "publishing-quota"
+    ? `Instagram API 게시 한도 ${Number(job.instagramQuotaUsage || 0)}/${Number(job.instagramQuotaTotal || 0)} 소진`
+    : `Meta 행동 제한 응답${job.instagramErrorCode ? ` (코드 ${job.instagramErrorCode}${job.instagramErrorSubcode ? `/${job.instagramErrorSubcode}` : ""})` : ""}`;
   return json({
     ok: true,
     done: false,
@@ -691,8 +755,52 @@ function instagramRateLimitResponse(job, retryAfterMs) {
     retryAfterMs,
     retryAt: job.instagramRetryAt || "",
     job,
-    message: `Instagram 행동 제한 감지 · 약 ${minutes}분 뒤 기존 릴스 작업으로 자동 재시도합니다.`,
+    message: `${quotaMessage} · 약 ${minutes}분 뒤 상태만 다시 확인하고, 제한이 해제된 경우에만 기존 릴스 작업을 게시합니다.`,
   });
+}
+
+async function loadInstagramPublishingLimit(env, providedAccess = null) {
+  const access = providedAccess || await getInstagramAccess(env);
+  const url = new URL(`${instagramGraphBase(env)}/${encodeURIComponent(access.igUserId)}/content_publishing_limit`);
+  url.searchParams.set("fields", "quota_usage,config");
+  url.searchParams.set("access_token", access.accessToken);
+  const result = await instagramApiJson(url, {}, "Instagram 게시 한도 확인");
+  const item = Array.isArray(result?.data) ? (result.data[0] || {}) : (result || {});
+  const config = item.config && typeof item.config === "object" ? item.config : {};
+  return {
+    usage: Math.max(0, Number(item.quota_usage || 0)),
+    total: Math.max(0, Number(config.quota_total || 0)),
+    durationSeconds: Math.max(0, Number(config.quota_duration || 0)),
+    checkedAt: new Date().toISOString(),
+  };
+}
+
+async function tryLoadInstagramPublishingLimit(env) {
+  try { return await loadInstagramPublishingLimit(env); }
+  catch { return null; }
+}
+
+function instagramPublishingQuotaFull(quota) {
+  return Number(quota?.total || 0) > 0 && Number(quota?.usage || 0) >= Number(quota.total);
+}
+
+function instagramPublishingQuotaMessage(quota) {
+  const usage = Number(quota?.usage || 0);
+  const total = Number(quota?.total || 0);
+  const hours = Math.max(1, Math.round(Number(quota?.durationSeconds || 86400) / 3600));
+  return total > 0
+    ? `Instagram API 게시 사용량 ${usage}/${total} · ${hours}시간 이동 한도 기준`
+    : "Instagram API 게시 한도 정보를 확인하지 못했습니다.";
+}
+
+function instagramQuotaFields(quota) {
+  if (!quota) return {};
+  return {
+    instagramQuotaUsage: Number(quota.usage || 0),
+    instagramQuotaTotal: Number(quota.total || 0),
+    instagramQuotaDurationSeconds: Number(quota.durationSeconds || 0),
+    instagramQuotaCheckedAt: quota.checkedAt || new Date().toISOString(),
+  };
 }
 
 export function instagramStoryLinkDetails(job = {}) {

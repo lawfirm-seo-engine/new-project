@@ -142,9 +142,11 @@ export async function instagramApiJson(url, options = {}, label = "Instagram API
 export function isInstagramRateLimitError(error) {
   const message = String(error?.message || error || "");
   const code = Number(error?.instagramCode || 0);
+  const subcode = Number(error?.instagramSubcode || 0);
   return Number(error?.httpStatus || 0) === 429
-    || [4, 17, 32, 613].includes(code)
-    || /user is performing too many actions|too many actions|rate limit|temporarily blocked|try again later/i.test(message);
+    || [4, 9, 17, 32, 613, 80002].includes(code)
+    || [2207042].includes(subcode)
+    || /user is performing too many actions|too many actions|rate limit|publishing limit|request limit|temporarily blocked|try again later/i.test(message);
 }
 
 async function loadInstagramProfile(env, accessToken) {
