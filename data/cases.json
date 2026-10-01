@@ -160501,7 +160501,7 @@
     "caseName": "dexiamarkets 사칭 사기",
     "category": "형사대응",
     "createdAt": "2026-09-10",
-    "updatedAt": "2026-09-10",
+    "updatedAt": "2026-10-01",
     "thumbnailUrl": "",
     "landingViews": 1394,
     "reports": 23,
@@ -160515,7 +160515,9 @@
       "증거보존"
     ],
     "memo": "",
-    "noindex": false,
+    "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "team-mission"
