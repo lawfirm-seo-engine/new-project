@@ -5,6 +5,7 @@ import { appendStockReadingroomCta } from "../_stockReadingroomCta.js";
 import { classifyLdCategory } from "../_readingroomCategory.js";
 import { durableCaseIndexFields, mergeDurableFieldsFromExisting } from "../_durableCaseFields.js";
 import { clearCaseDeletion, filterDeletedCases } from "../_caseDeletion.js";
+import { findCaseSlugByIdentity, normalizeCaseIdentity, rememberCaseIdentity } from "../_caseIdentity.js";
 import {
   buildFromTemplate as buildReadingroomBodyFromTemplate,
   generateReadingroomMeta,
@@ -63,6 +64,14 @@ export async function onRequestPost(context) {
     };
 
     if (env.CASES) {
+      const existingIdentitySlug = await findCaseSlugByIdentity(env, caseName);
+      if (existingIdentitySlug && existingIdentitySlug !== slug) {
+        return json({
+          ok: false,
+          message: "동일 사건명이 이미 등록되어 있습니다.",
+          existingSlug: existingIdentitySlug,
+        }, 409);
+      }
       const existingRaw = await env.CASES.get(`case:${slug}`);
       if (existingRaw) {
         return json({ ok: false, message: "이미 존재하는 slug입니다." }, 409);
@@ -75,6 +84,7 @@ export async function onRequestPost(context) {
       } else {
         await appendToIndexSafely(env, buildIndexEntry(newCase));
       }
+      await rememberCaseIdentity(env, newCase);
 
       // GitHub에도 동기화 — KV 전체를 덮어쓰는 방식으로 race condition 방지
       const repoOwner = env.GITHUB_REPO_OWNER;
@@ -135,6 +145,15 @@ export async function onRequestPost(context) {
     const currentContent = await readFileContent(currentFile, token);
     const cases = currentContent ? JSON.parse(currentContent) : [];
 
+    const incomingIdentity = normalizeCaseIdentity(caseName);
+    const existingIdentity = cases.find((item) => normalizeCaseIdentity(item.caseName || item.name || item.title) === incomingIdentity);
+    if (existingIdentity) {
+      return json({
+        ok: false,
+        message: existingIdentity.slug === slug ? "이미 존재하는 slug입니다." : "동일 사건명이 이미 등록되어 있습니다.",
+        existingSlug: existingIdentity.slug,
+      }, 409);
+    }
     if (cases.some((item) => item.slug === slug)) {
       return json({ ok: false, message: "이미 존재하는 slug입니다." }, 409);
     }

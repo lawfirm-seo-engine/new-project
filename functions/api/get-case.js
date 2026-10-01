@@ -1,6 +1,8 @@
 // Public case lookup API for landing page rendering.
 // GET /api/get-case?slug=xxx
 import { mergeCaseDataForRead } from "../_durableCaseFields.js";
+import { canonicalCaseSlug, duplicateCaseSlugsFor } from "../_caseAliases.js";
+import { mergeDuplicateCase } from "../_caseMerge.js";
 
 const READ_REPAIR_SLUGS = new Set(["jusigridingbang"]);
 
@@ -11,12 +13,21 @@ export async function onRequestGet(context) {
 
   if (!slug) return json({ ok: false, message: "slug is required" }, 400);
 
+  const canonicalSlug = canonicalCaseSlug(slug);
+  if (canonicalSlug !== slug) {
+    return json({ ok: false, message: "moved permanently", canonicalSlug }, 301);
+  }
+
   let kvCase = null;
 
   // 1st priority: KV
   if (env.CASES) {
     const raw = await env.CASES.get(`case:${slug}`);
     if (raw) kvCase = JSON.parse(raw);
+    for (const duplicateSlug of duplicateCaseSlugsFor(slug)) {
+      const duplicateRaw = await env.CASES.get(`case:${duplicateSlug}`);
+      if (duplicateRaw) kvCase = mergeDuplicateCase(kvCase || {}, JSON.parse(duplicateRaw));
+    }
     if (kvCase && !READ_REPAIR_SLUGS.has(slug)) return json({ ok: true, case: kvCase });
   }
 

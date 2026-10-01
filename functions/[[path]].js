@@ -37,6 +37,8 @@ import {
   standardVictimCases,
 } from "./_standardLanding.js";
 import { mergeCaseDataForRead } from "./_durableCaseFields.js";
+import { canonicalCaseSlug, duplicateCaseSlugsFor } from "./_caseAliases.js";
+import { mergeDuplicateCase } from "./_caseMerge.js";
 import {
   STOCK_READINGROOM_CTA_TEXT,
   shouldAppendStockReadingroomCta,
@@ -481,6 +483,17 @@ export async function onRequest(context) {
     slug = urlSlug;
   }
 
+  const canonicalSlug = canonicalCaseSlug(slug);
+  if (canonicalSlug && canonicalSlug !== slug) {
+    return new Response(null, {
+      status: 301,
+      headers: {
+        Location: `${buildLandingUrl(group, canonicalSlug)}${url.search}`,
+        "Cache-Control": "public, max-age=3600, s-maxage=86400",
+      },
+    });
+  }
+
   // 1순위: KV
   // 2순위: GitHub (env vars 있을 때)
   // 3순위: project A의 공개 API (b~e 프로젝트 fallback)
@@ -489,6 +502,10 @@ export async function onRequest(context) {
   if (env.CASES) {
     const raw = await env.CASES.get(`case:${slug}`);
     if (raw) caseData = JSON.parse(raw);
+    for (const duplicateSlug of duplicateCaseSlugsFor(slug)) {
+      const duplicateRaw = await env.CASES.get(`case:${duplicateSlug}`);
+      if (duplicateRaw) caseData = mergeDuplicateCase(caseData || {}, JSON.parse(duplicateRaw));
+    }
   }
 
   if (!caseData || READ_REPAIR_SLUGS.has(slug)) {
@@ -1550,7 +1567,7 @@ function renderLanding(caseData, group, origin, relatedCases = []) {
       ].join(", ")
     : searchKeyword(rawCaseName);
   const renderedFaq = renderFaqForLanding(landing, { ...group, key: lk }, caseData);
-  const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName);
+  const schemaFaq = schemaFaqItems(renderedFaq, rawCaseName, useStandardTemplate ? 1 : 3);
   const seoDescription = representativeTitle
     ? `${recoveryBank?.name || "은행"} 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.`.slice(0, 155)
     : lk === "c"
@@ -2468,7 +2485,10 @@ function createStandardLandingContent(landing, group, caseData, relatedCases = [
   const method = standardMethodTemplate(typeKey);
   const responseSections = standardResponseSections();
   const victimCases = standardVictimCases(typeKey);
-  const faq = renderFaqForLanding(landing, { ...group, key: "a" }, caseData);
+  const faq = reduceStandardFaqMentions(
+    renderFaqForLanding(landing, { ...group, key: "a" }, caseData),
+    rawCaseName,
+  );
   const memoSection = renderOperatorMemos(caseData);
   const currentProgressSection = renderCurrentProgressSection(landing, caseData, group.landingKey || group.key);
   const readingroomCtaSection = renderStockReadingroomCtaSection(caseData);
@@ -2481,12 +2501,12 @@ function createStandardLandingContent(landing, group, caseData, relatedCases = [
   return [
     memoSection,
     `<section class="article-block"><h2>${keyword}란?</h2>${paragraphs(standardIntroParagraphs(typeKey, rawCaseName))}</section>`,
-    `<section class="aeo-summary" id="aeo-summary" aria-label="${keyword} 핵심요약"><h2>${keyword} 핵심요약</h2><blockquote>${withSentenceBreaks(standardCoreSummary(typeKey, rawCaseName))}</blockquote></section>`,
-    `<section class="article-block"><h2>${keyword} 수법</h2><h3>${esc(method.title)}</h3>${list(method.bullets)}<h3>주요 진행 단계</h3>${orderedList(method.steps)}</section>`,
-    `<section class="article-block"><h2>${keyword} 피해 사례</h2>${list(victimCases)}</section>`,
-    `<section class="article-block"><h2>${keyword} 대응 방법</h2>${responseHtml}${createEvidenceCheckSection()}</section>`,
+    `<section class="aeo-summary" id="aeo-summary" aria-label="피해 징후 핵심요약"><h2>출금 제한과 추가 입금 요구 핵심요약</h2><blockquote>${withSentenceBreaks(standardCoreSummary(typeKey, rawCaseName))}</blockquote></section>`,
+    `<section class="article-block"><h2>접근 방식과 입금 유도 수법</h2><h3>${esc(method.title)}</h3>${list(method.bullets)}<h3>주요 진행 단계</h3>${orderedList(method.steps)}</section>`,
+    `<section class="article-block"><h2>피해 진행 사례</h2>${list(victimCases)}</section>`,
+    `<section class="article-block"><h2>증거 보존과 피해 회복 대응</h2>${responseHtml}${createEvidenceCheckSection()}</section>`,
     currentProgressSection,
-    `<section class="article-block faq" id="faq-list"><h2>${keyword} FAQ</h2>${faqHtml(faq, rawCaseName)}</section>`,
+    `<section class="article-block faq" id="faq-list"><h2>자주 묻는 질문</h2>${faqHtml(faq, rawCaseName, 1)}</section>`,
     readingroomCtaSection,
     createReadingroomCrossLink(group.landingKey || group.key, caseData),
     createLiveReceiptStatus(caseData),
@@ -2497,6 +2517,26 @@ function createStandardLandingContent(landing, group, caseData, relatedCases = [
     createFloatingWidgets(cn, siteName, slug),
     trackScript,
   ].filter(Boolean).join("\n");
+}
+
+function reduceStandardFaqMentions(items = [], caseName = "") {
+  const keyword = standardCaseKeyword(caseName);
+  if (!keyword) return items;
+  return (Array.isArray(items) ? items : []).map((item, index) => {
+    let question = String(item?.question || "");
+    let answer = String(item?.answer || "");
+    if (index > 0) {
+      question = question
+        .replace(`[${keyword}]`, "")
+        .replace(keyword, "")
+        .replace(/^\s*[-:·]\s*/, "")
+        .trim();
+    }
+    answer = answer
+      .replaceAll(`${keyword} 관련 대화 내용`, "접근 단계의 대화 내용")
+      .replaceAll(`${keyword} 관련 자료`, "접근·송금 경위를 보여주는 자료");
+    return { ...item, question, answer };
+  });
 }
 
 function createSameTypeLatestSection(caseData, group, relatedCases = [], typeKey = "") {
@@ -3635,11 +3675,11 @@ function list(items = []) {
   return `<ul>${(items || []).map((item) => `<li>${withSentenceBreaks(toStr(item))}</li>`).join("\n")}</ul>`;
 }
 
-function faqHtml(items = [], caseName = "") {
+function faqHtml(items = [], caseName = "", keepNameCount = 3) {
   const names = caseNameVariants(caseName).filter(Boolean);
   return (items || []).map((item, i) => {
     let q = item.question || "";
-    const shouldKeepName = i < 3;
+    const shouldKeepName = i < keepNameCount;
     q = cleanFaqQuestion(q, names, shouldKeepName ? caseName : "");
     if (shouldKeepName && caseName && !caseNameVariants(caseName).some((name) => q.includes(name))) {
       q = `[${caseName}] ` + q.replace(/^\[[^\]]*\]\s*/, "");
@@ -3648,11 +3688,11 @@ function faqHtml(items = [], caseName = "") {
   }).join("\n");
 }
 
-function schemaFaqItems(items = [], caseName = "") {
+function schemaFaqItems(items = [], caseName = "", keepNameCount = 3) {
   const names = caseNameVariants(caseName).filter(Boolean);
   return dedupeFaqItems(items).map((item, i) => {
     let question = item.question || "";
-    const shouldKeepName = i < 3;
+    const shouldKeepName = i < keepNameCount;
     question = cleanFaqQuestion(question, names, shouldKeepName ? caseName : "");
     if (shouldKeepName && caseName && !names.some((name) => question.includes(name))) {
       question = `[${caseName}] ` + question.replace(/^\[[^\]]*\]\s*/, "");
@@ -3855,7 +3895,7 @@ function reduceCaseNameText(value, caseName, keepFirst = false, replacementConte
 const CONTEXT_TERM_LIMITS = [
   { term: "해당 사건", limit: 1, replacements: ["상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
   { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "검토 대상"] },
-  { term: "해당 플랫폼", limit: 1, replacements: ["문제 사이트", "거래 화면", "접속 페이지", "운영 계정"] },
+  { term: "해당 플랫폼", limit: 1, replacements: ["접속 주소", "거래 화면", "로그인 페이지", "안내 화면"] },
   { term: "유사 피해", limit: 1, replacements: ["같은 유형의 사례", "비슷한 접수", "관련 상담 기록"] },
   { term: "출금 거부", limit: 2, replacements: ["출금 제한", "지급 보류", "환급 지연", "인출 제한"] },
   { term: "추가 입금 요구", limit: 2, replacements: ["추가 송금 요청", "보증금 안내", "인증비 요청", "추가 비용 안내"] },

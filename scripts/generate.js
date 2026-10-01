@@ -18,6 +18,7 @@ import { LD_CAROUSEL_ITEMS, LD_CATEGORY_OPTIONS } from "../functions/_readingroo
 import { ldPageH1, ldPageTitle } from "../functions/_readingroomTemplate.js";
 import {
   normalizeFraudTypeKey,
+  standardCaseKeyword,
   standardMetaDescription,
   standardVictimCases,
 } from "../functions/_standardLanding.js";
@@ -712,7 +713,7 @@ function createLandingContent(landing, group, caseItem) {
     const _victimCases = !isManualLandingItem(caseItem) && (group.landingKey || group.key) === "a"
       ? standardVictimCases(normalizeFraudTypeKey(caseItem.fraudType || caseItem.scamType, caseItem))
       : renderVictimCasesForLanding(landing, group, caseItem, _replacementContext);
-    const _faq = renderFaqForLanding(landing, group, caseItem);
+    const _faq = reduceStandardFaqMentions(renderFaqForLanding(landing, group, caseItem), _rawCaseName);
     const _introBody = _body.slice(0, 3);
     const _methodBody = _body.slice(3, 8);
     const _visibleBody = [..._introBody, ..._methodBody];
@@ -724,11 +725,11 @@ function createLandingContent(landing, group, caseItem) {
       createHeroCta(_rawCaseName),
       createAeoOverviewSection(caseItem, group.key),
       `<section class="article-block"><h2>${_keyword}란?</h2>${createConfirmedSignals(_rawCaseName)}${paragraphs(_introBody)}</section>`,
-      `<section class="article-block"><h2>${_keyword} 수법</h2>${list(createScamMethodItems(_rawCaseName))}</section>`,
-      `<section class="article-block"><h2>${_keyword} 피해 사례</h2>${list(_victimCases)}</section>`,
-      `<section class="article-block"><h2>${_keyword} 대응 방법</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
+      `<section class="article-block"><h2>접근 방식과 입금 유도 수법</h2>${list(createScamMethodItems(_rawCaseName))}</section>`,
+      `<section class="article-block"><h2>피해 진행 사례</h2>${list(_victimCases)}</section>`,
+      `<section class="article-block"><h2>증거 보존과 피해 회복 대응</h2>${paragraphs(_methodBody)}${createEvidenceCheckSection()}</section>`,
       _currentProgressSection,
-      `<section class="article-block faq" id="faq-list"><h2>${_keyword} FAQ</h2>${faqHtml(_faq, _rawCaseName)}</section>`,
+      `<section class="article-block faq" id="faq-list"><h2>자주 묻는 질문</h2>${faqHtml(_faq, _rawCaseName, 1)}</section>`,
       createLiveReceiptStatus(caseItem),
       _readingroomCta,
       _memoSection,
@@ -1157,6 +1158,22 @@ function reduceCaseNameTextLegacy(value, caseName, keepFirst = false) {
   return cleanupRepeatedWords(text);
 }
 
+function reduceStandardFaqMentions(items = [], caseName = "") {
+  const keyword = standardCaseKeyword(caseName);
+  if (!keyword) return items;
+  return (Array.isArray(items) ? items : []).map((item, index) => {
+    let question = String(item?.question || "");
+    let answer = String(item?.answer || "");
+    if (index > 0) {
+      question = question.replace(`[${keyword}]`, "").replace(keyword, "").replace(/^\s*[-:·]\s*/, "").trim();
+    }
+    answer = answer
+      .replaceAll(`${keyword} 관련 대화 내용`, "접근 단계의 대화 내용")
+      .replaceAll(`${keyword} 관련 자료`, "접근·송금 경위를 보여주는 자료");
+    return { ...item, question, answer };
+  });
+}
+
 function cleanupRepeatedWords(value = "") {
   return String(value || "")
     .replace(/이\s*사건\s*사건/g, "이 사안")
@@ -1228,7 +1245,7 @@ function reduceCaseNameText(value, caseName, keepFirst = false, replacementConte
 const CONTEXT_TERM_LIMITS = [
   { term: "해당 사건", limit: 1, replacements: ["접수 기록", "상담 기록", "문제 정황", "검토 대상", "관련 자료"] },
   { term: "이 사안", limit: 1, replacements: ["이 기록", "접수 내용", "거래 흐름", "검토 대상"] },
-  { term: "해당 플랫폼", limit: 1, replacements: ["문제 사이트", "거래 화면", "접속 페이지", "운영 계정"] },
+  { term: "해당 플랫폼", limit: 1, replacements: ["접속 주소", "거래 화면", "로그인 페이지", "안내 화면"] },
   { term: "유사 피해", limit: 1, replacements: ["같은 유형의 사례", "비슷한 접수", "관련 상담 기록"] },
   { term: "출금 거부", limit: 2, replacements: ["출금 제한", "지급 보류", "환급 지연", "인출 제한"] },
   { term: "추가 입금 요구", limit: 2, replacements: ["추가 송금 요청", "보증금 안내", "인증비 요청", "추가 비용 안내"] },
@@ -1272,11 +1289,11 @@ function cleanupRepeatedWordsLegacy(value = "") {
     .trim();
 }
 
-function faqHtml(items = [], caseName = "") {
+function faqHtml(items = [], caseName = "", keepNameCount = 3) {
   const names = caseNameVariants(caseName).filter(Boolean);
   return items.map((item, i) => {
     let q = item.question || "";
-    const shouldKeepName = i < 3;
+    const shouldKeepName = i < keepNameCount;
     q = cleanFaqQuestion(q, names, shouldKeepName ? caseName : "");
     if (shouldKeepName && caseName && !caseNameVariants(caseName).some((name) => q.includes(name))) {
       q = `[${caseName}] ` + q.replace(/^\[[^\]]*\]\s*/, "");

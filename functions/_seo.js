@@ -7,6 +7,7 @@ import {
 } from "./_standardLanding.js";
 import { LD_CAROUSEL_ITEMS } from "./_readingroomCategory.js";
 import { isRecoveryRepresentative, shouldConsolidateRecoveryCase } from "./_recoverySeo.js";
+import { canonicalCaseSlug, isRedirectedCaseSlug } from "./_caseAliases.js";
 
 export const INDEXNOW_KEY = "6f71f78a3dc940b9a3e1025bf8460d3c";
 
@@ -92,7 +93,7 @@ export function buildLandingUrl(group, slug = "") {
 }
 
 export function landingUrlForItem(group, item = {}) {
-  if (item?.slug) return buildLandingUrl(group, item.slug);
+  if (item?.slug) return buildLandingUrl(group, canonicalCaseSlug(item.slug));
 
   const siteUrl = String(group.siteUrl || (group.host ? `https://${group.host}` : "")).replace(/\/$/, "");
   const landingKey = group.landingKey || group.key;
@@ -130,6 +131,9 @@ export function hasReadingroomLanding(item = {}) {
 
 export function isCaseAllowedForGroup(item = {}, group = {}) {
   const lk = group.landingKey || group.key;
+  if (isRedirectedCaseSlug(item.slug)) {
+    return false;
+  }
   if (item.hideFromListing || item.searchHidden) {
     return false;
   }

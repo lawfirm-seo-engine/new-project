@@ -4,6 +4,8 @@ import {
   landingUrlForItem,
 } from "../_seo.js";
 import { hangulToRoman } from "../_searchNormalize.js";
+import { canonicalCaseSlug } from "../_caseAliases.js";
+import { findCaseSlugByIdentity } from "../_caseIdentity.js";
 import { onRequestPost as createCaseLanding } from "./create-case.js";
 import { onRequestPost as createRecoveryLanding } from "./create-recovery-landing.js";
 import { onRequestPost as generateLandingDraft } from "./generate-draft.js";
@@ -347,13 +349,21 @@ async function findExistingLanding(env, incoming, group) {
   // second time in the same request. The full-index fallback is retained for
   // local/GitHub-only environments.
   if (env?.CASES && incoming?.slug) {
-    const raw = await env.CASES.get(`case:${incoming.slug}`);
-    if (!raw) return null;
-    const item = JSON.parse(raw);
     const landingKey = group.landingKey || group.key;
-    return hasLandingForGroup(item, landingKey) && isExactLandingIdentity(incoming, item)
-      ? item
-      : null;
+    const identitySlug = await findCaseSlugByIdentity(env, incoming.caseName || incoming.title || "");
+    const candidates = [...new Set([
+      identitySlug,
+      canonicalCaseSlug(incoming.slug),
+      incoming.slug,
+      String(incoming.slug).replace(/-saching$/, ""),
+    ].filter(Boolean))];
+    for (const slug of candidates) {
+      const raw = await env.CASES.get(`case:${slug}`);
+      if (!raw) continue;
+      const item = JSON.parse(raw);
+      if (hasLandingForGroup(item, landingKey) && isExactLandingIdentity(incoming, item)) return item;
+    }
+    return null;
   }
   const cases = await loadCaseIndex(env);
   const landingKey = group.landingKey || group.key;

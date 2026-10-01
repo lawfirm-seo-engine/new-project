@@ -119,13 +119,13 @@ export async function onRequestPost(context) {
     const body = await request.json();
     const rawName = normalizeSpace(body.caseName);
     const caseName = normalizeCaseName(rawName);
-    const fraudType = normalizeFraudTypeKey(body.fraudType || body.scamType, { caseName, slug: createSlug(slugBase(rawName)) });
+    const fraudType = normalizeFraudTypeKey(body.fraudType || body.scamType, { caseName, slug: createCaseDraftSlug(rawName) });
 
     if (!caseName) {
       return json({ ok: false, message: "사건명을 입력해주세요." }, 400);
     }
 
-    const slug = createSlug(slugBase(rawName));
+    const slug = createCaseDraftSlug(rawName);
     const category = DEFAULT_CATEGORY;
     // The cafe bulk workflow performs an exact KV lookup before it creates a
     // landing.  Re-reading and parsing the multi-megabyte public case index for
@@ -954,10 +954,14 @@ function hangulToRoman(text) {
 }
 
 function slugBase(name) {
-  const s = String(name || "").trim();
+  const s = baseCaseName(String(name || "").trim());
   // "사기" 앞 부분만 추출 (예: "mediacastlekr.com 사기 티켓예매" → "mediacastlekr.com")
   const idx = s.search(/\s*사기/);
   return idx > 0 ? s.slice(0, idx).trim() : baseCaseName(s);
+}
+
+export function createCaseDraftSlug(caseName = "") {
+  return createSlug(slugBase(caseName));
 }
 
 function createSlug(value) {
