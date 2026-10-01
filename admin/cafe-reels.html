@@ -83,9 +83,9 @@
     <div>
       <a class="back" href="/admin/dashboard.html">← 관리자 대시보드</a>
       <h1 style="margin-top:18px">카페 원고·릴스 작업</h1>
-      <div class="status">자동화 프로그램 v1.82.0 · 수정 82차</div>
+      <div class="status">자동화 프로그램 v1.83.0 · 수정 83차</div>
     </div>
-    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.82.0" download>Windows 자동화 프로그램 v1.82.0 다운로드</a>
+    <a class="btn green" href="/admin/downloads/gnlaw-smarteditor-windows.zip?v=1.83.0" download>Windows 자동화 프로그램 v1.83.0 다운로드</a>
   </div>
 
   <div class="grid">
@@ -845,7 +845,7 @@
           const remainingMs = retryAt - Date.now();
           const minutes = Math.max(1, Math.ceil(remainingMs / 60000));
           const reason = publishingJob.instagramRateLimitReason === "publishing-quota"
-            ? `Instagram API 게시 한도 ${Number(publishingJob.instagramQuotaUsage || 0)}/${Number(publishingJob.instagramQuotaTotal || 0)} 소진`
+            ? `Instagram API 24시간 게시 한도 도달 (현재 ${Number(publishingJob.instagramQuotaUsage || 0)}개${publishingJob.instagramQuotaEffectiveTotal ? ` · 실제 적용 한도 ${Number(publishingJob.instagramQuotaEffectiveTotal)}개` : ""})`
             : `Meta 행동 제한 응답${publishingJob.instagramErrorCode ? ` (코드 ${publishingJob.instagramErrorCode}${publishingJob.instagramErrorSubcode ? `/${publishingJob.instagramErrorSubcode}` : ""})` : ""}`;
           const message = `${publishingJob.caseName} · ${reason} · 약 ${minutes}분 뒤 상태만 다시 확인합니다.`;
           show("reelsMsg", message);
@@ -952,6 +952,7 @@
     const params = new URLSearchParams({ _: String(Date.now()) });
     if (jobId) params.set("jobId", jobId);
     if (options.batchId) params.set("batchId", options.batchId);
+    if (options.recentBatches) params.set("recentBatches", String(options.recentBatches));
     try {
       const response = await fetch(`/api/cafe-reels-workflow?${params}`, { cache: "no-store" });
       const text = await response.text();
@@ -1007,7 +1008,7 @@
     container.hidden = false;
     container.innerHTML = "<div class='note'>서버에 등록된 대량 대기열을 불러오는 중...</div>";
     try {
-      const data = await getWorkflowJob("", { retries: 4 });
+      const data = await getWorkflowJob("", { recentBatches: 3, retries: 4 });
       const grouped = new Map();
       for (const job of data.jobs || []) {
         if (!job.batchId) continue;

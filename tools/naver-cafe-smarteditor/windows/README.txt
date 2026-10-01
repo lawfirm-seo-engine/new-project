@@ -19,3 +19,4 @@ Version 1.79 preserves an existing Instagram Reel container during action limits
 Version 1.80 applies the new part-specific Instagram Reel caption templates with each case, landing page, and reserved Cafe URL filled in automatically.
 Version 1.81 checks Instagram's live content publishing quota before creating or publishing a Reel, records Meta error diagnostics, and avoids repeated publish calls while the account is limited.
 Version 1.82 shares one Instagram cooldown across every queued job and PC so a duplicate batch cannot keep triggering an account-wide Meta action restriction.
+Version 1.83 recognizes Meta code 9/2207042 as the rolling Content Publishing limit, learns the lower enforced ceiling, and loads only the three most recent bulk queues from the server.

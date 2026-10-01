@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   INSTAGRAM_CONFIG_KEY,
   instagramAuthorizeUrl,
+  isInstagramPublishingLimitError,
   isInstagramRateLimitError,
   loadInstagramConfig,
   saveInstagramConfig,
@@ -269,8 +270,29 @@ test("caption templates use the case, landing, and reserved Cafe URL", () => {
 
 test("Instagram publishing quota error codes are classified as retryable limits", () => {
   assert.equal(isInstagramRateLimitError({ instagramCode: 9, instagramSubcode: 2207042 }), true);
+  assert.equal(isInstagramPublishingLimitError({ instagramCode: 9, instagramSubcode: 2207042 }), true);
+  assert.equal(isInstagramPublishingLimitError({ instagramCode: 4 }), false);
   assert.equal(isInstagramRateLimitError({ instagramCode: 80002 }), true);
   assert.equal(isInstagramRateLimitError(new Error("ordinary validation failure")), false);
+});
+
+test("recent bulk queue listing is filtered to the latest three batches on the server", async () => {
+  const index = [
+    { id: "new-a-1", batchId: "batch-new-a", updatedAt: "2026-10-01T10:00:00.000Z" },
+    { id: "new-a-2", batchId: "batch-new-a", updatedAt: "2026-10-01T09:59:00.000Z" },
+    { id: "new-b", batchId: "batch-new-b", updatedAt: "2026-10-01T09:00:00.000Z" },
+    { id: "new-c", batchId: "batch-new-c", updatedAt: "2026-10-01T08:00:00.000Z" },
+    { id: "old-d", batchId: "batch-old-d", updatedAt: "2026-09-30T08:00:00.000Z" },
+    { id: "single", batchId: "", updatedAt: "2026-10-01T11:00:00.000Z" },
+  ];
+  const { env } = testEnv([["cafe-reels:jobs:index:v1", index]]);
+  const response = await onWorkflowGet({
+    request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow?recentBatches=3"),
+    env,
+  });
+  const result = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(result.jobs.map((job) => job.id), ["new-a-1", "new-a-2", "new-b", "new-c"]);
 });
 
 test("Instagram Story metadata uses the part-specific center label and landing URL", () => {
@@ -640,6 +662,89 @@ test("Instagram publishing quota is checked before media_publish and full quota 
       "/v24.0/container-quota-full",
       "/v24.0/17841400000000000/content_publishing_limit",
     ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Meta code 9/2207042 learns the lower enforced publishing limit and stops repeat publish calls", async () => {
+  const jobId = "instagram-enforced-quota-job";
+  const jobKey = `cafe-reels:job:${jobId}`;
+  const job = {
+    id: jobId,
+    caseName: "실제 적용 한도 테스트 사칭 사기",
+    imageSetKey: "fraud",
+    draft: { title: "실제 적용 한도 테스트", body: "본문" },
+    videoUrl: "https://videos.example/enforced-quota.mp4",
+    instagramStatus: "processing",
+    instagramContainerId: "container-enforced-quota",
+    cafeStatus: "awaiting-reel",
+  };
+  const { env, stored } = testEnv([
+    [jobKey, job],
+    ["cafe-reels:jobs:index:v1", []],
+  ]);
+  await saveInstagramToken(env, {
+    accessToken: "instagram-access-token",
+    igUserId: "17841400000000000",
+    expiresAt: "2099-01-01T00:00:00.000Z",
+  });
+
+  const calls = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const url = new URL(String(input));
+    calls.push(url.pathname);
+    if (url.pathname.endsWith("/container-enforced-quota")) {
+      return Response.json({ status_code: "FINISHED", status: "Finished" });
+    }
+    if (url.pathname.endsWith("/17841400000000000/content_publishing_limit")) {
+      return Response.json({ data: [{ quota_usage: 50, config: { quota_total: 100, quota_duration: 86400 } }] });
+    }
+    if (url.pathname.endsWith("/17841400000000000/media_publish")) {
+      return Response.json({
+        error: {
+          message: "User is performing too many actions",
+          code: 9,
+          error_subcode: 2207042,
+        },
+      }, { status: 400 });
+    }
+    throw new Error(`Unexpected fetch: ${url}`);
+  };
+
+  const check = async () => {
+    const response = await onWorkflowPost({
+      request: new Request("https://gnlaw-criminal.co.kr/api/cafe-reels-workflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "check-instagram-reel", jobId }),
+      }),
+      env,
+    });
+    return { response, result: await response.json() };
+  };
+
+  try {
+    const limited = await check();
+    assert.equal(limited.response.status, 200);
+    assert.equal(limited.result.job.instagramRateLimitReason, "publishing-quota");
+    assert.equal(limited.result.job.instagramQuotaUsage, 50);
+    assert.equal(limited.result.job.instagramQuotaTotal, 100);
+    assert.equal(limited.result.job.instagramQuotaEffectiveTotal, 50);
+    assert.match(limited.result.message, /Meta 실제 적용 한도 50/);
+    assert.equal(calls.filter((path) => path.endsWith("/media_publish")).length, 1);
+
+    stored.set(jobKey, { ...stored.get(jobKey), instagramRetryAt: new Date(Date.now() - 1000).toISOString() });
+    stored.set("instagram:publish-cooldown:v1", {
+      ...stored.get("instagram:publish-cooldown:v1"),
+      retryAt: new Date(Date.now() - 1000).toISOString(),
+    });
+    const deferred = await check();
+    assert.equal(deferred.response.status, 200);
+    assert.equal(deferred.result.job.instagramRateLimitReason, "publishing-quota");
+    assert.equal(deferred.result.job.instagramQuotaEffectiveTotal, 50);
+    assert.equal(calls.filter((path) => path.endsWith("/media_publish")).length, 1, "learned effective quota must prevent a second publish attempt");
   } finally {
     globalThis.fetch = originalFetch;
   }

@@ -149,6 +149,14 @@ export function isInstagramRateLimitError(error) {
     || /user is performing too many actions|too many actions|rate limit|publishing limit|request limit|temporarily blocked|try again later/i.test(message);
 }
 
+export function isInstagramPublishingLimitError(error) {
+  const message = String(error?.message || error || "");
+  const code = Number(error?.instagramCode || 0);
+  const subcode = Number(error?.instagramSubcode || 0);
+  return (code === 9 && subcode === 2207042)
+    || /maximum number of posts|daily publishing limit|content publishing api/i.test(message);
+}
+
 async function loadInstagramProfile(env, accessToken) {
   const fields = ["user_id,username,name,account_type", "id,username"];
   let lastError;
