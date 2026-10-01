@@ -25311,7 +25311,7 @@
     "caseName": "MEXC Matcha 사기",
     "category": "형사대응",
     "createdAt": "2026-06-24",
-    "updatedAt": "2026-06-24",
+    "updatedAt": "2026-10-01",
     "thumbnailUrl": "",
     "landingViews": 4956,
     "reports": 23,
@@ -25324,7 +25324,20 @@
       "피해금회수",
       "증거보존"
     ],
-    "memo": ""
+    "memo": "",
+    "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "",
+    "memos": [
+      {
+        "id": 1786782073022,
+        "text": "MEXC Matcha 사기 사칭 사기 사건 현재 접수중 입니다.",
+        "createdAt": "2026-08-15 17:20"
+      }
+    ]
   },
   {
     "slug": "emtijipeurreoseu",
