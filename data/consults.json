@@ -2113,5 +2113,23 @@
     "caseName": "e-himart.online 사칭 사기",
     "domain": "피해금 추적 법률센터",
     "createdAt": "2026. 9. 30. 오후 8:05:14"
+  },
+  {
+    "id": 1790832366978,
+    "name": "김중길",
+    "phone": "01034996168",
+    "amount": "2천만원",
+    "caseName": "webcool3 사칭 사기",
+    "domain": "피해금 추적 법률센터",
+    "createdAt": "2026. 10. 1. 오후 2:26:06"
+  },
+  {
+    "id": 1790832385920,
+    "name": "김중길",
+    "phone": "01034996168",
+    "amount": "2천만원",
+    "caseName": "webcool3 사칭 사기",
+    "domain": "피해금 추적 법률센터",
+    "createdAt": "2026. 10. 1. 오후 2:26:25"
   }
 ]

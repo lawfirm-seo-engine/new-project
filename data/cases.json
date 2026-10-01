@@ -22954,6 +22954,39 @@
     "memo": ""
   },
   {
+    "slug": "mexc-matcha",
+    "caseName": "MEXC Matcha 사기",
+    "category": "형사대응",
+    "createdAt": "2026-06-24",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4956,
+    "reports": 23,
+    "summary": "MEXC Matcha 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
+    "tags": [
+      "MEXC",
+      "Matcha",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "",
+    "memos": [
+      {
+        "id": 1786782073022,
+        "text": "MEXC Matcha 사기 사칭 사기 사건 현재 접수중 입니다.",
+        "createdAt": "2026-08-15 17:20"
+      }
+    ]
+  },
+  {
     "slug": "gic-min",
     "caseName": "GIC MIN 사기",
     "category": "형사대응",
@@ -25299,26 +25332,6 @@
     "summary": "소개팅어플도킷 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
     "tags": [
       "소개팅어플도킷",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": ""
-  },
-  {
-    "slug": "mexc-matcha",
-    "caseName": "MEXC Matcha 사기",
-    "category": "형사대응",
-    "createdAt": "2026-06-24",
-    "updatedAt": "2026-06-24",
-    "thumbnailUrl": "",
-    "landingViews": 4956,
-    "reports": 23,
-    "summary": "MEXC Matcha 사기 관련 상담 기록으로, 송금 경위와 대화 자료, 계좌 단서, 접속 주소를 정리해 대응 가능성을 검토해야 합니다.",
-    "tags": [
-      "MEXC",
-      "Matcha",
       "사기",
       "사기피해",
       "피해금회수",
@@ -163079,6 +163092,58 @@
     "createdBy": "jipjeong-manual"
   },
   {
+    "slug": "degsiamakes",
+    "caseName": "덱시아마켓 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-10",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6785,
+    "reports": 23,
+    "summary": "덱시아마켓 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "덱시아마켓",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "dexiamarkets",
+    "caseName": "dexiamarkets 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-10",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 1394,
+    "reports": 23,
+    "summary": "dexiamarkets 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "dexiamarkets",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": true,
+    "hideFromListing": true,
+    "searchHidden": true,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
     "slug": "한국산업은행-계좌지급정지해제-지급정지-사실-통지서",
     "caseName": "한국산업은행 계좌지급정지해제 지급정지 사실 통지서",
     "category": "지급정지 랜딩",
@@ -164862,54 +164927,6 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "stock-project"
-  },
-  {
-    "slug": "degsiamakes",
-    "caseName": "덱시아마켓 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-09-10",
-    "updatedAt": "2026-09-10",
-    "thumbnailUrl": "",
-    "landingViews": 6785,
-    "reports": 23,
-    "summary": "덱시아마켓 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
-    "tags": [
-      "덱시아마켓",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": "team-mission"
-  },
-  {
-    "slug": "dexiamarkets",
-    "caseName": "dexiamarkets 사칭 사기",
-    "category": "형사대응",
-    "createdAt": "2026-09-10",
-    "updatedAt": "2026-09-10",
-    "thumbnailUrl": "",
-    "landingViews": 1394,
-    "reports": 23,
-    "summary": "dexiamarkets 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
-    "tags": [
-      "dexiamarkets",
-      "사칭",
-      "사기",
-      "사기피해",
-      "피해금회수",
-      "증거보존"
-    ],
-    "memo": "",
-    "noindex": false,
-    "targetGroups": [],
-    "createdBy": "",
-    "fraudType": "team-mission"
   },
   {
     "slug": "dexia",
@@ -188545,5 +188562,2069 @@
     "targetGroups": [],
     "createdBy": "",
     "fraudType": "team-mission"
+  },
+  {
+    "slug": "sseomdirmakes-saching",
+    "caseName": "썸딜마켓 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-09-30",
+    "updatedAt": "2026-09-30",
+    "thumbnailUrl": "",
+    "landingViews": 2189,
+    "reports": 23,
+    "summary": "썸딜마켓 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "썸딜마켓",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "산업은행-지급정지-소송",
+    "caseName": "산업은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7523,
+    "reports": 0,
+    "summary": "산업은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "nh농협-지급정지-소송",
+    "caseName": "NH농협 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 578,
+    "reports": 0,
+    "summary": "NH농협 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "농협-지급정지-소송",
+    "caseName": "농협 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2384,
+    "reports": 0,
+    "summary": "농협 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "신한은행-지급정지-소송",
+    "caseName": "신한은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 5245,
+    "reports": 0,
+    "summary": "신한은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "우리은행-지급정지-소송",
+    "caseName": "우리은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7386,
+    "reports": 0,
+    "summary": "우리은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "제일은행-지급정지-소송",
+    "caseName": "제일은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6433,
+    "reports": 0,
+    "summary": "제일은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "하나은행-지급정지-소송",
+    "caseName": "하나은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6574,
+    "reports": 0,
+    "summary": "하나은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "기업은행-지급정지-소송",
+    "caseName": "기업은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 176,
+    "reports": 0,
+    "summary": "기업은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "국민은행-지급정지-소송",
+    "caseName": "국민은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 5874,
+    "reports": 0,
+    "summary": "국민은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "수협-지급정지-소송",
+    "caseName": "수협 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3167,
+    "reports": 0,
+    "summary": "수협 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "im뱅크-지급정지-소송",
+    "caseName": "IM뱅크 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7556,
+    "reports": 0,
+    "summary": "IM뱅크 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "부산은행-지급정지-소송",
+    "caseName": "부산은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2981,
+    "reports": 0,
+    "summary": "부산은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "광주은행-지급정지-소송",
+    "caseName": "광주은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7146,
+    "reports": 0,
+    "summary": "광주은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "전북은행-지급정지-소송",
+    "caseName": "전북은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7612,
+    "reports": 0,
+    "summary": "전북은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "경남은행-지급정지-소송",
+    "caseName": "경남은행 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6751,
+    "reports": 0,
+    "summary": "경남은행 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "케이뱅크-지급정지-소송",
+    "caseName": "케이뱅크 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 5491,
+    "reports": 0,
+    "summary": "케이뱅크 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "카카오뱅크-지급정지-소송",
+    "caseName": "카카오뱅크 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6762,
+    "reports": 0,
+    "summary": "카카오뱅크 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "토스뱅크-지급정지-소송",
+    "caseName": "토스뱅크 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3130,
+    "reports": 0,
+    "summary": "토스뱅크 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "새마을금고-지급정지-소송",
+    "caseName": "새마을금고 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2735,
+    "reports": 0,
+    "summary": "새마을금고 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "유안타증권-지급정지-소송",
+    "caseName": "유안타증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 5347,
+    "reports": 0,
+    "summary": "유안타증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "kb증권-지급정지-소송",
+    "caseName": "KB증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7028,
+    "reports": 0,
+    "summary": "KB증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "ibk투자증권-지급정지-소송",
+    "caseName": "IBK투자증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7264,
+    "reports": 0,
+    "summary": "IBK투자증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "미래에셋증권-지급정지-소송",
+    "caseName": "미래에셋증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2372,
+    "reports": 0,
+    "summary": "미래에셋증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "삼성증권-지급정지-소송",
+    "caseName": "삼성증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3488,
+    "reports": 0,
+    "summary": "삼성증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "교보증권-지급정지-소송",
+    "caseName": "교보증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4845,
+    "reports": 0,
+    "summary": "교보증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "nh투자증권-지급정지-소송",
+    "caseName": "NH투자증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7901,
+    "reports": 0,
+    "summary": "NH투자증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "키움증권-지급정지-소송",
+    "caseName": "키움증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2602,
+    "reports": 0,
+    "summary": "키움증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "대신증권-지급정지-소송",
+    "caseName": "대신증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3996,
+    "reports": 0,
+    "summary": "대신증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "메리츠증권-지급정지-소송",
+    "caseName": "메리츠증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6065,
+    "reports": 0,
+    "summary": "메리츠증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "토스증권-지급정지-소송",
+    "caseName": "토스증권 지급정지 소송",
+    "category": "지급정지 랜딩",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3554,
+    "reports": 0,
+    "summary": "토스증권 계좌지급정지해제 절차를 안내합니다. 지급정지 사유와 피해신고 금액 확인, 이의제기 신청서·소명자료 제출, 채무부존재확인소송과 소송계속증명원 제출 요건을 확인하세요.",
+    "tags": [
+      "지급정지",
+      "이의신청"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [
+      "c"
+    ],
+    "createdBy": "jipjeong-manual"
+  },
+  {
+    "slug": "peurreibis",
+    "caseName": "플레이빗 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4633,
+    "reports": 17,
+    "summary": "플레이빗 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "플레이빗",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
+  },
+  {
+    "slug": "peurreibis-net",
+    "caseName": "플레이빗.net 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6614,
+    "reports": 31,
+    "summary": "플레이빗.net 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "플레이빗.net",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
+  },
+  {
+    "slug": "xn-om2bk9i7pix7n-net",
+    "caseName": "xn--om2bk9i7pix7n.net 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3848,
+    "reports": 6,
+    "summary": "xn--om2bk9i7pix7n.net 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "xn",
+      "om2bk9i7pix7n.net",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
+  },
+  {
+    "slug": "ia-live-net",
+    "caseName": "ia-live.net 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4319,
+    "reports": 10,
+    "summary": "ia-live.net 사칭 사기는 방송 진행자나 이성 회원을 가장해 친밀감과 신뢰를 형성한 뒤 후원, 환전, 등급 인증, 만남 비용 등의 명목으로 반복적인 송금을 유도하는 경우가 많습니다. 환전이나 출금을 위한 수수료·보증금 요구, 만남 조건의 반복적인 변경, 추가 결제 후 연락 두절 정황이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "ia",
+      "live.net",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "live-dating"
+  },
+  {
+    "slug": "pisyeor-dy",
+    "caseName": "피셜 DY 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 1753,
+    "reports": 31,
+    "summary": "피셜 DY 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "피셜",
+      "DY",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "shop-fdy-com",
+    "caseName": "shop-fdy.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3350,
+    "reports": 27,
+    "summary": "shop-fdy.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "shop",
+      "fdy.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "first-plan",
+    "caseName": "FIRST PLAN 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6403,
+    "reports": 8,
+    "summary": "FIRST PLAN 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "FIRST",
+      "PLAN",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "firstplan-kr-com",
+    "caseName": "firstplan-kr.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 1345,
+    "reports": 27,
+    "summary": "firstplan-kr.com 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "firstplan",
+      "kr.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "rumionmakes",
+    "caseName": "루미온마켓 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3682,
+    "reports": 27,
+    "summary": "루미온마켓 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "루미온마켓",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "lumionmarket-com",
+    "caseName": "lumionmarket.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4189,
+    "reports": 15,
+    "summary": "lumionmarket.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "lumionmarket.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "whee-in",
+    "caseName": "whee-in 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6740,
+    "reports": 10,
+    "summary": "whee-in 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "whee",
+      "in",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "wheein-shop-com",
+    "caseName": "wheein-shop.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 1728,
+    "reports": 25,
+    "summary": "wheein-shop.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "wheein",
+      "shop.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "wlinksw-com",
+    "caseName": "wlinksw.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 386,
+    "reports": 11,
+    "summary": "wlinksw.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "wlinksw.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "shopping",
+    "caseName": "SHOPPING 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 239,
+    "reports": 19,
+    "summary": "SHOPPING 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "SHOPPING",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "sptime",
+    "caseName": "SPTIME 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6907,
+    "reports": 13,
+    "summary": "SPTIME 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "SPTIME",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "krnwshop-com",
+    "caseName": "krnwshop.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7213,
+    "reports": 10,
+    "summary": "krnwshop.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "krnwshop.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "green-cat",
+    "caseName": "Green Cat 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3546,
+    "reports": 25,
+    "summary": "Green Cat 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "Green",
+      "Cat",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "imlikews5-top",
+    "caseName": "imlikews5.top 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7668,
+    "reports": 31,
+    "summary": "imlikews5.top 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "imlikews5.top",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "doullcox3-top",
+    "caseName": "doullcox3.top 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 1445,
+    "reports": 9,
+    "summary": "doullcox3.top 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "doullcox3.top",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "k-coco-com",
+    "caseName": "k-coco.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3687,
+    "reports": 15,
+    "summary": "k-coco.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "coco.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "coco",
+    "caseName": "coco 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 1371,
+    "reports": 34,
+    "summary": "coco 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "coco",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "jurriasyab",
+    "caseName": "줄리아샵 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3285,
+    "reports": 33,
+    "summary": "줄리아샵 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "줄리아샵",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "julia",
+    "caseName": "Julia 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 543,
+    "reports": 24,
+    "summary": "Julia 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "Julia",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "julia-shop-com",
+    "caseName": "julia-shop.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3353,
+    "reports": 19,
+    "summary": "julia-shop.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "julia",
+      "shop.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "bizmall-shop",
+    "caseName": "bizmall.shop 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6913,
+    "reports": 18,
+    "summary": "bizmall.shop 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "bizmall.shop",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "sellby-shop",
+    "caseName": "sellby.shop 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6871,
+    "reports": 4,
+    "summary": "sellby.shop 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "sellby.shop",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "earlobe-kr-com",
+    "caseName": "earlobe-kr.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2960,
+    "reports": 18,
+    "summary": "earlobe-kr.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "earlobe",
+      "kr.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "ieorobeu",
+    "caseName": "이어로브 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4756,
+    "reports": 34,
+    "summary": "이어로브 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "이어로브",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "painmakes",
+    "caseName": "파인마켓 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6932,
+    "reports": 11,
+    "summary": "파인마켓 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "파인마켓",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "otmarket",
+    "caseName": "OTMARKET 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2377,
+    "reports": 19,
+    "summary": "OTMARKET 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "OTMARKET",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "ssinebeurruming",
+    "caseName": "씨네블루밍 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3396,
+    "reports": 5,
+    "summary": "씨네블루밍 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "씨네블루밍",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "cxm",
+    "caseName": "CXM 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4776,
+    "reports": 25,
+    "summary": "CXM 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "CXM",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "earlobe",
+    "caseName": "Earlobe 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4267,
+    "reports": 32,
+    "summary": "Earlobe 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "Earlobe",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "somedealmarket",
+    "caseName": "SomeDealMarket 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4077,
+    "reports": 20,
+    "summary": "SomeDealMarket 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "SomeDealMarket",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "ekobis",
+    "caseName": "에코빗 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 5830,
+    "reports": 34,
+    "summary": "에코빗 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "에코빗",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "echobit",
+    "caseName": "Echobit 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3012,
+    "reports": 28,
+    "summary": "Echobit 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "Echobit",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "lampionn",
+    "caseName": "Lampionn 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3820,
+    "reports": 19,
+    "summary": "Lampionn 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "Lampionn",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "crowngold",
+    "caseName": "CROWNGOLD 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3674,
+    "reports": 9,
+    "summary": "CROWNGOLD 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "CROWNGOLD",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "gmarketgonggu-shop",
+    "caseName": "gmarketgonggu.shop 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6459,
+    "reports": 8,
+    "summary": "gmarketgonggu.shop 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "gmarketgonggu.shop",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "nonkahshop-com",
+    "caseName": "nonkahshop.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7037,
+    "reports": 31,
+    "summary": "nonkahshop.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "nonkahshop.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "purinmarket4989-com",
+    "caseName": "purinmarket4989.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 5932,
+    "reports": 25,
+    "summary": "purinmarket4989.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "purinmarket4989.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "matonshop-com",
+    "caseName": "matonshop.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6292,
+    "reports": 8,
+    "summary": "matonshop.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "matonshop.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "otmakes",
+    "caseName": "OT마켓 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 3376,
+    "reports": 22,
+    "summary": "OT마켓 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "OT마켓",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "ot-market-net",
+    "caseName": "ot-market.net/ 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 298,
+    "reports": 23,
+    "summary": "ot-market.net/ 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "ot",
+      "market.net/",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "ripeursyab",
+    "caseName": "리플샵 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2803,
+    "reports": 8,
+    "summary": "리플샵 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "리플샵",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "liper-shop-net",
+    "caseName": "liper-shop.net 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7577,
+    "reports": 14,
+    "summary": "liper-shop.net 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "liper",
+      "shop.net",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "wide-trade",
+    "caseName": "WIDE-TRADE 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6193,
+    "reports": 28,
+    "summary": "WIDE-TRADE 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "WIDE",
+      "TRADE",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "wide-trade-com",
+    "caseName": "wide-trade.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 184,
+    "reports": 6,
+    "summary": "wide-trade.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "wide",
+      "trade.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "digimall",
+    "caseName": "DigiMall 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4816,
+    "reports": 25,
+    "summary": "DigiMall 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "DigiMall",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "digi-mall-com",
+    "caseName": "digi-mall.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2606,
+    "reports": 16,
+    "summary": "digi-mall.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "digi",
+      "mall.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "gordeumoa",
+    "caseName": "골드모아 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6740,
+    "reports": 21,
+    "summary": "골드모아 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "골드모아",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "goldmore14k-com",
+    "caseName": "goldmore14k.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2361,
+    "reports": 17,
+    "summary": "goldmore14k.com 사칭 사기는 쇼핑몰 구매대행, 공동구매, 재택 부업, 영상 시청 등 간단한 활동으로 수익을 얻을 수 있다고 접근한 뒤 단계적으로 고액 결제와 추가 입금을 유도하는 경우가 많습니다. 미션 완료를 위한 선결제, 주문 오류·미션 실패·정산 조건을 이유로 한 추가 충전, 수익금 출금 지연이 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "goldmore14k.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "team-mission"
+  },
+  {
+    "slug": "tvrmax",
+    "caseName": "TVRmax 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 4353,
+    "reports": 11,
+    "summary": "TVRmax 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "TVRmax",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "txieks-com",
+    "caseName": "txieks.com 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7848,
+    "reports": 12,
+    "summary": "txieks.com 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "txieks.com",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "tvr-exchange",
+    "caseName": "TVR Exchange 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 6786,
+    "reports": 6,
+    "summary": "TVR Exchange 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "TVR",
+      "Exchange",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "qsin-quantify",
+    "caseName": "QSIN Quantify 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 2764,
+    "reports": 22,
+    "summary": "QSIN Quantify 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "QSIN",
+      "Quantify",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "stcgpsihai-cc",
+    "caseName": "stcgpsihai.cc 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 7387,
+    "reports": 19,
+    "summary": "stcgpsihai.cc 사칭 사기는 투자 전문가나 증권사·자산운용사를 사칭해 밴드, 텔레그램, 카카오톡 등 비공식 채널로 접근하는 유형입니다. 고수익 보장, 허위 수익 인증, 출금 지연, 세금·보증금 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "stcgpsihai.cc",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "stock-project"
+  },
+  {
+    "slug": "qsin-saching",
+    "caseName": "QSIN 사칭 사기",
+    "category": "형사대응",
+    "createdAt": "2026-10-01",
+    "updatedAt": "2026-10-01",
+    "thumbnailUrl": "",
+    "landingViews": 332,
+    "reports": 30,
+    "summary": "QSIN 사칭 사기는 실제 금융기관이나 임직원을 사칭해 투자상품 가입, 특별계좌 개설, 공모주 배정, 가상자산 거래 등을 명목으로 입금을 유도하는 경우가 많습니다. 금융기관 명칭과 로고를 사용한 허위 사이트, 조작된 거래 화면, 출금 지연, 세금·보증금·인증비 명목의 추가 입금 요구가 있었다면 피해 여부를 즉시 확인해야 합니다. 법무법인 선린은 사건 경위 분석부터 형사고소, 민사상 피해 회복 절차까지 맞춤형 법률 대응을 통해 피해 회복을 지원합니다.",
+    "tags": [
+      "QSIN",
+      "사칭",
+      "사기",
+      "사기피해",
+      "피해금회수",
+      "증거보존"
+    ],
+    "memo": "",
+    "noindex": false,
+    "targetGroups": [],
+    "createdBy": "",
+    "fraudType": "institution-exchange"
   }
 ]
